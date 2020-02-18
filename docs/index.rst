@@ -21,6 +21,8 @@ Contents
    :maxdepth: 2
    :caption: Contents:
 
+   licenses
+
 
 
 Indices and tables
