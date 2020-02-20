@@ -1,1 +1,1 @@
-"""Quality control functions for weather data.""""
+"""Quality control functions for weather data."""
