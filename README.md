@@ -7,7 +7,7 @@ system-level data.
 
 ## Library Overview
 
-The functions provided by PVAnalytics are broken up in to different
+The functions provided by PVAnalytics are organized in
 modules based on their anticipated use. The package is broken up in to
 the modules listed below. The structure/organization below is likely
 change as differnt functionality, use-cases, overlaps, or divisions
