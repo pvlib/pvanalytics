@@ -7,18 +7,17 @@ system-level data.
 
 ## Library Overview
 
-The functions provided by PVAnalytics are organized in
-modules based on their anticipated use. 
-The structure/organization below is likely to
-change as use cases are identified and refined and as package content evolves.
-The functions in `quality`,
-`filtering`, and `features` will take a series of data and return a
-series of booleans.
+The functions provided by PVAnalytics are organized in modules based
+on their anticipated use.  The structure/organization below is likely
+to change as use cases are identified and refined and as package
+content evolves.  The functions in `quality`, `filtering`, and
+`features` will take a series of data and return a series of booleans.
 * `quality` contains submodules for different kinds of data quality
   checks.
-  * `irradiance` provides quality checks for irradiance measurements. This will
-    initially contain an implementation of the QCRad algorithm, but
-    any other quality tests for irradiance data should be added here.
+  * `irradiance` provides quality checks for irradiance
+    measurements. This will initially contain an implementation of the
+    QCRad algorithm, but any other quality tests for irradiance data
+    should be added here.
   * `weather` has quality checks for weather data (for example tests
     for physically plausible values of temperature, wind speed,
     humidity, etc.)
@@ -39,7 +38,6 @@ series of booleans.
   irradiance adjustment)
 * `metrics` contains functions for computing PV system-level metrics
 * `fitting` contains submodules for different types of models that can
-  be fit to data (e.g.
-  temperature models)
+  be fit to data (e.g.  temperature models)
 * `dataclasses` contains classes for normalizing data (e.g. an
   `IVCurve` class)
