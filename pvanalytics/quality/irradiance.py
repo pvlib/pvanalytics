@@ -1,10 +1,7 @@
 """Quality control functions for irradiance data."""
 
 import numpy as np
-import pandas as pd
 from pvlib.tools import cosd
-from pvlib.irradiance import clearsky_index
-from pvlib.clearsky import detect_clearsky as _detect_clearsky
 
 QCRAD_LIMITS = {'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
                 'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
