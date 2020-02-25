@@ -28,6 +28,7 @@ QCRAD_CONSISTENCY = {
             'ghi_bounds': [50, np.Inf],
             'ratio_bounds': [0.0, 1.10]}}}
 
+
 def _check_limits(val, lb=None, ub=None, lb_ge=False, ub_le=False):
     """ Returns True where lb < (or <=) val < (or <=) ub
     """

@@ -90,4 +90,3 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
         expected['dhi'], expected['dni'])
     assert_series_equal(cons_comp, expected['consistent_components'])
     assert_series_equal(diffuse, expected['diffuse_ratio_limit'])
-
