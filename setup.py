@@ -8,7 +8,7 @@ except ImportError:
 DESCRIPTION = ('PVAnalytics is a python library for the analysis of ' +
                'photovoltaic system-level data.')
 
-LONG_DESCRIPTION="""
+LONG_DESCRIPTION = """
 PVAnalytics is a collection point for funcions for working with data
 from photovoltaic power systems. The library includes functions for
 general data quality tests such as outlier detection, validataion that
