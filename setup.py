@@ -9,9 +9,9 @@ DESCRIPTION = ('PVAnalytics is a python library for the analysis of ' +
                'photovoltaic system-level data.')
 
 LONG_DESCRIPTION = """
-PVAnalytics is a collection of funcions for working with data
+PVAnalytics is a collection of functions for working with data
 from photovoltaic power systems. The library includes functions for
-general data quality tests such as outlier detection, validataion that
+general data quality tests such as outlier detection, validation that
 data is physically plausible, filtering data for specific conditions,
 and labeling specific features in the data.
 
