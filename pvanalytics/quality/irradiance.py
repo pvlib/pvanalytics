@@ -59,7 +59,7 @@ def _qcrad_ub(dni_extra, sza, lim):
 
 
 def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
-    """Tests for physical limits on GHI using the QCRad criteria.
+    r"""Tests for physical limits on GHI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper bound. Lower bounds
     are constant for all tests. Upper bounds are calculated as
@@ -97,7 +97,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
 
 
 def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
-    """Tests for physical limits on DHI using the QCRad criteria.
+    r"""Tests for physical limits on DHI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper
     bound. Lower bounds are constant for all tests. Upper bounds are
@@ -137,7 +137,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
 
 def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
-    """Tests for physical limits on DNI using the QCRad criteria.
+    r"""Tests for physical limits on DNI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper
     bound. Lower bounds are constant for all tests. Upper bounds are
@@ -178,7 +178,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
 def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
                                   dni=None, limits=None):
-    """Tests for physical limits on GHI, DHI or DNI using the QCRad criteria.
+    r"""Tests for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
     Criteria from [1]_ are used to determine lower and upper bounds
     for physically plausible value. Test passes if a value > lower
