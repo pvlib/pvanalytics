@@ -21,6 +21,7 @@ Contents
    :maxdepth: 2
    :caption: Contents:
 
+   api
    licenses
 
 
