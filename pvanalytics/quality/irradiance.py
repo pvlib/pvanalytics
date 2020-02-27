@@ -3,6 +3,7 @@
 import numpy as np
 from pvlib.tools import cosd
 
+
 QCRAD_LIMITS = {'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
                 'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
                 'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
@@ -64,16 +65,16 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     are constant for all tests. Upper bounds are calculated as
 
     .. math::
-        ub = min + mult * dni_extra * cos( solar_zenith)^exp
+        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
 
     Parameters
     ----------
     ghi : Series
-        Global horizontal irradiance in W/m^2
+        Global horizontal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
     dni_extra : Series
-        Extraterrestrial normal irradiance in W/m^2
+        Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
         for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
         keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
@@ -103,16 +104,16 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     calculated as
 
     .. math::
-        ub = min + mult * dni_extra * cos( solar_zenith)^exp
+        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
 
     Parameters
     ----------
     dhi : Series
-        Diffuse horizontal irradiance in W/m^2
+        Diffuse horizontal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
     dni_extra : Series
-        Extraterrestrial normal irradiance in W/m^2
+        Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
         for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
         keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
@@ -143,16 +144,16 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     calculated as
 
     .. math::
-        ub = min + mult * dni_extra * cos( solar_zenith)^exp
+        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
 
     Parameters
     ----------
     dni : Series
-        Direct normal irradiance in W/m^2
+        Direct normal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
     dni_extra : Series
-        Extraterrestrial normal irradiance in W/m^2
+        Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
         for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
         keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
@@ -177,27 +178,31 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
 def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
                                   dni=None, limits=None):
-    """Tests for physical limits on GHI, DHI or DNI using the QCRad
-    criteria.
+    """Tests for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
-    Test passes if a value > lower bound and value < upper bound. Lower bounds
-    are constant for all tests. Upper bounds are calculated as
+    Criteria from [1]_ are used to determine lower and upper bounds
+    for physically plausible value. Test passes if a value > lower
+    bound and value < upper bound. Lower bounds are constant for all
+    tests. Upper bounds are calculated as
 
     .. math::
-        ub = min + mult * dni_extra * cos( solar_zenith)^exp
+        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
+
+    .. note:: If any of ``ghi``, ``dhi``, or ``dni`` are None, the
+       corresponding element of the returned tuple will also be None.
 
     Parameters
     ----------
     solar_zenith : Series
         Solar zenith angle in degrees
     dni_extra : Series
-        Extraterrestrial normal irradiance in W/m^2
+        Extraterrestrial normal irradiance in :math:`W/m^2`
     ghi : Series or None, default None
-        Global horizontal irradiance in W/m^2
+        Global horizontal irradiance in :math:`W/m^2`
     dhi : Series or None, default None
-        Diffuse horizontal irradiance in W/m^2
+        Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series or None, default None
-        Direct normal irradiance in W/m^2
+        Direct normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
         for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
         keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
@@ -205,10 +210,12 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
 
     Returns
     -------
-    ghi_limit_flag : Series or None, default None
-        True if value passes physically-possible test
-    dhi_limit_flag : Series or None, default None
-    dhi_limit_flag : Series or None, default None
+    ghi_limit_flag : Series
+        True if value is physically possible. None if ``ghi`` is None.
+    dhi_limit_flag : Series
+        True if value is physically possible. None if ``dni`` is None.
+    dhi_limit_flag : Series
+        True if value is physically possible. None if ``dhi`` is None.
 
     References
     ----------
@@ -258,20 +265,27 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
 
 def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
                                        param=None):
-    """Checks consistency of GHI, DHI and DNI. Not valid for night time.
+    """Checks consistency of GHI, DHI and DNI using QCRad criteria.
+
+    Uses criteria given in [1]_ to validate the ratio of irradiance
+    components.
+
+    .. warning:: Not valid for night time. While you can pass data
+       from night time to this function, be aware that the truth
+       values returned for that data will not be valid.
 
     Parameters
     ----------
     ghi : Series
-        Global horizontal irradiance in W/m^2
+        Global horizontal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
     dni_extra : Series
-        Extraterrestrial normal irradiance in W/m^2
+        Extraterrestrial normal irradiance in :math:`W/m^2`
     dhi : Series
-        Diffuse horizontal irradiance in W/m^2
+        Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series
-        Direct normal irradiance in W/m^2
+        Direct normal irradiance in :math:`W/m^2`
     param : dict
         keys are 'ghi_ratio' and 'dhi_ratio'. For each key, value is a dict
         with keys 'high_zenith' and 'low_zenith'; for each of these keys,
