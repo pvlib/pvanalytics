@@ -1,0 +1,5 @@
+[flake8]
+exclude =
+    versioneer.py
+    pvanalytics/_version.py
+    docs/conf.py
