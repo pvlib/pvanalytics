@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import versioneer
+
 try:
     from setuptools import setup
 except ImportError:
@@ -59,7 +61,8 @@ PACKAGES = ['pvanalytics']
 
 setup(
     name=DISTNAME,
-    version="0.0.1",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
