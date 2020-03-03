@@ -47,6 +47,8 @@ EXTRAS_REQUIRE = {
 
 EXTRAS_REQUIRE['all'] = sorted(set(sum(EXTRAS_REQUIRE.values(), [])))
 
+SETUP_REQUIRES = ['setuptools_scm']
+
 CLASSIFIERS = [
     'Development Status :: 2 - Pre-Alpha',
     'Operating System :: OS Independent',
@@ -59,11 +61,12 @@ PACKAGES = ['pvanalytics']
 
 setup(
     name=DISTNAME,
-    version="0.0.1",
+    use_scm_version=True,
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     tests_require=TESTS_REQUIRE,
+    setup_requires=SETUP_REQUIRES,
     ext_modules=[],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
