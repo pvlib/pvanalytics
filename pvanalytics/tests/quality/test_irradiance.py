@@ -90,3 +90,28 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
         expected['dhi'], expected['dni'])
     assert_series_equal(cons_comp, expected['consistent_components'])
     assert_series_equal(diffuse, expected['diffuse_ratio_limit'])
+
+
+def test_check_limits():
+    """Test the private check limits function."""
+    expected = pd.Series(data=[True, False])
+    data = pd.Series(data=[3, 2])
+    result = irradiance._check_limits(val=data, lb=2.5)
+    assert_series_equal(expected, result)
+    result = irradiance._check_limits(val=data, lb=3, lb_ge=True)
+    assert_series_equal(expected, result)
+
+    data = pd.Series(data=[3, 4])
+    result = irradiance._check_limits(val=data, ub=3.5)
+    assert_series_equal(expected, result)
+    result = irradiance._check_limits(val=data, ub=3, ub_le=True)
+    assert_series_equal(expected, result)
+
+    result = irradiance._check_limits(val=data, lb=3, ub=4, lb_ge=True,
+                                      ub_le=True)
+    assert all(result)
+    result = irradiance._check_limits(val=data, lb=3, ub=4)
+    assert not any(result)
+
+    with pytest.raises(ValueError):
+        irradiance._check_limits(val=data)
