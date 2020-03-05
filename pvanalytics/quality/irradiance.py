@@ -188,7 +188,7 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
 
-    .. note:: If any of ``ghi``, ``dhi``, or ``dni`` are None, the
+    .. note:: If any of `ghi`, `dhi`, or `dni` are None, the
        corresponding element of the returned tuple will also be None.
 
     Parameters
@@ -211,11 +211,11 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
     Returns
     -------
     ghi_limit_flag : Series
-        True if value is physically possible. None if ``ghi`` is None.
+        True if value is physically possible. None if `ghi` is None.
     dhi_limit_flag : Series
-        True if value is physically possible. None if ``dni`` is None.
+        True if value is physically possible. None if `dni` is None.
     dhi_limit_flag : Series
-        True if value is physically possible. None if ``dhi`` is None.
+        True if value is physically possible. None if `dhi` is None.
 
     References
     ----------
@@ -296,9 +296,9 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
     Returns
     -------
     consistent_components : Series
-        True if ghi, dhi and dni components are consistent.
+        True if `ghi`, `dhi` and `dni` components are consistent.
     diffuse_ratio_limit : Series
-        True if diffuse to ghi ratio passes limit test.
+        True if diffuse to GHI ratio passes limit test.
 
     References
     ----------
