@@ -1,4 +1,4 @@
-import pytest
+"""Tests for pvanalytics."""
 
 
 def test_example():
