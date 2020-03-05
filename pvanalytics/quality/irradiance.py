@@ -202,8 +202,8 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         Direct normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
         for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
-        keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
-        value is a float.
+        keys {'mult', 'exp', 'min'} and float values. For keys
+        'ghi_lb', 'dhi_lb', 'dni_lb', value is a float.
 
     Returns
     -------
