@@ -91,7 +91,6 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
     ghi_limit_flag = _check_limits(ghi, limits['ghi_lb'], ghi_ub)
-    ghi_limit_flag.name = 'ghi_limit_flag'
 
     return ghi_limit_flag
 
@@ -131,7 +130,6 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     dhi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dhi_ub'])
 
     dhi_limit_flag = _check_limits(dhi, limits['dhi_lb'], dhi_ub)
-    dhi_limit_flag.name = 'dhi_limit_flag'
 
     return dhi_limit_flag
 
@@ -171,7 +169,6 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     dni_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dni_ub'])
 
     dni_limit_flag = _check_limits(dni, limits['dni_lb'], dni_ub)
-    dni_limit_flag.name = 'dni_limit_flag'
 
     return dni_limit_flag
 
@@ -321,7 +318,6 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
                            sza=solar_zenith, bounds=bounds['high_zenith'])
         | _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
                              sza=solar_zenith, bounds=bounds['low_zenith']))
-    consistent_components.name = 'consistent_components'
 
     bounds = param['dhi_ratio']
     diffuse_ratio_limit = (
@@ -329,6 +325,5 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
                            bounds=bounds['high_zenith'])
         | _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
                              bounds=bounds['low_zenith']))
-    diffuse_ratio_limit.name = 'diffuse_ratio_limit'
 
     return consistent_components, diffuse_ratio_limit

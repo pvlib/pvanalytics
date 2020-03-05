@@ -43,7 +43,7 @@ def test_check_ghi_limits_qcrad(irradiance_qcrad):
     ghi_out = irradiance.check_ghi_limits_qcrad(expected['ghi'],
                                                 expected['solar_zenith'],
                                                 expected['dni_extra'])
-    assert_series_equal(ghi_out, ghi_out_expected)
+    assert_series_equal(ghi_out, ghi_out_expected, check_names=False)
 
 
 def test_check_dhi_limits_qcrad(irradiance_qcrad):
@@ -53,7 +53,7 @@ def test_check_dhi_limits_qcrad(irradiance_qcrad):
     dhi_out = irradiance.check_dhi_limits_qcrad(expected['dhi'],
                                                 expected['solar_zenith'],
                                                 expected['dni_extra'])
-    assert_series_equal(dhi_out, dhi_out_expected)
+    assert_series_equal(dhi_out, dhi_out_expected, check_names=False)
 
 
 def test_check_dni_limits_qcrad(irradiance_qcrad):
@@ -63,7 +63,7 @@ def test_check_dni_limits_qcrad(irradiance_qcrad):
     dni_out = irradiance.check_dni_limits_qcrad(expected['dni'],
                                                 expected['solar_zenith'],
                                                 expected['dni_extra'])
-    assert_series_equal(dni_out, dni_out_expected)
+    assert_series_equal(dni_out, dni_out_expected, check_names=False)
 
 
 def test_check_irradiance_limits_qcrad(irradiance_qcrad):
@@ -72,7 +72,7 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
     ghi_out_expected = expected['ghi_limit_flag']
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
         expected['solar_zenith'], expected['dni_extra'], ghi=expected['ghi'])
-    assert_series_equal(ghi_out, ghi_out_expected)
+    assert_series_equal(ghi_out, ghi_out_expected, check_names=False)
     assert dhi_out is None
     assert dni_out is None
 
@@ -80,13 +80,13 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
         expected['solar_zenith'], expected['dni_extra'], ghi=expected['ghi'],
         dhi=expected['dhi'])
-    assert_series_equal(dhi_out, dhi_out_expected)
+    assert_series_equal(dhi_out, dhi_out_expected, check_names=False)
 
     dni_out_expected = expected['dni_limit_flag']
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
         expected['solar_zenith'], expected['dni_extra'],
         dni=expected['dni'])
-    assert_series_equal(dni_out, dni_out_expected)
+    assert_series_equal(dni_out, dni_out_expected, check_names=False)
 
 
 def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
@@ -95,8 +95,8 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
     cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
         expected['ghi'], expected['solar_zenith'], expected['dni_extra'],
         expected['dhi'], expected['dni'])
-    assert_series_equal(cons_comp, expected['consistent_components'])
-    assert_series_equal(diffuse, expected['diffuse_ratio_limit'])
+    assert_series_equal(cons_comp, expected['consistent_components'], check_names=False)
+    assert_series_equal(diffuse, expected['diffuse_ratio_limit'], check_names=False)
 
 
 def test_check_limits():
@@ -104,15 +104,15 @@ def test_check_limits():
     expected = pd.Series(data=[True, False])
     data = pd.Series(data=[3, 2])
     result = irradiance._check_limits(val=data, lb=2.5)
-    assert_series_equal(expected, result)
+    assert_series_equal(expected, result, check_names=False)
     result = irradiance._check_limits(val=data, lb=3, lb_ge=True)
-    assert_series_equal(expected, result)
+    assert_series_equal(expected, result, check_names=False)
 
     data = pd.Series(data=[3, 4])
     result = irradiance._check_limits(val=data, ub=3.5)
-    assert_series_equal(expected, result)
+    assert_series_equal(expected, result, check_names=False)
     result = irradiance._check_limits(val=data, ub=3, ub_le=True)
-    assert_series_equal(expected, result)
+    assert_series_equal(expected, result, check_names=False)
 
     result = irradiance._check_limits(val=data, lb=3, ub=4, lb_ge=True,
                                       ub_le=True)
