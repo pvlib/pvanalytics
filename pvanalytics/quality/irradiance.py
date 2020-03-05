@@ -75,9 +75,9 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
-        for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
-        keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
-        value is a float.
+        Must have keys 'ghi_ub' and 'ghi_lb'. For 'ghi_ub' value is a
+        dict with keys {'mult', 'exp', 'min'} and float values. For
+        'ghi_lb' value is a float.
 
     Returns
     -------
@@ -114,9 +114,9 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
-        for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
-        keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
-        value is a float.
+        Must have keys 'dhi_ub' and 'dhi_lb'. For 'dhi_ub' value is a
+        dict with keys {'mult', 'exp', 'min'} and float values. For
+        'dhi_lb' value is a float.
 
     Returns
     -------
@@ -154,9 +154,9 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : dict, default QCRAD_LIMITS
-        for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
-        keys {'mult', 'exp', 'min'}. For keys 'ghi_lb', 'dhi_lb', 'dni_lb',
-        value is a float.
+        Must have keys 'dni_ub' and 'dni_lb'. For 'dni_ub' value is a
+        dict with keys {'mult', 'exp', 'min'} and float values. For
+        'dni_lb' value is a float.
 
     Returns
     -------
