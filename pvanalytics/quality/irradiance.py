@@ -258,9 +258,9 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
     # unpack bounds dict
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
     # for zenith set lb_ge to handle edge cases, e.g., zenith=0
-    return ((_check_limits(sza, lb=sza_lb, ub=sza_ub, lb_ge=True)) &
-            (_check_limits(ghi, lb=ghi_lb, ub=ghi_ub)) &
-            (_check_limits(ratio, lb=ratio_lb, ub=ratio_ub)))
+    return ((_check_limits(sza, lb=sza_lb, ub=sza_ub, lb_ge=True))
+            & (_check_limits(ghi, lb=ghi_lb, ub=ghi_ub))
+            & (_check_limits(ratio, lb=ratio_lb, ub=ratio_ub)))
 
 
 def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
@@ -319,17 +319,17 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
     bounds = param['ghi_ratio']
     consistent_components = (
         _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds['high_zenith']) |
-        _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds['low_zenith']))
+                           sza=solar_zenith, bounds=bounds['high_zenith'])
+        | _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
+                             sza=solar_zenith, bounds=bounds['low_zenith']))
     consistent_components.name = 'consistent_components'
 
     bounds = param['dhi_ratio']
     diffuse_ratio_limit = (
         _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds['high_zenith']) |
-        _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds['low_zenith']))
+                           bounds=bounds['high_zenith'])
+        | _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+                             bounds=bounds['low_zenith']))
     diffuse_ratio_limit.name = 'diffuse_ratio_limit'
 
     return consistent_components, diffuse_ratio_limit
