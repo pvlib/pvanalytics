@@ -60,8 +60,9 @@ def _qcrad_ub(dni_extra, sza, lim):
 def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     r"""Test for physical limits on GHI using the QCRad criteria.
 
-    Test passes if a value > lower bound and value < upper bound. Lower bounds
-    are constant for all tests. Upper bounds are calculated as
+    Test is applied to each GHI value. A GHI value passes if value >
+    lower bound and value < upper bound. Lower bounds are constant for
+    all tests. Upper bounds are calculated as
 
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
@@ -82,7 +83,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     Returns
     -------
     ghi_limit_flag : Series
-        True if value passes physically-possible test
+        True where value passes limits test.
 
     """
     if not limits:
@@ -98,9 +99,9 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
 def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     r"""Test for physical limits on DHI using the QCRad criteria.
 
-    Test passes if a value > lower bound and value < upper
-    bound. Lower bounds are constant for all tests. Upper bounds are
-    calculated as
+    Test is applied to each DHI value. A DHI value passes if value >
+    lower bound and value < upper bound. Lower bounds are constant for
+    all tests. Upper bounds are calculated as
 
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
@@ -121,7 +122,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     Returns
     -------
     dhi_limit_flag : Series
-        True if value passes physically-possible test
+        True where value passes limit test.
 
     """
     if not limits:
@@ -138,9 +139,9 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     r"""Test for physical limits on DNI using the QCRad criteria.
 
-    Test passes if a value > lower bound and value < upper
-    bound. Lower bounds are constant for all tests. Upper bounds are
-    calculated as
+    Test is applied to each DNI value. A DNI value passes if value >
+    lower bound and value < upper bound. Lower bounds are constant for
+    all tests. Upper bounds are calculated as
 
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
@@ -161,7 +162,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     Returns
     -------
     dni_limit_flag : Series
-        True if value passes physically-possible test
+        True where value passes limit test.
 
     """
     if not limits:
@@ -179,10 +180,10 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
                                   dni=None, limits=None):
     r"""Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
-    Criteria from [1]_ are used to determine lower and upper bounds
-    for physically plausible value. Test passes if a value > lower
-    bound and value < upper bound. Lower bounds are constant for all
-    tests. Upper bounds are calculated as
+    Criteria from [1]_ are used to determine physically plausible
+    lower and upper bounds. Each value is tested and a value passes if
+    value > lower bound and value < upper bound. Lower bounds are
+    constant for all tests. Upper bounds are calculated as
 
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
@@ -210,11 +211,11 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
     Returns
     -------
     ghi_limit_flag : Series
-        True if value is physically possible. None if `ghi` is None.
+        True for each value that is physically possible. None if `ghi` is None.
     dhi_limit_flag : Series
-        True if value is physically possible. None if `dni` is None.
+        True for each value that is physically possible. None if `dni` is None.
     dhi_limit_flag : Series
-        True if value is physically possible. None if `dhi` is None.
+        True for each value that is physically possible. None if `dhi` is None.
 
     References
     ----------
@@ -295,9 +296,9 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
     Returns
     -------
     consistent_components : Series
-        True if `ghi`, `dhi` and `dni` components are consistent.
+        True where `ghi`, `dhi` and `dni` components are consistent.
     diffuse_ratio_limit : Series
-        True if diffuse to GHI ratio passes limit test.
+        True where diffuse to GHI ratio passes limit test.
 
     References
     ----------
