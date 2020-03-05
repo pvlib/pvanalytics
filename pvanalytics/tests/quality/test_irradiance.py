@@ -95,8 +95,10 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
     cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
         expected['ghi'], expected['solar_zenith'], expected['dni_extra'],
         expected['dhi'], expected['dni'])
-    assert_series_equal(cons_comp, expected['consistent_components'], check_names=False)
-    assert_series_equal(diffuse, expected['diffuse_ratio_limit'], check_names=False)
+    assert_series_equal(cons_comp, expected['consistent_components'],
+                        check_names=False)
+    assert_series_equal(diffuse, expected['diffuse_ratio_limit'],
+                        check_names=False)
 
 
 def test_check_limits():
