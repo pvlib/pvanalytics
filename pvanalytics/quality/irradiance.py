@@ -31,8 +31,7 @@ QCRAD_CONSISTENCY = {
 
 
 def _check_limits(val, lb=None, ub=None, lb_ge=False, ub_le=False):
-    """ Returns True where lb < (or <=) val < (or <=) ub
-    """
+    """Return True where lb < (or <=) val < (or <=) ub."""
     if lb_ge:
         lb_op = np.greater_equal
     else:
@@ -59,7 +58,7 @@ def _qcrad_ub(dni_extra, sza, lim):
 
 
 def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
-    r"""Tests for physical limits on GHI using the QCRad criteria.
+    r"""Test for physical limits on GHI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper bound. Lower bounds
     are constant for all tests. Upper bounds are calculated as
@@ -97,7 +96,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
 
 
 def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
-    r"""Tests for physical limits on DHI using the QCRad criteria.
+    r"""Test for physical limits on DHI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper
     bound. Lower bounds are constant for all tests. Upper bounds are
@@ -137,7 +136,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
 
 def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
-    r"""Tests for physical limits on DNI using the QCRad criteria.
+    r"""Test for physical limits on DNI using the QCRad criteria.
 
     Test passes if a value > lower bound and value < upper
     bound. Lower bounds are constant for all tests. Upper bounds are
@@ -178,7 +177,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
 def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
                                   dni=None, limits=None):
-    r"""Tests for physical limits on GHI, DHI or DNI using the QCRad criteria.
+    r"""Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
     Criteria from [1]_ are used to determine lower and upper bounds
     for physically plausible value. Test passes if a value > lower
@@ -265,7 +264,7 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
 
 def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
                                        param=None):
-    """Checks consistency of GHI, DHI and DNI using QCRad criteria.
+    """Check consistency of GHI, DHI and DNI using QCRad criteria.
 
     Uses criteria given in [1]_ to validate the ratio of irradiance
     components.
@@ -307,7 +306,6 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
        Science Journal 2, pp. 23-37, 2008.
 
     """
-
     if not param:
         param = QCRAD_CONSISTENCY
 
