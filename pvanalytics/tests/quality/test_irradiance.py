@@ -1,3 +1,4 @@
+"""Tests for irradiance quality control functions."""
 import pandas as pd
 import numpy as np
 
@@ -9,6 +10,7 @@ from pvanalytics.quality import irradiance
 
 @pytest.fixture
 def irradiance_qcrad():
+    """Synthetic irradiance data and its expected quality flags."""
     output = pd.DataFrame(
         columns=['ghi', 'dhi', 'dni', 'solar_zenith', 'dni_extra',
                  'ghi_limit_flag', 'dhi_limit_flag', 'dni_limit_flag',
@@ -35,6 +37,7 @@ def irradiance_qcrad():
 
 
 def test_check_ghi_limits_qcrad(irradiance_qcrad):
+    """Test that QCRad identifies out of bounds GHI values."""
     expected = irradiance_qcrad
     ghi_out_expected = expected['ghi_limit_flag']
     ghi_out = irradiance.check_ghi_limits_qcrad(expected['ghi'],
@@ -44,6 +47,7 @@ def test_check_ghi_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_dhi_limits_qcrad(irradiance_qcrad):
+    """Test that QCRad identifies out of bounds DHI values."""
     expected = irradiance_qcrad
     dhi_out_expected = expected['dhi_limit_flag']
     dhi_out = irradiance.check_dhi_limits_qcrad(expected['dhi'],
@@ -53,6 +57,7 @@ def test_check_dhi_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_dni_limits_qcrad(irradiance_qcrad):
+    """Test that QCRad identifies out of bounds DNI values."""
     expected = irradiance_qcrad
     dni_out_expected = expected['dni_limit_flag']
     dni_out = irradiance.check_dni_limits_qcrad(expected['dni'],
@@ -62,6 +67,7 @@ def test_check_dni_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_irradiance_limits_qcrad(irradiance_qcrad):
+    """Test different input combinations to check_irradiance_limits_qcrad."""
     expected = irradiance_qcrad
     ghi_out_expected = expected['ghi_limit_flag']
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
@@ -84,6 +90,7 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
+    """Test that QCRad identifies consistent irradiance measurements."""
     expected = irradiance_qcrad
     cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
         expected['ghi'], expected['solar_zenith'], expected['dni_extra'],
