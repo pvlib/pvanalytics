@@ -31,7 +31,7 @@ content evolves.  The functions in `quality`, `filtering`, and
   and timestamp errors will also be included in `quality`.
 * `filtering` as the name implies, contains functions for data
   filtering (e.g. day/night or solar position)
-* `features` contains functons for identifying features in the data
+* `features` contains functions for identifying features in the data
   (e.g. inverter clipping, misaligned sensors, or clear sky
   conditions)
 * `system` identification of PV system chatacteristics from data
