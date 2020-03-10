@@ -82,7 +82,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
 
     Returns
     -------
-    ghi_limit_flag : Series
+    Series
         True where value passes limits test.
 
     """
@@ -120,7 +120,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
     Returns
     -------
-    dhi_limit_flag : Series
+    Series
         True where value passes limit test.
 
     """
@@ -159,7 +159,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
     Returns
     -------
-    dni_limit_flag : Series
+    Series
         True where value passes limit test.
 
     """
