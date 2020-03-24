@@ -55,7 +55,8 @@ def detect_stale_values(x, window=3, rtol=1e-5, atol=1e-8):
 
     Raises
     ------
-        ValueError if window < 2
+    ValueError
+        If window < 2.
 
     """
     if window < 2:
@@ -95,7 +96,8 @@ def detect_interpolation(x, window=3, rtol=1e-5, atol=1e-8):
 
     Raises
     ------
-        ValueError if window < 3
+    ValueError
+        If window < 3.
 
     """
     if window < 3:
