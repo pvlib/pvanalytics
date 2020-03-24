@@ -1,10 +1,10 @@
 """Functions for identifying and labeling outliers."""
 
 
-def filter_iqr(data, k=1.5):
+def tukey(data, k=1.5):
     r"""Identify outliers based on the interquartile range.
 
-    A value is considered an outlier if it does not satisfy the
+    A value is considered an outlier if it does *not* satisfy the
     following condition
 
     .. math::
