@@ -26,9 +26,11 @@ content evolves.  The functions in `quality`, `filtering`, and
     humidity, etc.)
   * `outliers` contains different functions for identifying outliers
     in the data.
+  * `gaps` contains functions for identifying gaps in the data
+    (i.e. missing values, stuck values, and interpolation).
 
-  Other quality checks such as detecting stuck values, interpolation,
-  and timestamp errors will also be included in `quality`.
+  Other quality checks such as detecting timestamp errors will also be
+  included in `quality`.
 * `filtering` as the name implies, contains functions for data
   filtering (e.g. day/night or solar position)
 * `features` contains functions for identifying features in the data
