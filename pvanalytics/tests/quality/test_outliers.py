@@ -1,6 +1,7 @@
 """Tests for the quality.outliers module."""
-from pandas.testing import assert_series_equal
 import pandas as pd
+import numpy as np
+from pandas.util.testing import assert_series_equal
 from pvanalytics.quality import outliers
 
 
@@ -40,3 +41,46 @@ def test_tukey_lower_criteria():
         pd.Series([True for _ in range(len(data))]),
         outliers.tukey(data, k=3)
     )
+
+
+def test_zscore_all_same():
+    """If all data is identical there are no outliers."""
+    data = pd.Series([1 for _ in range(20)])
+    np.seterr(invalid='ignore')
+    assert_series_equal(
+        pd.Series([True for _ in range(20)]),
+        outliers.zscore(data)
+    )
+    np.seterr(invalid='warn')
+
+
+def test_zscore_outlier_above():
+    """Correctly idendifies an outlier above the mean."""
+    data = pd.Series([1, 0, -1, 0, 1, -1, 10])
+    assert_series_equal(
+        pd.Series([True, True, True, True, True, True, False]),
+        outliers.zscore(data)
+    )
+
+
+def test_zscore_outlier_below():
+    """Correctly idendifies an outlier below the mean."""
+    data = pd.Series([1, 0, -1, 0, 1, -1, -10])
+    assert_series_equal(
+        pd.Series([True, True, True, True, True, True, False]),
+        outliers.zscore(data)
+    )
+
+
+def test_zscore_zmax():
+    """Increasing zmax excludes outliers closest to the mean."""
+    data = pd.Series([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 10])
+    assert_series_equal(
+        data[-2:],
+        data[~outliers.zscore(data)]
+    )
+    assert_series_equal(
+        data[-1:],
+        data[~outliers.zscore(data, zmax=3)]
+    )
+    assert outliers.zscore(data, zmax=5).all()

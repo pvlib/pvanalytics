@@ -1,4 +1,6 @@
 """Functions for identifying and labeling outliers."""
+import pandas as pd
+from scipy import stats
 
 
 def tukey(data, k=1.5):
@@ -33,3 +35,28 @@ def tukey(data, k=1.5):
     iqr = third_quartile - first_quartile
     return ~((data < (first_quartile - k*iqr))
              | (data > (third_quartile + k*iqr)))
+
+
+def zscore(data, zmax=1.5):
+    """Identify outliers based on the z-score.
+
+    If the absolute value of the z-score is greater than `zmax` then
+    the value is considered an outlier.
+
+    Parameters
+    ----------
+    data : Series
+        A series of numeric values in which to find outliers.
+    zmax : float
+        Upper limit of the absolute values of the z-score.
+
+    Returns
+    -------
+    Series
+        A series of booleans with True for each value that is not an
+        outlier.
+
+    """
+    # The comparison is performed as > (rather than <=) and negated so
+    # that NA values are not treated as outliers.
+    return pd.Series(~(abs(stats.zscore(data)) > zmax), index=data.index)
