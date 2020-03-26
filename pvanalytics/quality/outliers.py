@@ -26,15 +26,15 @@ def tukey(data, k=1.5):
     Returns
     -------
     Series
-        A series of booleans with True for each value that is not an
+        A series of booleans with True for each value that is an
         outlier.
 
     """
     first_quartile = data.quantile(0.25)
     third_quartile = data.quantile(0.75)
     iqr = third_quartile - first_quartile
-    return ~((data < (first_quartile - k*iqr))
-             | (data > (third_quartile + k*iqr)))
+    return ((data < (first_quartile - k*iqr))
+            | (data > (third_quartile + k*iqr)))
 
 
 def zscore(data, zmax=1.5):
@@ -53,10 +53,8 @@ def zscore(data, zmax=1.5):
     Returns
     -------
     Series
-        A series of booleans with True for each value that is not an
+        A series of booleans with True for each value that is an
         outlier.
 
     """
-    # The comparison is performed as > (rather than <=) and negated so
-    # that NA values are not treated as outliers.
-    return pd.Series(~(abs(stats.zscore(data)) > zmax), index=data.index)
+    return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
