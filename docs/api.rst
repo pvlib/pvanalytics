@@ -33,6 +33,18 @@ Irradiance measurements can also be checked for consistency.
    :toctree: generated/
 
    quality.irradiance.check_irradiance_consistency_qcrad
+
+Outliers
+--------
+
+Functions for detecting outliers.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.outliers.tukey
+   quality.outliers.zscore
+
 	     
 .. rubric:: References
 
