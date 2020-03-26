@@ -6,7 +6,7 @@ from scipy import stats
 def tukey(data, k=1.5):
     r"""Identify outliers based on the interquartile range.
 
-    A value is considered an outlier if it does *not* satisfy the
+    A value `x` is considered an outlier if it does *not* satisfy the
     following condition
 
     .. math::
@@ -20,7 +20,7 @@ def tukey(data, k=1.5):
     data : Series
         The data in which to find outliers.
     k : float, default 1.5
-        Multiplier of the IQR. Using a larger value will be more
+        Multiplier of the interquartile range. A larger value will be more
         permissive of values that are far from the median.
 
     Returns
@@ -38,9 +38,9 @@ def tukey(data, k=1.5):
 
 
 def zscore(data, zmax=1.5):
-    """Identify outliers based on the z-score.
+    """Identify outliers using the z-score.
 
-    If the absolute value of the z-score is greater than `zmax` then
+    Points with z-score greater than `zmax` are considered as outliers.
     the value is considered an outlier.
 
     Parameters
