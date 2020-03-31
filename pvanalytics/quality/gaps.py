@@ -5,6 +5,7 @@ values (i.e. 999).
 
 """
 import numpy as np
+import pandas as pd
 
 
 def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
@@ -135,3 +136,90 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8):
         atol=atol
     )
     return flags
+
+
+def valid_between(series, days=10, minimum_hours=7.75, freq=None):
+    """Get the start and end of valid data.
+
+    The start and end dates returned by this function can be used to
+    remove large periods of missing data from the begining and end of
+    the series. The valid data begins when there are `days`
+    consecutive days with data covering at least `minimum_hours` on
+    each day. Valid data ends on the last day with `days` consecutive
+    days with data covering at least `minimum_hours` preceeding it.
+
+    Parameters
+    ----------
+    series : Series
+        A datetime indexed series.
+    days : int
+        The minimum number of consecutive valid days for data to be
+        considered valid.
+    minimum_hours : float
+        The number of hours that must have valid data for a day to be
+        considered valid.
+    freq : string or None, default None
+        The frequency to the series. If None, then frequescy is
+        inferred from the index.
+
+    Returns
+    -------
+    start : Datetime or None
+        The first valid day. If there are no sufficiently long periods
+        of valid days then None is returned.
+    end : Datetime or None
+        The last valid day. None if start is None.
+
+    """
+    freq_hours = (pd.Timedelta(freq or pd.infer_freq(series.index)).seconds
+                  / (60.0*60.0))
+    daily_hours = (series.dropna().resample('D').count()*freq_hours)
+    good_days_preceeding = daily_hours[daily_hours >= minimum_hours].rolling(
+        str(days)+'D', closed='right'
+    ).count()
+    good_days_following = good_days_preceeding.shift(periods=-(days-1))
+
+    following_above_threshold = good_days_following[
+        good_days_following >= days
+    ]
+    preceeding_above_threshold = good_days_preceeding[
+        good_days_preceeding >= days
+    ]
+
+    start = None
+    end = None
+
+    if len(following_above_threshold) > 0:
+        start = following_above_threshold.index[0]
+
+    if len(preceeding_above_threshold) > 0:
+        end = preceeding_above_threshold.index[-1]
+
+    return start, end
+
+
+def trim(series, **kwargs):
+    """Remove missing data from the begining and end of the dataset.
+
+    Missing data is determined by the criteria in
+    :py:func:`valid_between`.
+
+    Parameters
+    ----------
+    series : Series
+        A DatatimeIndexed series
+    kwargs :
+        Any of the keyword arguments that can be passed to
+        :py:func:`valid_between`
+
+    Returns
+    -------
+    Series or None
+        The same series with leading and trailing `NA`s removed. If
+        there is no valid data None is returned
+
+    """
+    start, end = valid_between(series, **kwargs)
+    if start:
+        return series[start.date():end.date()]
+    return None
