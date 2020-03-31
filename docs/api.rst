@@ -34,6 +34,18 @@ Irradiance measurements can also be checked for consistency.
 
    quality.irradiance.check_irradiance_consistency_qcrad
 	     
+
+Gaps
+----
+
+Identify gaps in the data.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.gaps.detect_interpolation
+   quality.gaps.detect_stale_values
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
