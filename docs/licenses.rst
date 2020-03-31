@@ -33,5 +33,5 @@ the terms of the MIT License
   :py:mod:`pvanalytics.quality.irradiance`
 
 * The interpolation and stuck value detection functions
-  :py:func:`pvanalytics.quality.gaps.detect_interpolation` and
-  :py:func:`pvanalytics.quality.gaps.detect_stale_values`
+  :py:func:`pvanalytics.quality.gaps.interpolation()` and
+  :py:func:`pvanalytics.quality.gaps.stale_values()`

@@ -43,8 +43,8 @@ Identify gaps in the data.
 .. autosummary::
    :toctree: generated/
 
-   quality.gaps.detect_interpolation
-   quality.gaps.detect_stale_values
+   quality.gaps.interpolation_diff
+   quality.gaps.stale_values_diff
 
 .. rubric:: References
 
