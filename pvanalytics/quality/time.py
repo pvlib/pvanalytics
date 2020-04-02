@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def spacing(times, freq):
-    """Check that the spacing betweem `times` conforms to `freq`.
+    """Check that the spacing between `times` conforms to `freq`.
 
     Parameters
     ----------
