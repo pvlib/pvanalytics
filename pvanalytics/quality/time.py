@@ -2,7 +2,7 @@
 import pandas as pd
 
 
-def timestamp_spacing(times, freq):
+def spacing(times, freq):
     """Check that the spacing betweem `times` conforms to `freq`.
 
     Parameters
