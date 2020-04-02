@@ -34,6 +34,15 @@ Irradiance measurements can also be checked for consistency.
 
    quality.irradiance.check_irradiance_consistency_qcrad
 
+GHI and POA irradiance can be validated against clearsky values to
+eliminate data that is unrealistically high.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.ghi_clearsky_limits
+   quality.irradiance.poa_clearsky_limits
+
 Gaps
 ----
 
