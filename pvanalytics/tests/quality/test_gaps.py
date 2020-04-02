@@ -355,6 +355,10 @@ def test_valid_between_with_gaps_in_middle():
 
 
 def test_trim():
+    """gaps.trim() should return a boolean mask that selects only the good
+    data in the middle of a series.
+
+    """
     index = pd.date_range(
         freq='15T',
         start='01-01-2020',
@@ -367,3 +371,15 @@ def test_trim():
         series[gaps.trim(series, days=3)],
         series['01-07-2020':'08-01-2020 00:00']
     )
+
+
+def test_trim_empty():
+    """gaps.trim() returns all False for series with no valid days."""
+    index = pd.date_range(
+        freq='15T',
+        start='01-01-2020',
+        end='08-01-2020 23:00'
+    )
+    series = pd.Series(index=index, dtype='float64')
+    series.iloc[::(24*60)] = 1
+    assert (~gaps.trim(series, days=3)).all()
