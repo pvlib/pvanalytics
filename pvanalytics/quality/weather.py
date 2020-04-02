@@ -48,3 +48,28 @@ def relative_humidity_limits(relative_humidity, limits=(0, 100)):
         inclusive_lower=True,
         inclusive_upper=True
     )
+
+
+def wind_limits(wind_speed, limits=(0.0, 50.0)):
+    """Check for extreme wind speeds.
+
+    Parameters
+    ----------
+    wind_speed : Series
+        Wind speed in :math:`m/s`
+    wind_limits : tuple, default (0, 50)
+        (lower bound, upper bound) for wind speed.
+
+    Returns
+    -------
+    Series
+        True if `wind_speed` >= lower bound and `wind_speed` < upper
+        bound.
+
+    """
+    return util.check_limits(
+        wind_speed,
+        lower_bound=limits[0],
+        upper_bound=limits[1],
+        inclusive_lower=True
+    )

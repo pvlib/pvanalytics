@@ -38,3 +38,12 @@ def test_relative_humidity_limits(weather_data):
         weather_data['extreme_rh_flag'],
         check_names=False
     )
+
+
+def test_wind_limits(weather_data):
+    """Check that extremes in wind data are flagged."""
+    assert_series_equal(
+        weather.wind_limits(weather_data['wind_speed']),
+        weather_data['extreme_wind_flag'],
+        check_names=False
+    )
