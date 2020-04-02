@@ -2,6 +2,7 @@
 
 import numpy as np
 from pvlib.tools import cosd
+import pvlib
 
 from pvanalytics.quality import util
 
@@ -309,3 +310,71 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
                              bounds=bounds['low_zenith']))
 
     return consistent_components, diffuse_ratio_limit
+
+
+def ghi_clearsky_limits(ghi, ghi_clearsky, csi_max=1.1):
+    """Identify GHI values greater than clearsky values.
+
+    Uses :py:func:`pvlib.irradiance.clearsky_index` to compute the
+    clearsky index for `ghi` and `ghi_clearsky`. Compares the
+    clearsky index to `csi_max` to identify values in `ghi` that are
+    greater than the expected clearsky irradiance.
+
+    Parameters
+    ----------
+    ghi : Series
+        Global horizontal irradiance in :math:`W/m^2`
+    ghi_clearsky : Series
+        Global horizontal irradiance in :math:`W/m^2` under clearsky
+        conditions.
+    csi_max : float, default 1.1
+        Maximum acceptable clearsky index. Any clearsky index value
+        greater than this indicates a `ghi` value that is too large.
+
+    Returns
+    -------
+    Series
+        True for each value where the clearsky index does not exceed
+        `csi_max`.
+
+    """
+    csi = pvlib.irradiance.clearsky_index(
+        ghi,
+        ghi_clearsky,
+        max_clearsky_index=np.Inf
+    )
+    return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)
+
+
+def poa_clearsky_limits(poa, poa_clearsky, csi_max=1.1):
+    """Identify POA irradiance values greater than clearsky values.
+
+    Uses :py:func:`pvlib.irradiance.clearsky_index` to compute the
+    clearsky index for `poa` and `poa_clearsky`. Compares the
+    clearsky index to `csi_max` to identify values in `poa` that are
+    greater than the expected clearsky irradiance.
+
+    Parameters
+    ----------
+    poa : Series
+        Plane of array irradiance in :math:`W/m^2`
+    poa_clearsky : Series
+        Plane of array irradiance in :math:`W/m^2` under clearsky
+        conditions.
+    csi_max : float, default 1.1
+        Maximum clearsky index that defines when POA irradiance exceeds
+        clear-sky value.
+
+    Returns
+    -------
+    Series
+        True for each value where the clearsky index does not exceed
+        `csi_max`.
+
+    """
+    csi = pvlib.irradiance.clearsky_index(
+        poa,
+        poa_clearsky,
+        max_clearsky_index=np.Inf
+    )
+    return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)
