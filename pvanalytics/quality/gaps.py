@@ -199,7 +199,7 @@ def valid_between(series, days=10, minimum_hours=7.75, freq=None):
 
 
 def trim(series, **kwargs):
-    """Remove missing data from the begining and end of the dataset.
+    """Mask out missing data from the begining and end of the data.
 
     Missing data is determined by the criteria in
     :py:func:`valid_between`.
@@ -207,19 +207,22 @@ def trim(series, **kwargs):
     Parameters
     ----------
     series : Series
-        A DatatimeIndexed series
+        A DatatimeIndexed series.
     kwargs :
         Any of the keyword arguments that can be passed to
-        :py:func:`valid_between`
+        :py:func:`valid_between`.
 
     Returns
     -------
-    Series or None
-        The same series with leading and trailing `NA`s removed. If
-        there is no valid data None is returned
+    Series
+      A series of booleans whith the same index as `series` with False
+      up to the first good day, True from the first to the last good
+      day, and False from the last good day to the end.
 
     """
     start, end = valid_between(series, **kwargs)
+    s = pd.Series(index=series.index, dtype='bool')
+    s.loc[:] = False
     if start:
-        return series[start.date():end.date()]
-    return None
+        s.loc[start.date():end.date()] = True
+    return s

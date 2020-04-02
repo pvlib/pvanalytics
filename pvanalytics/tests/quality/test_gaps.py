@@ -363,8 +363,7 @@ def test_trim():
     series = pd.Series(index=index, data=np.full(len(index), 1))
     series['01-02-2020':'01-07-2020 13:00'] = np.nan
     series['01-10-2020':'01-11-2020'] = np.nan
-    valid_series = gaps.trim(series, days=3)
     assert_series_equal(
-        valid_series,
+        series[gaps.trim(series, days=3)],
         series['01-07-2020':'08-01-2020 00:00']
     )
