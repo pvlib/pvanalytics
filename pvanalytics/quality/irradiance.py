@@ -236,9 +236,12 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
     # unpack bounds dict
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
     # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
-    return ((util.check_limits(sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True))
-            & (util.check_limits(ghi, lower_bound=ghi_lb, upper_bound=ghi_ub))
-            & (util.check_limits(ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)))
+    return (
+        util.check_limits(sza, lower_bound=sza_lb,
+                          upper_bound=sza_ub, inclusive_lower=True)
+        & util.check_limits(ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
+        & util.check_limits(ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+    )
 
 
 def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
