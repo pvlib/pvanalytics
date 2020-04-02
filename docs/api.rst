@@ -53,6 +53,15 @@ Identify gaps in the data.
    quality.gaps.interpolation_diff
    quality.gaps.stale_values_diff
 
+Many data sets may have leading and trailing periods with sparodic or
+no data. The following functions can be used to remove those periods.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.gaps.valid_between
+   quality.gaps.trim
+
 Outliers
 --------
 
