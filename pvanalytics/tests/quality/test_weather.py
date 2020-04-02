@@ -29,3 +29,12 @@ def test_check_temperature_limits(weather_data):
         weather_data['extreme_temp_flag'],
         check_names=False
     )
+
+
+def test_relative_humidity_limits(weather_data):
+    """Check that relative humidity values outside normal range are flagged."""
+    assert_series_equal(
+        weather.relative_humidity_limits(weather_data['relative_humidity']),
+        weather_data['extreme_rh_flag'],
+        check_names=False
+    )
