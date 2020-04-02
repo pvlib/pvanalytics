@@ -93,7 +93,7 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
     """Test that QCRad identifies consistent irradiance measurements."""
     expected = irradiance_qcrad
     cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
-        expected['ghi'], expected['solar_zenith'], expected['dni_extra'],
+        expected['ghi'], expected['solar_zenith'],
         expected['dhi'], expected['dni'])
     assert_series_equal(cons_comp, expected['consistent_components'],
                         check_names=False)
