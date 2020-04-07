@@ -46,6 +46,17 @@ Identify gaps in the data.
    quality.gaps.interpolation_diff
    quality.gaps.stale_values_diff
 
+Time
+----
+
+Quality control related to time. This includes things like time-stamp
+spacing, time-shifts, and time zone validation.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.time.spacing
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
