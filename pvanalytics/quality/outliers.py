@@ -58,3 +58,44 @@ def zscore(data, zmax=1.5):
 
     """
     return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
+
+
+def hampel(data, window=5, max_deviation=3.0, mad_scale=1.4826):
+    r"""Identify outliers by the Hampel identifier.
+
+    The Hampel identifier is computed according to [1]_.
+
+    Parameters
+    ----------
+    data : Series
+        The data in which to find outliers.
+    window : int or offset, default 5
+        The size of the rolling window used to compute the hampel
+        identifier.
+    max_deviation : float, default 3.0
+        Any value with a hampel identifier > `max_deviation` standard
+        deviations from the median is considered an outlier.
+    scale : float, default 1.4826
+        MAD scale estimate. The standard deviation is calculated as
+        :math:`scale * MAD`. The default gives an estimate for the
+        standard deviation of Gaussian distributed data.
+
+    Returns
+    -------
+    Series
+        True for each value that is an outlier according to its Hampel
+        identifier.
+
+    References
+    ----------
+    .. [1] Pearson, R.K., Neuvo, Y., Astola, J. et al. Generalized
+       Hampel Filters. EURASIP J. Adv. Signal Process. 2016, 87
+       (2016). https://doi.org/10.1186/s13634-016-0383-6
+
+    """
+    median = data.rolling(window=window, center=True).median()
+    deviation = abs(data - median)
+    mad = data.rolling(window=window, center=True).apply(
+        stats.median_absolute_deviation
+    )
+    return deviation > max_deviation * mad_scale * mad

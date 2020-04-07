@@ -84,3 +84,54 @@ def test_zscore_zmax():
         data[outliers.zscore(data, zmax=3)]
     )
     assert (~outliers.zscore(data, zmax=5)).all()
+
+
+def test_hampel_all_same():
+    """outliers.hampel identifies no outlier if all data is the same."""
+    data = pd.Series(1, index=range(0, 50))
+    assert_series_equal(
+        outliers.hampel(data),
+        pd.Series(False, index=range(0, 50))
+    )
+
+def test_hampel_one_outlier():
+    """If all data is same but one value outliers.hampel should identify
+    that value as an outlier."""
+    np.random.seed(1000)
+    data = pd.Series(np.random.uniform(0, 1, size=50))
+    data.iloc[20] = 10
+    expected = pd.Series(False, index=data.index)
+    expected.iloc[20] = True
+    assert_series_equal(
+        outliers.hampel(data, window=11),
+        expected
+    )
+
+def test_hampel_max_deviation():
+    """Increasing max_deviation causes fewer values to be identified as
+    outliers."""
+    np.random.seed(1000)
+    data = pd.Series(np.random.uniform(-1, 1, size=100))
+    data.iloc[20] = -25
+    data.iloc[40] = 15
+    data.iloc[60] = 5
+
+    expected = pd.Series(False, index=data.index)
+    expected.iloc[[20, 40, 60]] = True
+
+    assert_series_equal(
+        data[outliers.hampel(data, window=11)],
+        data[expected]
+    )
+
+    expected.iloc[60] = False
+    assert_series_equal(
+        data[outliers.hampel(data, window=11, max_deviation=10)],
+        data[expected]
+    )
+
+    expected.iloc[40] = False
+    assert_series_equal(
+        data[outliers.hampel(data, window=11, max_deviation=12)],
+        data[expected]
+    )
