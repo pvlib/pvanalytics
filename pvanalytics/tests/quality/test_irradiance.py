@@ -114,31 +114,53 @@ def times():
     )
 
 
-def test_ghi_clearsky_limits(times):
-    """GHI values greater than clearsky values are flagged False."""
+def test_clearsky_limits(times):
+    """Values greater than clearsky values are flagged False."""
     clearsky = pd.Series(np.linspace(50, 55, len(times)), index=times)
-    ghi = clearsky.copy()
-    ghi.iloc[0] *= 0.5
-    ghi.iloc[-1] *= 2.0
+    measured = clearsky.copy()
+    measured.iloc[0] *= 0.5
+    measured.iloc[-1] *= 2.0
     clear_times = np.tile(True, len(times))
     clear_times[-1] = False
     assert_series_equal(
-        irradiance.ghi_clearsky_limits(ghi, clearsky),
+        irradiance.clearsky_limits(measured, clearsky),
         pd.Series(index=times, data=clear_times)
     )
 
 
-def test_poa_clearsky_limits():
-    """POA irradiance values greater than clearsky valuse are flagged False."""
+def test_clearsky_limits_negative_and_nan():
+    """Irradiance values greater than clearsky valuse are flagged False
+    along with NaNs."""
     index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),
                           freq='15T', periods=5)
-    poa = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])
-    poa_clearsky = pd.Series(index=index, data=1000)
+    measured = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])
+    clearsky = pd.Series(index=index, data=1000)
     assert_series_equal(
-        irradiance.poa_clearsky_limits(poa, poa_clearsky),
+        irradiance.clearsky_limits(measured, clearsky),
         pd.Series(index=index, data=[True, True, False, True, False])
     )
+
+
+def test_clearsky_limits_csi_max(times):
+    """Increasing `csi_max` passes larger values."""
+    measured = pd.Series(np.linspace(800, 1000, len(times)), index=times)
+    measured.iloc[0] = 1300
+    measured.iloc[1] = 1200
+    measured.iloc[2] = 1100
+    clearsky = pd.Series(1000, index=times)
+    expected = pd.Series(True, index=times)
+    expected.iloc[0:3] = False
     assert_series_equal(
-        irradiance.poa_clearsky_limits(poa, poa_clearsky, csi_max=1.2),
-        pd.Series(index=index, data=[True, True, True, True, False])
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.0),
+        expected
+    )
+    expected.iloc[2] = True
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.1),
+        expected
+    )
+    expected.iloc[1] = True
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.2),
+        expected
     )

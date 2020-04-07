@@ -40,8 +40,7 @@ eliminate data that is unrealistically high.
 .. autosummary::
    :toctree: generated/
 
-   quality.irradiance.ghi_clearsky_limits
-   quality.irradiance.poa_clearsky_limits
+   quality.irradiance.clearsky_limits
 
 Gaps
 ----
