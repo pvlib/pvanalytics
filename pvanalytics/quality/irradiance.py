@@ -244,7 +244,7 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
     )
 
 
-def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
+def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
                                        param=None):
     """Check consistency of GHI, DHI and DNI using QCRad criteria.
 
@@ -261,8 +261,6 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
         Global horizontal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
-    dni_extra : Series
-        Extraterrestrial normal irradiance in :math:`W/m^2`
     dhi : Series
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series
