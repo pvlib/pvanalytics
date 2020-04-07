@@ -44,8 +44,8 @@ Functions for detecting outliers.
 
    quality.outliers.tukey
    quality.outliers.zscore
+   quality.outliers.hampel
 
-	     
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
