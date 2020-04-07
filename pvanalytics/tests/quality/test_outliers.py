@@ -94,6 +94,7 @@ def test_hampel_all_same():
         pd.Series(False, index=range(0, 50))
     )
 
+
 def test_hampel_one_outlier():
     """If all data is same but one value outliers.hampel should identify
     that value as an outlier."""
@@ -106,6 +107,7 @@ def test_hampel_one_outlier():
         outliers.hampel(data, window=11),
         expected
     )
+
 
 def test_hampel_max_deviation():
     """Increasing max_deviation causes fewer values to be identified as
