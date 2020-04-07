@@ -3,7 +3,6 @@ from datetime import datetime
 import pytz
 import pandas as pd
 import numpy as np
-from pvlib.location import Location
 
 import pytest
 from pandas.util.testing import assert_series_equal
@@ -105,18 +104,6 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
 
 
 @pytest.fixture
-def location():
-    """Fixture giving Albuquerque's location."""
-    return Location(
-        latitude=35.05,
-        longitude=-106.5,
-        altitude=1619,
-        name="Albuquerque",
-        tz="MST"
-    )
-
-
-@pytest.fixture
 def times():
     """One hour of times at 10 minute frequency."""
     mst = pytz.timezone('MST')
@@ -127,16 +114,16 @@ def times():
     )
 
 
-def test_ghi_clearsky_limits(location, times):
+def test_ghi_clearsky_limits(times):
     """GHI values greater than clearsky values are flagged False."""
-    clearsky = location.get_clearsky(times)
-    ghi = clearsky['ghi'].copy()
+    clearsky = pd.Series(np.linspace(50, 55, len(times)), index=times)
+    ghi = clearsky.copy()
     ghi.iloc[0] *= 0.5
     ghi.iloc[-1] *= 2.0
     clear_times = np.tile(True, len(times))
     clear_times[-1] = False
     assert_series_equal(
-        irradiance.ghi_clearsky_limits(ghi, clearsky['ghi']),
+        irradiance.ghi_clearsky_limits(ghi, clearsky),
         pd.Series(index=times, data=clear_times)
     )
 
