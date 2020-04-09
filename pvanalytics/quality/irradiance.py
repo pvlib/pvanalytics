@@ -3,6 +3,8 @@
 import numpy as np
 from pvlib.tools import cosd
 
+from pvanalytics.quality import util
+
 
 QCRAD_LIMITS = {'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
                 'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
@@ -28,27 +30,6 @@ QCRAD_CONSISTENCY = {
             'zenith_bounds': [75, 93],
             'ghi_bounds': [50, np.Inf],
             'ratio_bounds': [0.0, 1.10]}}}
-
-
-def _check_limits(val, lb=None, ub=None, lb_ge=False, ub_le=False):
-    """Return True where lb < (or <=) val < (or <=) ub."""
-    if lb_ge:
-        lb_op = np.greater_equal
-    else:
-        lb_op = np.greater
-    if ub_le:
-        ub_op = np.less_equal
-    else:
-        ub_op = np.less
-
-    if (lb is not None) & (ub is not None):
-        return lb_op(val, lb) & ub_op(val, ub)
-    elif lb is not None:
-        return lb_op(val, lb)
-    elif ub is not None:
-        return ub_op(val, ub)
-    else:
-        raise ValueError('must provide either upper or lower bound')
 
 
 def _qcrad_ub(dni_extra, sza, lim):
@@ -90,7 +71,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
         limits = QCRAD_LIMITS
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
-    ghi_limit_flag = _check_limits(ghi, limits['ghi_lb'], ghi_ub)
+    ghi_limit_flag = util.check_limits(ghi, limits['ghi_lb'], ghi_ub)
 
     return ghi_limit_flag
 
@@ -129,7 +110,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
     dhi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dhi_ub'])
 
-    dhi_limit_flag = _check_limits(dhi, limits['dhi_lb'], dhi_ub)
+    dhi_limit_flag = util.check_limits(dhi, limits['dhi_lb'], dhi_ub)
 
     return dhi_limit_flag
 
@@ -168,7 +149,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
     dni_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dni_ub'])
 
-    dni_limit_flag = _check_limits(dni, limits['dni_lb'], dni_ub)
+    dni_limit_flag = util.check_limits(dni, limits['dni_lb'], dni_ub)
 
     return dni_limit_flag
 
@@ -254,13 +235,16 @@ def _get_bounds(bounds):
 def _check_irrad_ratio(ratio, ghi, sza, bounds):
     # unpack bounds dict
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
-    # for zenith set lb_ge to handle edge cases, e.g., zenith=0
-    return ((_check_limits(sza, lb=sza_lb, ub=sza_ub, lb_ge=True))
-            & (_check_limits(ghi, lb=ghi_lb, ub=ghi_ub))
-            & (_check_limits(ratio, lb=ratio_lb, ub=ratio_ub)))
+    # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
+    return (
+        util.check_limits(sza, lower_bound=sza_lb,
+                          upper_bound=sza_ub, inclusive_lower=True)
+        & util.check_limits(ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
+        & util.check_limits(ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+    )
 
 
-def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
+def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
                                        param=None):
     """Check consistency of GHI, DHI and DNI using QCRad criteria.
 
@@ -277,8 +261,6 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dni_extra, dhi, dni,
         Global horizontal irradiance in :math:`W/m^2`
     solar_zenith : Series
         Solar zenith angle in degrees
-    dni_extra : Series
-        Extraterrestrial normal irradiance in :math:`W/m^2`
     dhi : Series
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series

@@ -1,10 +1,13 @@
 Licenses
 ========
 
-* The implementation of the QCRad algorithm in
-  :py:mod:`pvanalytics.quality.irradiance` is derived from `solarforecastarbiter
-  <https://github.com/SolarArbiter/solarforecastarbiter-core>`_ under the
-  terms of the MIT License
+Solar Forecast Arbiter
+----------------------
+
+The functions and modules listed below are derived from
+`solarforecastarbiter
+<https://github.com/SolarArbiter/solarforecastarbiter-core>`_ under
+the terms of the MIT License
 
   Copyright (c) 2019 SolarArbiter
 
@@ -25,3 +28,10 @@ Licenses
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
+
+* The implementation of the QCRad algorithm in
+  :py:mod:`pvanalytics.quality.irradiance`
+
+* The interpolation and stuck value detection functions
+  :py:func:`pvanalytics.quality.gaps.interpolation()` and
+  :py:func:`pvanalytics.quality.gaps.stale_values()`

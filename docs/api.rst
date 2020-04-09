@@ -34,6 +34,17 @@ Irradiance measurements can also be checked for consistency.
 
    quality.irradiance.check_irradiance_consistency_qcrad
 
+Gaps
+----
+
+Identify gaps in the data.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.gaps.interpolation_diff
+   quality.gaps.stale_values_diff
+
 Outliers
 --------
 
@@ -45,6 +56,17 @@ Functions for detecting outliers.
    quality.outliers.tukey
    quality.outliers.zscore
    quality.outliers.hampel
+
+Time
+----
+
+Quality control related to time. This includes things like time-stamp
+spacing, time-shifts, and time zone validation.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.time.spacing
 
 .. rubric:: References
 
