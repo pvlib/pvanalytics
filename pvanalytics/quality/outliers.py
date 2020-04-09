@@ -41,7 +41,6 @@ def zscore(data, zmax=1.5):
     """Identify outliers using the z-score.
 
     Points with z-score greater than `zmax` are considered as outliers.
-    the value is considered an outlier.
 
     Parameters
     ----------
@@ -60,7 +59,7 @@ def zscore(data, zmax=1.5):
     return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
 
 
-def hampel(data, window=5, max_deviation=3.0, mad_scale=1.4826):
+def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
     r"""Identify outliers by the Hampel identifier.
 
     The Hampel identifier is computed according to [1]_.
@@ -70,10 +69,10 @@ def hampel(data, window=5, max_deviation=3.0, mad_scale=1.4826):
     data : Series
         The data in which to find outliers.
     window : int or offset, default 5
-        The size of the rolling window used to compute the hampel
+        The size of the rolling window used to compute the Hampel
         identifier.
     max_deviation : float, default 3.0
-        Any value with a hampel identifier > `max_deviation` standard
+        Any value with a Hampel identifier > `max_deviation` standard
         deviations from the median is considered an outlier.
     scale : float, default 1.4826
         MAD scale estimate. The standard deviation is calculated as
@@ -98,4 +97,4 @@ def hampel(data, window=5, max_deviation=3.0, mad_scale=1.4826):
     mad = data.rolling(window=window, center=True).apply(
         stats.median_absolute_deviation
     )
-    return deviation > max_deviation * mad_scale * mad
+    return deviation > max_deviation * scale * mad
