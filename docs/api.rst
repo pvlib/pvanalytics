@@ -33,7 +33,6 @@ Irradiance measurements can also be checked for consistency.
    :toctree: generated/
 
    quality.irradiance.check_irradiance_consistency_qcrad
-	     
 
 Gaps
 ----
@@ -45,6 +44,18 @@ Identify gaps in the data.
 
    quality.gaps.interpolation_diff
    quality.gaps.stale_values_diff
+
+Outliers
+--------
+
+Functions for detecting outliers.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.outliers.tukey
+   quality.outliers.zscore
+   quality.outliers.hampel
 
 Time
 ----
