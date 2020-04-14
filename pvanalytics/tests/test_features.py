@@ -55,3 +55,24 @@ def test_clipping_levels_compound_clipped(quadratic, quadratic_clipped):
     """Clipping is identified in summed quadratics when one quadratic has
     clipping."""
     assert features.clipping_levels(quadratic + quadratic_clipped).any()
+
+
+def test_clipping_levels_two_periods(quadratic, quadratic_clipped):
+    """Two periods of clipping with lower values between them.
+
+    The two periods of clipping should be flagged as clipping, and the
+    central period of lower values should not be marked as clipping.
+    """
+    quadratic_clipped.loc[28:31] = [750, 725, 700, 650]
+    clipping = features.clipping_levels(
+        quadratic_clipped,
+        window=4,
+        fraction_in_window=0.5,
+        levels=4,
+        rtol=5e-3
+    )
+    assert not clipping[29:33].any()
+    assert clipping[20:28].all()
+    assert clipping[35:40].all()
+    assert not clipping[0:10].any()
+    assert not clipping[50:].any()
