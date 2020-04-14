@@ -68,6 +68,16 @@ spacing, time-shifts, and time zone validation.
 
    quality.time.spacing
 
+Features
+========
+
+Functions for detecting features in the data.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.clipping_levels
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control

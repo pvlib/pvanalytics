@@ -35,3 +35,6 @@ the terms of the MIT License
 * The interpolation and stuck value detection functions
   :py:func:`pvanalytics.quality.gaps.interpolation()` and
   :py:func:`pvanalytics.quality.gaps.stale_values()`
+
+* Level-based clipping detection in
+  :py:func:`pvanalytics.features.clipping_levels`.
