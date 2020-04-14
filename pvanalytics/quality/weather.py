@@ -3,7 +3,7 @@ from pvanalytics.quality import util
 
 
 def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
-    """Identify extreme temperatures.
+    """Identify temperature values that are within limits.
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
 
 
 def relative_humidity_limits(relative_humidity, limits=(0, 100)):
-    """Check for extremes in relative humidity data.
+    """Identify relative humidity values that are within limits.
 
     Parameters
     ----------
@@ -51,7 +51,7 @@ def relative_humidity_limits(relative_humidity, limits=(0, 100)):
 
 
 def wind_limits(wind_speed, limits=(0.0, 50.0)):
-    """Check for extreme wind speeds.
+    """Identify wind speed values that are within limits.
 
     Parameters
     ----------
