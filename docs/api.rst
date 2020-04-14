@@ -68,6 +68,18 @@ spacing, time-shifts, and time zone validation.
 
    quality.time.spacing
 
+Weather
+-------
+
+Quality checks for weather data.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.weather.relative_humidity_limits
+   quality.weather.temperature_limits
+   quality.weather.wind_limits
+
 Features
 ========
 

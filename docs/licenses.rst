@@ -36,5 +36,13 @@ the terms of the MIT License
   :py:func:`pvanalytics.quality.gaps.interpolation()` and
   :py:func:`pvanalytics.quality.gaps.stale_values()`
 
+* Weather related quality functions
+
+  * :py:func:`pvanalytics.quality.weather.temperature_limits`
+
+  * :py:func:`pvanalytics.quality.weather.relative_humidity_limits`
+
+  * :py:func:`pvanalytics.quality.weather.wind_limits`
+
 * Level-based clipping detection in
   :py:func:`pvanalytics.features.clipping_levels`.
