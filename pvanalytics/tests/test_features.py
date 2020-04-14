@@ -8,7 +8,11 @@ from pvanalytics import features
 
 @pytest.fixture
 def quadratic():
-    """Downward facing quadratic with vertex at (0, 1000) and roots at +/-1."""
+    """Downward facing quadratic.
+
+    Vertex at (30.5, 1000) and roots at 0, 59.
+
+    """
     q = -1000 * (np.linspace(-1, 1, 60) ** 2) + 1000
     return pd.Series(q)
 
