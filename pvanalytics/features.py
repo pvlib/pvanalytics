@@ -46,7 +46,7 @@ def clipping_levels(ac_power, window=4, fraction_in_window=0.75,
     ac_power : Series
         Time series of AC power measurements.
     window : int
-        Size of the window used to detect clipping.
+        Number of data points in a window used to detect clipping.
     fraction_in_window : float
         Fraction of points which indicate clipping if AC power at each
         point is close to the plateau level.
