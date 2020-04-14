@@ -12,7 +12,7 @@ def _detect_levels(x, count=3, num_bins=100):
         Data in which to find plateaus.
     count : int
         Number of pleataus to return.
-    num_bins : interpolated
+    num_bins : int
         Number of bins to use in histogram that finds plateau levels.
 
     Returns
@@ -37,7 +37,8 @@ def _label_clipping(x, window, frac):
     return y
 
 
-def clipping_levels(ac_power, window, fraction_in_window, rtol, levels):
+def clipping_levels(ac_power, window=4, fraction_in_window=0.75,
+                    rtol=5e-3, levels=2):
     """Label clipping in AC power data based on levels in the data.
 
     Parameters
@@ -64,7 +65,7 @@ def clipping_levels(ac_power, window, fraction_in_window, rtol, levels):
     num_bins = np.ceil(1.0 / rtol).astype(int)
     flags = pd.Series(index=ac_power.index, data=False)
     power_plateaus, bins = _detect_levels(ac_power, count=levels,
-                                         num_bins=num_bins)
+                                          num_bins=num_bins)
     for lower, upper in power_plateaus:
         temp = pd.Series(index=ac_power.index, data=0.0)
         temp.loc[(ac_power >= lower) & (ac_power <= upper)] = 1.0
