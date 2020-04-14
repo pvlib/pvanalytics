@@ -19,12 +19,6 @@ def quadratic_clipped(quadratic):
     return np.minimum(quadratic, 800)
 
 
-@pytest.fixture
-def quadratic_compound(quadratic):
-    """A sum of two quadratics."""
-    return quadratic + quadratic
-
-
 def test_clipping_levels(quadratic, quadratic_clipped):
     """The clipped segment of a quadratic is properly identified."""
     expected = quadratic >= 800
