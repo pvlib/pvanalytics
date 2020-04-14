@@ -8,7 +8,7 @@ def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
     Parameters
     ----------
     air_temperature : Series
-        Air temperature in Celsius.
+        Air temperature [C].
     temp_limits : tuple, default (-35, 50)
         (lower bound, upper bound) for temperature.
 
