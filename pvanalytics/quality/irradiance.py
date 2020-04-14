@@ -313,12 +313,12 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
 
 
 def clearsky_limits(measured, clearsky, csi_max=1.1):
-    """Identify irradiance measurements greater than clearsky values.
+    """Identify irradiance values which do not exceed clearsky values.
 
     Uses :py:func:`pvlib.irradiance.clearsky_index` to compute the
-    clearsky index for `measured` and `clearsky`. Compares the
+    clearsky index as the ratio of `measured` to `clearsky`. Compares the
     clearsky index to `csi_max` to identify values in `measured` that
-    are greater than the expected clearsky irradiance.
+    are less than or equal to `csi_max`.
 
     Parameters
     ----------
