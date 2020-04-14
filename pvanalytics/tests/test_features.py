@@ -19,6 +19,12 @@ def quadratic_clipped(quadratic):
     return np.minimum(quadratic, 800)
 
 
+@pytest.fixture
+def quadratic_compound(quadratic):
+    """A sum of two quadratics."""
+    return quadratic + quadratic
+
+
 def test_clipping_levels(quadratic, quadratic_clipped):
     """The clipped segment of a quadratic is properly identified."""
     expected = quadratic >= 800
@@ -41,3 +47,17 @@ def test_clipping_levels_no_clipping(quadratic):
     assert not features.clipping_levels(
         quadratic, window=10, fraction_in_window=0.75, levels=4, rtol=5e-3
     ).any()
+
+
+def test_clipping_levels_compound(quadratic):
+    """No clipping is identified in the sum of two quadratics"""
+    qsum = quadratic + quadratic
+    assert not features.clipping_levels(
+        qsum, window=10, fraction_in_window=0.75, levels=4, rtol=5e-3
+    ).any()
+
+
+def test_clipping_levels_compound_clipped(quadratic, quadratic_clipped):
+    """Clipping is identified in summed quadratics when one quadratic has
+    clipping."""
+    assert features.clipping_levels(quadratic + quadratic_clipped).any()
