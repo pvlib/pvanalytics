@@ -8,14 +8,14 @@ from pvanalytics import features
 
 @pytest.fixture
 def quadratic():
-    """A downward facing quadratic with vertex at (0, 1000) and roots at +/-1."""
+    """Downward facing quadratic with vertex at (0, 1000) and roots at +/-1."""
     q = -1000 * (np.linspace(-1, 1, 60) ** 2) + 1000
     return pd.Series(q)
 
 
 @pytest.fixture
 def quadratic_clipped(quadratic):
-    """A downward facing quadratic with clipping at y=800"""
+    """Downward facing quadratic with clipping at y=800"""
     return np.minimum(quadratic, 800)
 
 
