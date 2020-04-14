@@ -2,6 +2,7 @@
 
 import numpy as np
 from pvlib.tools import cosd
+import pvlib
 
 from pvanalytics.quality import util
 
@@ -309,3 +310,35 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
                              bounds=bounds['low_zenith']))
 
     return consistent_components, diffuse_ratio_limit
+
+
+def clearsky_limits(measured, clearsky, csi_max=1.1):
+    """Identify irradiance values which do not exceed clearsky values.
+
+    Uses :py:func:`pvlib.irradiance.clearsky_index` to compute the
+    clearsky index as the ratio of `measured` to `clearsky`. Compares the
+    clearsky index to `csi_max` to identify values in `measured` that
+    are less than or equal to `csi_max`.
+
+    Parameters
+    ----------
+    measured : Series
+        Measured irradiance in :math:`W/m^2`.
+    clearsky : Series
+        Expected clearsky irradiance in :math:`W/m^2`.
+    csi_max : float, default 1.1
+        Maximum ratio of `measured` to `clearsky` (clearsky index).
+
+    Returns
+    -------
+    Series
+        True for each value where the clearsky index is less than or
+        equal to `csi_max`.
+
+    """
+    csi = pvlib.irradiance.clearsky_index(
+        measured,
+        clearsky,
+        max_clearsky_index=np.Inf
+    )
+    return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)

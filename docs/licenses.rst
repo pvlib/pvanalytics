@@ -31,6 +31,9 @@ the terms of the MIT License
 
 * The implementation of the QCRad algorithm in
   :py:mod:`pvanalytics.quality.irradiance`
+  
+* The clearsky limits quality check
+  :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
 
 * The interpolation and stuck value detection functions
   :py:func:`pvanalytics.quality.gaps.interpolation()` and

@@ -1,4 +1,6 @@
 """Tests for irradiance quality control functions."""
+from datetime import datetime
+import pytz
 import pandas as pd
 import numpy as np
 
@@ -99,3 +101,66 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
                         check_names=False)
     assert_series_equal(diffuse, expected['diffuse_ratio_limit'],
                         check_names=False)
+
+
+@pytest.fixture
+def times():
+    """One hour of times at 10 minute frequency."""
+    mst = pytz.timezone('MST')
+    return pd.date_range(
+        start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=mst),
+        end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=mst),
+        freq='10T'
+    )
+
+
+def test_clearsky_limits(times):
+    """Values greater than clearsky values are flagged False."""
+    clearsky = pd.Series(np.linspace(50, 55, len(times)), index=times)
+    measured = clearsky.copy()
+    measured.iloc[0] *= 0.5
+    measured.iloc[-1] *= 2.0
+    clear_times = np.tile(True, len(times))
+    clear_times[-1] = False
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky),
+        pd.Series(index=times, data=clear_times)
+    )
+
+
+def test_clearsky_limits_negative_and_nan():
+    """Irradiance values greater than clearsky valuse are flagged False
+    along with NaNs."""
+    index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),
+                          freq='15T', periods=5)
+    measured = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])
+    clearsky = pd.Series(index=index, data=1000)
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky),
+        pd.Series(index=index, data=[True, True, False, True, False])
+    )
+
+
+def test_clearsky_limits_csi_max(times):
+    """Increasing `csi_max` passes larger values."""
+    measured = pd.Series(np.linspace(800, 1000, len(times)), index=times)
+    measured.iloc[0] = 1300
+    measured.iloc[1] = 1200
+    measured.iloc[2] = 1100
+    clearsky = pd.Series(1000, index=times)
+    expected = pd.Series(True, index=times)
+    expected.iloc[0:3] = False
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.0),
+        expected
+    )
+    expected.iloc[2] = True
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.1),
+        expected
+    )
+    expected.iloc[1] = True
+    assert_series_equal(
+        irradiance.clearsky_limits(measured, clearsky, csi_max=1.2),
+        expected
+    )
