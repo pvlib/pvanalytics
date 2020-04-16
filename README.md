@@ -28,15 +28,19 @@ content evolves.  The functions in `quality`, `filtering`, and
     in the data.
   * `gaps` contains functions for identifying gaps in the data
     (i.e. missing values, stuck values, and interpolation).
+  * `time` quality checks related to time (e.g. timestamp spacing)
+  * `util` general purpose quality functions.
 
   Other quality checks such as detecting timestamp errors will also be
   included in `quality`.
 * `filtering` as the name implies, contains functions for data
   filtering (e.g. day/night or solar position)
-* `features` contains functions for identifying features in the data
-  (e.g. inverter clipping, misaligned sensors, or clear sky
-  conditions)
-* `system` identification of PV system chatacteristics from data
+* `features` contains submodules with different methods for
+  identifying and labeling salient features.
+  * `clipping` functions for labeling inverter clipping.
+  * `clearsky` functions for identifying periods of clear sky
+    conditions.
+* `system` identification of PV system characteristics from data
   (e.g. nameplate power, orientation, azimuth)
 * `translate` contains functions for translating data to other
   conditions (e.g. IV curve translators, temperature adjustment,
