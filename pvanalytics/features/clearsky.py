@@ -3,8 +3,8 @@ import numpy as np
 import pvlib
 
 
-def clearsky(ghi, ghi_clearsky):
-    """Identify time when GHI is consistent with clearsky conditions.
+def reno(ghi, ghi_clearsky):
+    """Identify times when GHI is consistent with clearsky conditions.
 
     Uses the function :py:func:`pvlib.clearsky.detect_clearsky`.
 
