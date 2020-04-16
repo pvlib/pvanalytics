@@ -103,6 +103,14 @@ Functions for identifying inverter clipping
 
    features.clipping.levels
 
+Clearsky
+--------
+
+.. autosummary::
+   :toctree: generated/
+
+   features.clearsky.reno
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
