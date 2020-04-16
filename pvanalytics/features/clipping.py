@@ -1,4 +1,4 @@
-"""Functions for identifying and labeling features."""
+"""Functions for identifying clipping."""
 import pandas as pd
 import numpy as np
 
@@ -37,8 +37,8 @@ def _label_clipping(x, window, frac):
     return y
 
 
-def clipping_levels(ac_power, window=4, fraction_in_window=0.75,
-                    rtol=5e-3, levels=2):
+def levels(ac_power, window=4, fraction_in_window=0.75,
+           rtol=5e-3, levels=2):
     """Label clipping in AC power data based on levels in the data.
 
     Parameters
