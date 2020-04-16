@@ -31,7 +31,7 @@ the terms of the MIT License
 
 * The implementation of the QCRad algorithm in
   :py:mod:`pvanalytics.quality.irradiance`
-  
+
 * The clearsky limits quality check
   :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
 
@@ -49,3 +49,6 @@ the terms of the MIT License
 
 * Level-based clipping detection in
   :py:func:`pvanalytics.features.clipping.levels`.
+
+* Clear sky detection in
+  :py:func:`pvanalytics.features.clearsky.reno`
