@@ -93,10 +93,15 @@ Features
 
 Functions for detecting features in the data.
 
+Clipping
+--------
+
+Functions for identifying inverter clipping
+
 .. autosummary::
    :toctree: generated/
 
-   features.clipping_levels
+   features.clipping.levels
 
 .. rubric:: References
 

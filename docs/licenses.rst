@@ -48,4 +48,4 @@ the terms of the MIT License
   * :py:func:`pvanalytics.quality.weather.wind_limits`
 
 * Level-based clipping detection in
-  :py:func:`pvanalytics.features.clipping_levels`.
+  :py:func:`pvanalytics.features.clipping.levels`.
