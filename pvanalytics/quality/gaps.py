@@ -224,9 +224,9 @@ def trim(series, **kwargs):
     Returns
     -------
     Series
-      A series of booleans whith the same index as `series` with False
-      up to the first good day, True from the first to the last good
-      day, and False from the last good day to the end.
+        A series of booleans with the same index as `series` with
+        False up to the first good day, True from the first to the
+        last good day, and False from the last good day to the end.
 
     """
     start, end = valid_between(series, **kwargs)
