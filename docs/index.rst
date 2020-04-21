@@ -22,7 +22,6 @@ Contents
    :caption: Contents:
 
    api
-   licenses
 
 
 

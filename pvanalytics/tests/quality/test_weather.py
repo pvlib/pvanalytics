@@ -8,7 +8,17 @@ from pvanalytics.quality import weather
 
 @pytest.fixture
 def weather_data():
-    """Weather data for use in tests."""
+    """Weather data for use in tests.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     output = pd.DataFrame(columns=['air_temperature', 'wind_speed',
                                    'relative_humidity',
                                    'extreme_temp_flag', 'extreme_wind_flag',
@@ -23,7 +33,17 @@ def weather_data():
 
 
 def test_check_temperature_limits(weather_data):
-    """Check that temperature values beyond limits are flagged."""
+    """Check that temperature values beyond limits are flagged.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     assert_series_equal(
         weather.temperature_limits(weather_data['air_temperature']),
         weather_data['extreme_temp_flag'],
@@ -32,7 +52,17 @@ def test_check_temperature_limits(weather_data):
 
 
 def test_relative_humidity_limits(weather_data):
-    """Check that relative humidity values outside normal range are flagged."""
+    """Check that relative humidity values outside normal range are flagged.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     assert_series_equal(
         weather.relative_humidity_limits(weather_data['relative_humidity']),
         weather_data['extreme_rh_flag'],
@@ -41,7 +71,17 @@ def test_relative_humidity_limits(weather_data):
 
 
 def test_wind_limits(weather_data):
-    """Check that extremes in wind data are flagged."""
+    """Check that extremes in wind data are flagged.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     assert_series_equal(
         weather.wind_limits(weather_data['wind_speed']),
         weather_data['extreme_wind_flag'],

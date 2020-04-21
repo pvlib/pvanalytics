@@ -12,7 +12,17 @@ from pvanalytics.quality import irradiance
 
 @pytest.fixture
 def irradiance_qcrad():
-    """Synthetic irradiance data and its expected quality flags."""
+    """Synthetic irradiance data and its expected quality flags.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     output = pd.DataFrame(
         columns=['ghi', 'dhi', 'dni', 'solar_zenith', 'dni_extra',
                  'ghi_limit_flag', 'dhi_limit_flag', 'dni_limit_flag',
@@ -39,7 +49,17 @@ def irradiance_qcrad():
 
 
 def test_check_ghi_limits_qcrad(irradiance_qcrad):
-    """Test that QCRad identifies out of bounds GHI values."""
+    """Test that QCRad identifies out of bounds GHI values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = irradiance_qcrad
     ghi_out_expected = expected['ghi_limit_flag']
     ghi_out = irradiance.check_ghi_limits_qcrad(expected['ghi'],
@@ -49,7 +69,17 @@ def test_check_ghi_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_dhi_limits_qcrad(irradiance_qcrad):
-    """Test that QCRad identifies out of bounds DHI values."""
+    """Test that QCRad identifies out of bounds DHI values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = irradiance_qcrad
     dhi_out_expected = expected['dhi_limit_flag']
     dhi_out = irradiance.check_dhi_limits_qcrad(expected['dhi'],
@@ -59,7 +89,17 @@ def test_check_dhi_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_dni_limits_qcrad(irradiance_qcrad):
-    """Test that QCRad identifies out of bounds DNI values."""
+    """Test that QCRad identifies out of bounds DNI values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = irradiance_qcrad
     dni_out_expected = expected['dni_limit_flag']
     dni_out = irradiance.check_dni_limits_qcrad(expected['dni'],
@@ -69,7 +109,17 @@ def test_check_dni_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_irradiance_limits_qcrad(irradiance_qcrad):
-    """Test different input combinations to check_irradiance_limits_qcrad."""
+    """Test different input combinations to check_irradiance_limits_qcrad.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = irradiance_qcrad
     ghi_out_expected = expected['ghi_limit_flag']
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
@@ -92,7 +142,17 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
 
 
 def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
-    """Test that QCRad identifies consistent irradiance measurements."""
+    """Test that QCRad identifies consistent irradiance measurements.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = irradiance_qcrad
     cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
         expected['ghi'], expected['solar_zenith'],
@@ -105,7 +165,17 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
 
 @pytest.fixture
 def times():
-    """One hour of times at 10 minute frequency."""
+    """One hour of times at 10 minute frequency.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     mst = pytz.timezone('MST')
     return pd.date_range(
         start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=mst),
@@ -115,7 +185,17 @@ def times():
 
 
 def test_clearsky_limits(times):
-    """Values greater than clearsky values are flagged False."""
+    """Values greater than clearsky values are flagged False.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     clearsky = pd.Series(np.linspace(50, 55, len(times)), index=times)
     measured = clearsky.copy()
     measured.iloc[0] *= 0.5
@@ -130,7 +210,17 @@ def test_clearsky_limits(times):
 
 def test_clearsky_limits_negative_and_nan():
     """Irradiance values greater than clearsky valuse are flagged False
-    along with NaNs."""
+    along with NaNs.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),
                           freq='15T', periods=5)
     measured = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])

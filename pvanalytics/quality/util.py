@@ -31,6 +31,15 @@ def check_limits(val, lower_bound=None, upper_bound=None,
     ------
     ValueError
         if `lower_bound` nor `upper_bound` is provided.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     """
     if inclusive_lower:
         lb_op = np.greater_equal

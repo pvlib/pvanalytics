@@ -6,7 +6,17 @@ from pvanalytics.quality import util
 
 
 def test_check_limits():
-    """Test the private check limits function."""
+    """Test the private check limits function.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
     expected = pd.Series(data=[True, False])
     data = pd.Series(data=[3, 2])
     result = util.check_limits(val=data, lower_bound=2.5)

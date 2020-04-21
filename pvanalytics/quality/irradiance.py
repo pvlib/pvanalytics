@@ -67,6 +67,14 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     Series
         True where value passes limits test.
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     """
     if not limits:
         limits = QCRAD_LIMITS
@@ -104,6 +112,14 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     -------
     Series
         True where value passes limit test.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if not limits:
@@ -143,6 +159,14 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     -------
     Series
         True where value passes limit test.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if not limits:
@@ -195,6 +219,14 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         True for each value that is physically possible. None if `dni` is None.
     dhi_limit_flag : Series
         True for each value that is physically possible. None if `dhi` is None.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     References
     ----------
@@ -280,6 +312,14 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
     diffuse_ratio_limit : Series
         True where diffuse to GHI ratio passes limit test.
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     References
     ----------
     .. [1] C. N. Long and Y. Shi, An Automated Quality Assessment and Control
@@ -334,6 +374,14 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
     Series
         True for each value where the clearsky index is less than or
         equal to `csi_max`.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     csi = pvlib.irradiance.clearsky_index(

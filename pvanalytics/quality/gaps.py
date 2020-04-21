@@ -22,6 +22,14 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     -------
     Boolean
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     """
     return np.allclose(a=x, b=x[0], rtol=rtol, atol=atol)
 
@@ -57,6 +65,14 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8):
     ------
     ValueError
         If window < 2.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if window < 2:
@@ -98,6 +114,14 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8):
     ------
     ValueError
         If window < 3.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if window < 3:

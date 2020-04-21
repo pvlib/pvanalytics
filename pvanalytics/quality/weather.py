@@ -18,6 +18,14 @@ def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
         True if `air_temperature` > lower bound and `air_temperature`
         < upper bound.
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     """
     return util.check_limits(
         air_temperature, lower_bound=limits[0], upper_bound=limits[1]
@@ -39,6 +47,14 @@ def relative_humidity_limits(relative_humidity, limits=(0, 100)):
     Series
         True if `relative_humidity` >= lower bound and
         `relative_humidity` <= upper_bound.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     return util.check_limits(
@@ -65,6 +81,14 @@ def wind_limits(wind_speed, limits=(0.0, 50.0)):
     Series
         True if `wind_speed` >= lower bound and `wind_speed` < upper
         bound.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     return util.check_limits(

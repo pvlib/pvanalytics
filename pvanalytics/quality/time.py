@@ -17,6 +17,14 @@ def spacing(times, freq):
         True when the difference between one time and the time before
         it conforms to `freq`.
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
     """
     if not isinstance(freq, pd.Timedelta):
         freq = pd.Timedelta(freq)
