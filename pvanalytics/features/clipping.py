@@ -24,10 +24,11 @@ def _detect_levels(x, count=3, num_bins=100):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     hist, bin_edges = np.histogram(x, bins=num_bins, density=True)
@@ -70,10 +71,11 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     num_bins = np.ceil(1.0 / rtol).astype(int)

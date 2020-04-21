@@ -16,10 +16,11 @@ def irradiance_qcrad():
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     output = pd.DataFrame(
@@ -52,10 +53,11 @@ def test_check_ghi_limits_qcrad(irradiance_qcrad):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = irradiance_qcrad
@@ -71,10 +73,11 @@ def test_check_dhi_limits_qcrad(irradiance_qcrad):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = irradiance_qcrad
@@ -90,10 +93,11 @@ def test_check_dni_limits_qcrad(irradiance_qcrad):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = irradiance_qcrad
@@ -109,10 +113,11 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = irradiance_qcrad
@@ -141,10 +146,11 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = irradiance_qcrad
@@ -163,10 +169,11 @@ def times():
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     mst = pytz.timezone('MST')
@@ -182,10 +189,11 @@ def test_clearsky_limits(times):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     clearsky = pd.Series(np.linspace(50, 55, len(times)), index=times)
@@ -206,10 +214,11 @@ def test_clearsky_limits_negative_and_nan():
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),

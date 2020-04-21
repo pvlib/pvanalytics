@@ -12,10 +12,11 @@ def weather_data():
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     output = pd.DataFrame(columns=['air_temperature', 'wind_speed',
@@ -36,10 +37,11 @@ def test_check_temperature_limits(weather_data):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     assert_series_equal(
@@ -54,10 +56,11 @@ def test_relative_humidity_limits(weather_data):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     assert_series_equal(
@@ -72,10 +75,11 @@ def test_wind_limits(weather_data):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     assert_series_equal(

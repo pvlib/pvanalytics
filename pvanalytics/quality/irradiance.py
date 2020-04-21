@@ -69,10 +69,11 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if not limits:
@@ -114,10 +115,11 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if not limits:
@@ -160,10 +162,11 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     if not limits:
@@ -219,10 +222,11 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     References
     ----------
@@ -310,10 +314,11 @@ def check_irradiance_consistency_qcrad(ghi, solar_zenith, dhi, dni,
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     References
     ----------
@@ -372,10 +377,11 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     csi = pvlib.irradiance.clearsky_index(

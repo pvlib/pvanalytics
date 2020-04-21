@@ -10,10 +10,11 @@ def test_check_limits():
 
     Notes
     -----
-    Copyright (c) 2019 SolarArbiter. See the license in the
-    docs/liscences.rst file at the top level of this distribution and
-    at at `<https://pvanalytics.readthedocs.io/en/latest/
-    licenses.html#solar-forecast-arbiter>`_.
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
 
     """
     expected = pd.Series(data=[True, False])
