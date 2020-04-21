@@ -170,6 +170,15 @@ def valid_between(series, days=10, minimum_hours=7.75, freq=None):
     end : Datetime or None
         The last valid day. None if start is None.
 
+    Notes
+    -----
+    This function was derived from the pvfleets_qa_analysis project,
+    Copyright (c) 2020 Alliance for Sustainable Energy, LLC. See the
+    file LICENSES/PVFLEETS_QA_LICENSE at the top level directory of
+    this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/PVFLEETS_QA_LICENSE>`_ for more
+    information.
+
     """
     freq_hours = (pd.Timedelta(freq or pd.infer_freq(series.index)).seconds
                   / (60.0*60.0))
