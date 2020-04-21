@@ -144,9 +144,13 @@ def valid_between(series, days=10, minimum_hours=7.75, freq=None):
     The start and end dates returned by this function can be used to
     remove large periods of missing data from the begining and end of
     the series. The valid data begins when there are `days`
-    consecutive days with data covering at least `minimum_hours` on
-    each day. Valid data ends on the last day with `days` consecutive
-    days with data covering at least `minimum_hours` preceeding it.
+    consecutive days with valid data covering at least `minimum_hours`
+    on each day. Valid data ends on the last day with `days`
+    consecutive days with data covering at least `minimum_hours`
+    preceeding it.
+
+    Any data point with a value other than `NaN` is considered valid
+    data.
 
     Parameters
     ----------
