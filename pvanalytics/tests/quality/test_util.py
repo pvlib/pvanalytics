@@ -43,3 +43,56 @@ def test_check_limits():
 
     with pytest.raises(ValueError):
         util.check_limits(val=data)
+
+
+@pytest.fixture
+def ten_days():
+    """A ten day index (not localized) at ten minute frequency."""
+    return pd.date_range(
+        start='01/01/2020',
+        end='01/10/2020 23:59',
+        freq='10T'
+    )
+
+
+def test_daily_maxmin_all_below(ten_days):
+    """If every data point is below the minimum then all values are
+    flagged True."""
+    data = pd.Series(1, index=ten_days)
+    assert_series_equal(
+        pd.Series(True, index=ten_days),
+        util.daily_maxmin(data, maximum=2)
+    )
+
+
+def test_daily_maxmin_some_values_above(ten_days):
+    """If there are some values above `maximum` on one day, all data is
+    flagged True."""
+    data = pd.Series(1, index=ten_days)
+    data.iloc[0:10] = 10
+    data.iloc[100:150] = 10
+    data.iloc[500:710] = 3
+    assert_series_equal(
+        pd.Series(True, index=ten_days),
+        util.daily_maxmin(data, maximum=2)
+    )
+
+
+def test_daily_maxmin_one_day_fails(ten_days):
+    """daily_maxmin flags day with all values above maximum False."""
+    data = pd.Series(2, index=ten_days)
+    data.loc['01/02/2020'] = 5
+    expected = pd.Series(True, index=ten_days)
+    expected['01/02/2020'] = False
+    assert_series_equal(
+        expected,
+        util.daily_maxmin(data, maximum=3)
+    )
+
+
+def test_daily_maxmin_exclusice(ten_days):
+    """Check that inclusive=False makes the comparison strictly less
+    than."""
+    data = pd.Series(2, index=ten_days)
+    assert not util.daily_maxmin(data, maximum=2).any()
+    assert util.daily_maxmin(data, maximum=2, inclusive=True).all()
