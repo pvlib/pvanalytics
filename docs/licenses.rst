@@ -1,13 +1,12 @@
-Licenses
-========
+Third Party Licenses
+====================
 
 Solar Forecast Arbiter
 ----------------------
 
-The functions and modules listed below are derived from
-`solarforecastarbiter
+This project includes code from `SolarForecastArbiter
 <https://github.com/SolarArbiter/solarforecastarbiter-core>`_ under
-the terms of the MIT License
+the terms of the license below.
 
   Copyright (c) 2019 SolarArbiter
 
@@ -28,27 +27,3 @@ the terms of the MIT License
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
-
-* The implementation of the QCRad algorithm in
-  :py:mod:`pvanalytics.quality.irradiance`
-
-* The clearsky limits quality check
-  :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
-
-* The interpolation and stuck value detection functions
-  :py:func:`pvanalytics.quality.gaps.interpolation()` and
-  :py:func:`pvanalytics.quality.gaps.stale_values()`
-
-* Weather related quality functions
-
-  * :py:func:`pvanalytics.quality.weather.temperature_limits`
-
-  * :py:func:`pvanalytics.quality.weather.relative_humidity_limits`
-
-  * :py:func:`pvanalytics.quality.weather.wind_limits`
-
-* Level-based clipping detection in
-  :py:func:`pvanalytics.features.clipping.levels`.
-
-* Clear sky detection in
-  :py:func:`pvanalytics.features.clearsky.reno`

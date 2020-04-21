@@ -22,6 +22,13 @@ def _detect_levels(x, count=3, num_bins=100):
         plateau, in decreasing order of count of x values in the
         interval. List length is given by `count`.
 
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
     """
     hist, bin_edges = np.histogram(x, bins=num_bins, density=True)
     level_index = np.argsort(hist * -1)
@@ -60,6 +67,13 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
     -------
     Series
         True when clipping is indicated.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
 
     """
     num_bins = np.ceil(1.0 / rtol).astype(int)

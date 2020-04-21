@@ -7,20 +7,47 @@ from pvanalytics.quality import gaps
 
 @pytest.fixture
 def stale_data():
-    """A series that contains stuck values."""
+    """A series that contains stuck values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     data = [1.0, 1.001, 1.001, 1.001, 1.001, 1.001001, 1.001, 1.001, 1.2, 1.3]
     return pd.Series(data=data)
 
 
 @pytest.fixture
 def data_with_negatives():
-    """A series that contains stuck values, interpolation, and negatives."""
+    """A series that contains stuck values, interpolation, and negatives.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     data = [0.0, 0.0, 0.0, -0.0, 0.00001, 0.000010001, -0.00000001]
     return pd.Series(data=data)
 
 
 def test_stale_values_diff(stale_data):
-    """stale_values_diff properly identifies stuck values."""
+    """stale_values_diff properly identifies stuck values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     res1 = gaps.stale_values_diff(stale_data)
     res2 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=2)
     res3 = gaps.stale_values_diff(stale_data, window=7)
@@ -46,7 +73,16 @@ def test_stale_values_diff(stale_data):
 
 
 def test_stale_values_diff_handles_negatives(data_with_negatives):
-    """stale_values_diff works with negative values."""
+    """stale_values_diff works with negative values.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     res = gaps.stale_values_diff(data_with_negatives)
     assert_series_equal(res, pd.Series([False, False, True, True, False, False,
                                         False]))
@@ -62,21 +98,48 @@ def test_stale_values_diff_handles_negatives(data_with_negatives):
 
 
 def test_stale_values_diff_raises_error(stale_data):
-    """stale_values_diff raises a ValueError for 'window' < 2."""
+    """stale_values_diff raises a ValueError for 'window' < 2.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     with pytest.raises(ValueError):
         gaps.stale_values_diff(stale_data, window=1)
 
 
 @pytest.fixture
 def interpolated_data():
-    """A series that contains linear interpolation."""
+    """A series that contains linear interpolation.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     data = [1.0, 1.001, 1.002001, 1.003, 1.004, 1.001001, 1.001001, 1.001001,
             1.2, 1.3, 1.5, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0]
     return pd.Series(data=data)
 
 
 def test_interpolation_diff(interpolated_data):
-    """Interpolation is detected correclty."""
+    """Interpolation is detected correclty.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     res1 = gaps.interpolation_diff(interpolated_data)
     assert_series_equal(res1, pd.Series([False, False, False, False, False,
                                          False, False, True, False, False,
@@ -100,7 +163,16 @@ def test_interpolation_diff(interpolated_data):
 
 
 def test_interpolation_diff_handles_negatives(data_with_negatives):
-    """Interpolation is detected correctly when data contains negatives."""
+    """Interpolation is detected correctly when data contains negatives.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     res = gaps.interpolation_diff(data_with_negatives, atol=1e-5)
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         False]))
@@ -110,6 +182,15 @@ def test_interpolation_diff_handles_negatives(data_with_negatives):
 
 
 def test_interpolation_diff_raises_error(interpolated_data):
-    """interpolation raises a ValueError for 'window' < 3."""
+    """interpolation raises a ValueError for 'window' < 3.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     with pytest.raises(ValueError):
         gaps.interpolation_diff(interpolated_data, window=2)

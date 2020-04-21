@@ -9,7 +9,16 @@ from pvanalytics.quality import time
 
 @pytest.fixture
 def times():
-    """One hour in Mountain Standard Time at 10 minute intervals."""
+    """One hour in Mountain Standard Time at 10 minute intervals.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the license in the
+    docs/liscences.rst file at the top level of this distribution and
+    at at `<https://pvanalytics.readthedocs.io/en/latest/
+    licenses.html#solar-forecast-arbiter>`_.
+
+    """
     MST = pytz.timezone('MST')
     return pd.date_range(start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=MST),
                          end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=MST),
