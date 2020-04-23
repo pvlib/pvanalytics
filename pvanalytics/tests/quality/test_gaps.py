@@ -651,3 +651,63 @@ def test_complete():
         pd.Series(True, index=data.index),
         gaps.complete(data, minimum_completeness=0.2)
     )
+
+
+def test_stale_values_round_no_stale():
+    """No stale values in a monotonically increasing sequence."""
+    data = pd.Series(np.linspace(0, 10))
+    assert not gaps.stale_values_round(data).any()
+
+
+def test_stale_values_round_all_same():
+    """If all data is identical, then all values are stale."""
+    data = pd.Series(1, index=range(0, 10))
+    assert gaps.stale_values_round(data).all()
+
+
+def test_stale_values_round_noisy():
+    """If all values are the same +/- 0.0005"""
+    data = pd.Series(
+        [1.555, 1.5551, 1.5549, 1.555, 1.555, 1.5548, 1.5553]
+    )
+    assert gaps.stale_values_round(data, decimals=3).all()
+
+
+def test_stale_values_round_span_in_middle():
+    """A span of stale values between not-stale data."""
+    data = pd.Series(
+        [1.0, 1.1, 1.2, 1.5, 1.5, 1.5, 1.5, 1.9, 2.0, 2.2]
+    )
+    assert_series_equal(
+        gaps.stale_values_round(data),
+        pd.Series([False, False, False,
+                   True, True, True, True,
+                   False, False, False], dtype='bool')
+    )
+
+
+def test_stale_values_larger_window():
+    """Increasing the window size excludes short spans of repeated
+    values."""
+    data = pd.Series(
+        [1, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 6]
+    )
+    assert_series_equal(
+        gaps.stale_values_round(data, window=4),
+        (data == 2) | (data == 4)
+    )
+    assert_series_equal(
+        gaps.stale_values_round(data, window=5),
+        (data == 4)
+    )
+
+
+def test_stale_values_round_smaller_window():
+    """Decreasing window size includes shorter spans of repeated values."""
+    data = pd.Series(
+        [1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 6]
+    )
+    assert_series_equal(
+        gaps.stale_values_round(data, window=3),
+        (data == 2) | (data == 4)
+    )
