@@ -162,7 +162,7 @@ def stale_values_round(x, decimals=3, window=4):
     """
     rounded_diff = x.round(decimals=decimals).diff()
     endpoints = rounded_diff.rolling(window=window-1).apply(
-        lambda xs: xs[xs == 0].count() == window-1
+        lambda xs: len(xs[xs == 0]) == window-1
     ).fillna(False).astype(bool)
     flags = endpoints
     while window > 0:
