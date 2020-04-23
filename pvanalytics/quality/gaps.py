@@ -129,7 +129,7 @@ def stale_values_round(x, decimals=3, window=4):
     """Identify stale values by rounding.
 
     A value is considered stale if it is part of a sequence of
-    `window` or more consecutive values that are identical when
+   of length `window` of values that are identical when
     rounded to `decimals` decimal places.
 
     This function is more aggressive than :py:func:`stale_values_diff`
