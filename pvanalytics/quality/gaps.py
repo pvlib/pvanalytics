@@ -125,6 +125,51 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     return _mark(flags, window, mark)
 
 
+def stale_values_round(x, decimals=3, window=4):
+    """Identify stale values by rounding.
+
+    A value is considered stale if it is part of a sequence of
+    `window` or more consecutive values that are identical when
+    rounded to `decimals` decimal places.
+
+    This function is more aggressive than :py:func:`stale_values_diff`
+    in that marks every value in a repeated sequence as
+    stale. :py:func:`stale_values_diff` only marks values as stale
+    when there have been at least `window` preceeding instances of the
+    same value.
+
+    Parameters
+    ----------
+    x : Series
+        Data to be processed.
+    decimals : int
+        Number of decimal places to round to.
+    window : int
+        Number of consecutive identical values for a data point to be
+        considered stale.
+
+    Returns
+    -------
+    Series
+        True for each value that is part of a stale sequence of data.
+
+    Notes
+    -----
+        Based on code from the pvfleets_qa_analysis project. Copyright
+        (c) 2020 Alliance for Sustainable Energy, LLC.
+
+    """
+    rounded_diff = x.round(decimals=decimals).diff()
+    endpoints = rounded_diff.rolling(window=window-1).apply(
+        lambda xs: xs[xs == 0].count() == window-1
+    ).fillna(False).astype(bool)
+    flags = endpoints
+    while window > 0:
+        window = window - 1
+        flags = flags | endpoints.shift(-window).fillna(False)
+    return flags
+
+
 def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify sequences which appear to be linear.
 
