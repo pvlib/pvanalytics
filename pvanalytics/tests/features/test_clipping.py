@@ -128,3 +128,16 @@ def test_threshold_clipping_with_night(quadratic_clipped):
     full_day.fillna(0)
     assert not clipping.threshold(full_day).all()
     assert clipping.threshold(full_day)[quadratic_clipped.index].any()
+
+
+def test_threshold_clipping_with_freq(quadratic_clipped):
+    """Passing the frequency gives same result as infered frequency."""
+    quadratic_clipped.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    assert_series_equal(
+        clipping.threshold(quadratic_clipped),
+        clipping.threshold(quadratic_clipped, freq='10T')
+    )
