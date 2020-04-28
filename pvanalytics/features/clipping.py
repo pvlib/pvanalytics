@@ -108,6 +108,12 @@ def _daytime_powercurve(ac_power):
     return daytime_power.groupby('minutes')[power_column].quantile(0.995)
 
 
+def _clipped(power, derivative, clip_derivative, minimum):
+    # test whether a `power` is greater than `minimum` and
+    # `derivative` is less than `clip_derivative`
+    return (np.abs(derivative) <= clip_derivative) and (power > minimum)
+
+
 def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
     # Returns the clipping power threshold or None if no clipping is
     # identified in the data.
@@ -131,7 +137,7 @@ def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
     oldpowersum = 0.0
     newpowersum = 0.0
     for derivative, power in zip(power_derivative, powercurve):
-        if ((np.abs(derivative) <= clip_derivative) and (power > power_median * 0.75)):
+        if _clipped(power, derivative, clip_derivative, power_median * 0.75):
             newcount += 1
             newpowersum += power
         else:
