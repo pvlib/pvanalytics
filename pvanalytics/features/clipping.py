@@ -184,4 +184,4 @@ def threshold(ac_power, clip_derivative=0.0035, freq=None):
         clip_derivative=clip_derivative,
         freq=freq
     )
-    return ac_power > threshold
+    return ac_power >= threshold
