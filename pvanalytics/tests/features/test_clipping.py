@@ -81,6 +81,24 @@ def test_threshold_no_clipping(quadratic):
     assert not clipping.threshold(quadratic).any()
 
 
+def test_threshold_no_clipping_with_night(quadratic):
+    """In a data set with a single quadratic surrounded by zeros there is
+    no clipping."""
+    quadratic.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    full_day = quadratic.reindex(
+        pd.date_range(
+            start='01/01/2020 00:00',
+            end='01/01/2020 23:50',
+            freq='10T')
+    )
+    full_day.fillna(0)
+    assert not clipping.threshold(quadratic).any()
+
+
 def test_threshold_clipping(quadratic_clipped):
     """In a data set with a single clipped quadratic clipping is
     indicated."""
