@@ -121,7 +121,7 @@ def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
     # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
     if not freq:
         freq = pd.Timedelta(pd.infer_freq(ac_power.index)).seconds * 60
-    elif freq.isinstance(str):
+    elif isinstance(freq, str):
         freq = pd.Timedelta(freq).seconds * 60
 
     # Use the derivative of the 99.5% quantile of daytime power at
