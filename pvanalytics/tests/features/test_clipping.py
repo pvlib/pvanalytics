@@ -2,6 +2,7 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import numpy as np
+import pandas as pd
 from pvanalytics.features import clipping
 
 
@@ -68,3 +69,24 @@ def test_levels_two_periods(quadratic, quadratic_clipped):
     assert clipped[35:40].all()
     assert not clipped[0:10].any()
     assert not clipped[50:].any()
+
+
+def test_threshold_no_clipping(quadratic):
+    """In a data set with a single quadratic there is no clipping."""
+    quadratic.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    assert not clipping.threshold(quadratic).any()
+
+
+def test_threshold_clipping(quadratic_clipped):
+    """In a data set with a single clipped quadratic clipping is
+    indicated."""
+    quadratic_clipped.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    assert clipping.threshold(quadratic_clipped).any()

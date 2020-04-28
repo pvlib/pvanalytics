@@ -88,3 +88,100 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
         flags = flags | _label_clipping(temp, window=window,
                                         frac=fraction_in_window)
     return flags
+
+
+def _daytime_powercurve(ac_power):
+    # return the 99.5% quantile of daytime power data after removing
+    # night time data.
+    #
+    # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
+    power = ac_power.to_frame()
+    power_column = power.columns[0]
+    power['minutes'] = power.index.hour * 60 + power.index.minute
+
+    power['positive_power'] = ac_power
+    power.loc[power.positive_power >= 0, 'positive_power'] = 1
+    powerfreq = power.groupby('minutes').positive_power.sum()
+    daytimes = powerfreq[powerfreq > powerfreq.quantile(0.25)].index
+    daytime_power = power[power.minutes.isin(daytimes)]
+
+    return daytime_power.groupby('minutes')[power_column].quantile(0.995)
+
+
+def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
+    # Returns the clipping power threshold or None if no clipping is
+    # identified in the data.
+    #
+    # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
+    if not freq:
+        freq = pd.Timedelta(pd.infer_freq(ac_power.index)).seconds * 60
+    elif freq.isinstance(str):
+        freq = pd.Timedelta(freq).seconds * 60
+
+    # Use the derivative of the 99.5% quantile of daytime power at
+    # each minute to identify clipping.
+    powercurve = _daytime_powercurve(ac_power)
+    normalized_power = powercurve / powercurve.max()
+    power_derivative = (normalized_power.diff()
+                        / normalized_power.index.to_series().diff()) * freq
+    power_median = powercurve.median()
+
+    oldcount = 0
+    newcount = 0
+    oldpowersum = 0.0
+    newpowersum = 0.0
+    for derivative, power in zip(power_derivative, powercurve):
+        if ((np.abs(derivative) <= clip_derivative) and (power > power_median * 0.75)):
+            newcount += 1
+            newpowersum += power
+        else:
+            if newcount > oldcount:
+                oldcount = newcount
+                oldpowersum = newpowersum
+            newcount = 0
+            newpowersum = 0.0
+
+    if (oldcount * freq) >= 60:
+        return oldpowersum / oldcount
+
+    return None
+
+
+def threshold(ac_power, clip_derivative=0.0035, freq=None):
+    """Detect clipping based on a maximum power threshold.
+
+    A power threshold is calculated from the AC power data and any
+    power above that threshold is assumed to be clipped. The threshold
+    is computed based on the derivative of the 99.5% quantile of all
+    power data grouped by time of day.
+
+    Parameters
+    ----------
+    ac_power : Series
+        Time series of AC Power.
+    clip_derivative : float, default 0.0035
+        Minimum derivative for clipping to be indicated. The default
+        value has been derived empirically to prevent false positives
+        for tracking PV systems.
+    freq : string, default None
+        A pandas string offset giving the frequency of data in
+        `ac_power`. If None then the frequency is infered from the
+        series index.
+
+    Returns
+    -------
+    Series
+        True when clipping is indicated.
+
+    Notes
+    -----
+    This function is based on code from the pvfleets_qa_analysis
+    project. Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
+
+    """
+    threshold = _clipping_power(
+        ac_power,
+        clip_derivative=clip_derivative,
+        freq=freq
+    )
+    return ac_power > threshold
