@@ -107,6 +107,7 @@ def test_threshold_clipping(quadratic_clipped):
         freq='10T',
         periods=61
     )
+    assert not clipping.threshold(quadratic_clipped).all()
     assert clipping.threshold(quadratic_clipped).any()
 
 
@@ -125,4 +126,5 @@ def test_threshold_clipping_with_night(quadratic_clipped):
             freq='10T')
     )
     full_day.fillna(0)
+    assert not clipping.threshold(full_day).all()
     assert clipping.threshold(full_day)[quadratic_clipped.index].any()
