@@ -90,3 +90,21 @@ def test_threshold_clipping(quadratic_clipped):
         periods=61
     )
     assert clipping.threshold(quadratic_clipped).any()
+
+
+def test_threshold_clipping_with_night(quadratic_clipped):
+    """Clipping is identified in the daytime with periods of zero power
+    before and after simulating night time conditions."""
+    quadratic_clipped.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    full_day = quadratic_clipped.reindex(
+        pd.date_range(
+            start='01/01/2020 00:00',
+            end='01/01/2020 23:50',
+            freq='10T')
+    )
+    full_day.fillna(0)
+    assert clipping.threshold(full_day)[quadratic_clipped.index].any()
