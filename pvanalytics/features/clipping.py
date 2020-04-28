@@ -102,7 +102,7 @@ def _daytime_powercurve(ac_power):
     power['positive_power'] = ac_power
     power.loc[power.positive_power >= 0, 'positive_power'] = 1
     powerfreq = power.groupby('minutes').positive_power.sum()
-    daytimes = powerfreq[powerfreq > powerfreq.quantile(0.25)].index
+    daytimes = powerfreq[powerfreq >= powerfreq.quantile(0.25)].index
     daytime_power = power[power.minutes.isin(daytimes)]
 
     return daytime_power.groupby('minutes')[power_column].quantile(0.995)
