@@ -141,3 +141,20 @@ def test_threshold_clipping_with_freq(quadratic_clipped):
         clipping.threshold(quadratic_clipped),
         clipping.threshold(quadratic_clipped, freq='10T')
     )
+
+
+def test_threshold_clipping_with_interruption(quadratic_clipped):
+    """Test threshold clipping with period of no clipping mid-day."""
+    quadratic_clipped.loc[28:31] = [750, 725, 700, 650]
+    quadratic_clipped.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    clipped = clipping.threshold(quadratic_clipped)
+
+    assert not clipped.iloc[0:10].any()
+    assert not clipped.iloc[28:31].any()
+    assert not clipped.iloc[50:].any()
+    assert clipped.iloc[17:27].all()
+    assert clipped.iloc[32:40].all()
