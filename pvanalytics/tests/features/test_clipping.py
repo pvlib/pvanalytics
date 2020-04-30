@@ -158,3 +158,48 @@ def test_threshold_clipping_with_interruption(quadratic_clipped):
     assert not clipped.iloc[50:].any()
     assert clipped.iloc[17:27].all()
     assert clipped.iloc[32:40].all()
+
+
+def test_threshold_clipping_four_days(quadratic, quadratic_clipped):
+    """Clipping is identified in the first of four days."""
+    quadratic.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    quadratic_clipped.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    full_day_clipped = quadratic_clipped.reindex(
+        pd.date_range(
+            start='01/01/2020 00:00',
+            end='01/01/2020 23:50',
+            freq='10T')
+    )
+    full_day = quadratic.reindex(
+        pd.date_range(
+            start='01/01/2020 00:00',
+            end='01/01/2020 23:50',
+            freq='10T')
+    )
+    full_day_clipped.fillna(0)
+    full_day.fillna(0)
+
+    # scale the rest of the days below the clipping threshold
+    full_day *= 0.75
+
+    power = full_day_clipped
+    power.append(full_day)
+    power.append(full_day)
+    power.append(full_day)
+
+    power.index = pd.date_range(
+        start='01/01/2020 00:00', freq='10T', periods=len(power)
+    )
+
+    clipped = clipping.threshold(power)
+
+    assert clipped['01/01/2020'].any()
+    assert not clipped['01/02/2020':].any()
