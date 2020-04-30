@@ -132,23 +132,24 @@ def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
                         / normalized_power.index.to_series().diff()) * freq
     power_median = powercurve.median()
 
-    oldcount = 0
-    newcount = 0
-    oldpowersum = 0.0
-    newpowersum = 0.0
+    powersum = 0
+    count = 0
+    longest_powersum = 0
+    longest_count = 0
     for derivative, power in zip(power_derivative, powercurve):
         if _clipped(power, derivative, clip_derivative, power_median * 0.75):
-            newcount += 1
-            newpowersum += power
+            count += 1
+            powersum += power
         else:
-            if newcount > oldcount:
-                oldcount = newcount
-                oldpowersum = newpowersum
-            newcount = 0
-            newpowersum = 0.0
+            count = 0
+            powersum = 0
 
-    if (oldcount * freq) >= 60:
-        return oldpowersum / oldcount
+        if count > longest_count:
+            longest_count = count
+            longest_powersum = powersum
+
+    if (longest_count * freq) >= 60:
+        return longest_powersum / longest_count
 
     return None
 
