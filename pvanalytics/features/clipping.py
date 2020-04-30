@@ -156,15 +156,23 @@ def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
 def threshold(ac_power, clip_derivative=0.0035, freq=None):
     """Detect clipping based on a maximum power threshold.
 
-    A power threshold is calculated from the AC power data and any
-    power above that threshold is assumed to be clipped. The threshold
-    is computed based on the derivative of the 99.5% quantile of all
-    power data grouped by time of day.
+    A clipping threshold is calculated from the AC power data and any
+    power greater than the threshold is flagged as clipped.
+
+    To calculate the clipping threshold, `ac_power` is aggregated at
+    each minute of the day. Low power data is removed to eliminate
+    night-time periods and the 99.5% quantile is computed. If the
+    derivative of the 99.5% quantile is less than `clip_derivative`
+    for a continuous period of at least one hour then clipping is
+    indicated. The mean power for that period is used as the
+    threshold. If there are multiple periods with a derivative less
+    than `clip_derivative` then the longest period is used to compute
+    the threshold.
 
     Parameters
     ----------
     ac_power : Series
-        Time series of AC Power.
+        DatetimeIndexed series of AC power data.
     clip_derivative : float, default 0.0035
         Minimum derivative for clipping to be indicated. The default
         value has been derived empirically to prevent false positives
