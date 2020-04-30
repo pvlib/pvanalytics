@@ -203,3 +203,32 @@ def test_threshold_clipping_four_days(quadratic, quadratic_clipped):
 
     assert clipped['01/01/2020'].any()
     assert not clipped['01/02/2020':].any()
+
+
+def test_threshold_no_clipping_four_days(quadratic):
+    """Four days with no clipping."""
+    quadratic.index = pd.date_range(
+        start='01/01/2020 07:30',
+        freq='10T',
+        periods=61
+    )
+    full_day = quadratic.reindex(
+        pd.date_range(
+            start='01/01/2020 00:00',
+            end='01/01/2020 23:50',
+            freq='10T')
+    )
+    full_day.fillna(0)
+
+    power = full_day
+    power.append(full_day * 1.3)
+    power.append(full_day * 1.2)
+    power.append(full_day * 1.1)
+
+    power.index = pd.date_range(
+        start='01/01/2020 00:00', freq='10T', periods=len(power)
+    )
+
+    clipped = clipping.threshold(power)
+
+    assert not clipped.any()
