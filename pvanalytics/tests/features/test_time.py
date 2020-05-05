@@ -15,8 +15,21 @@ def test_daytime_too_few_days(quadratic):
         time.daytime(quadratic, minimum_days=2)
 
 
-def test_daytime_only(quadratic_day):
-    """In a series with only daytime data, all points are flagged."""
+def test_daytime_one_day_only(quadratic_day):
+    """In a series with one quadratic only the quadratic is flagged as
+    daytime"""
     daylight = time.daytime(quadratic_day, minimum_days=1)
-    assert daylight.iloc[0:61].all()
-    assert not daylight.iloc[61:].any()
+    # the roots of the quadratic (at 0 & 61) are 0 so will be excluded
+    # from the mask returned by time.daytime()
+    assert daylight.iloc[1:60].all()
+    assert not daylight.iloc[60:].any()
+
+
+def test_daytime_only(quadratic_day):
+    """If every value is > 0 then all values are flagged True."""
+    assert time.daytime(quadratic_day.iloc[1:60], minimum_days=0).all()
+
+
+def test_daytime_zero_only(quadratic_day):
+    """If evey value == 0 then all values are flagged False."""
+    assert not time.daytime(quadratic_day.iloc[60:], minimum_days=0).any()

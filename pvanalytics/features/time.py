@@ -1,5 +1,6 @@
 """Features related to time."""
 import numpy as np
+import pandas as pd
 
 
 def _minute_of_day(time):
@@ -30,7 +31,7 @@ def daytime(power_or_irradiance, threshold=0.8, minimum_days=60):
     Raises
     ------
     ValueError
-        if there are less than 60 days of actual data.
+        if there are less than `minimum_days` of actual data.
 
     Notes
     -----
@@ -41,15 +42,14 @@ def daytime(power_or_irradiance, threshold=0.8, minimum_days=60):
     # remove all datapoints less than or equal to zero
     data = power_or_irradiance.copy()
     data[data <= 0] = np.nan
-    data = data.to_frame()
-    data['minute'] = _minute_of_day(data.index)
+    minutes = pd.Series(_minute_of_day(data.index), index=data.index)
     # group by minute of day and compute frequency of positive values
     # at each minute
-    value_frequency = data.groupby('minute').count()
+    value_frequency = data.groupby(minutes).count()
 
-    if max(value_frequency) <= minimum_days:
+    if value_frequency.max() < minimum_days:
         raise ValueError("Too few days with data (got {}, minimum_days={})"
-                         .format(max(value_frequency), minimum_days))
+                         .format(value_frequency.max(), minimum_days))
     # TODO Ask Matt about the "adaptive" step where the threshold is
     #      increased from 0.8 to 0.9 if not enough data has been
     #      excluded.
@@ -57,4 +57,4 @@ def daytime(power_or_irradiance, threshold=0.8, minimum_days=60):
         value_frequency > threshold * value_frequency.mean()
     ].index
 
-    return data['minutes'].isin(daylight_minutes)
+    return minutes.isin(daylight_minutes)
