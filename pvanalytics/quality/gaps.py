@@ -211,6 +211,35 @@ def valid_between(series, days=10, minimum_hours=7.75, freq=None):
     return start, end
 
 
+def daily_completeness(series, freq=None):
+    """Calculate a completeness index for each day in the data.
+
+    The completeness for a given day is the fraction of time in the
+    day for which there is data (a value other than NaN).
+
+    Parameters
+    ----------
+    series : Series
+        A DatetimeIndexed series.
+    freq : string, default None
+        interval between samples in the series. If None, the frequency
+        is inferred using :py:func:`pandas.infer_freq`.
+
+    Returns
+    -------
+    Series
+        A series of floats indexed by day giving the completeness of
+        each day (fraction of hours in the day for which `series` has
+        data).
+
+    """
+    seconds_per_sample = pd.Timedelta(
+        freq or pd.infer_freq(series.index)
+    ).seconds
+    daily_counts = series.resample('D').count()
+    return (daily_counts * seconds_per_sample) / (1440*60)
+
+
 def trim(series, **kwargs):
     """Mask out missing data from the begining and end of the data.
 
