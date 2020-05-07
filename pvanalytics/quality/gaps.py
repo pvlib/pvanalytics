@@ -282,7 +282,8 @@ def complete(series, threshold=0.333, freq=None):
         See :py:func:`daily_completeness`.
 
     """
-    pass
+    completeness = daily_completeness(series, freq)
+    return (completeness >= threshold).reindex(series.index, method='pad')
 
 
 def trim(series, **kwargs):
