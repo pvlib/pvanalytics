@@ -257,6 +257,34 @@ def daily_completeness(series, freq=None):
     return (daily_counts * seconds_per_sample) / (1440*60)
 
 
+def complete(series, threshold=0.333, freq=None):
+    """Select only data points that are part of a day with complete data.
+
+    Parameters
+    ----------
+    series : Series
+        The data to be checked for completeness.
+    threshold : float, default 0.333
+        Fraction of the day that must have data.
+    freq : str, default None
+        The expected frequency of the data in `series`. If none then
+        the frequency is inferred from the data.
+
+    Returns
+    -------
+    Series
+        A series of booleans with True for each value that is part of
+        a day with completeness greater than `threshold`.
+
+    Raises
+    ------
+    ValueError
+        See :py:func:`daily_completeness`.
+
+    """
+    pass
+
+
 def trim(series, **kwargs):
     """Mask out missing data from the begining and end of the data.
 
