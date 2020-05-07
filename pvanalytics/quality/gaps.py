@@ -211,6 +211,15 @@ def valid_between(series, days=10, minimum_hours=7.75, freq=None):
     return start, end
 
 
+def _freq_to_seconds(freq):
+    if not freq:
+        return None
+    if freq.isalpha():
+        freq = '1' + freq
+    delta = pd.to_timedelta(freq)
+    return delta.days * (1440 * 60) + delta.seconds
+
+
 def daily_completeness(series, freq=None):
     """Calculate a completeness index for each day in the data.
 
@@ -232,10 +241,18 @@ def daily_completeness(series, freq=None):
         each day (fraction of hours in the day for which `series` has
         data).
 
+    Raises
+    ------
+    ValueError
+        If `freq` is longer than the frequency inferred from `series`.
+
     """
-    seconds_per_sample = pd.Timedelta(
-        freq or pd.infer_freq(series.index)
-    ).seconds
+    inferred_seconds = _freq_to_seconds(pd.infer_freq(series.index))
+    freq_seconds = _freq_to_seconds(freq)
+    seconds_per_sample = freq_seconds or inferred_seconds
+    if freq and inferred_seconds < freq_seconds:
+        raise ValueError("freq must be less than or equal to the"
+                         + " frequency of the series")
     daily_counts = series.resample('D').count()
     return (daily_counts * seconds_per_sample) / (1440*60)
 
