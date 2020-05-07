@@ -396,7 +396,7 @@ def test_daily_completeness_all_nans():
     )
     assert_series_equal(
         pd.Series(
-            0,
+            0.0,
             index=pd.date_range(start='01/01/2020', freq='D', periods=2)
         ),
         completeness
@@ -406,12 +406,12 @@ def test_daily_completeness_all_nans():
 def test_daily_completeness_no_data():
     """A data set with completely missing timestamps and NaNs has
     completeness 0."""
-    two_days = pd.date_range(start='01/01/2020', freq='D', periods=2)
+    four_days = pd.date_range(start='01/01/2020', freq='D', periods=4)
     completeness = gaps.daily_completeness(
-        pd.Series(index=two_days, dtype='float64'), freq='15T'
+        pd.Series(index=four_days, dtype='float64'), freq='15T'
     )
     assert_series_equal(
-        pd.Series(0.0, index=two_days),
+        pd.Series(0.0, index=four_days),
         completeness
     )
 
