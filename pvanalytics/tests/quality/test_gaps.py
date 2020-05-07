@@ -206,7 +206,7 @@ def test_interpolation_diff_raises_error(interpolated_data):
         gaps.interpolation_diff(interpolated_data, window=2)
 
 
-def test_valid_between_no_missing_data():
+def test_start_stop_dates_no_missing_data():
     """If there is no missing data firstlastvaliddays should return the
     start and end of the series.
 
@@ -220,7 +220,7 @@ def test_valid_between_no_missing_data():
         data=np.full(len(index), 10),
         index=index
     )
-    firstvalid, lastvalid = gaps.valid_between(series)
+    firstvalid, lastvalid = gaps.start_stop_dates(series)
     assert firstvalid.date() == pd.Timestamp('01-01-2020').date()
     assert lastvalid.date() == pd.Timestamp('08-01-2020').date()
 
@@ -238,7 +238,7 @@ def test_first_day_missing_data():
     data = np.full(len(index), 10)
     series = pd.Series(data=data, index=index)
     series['01-01-2020 00:00':'01-02-2020 00:00'] = np.nan
-    firstvalid, lastvalid = gaps.valid_between(series)
+    firstvalid, lastvalid = gaps.start_stop_dates(series)
     assert firstvalid.date() == pd.Timestamp('01-02-2020').date()
     assert lastvalid.date() == pd.Timestamp('08-01-2020').date()
 
@@ -254,7 +254,7 @@ def test_first_and_fifth_days_missing():
     series = pd.Series(data=data, index=index)
     series['01-01-2020 00:00':'01-02-2020 00:00'] = np.nan
     series['01-05-2020 00:00':'01-06-2020 00:00'] = np.nan
-    firstvalid, lastvalid = gaps.valid_between(series)
+    firstvalid, lastvalid = gaps.start_stop_dates(series)
     assert firstvalid.date() == pd.Timestamp('01-06-2020').date()
     assert lastvalid.date() == pd.Timestamp('08-01-2020').date()
 
@@ -272,23 +272,23 @@ def test_last_two_days_missing():
     data = np.full(len(index), 10)
     series = pd.Series(data=data, index=index)
     series['07-31-2020 00:00':'08-01-2020 23:00'] = np.nan
-    firstvalid, lastvalid = gaps.valid_between(series)
+    firstvalid, lastvalid = gaps.start_stop_dates(series)
     assert firstvalid.date() == pd.Timestamp('01-01-2020').date()
     assert lastvalid.date() == pd.Timestamp('07-30-2020').date()
 
 
-def test_valid_between_no_data():
-    """If the passed to valid_between is empty the returns (None, None)."""
+def test_start_stop_dates_no_data():
+    """If the passed to start_stop_dates is empty the returns (None, None)."""
     index = pd.date_range(
         freq='15T',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
     series = pd.Series(index=index, data=np.full(len(index), np.nan))
-    assert (None, None) == gaps.valid_between(series)
+    assert (None, None) == gaps.start_stop_dates(series)
 
 
-def test_valid_between_sparse_data():
+def test_start_stop_dates_sparse_data():
     """Check that days with only a few hours of data aren't considered
     valid.
 
@@ -302,12 +302,12 @@ def test_valid_between_sparse_data():
     series['01-02-2020 00:00':'01-02-2020 06:00'] = np.nan
     series['01-02-2020 08:00':'01-02-2020 21:00'] = np.nan
     series['07-31-2020 07:00':] = np.nan
-    start, end = gaps.valid_between(series)
+    start, end = gaps.start_stop_dates(series)
     assert start.date() == pd.Timestamp('01-03-2020').date()
     assert end.date() == pd.Timestamp('07-30-2020').date()
 
 
-def test_valid_between_not_enough_data():
+def test_start_stop_dates_not_enough_data():
     """Only one day of data is not ehough for any valid days."""
     index = pd.date_range(
         freq='15T',
@@ -316,10 +316,10 @@ def test_valid_between_not_enough_data():
     )
     series = pd.Series(index=index, dtype='float64')
     series['02-23-2020 08:00':'02-24-2020 08:00'] = 1
-    assert (None, None) == gaps.valid_between(series)
+    assert (None, None) == gaps.start_stop_dates(series)
 
 
-def test_valid_between_one_day():
+def test_start_stop_dates_one_day():
     """Works when there is exactly the minimum number of consecutive
     days with data.
 
@@ -331,12 +331,12 @@ def test_valid_between_one_day():
     )
     series = pd.Series(index=index, dtype='float64')
     series['05-05-2020'] = 2
-    start, end = gaps.valid_between(series, days=1)
+    start, end = gaps.start_stop_dates(series, days=1)
     assert start.date() == pd.Timestamp('05-05-2020').date()
     assert end.date() == pd.Timestamp('05-05-2020').date()
 
 
-def test_valid_between_with_gaps_in_middle():
+def test_start_stop_dates_with_gaps_in_middle():
     """When there are gaps in the data longer than `days` valid between
     should include those gaps, as long as there are `days` consecutive
     days with enough data some time after the gap.
@@ -349,7 +349,7 @@ def test_valid_between_with_gaps_in_middle():
     )
     series = pd.Series(index=index, data=np.full(len(index), 1))
     series['03-05-2020':'03-25-2020'] = np.nan
-    start, end = gaps.valid_between(series, days=5)
+    start, end = gaps.start_stop_dates(series, days=5)
     assert start.date() == index[0].date()
     assert end.date() == index[-1].date()
 

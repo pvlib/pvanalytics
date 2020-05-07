@@ -226,33 +226,31 @@ def complete(series, threshold=0.333, freq=None):
     return (completeness >= threshold).reindex(series.index, method='pad')
 
 
-def valid_between(series, days=10, minimum_completeness=0.333333, freq=None):
-    """Get the start and end of valid data.
+def start_stop_dates(series, days=10, minimum_completeness=0.333333,
+                     freq=None):
+    """Get the start and end of data excluding leading and trailing gaps.
 
     The start and end dates returned by this function can be used to
     remove large periods of missing data from the begining and end of
-    the series. The valid data begins when there are `days`
-    consecutive days with valid data covering at least `minimum_hours`
-    on each day. Valid data ends on the last day with `days`
-    consecutive days with data covering at least `minimum_hours`
-    preceeding it.
-
-    Any data point with a value other than `NaN` is considered valid
-    data.
+    the series. The data starts when there are `days` consecutive days
+    with completeness greater than `minimum_completeness` (see
+    :py:func:`daily_completeness`) and ends on the last day with
+    `days` consecutive days with completeness at least
+    `minimum_completeness` preceeding it.
 
     Parameters
     ----------
     series : Series
-        A datetime indexed series.
-    days : int
+        A DatetimeIndexed series.
+    days : int, default 10
         The minimum number of consecutive valid days for data to be
         considered valid.
-    minimum_hours : float
-        The number of hours that must have valid data for a day to be
-        considered valid.
+    minimum_completeness : float, default 0.333333
+        The fraction of a day that must have data for the day to be
+        considered complete.
     freq : string or None, default None
-        The frequency to the series. If None, then frequency is
-        inferred from the index.
+        The frequency of data in the series. If None, then frequency
+        is inferred from the index.
 
     Returns
     -------
@@ -261,6 +259,10 @@ def valid_between(series, days=10, minimum_completeness=0.333333, freq=None):
         of valid days then None is returned.
     end : Datetime or None
         The last valid day. None if start is None.
+
+    See Also
+    --------
+    :py:func:`daily_completeness`
 
     Notes
     -----
@@ -319,7 +321,7 @@ def trim(series, **kwargs):
         last good day, and False from the last good day to the end.
 
     """
-    start, end = valid_between(series, **kwargs)
+    start, end = start_stop_dates(series, **kwargs)
     s = pd.Series(index=series.index, dtype='bool')
     s.loc[:] = False
     if start:
