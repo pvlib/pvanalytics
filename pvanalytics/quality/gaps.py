@@ -224,15 +224,21 @@ def daily_completeness(series, freq=None):
     """Calculate a completeness index for each day in the data.
 
     The completeness for a given day is the fraction of time in the
-    day for which there is data (a value other than NaN).
+    day for which there is data (a value other than NaN). The amount
+    of time that a value is attributed is equal to the timestamp
+    spacing in `series` or `freq` if it is specified. For example, a
+    day with 24 non-NaN values in a series with 30 minute timestamp
+    spacing would have 12 hours of data and therefore completeness of
+    0.5.
 
     Parameters
     ----------
     series : Series
         A DatetimeIndexed series.
     freq : string, default None
-        interval between samples in the series. If None, the frequency
-        is inferred using :py:func:`pandas.infer_freq`.
+        Interval between samples in the series, as a pandas frequency
+        string. If None, the frequency is inferred using
+        :py:func:`pandas.infer_freq`.
 
     Returns
     -------
@@ -259,6 +265,13 @@ def daily_completeness(series, freq=None):
 
 def complete(series, threshold=0.333, freq=None):
     """Select only data points that are part of a day with complete data.
+
+    A day has complete data if the fraction of the day that has
+    non-NaN values is at least `threshold`. The fraction of the day
+    assigned to each value is equal to the timestamp spacing of the
+    series or `freq` if it is provided. For example, a day with 24
+    non-NaN values in a series with 30 minute timestamp spacing would
+    have 12 hours of data and therefore completeness of 0.5.
 
     Parameters
     ----------
