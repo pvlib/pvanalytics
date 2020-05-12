@@ -225,9 +225,8 @@ def complete(series, minimum_completeness=0.333, freq=None):
     :py:func:`daily_completeness`
 
     """
-    completeness = daily_completeness(series, freq)
-    return ((completeness >= minimum_completeness)
-            .reindex(series.index, method='pad'))
+    complete_days = daily_completeness(series, freq) >= minimum_completeness
+    return complete_days.reindex(series.index, method='pad')
 
 
 def start_stop_dates(series, days=10, minimum_completeness=0.333333,
