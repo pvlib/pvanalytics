@@ -462,42 +462,42 @@ def test_daily_completeness_freq_too_high():
 
 
 def test_complete_threshold_zero():
-    """threshold of 0 returns all True regardless of data."""
+    """minimum_completeness of 0 returns all True regardless of data."""
     ten_days = pd.date_range(
         start='01/01/2020', freq='15T', end='1/10/2020', closed='left')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, threshold=0)
+        gaps.complete(data, minimum_completeness=0)
     )
     data[pd.date_range(
         start='01/01/2020', freq='1D', end='1/10/2020', closed='left')] = 1.0
     data.dropna()
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, threshold=0, freq='15T')
+        gaps.complete(data, minimum_completeness=0, freq='15T')
     )
     data = pd.Series(1.0, index=ten_days)
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, threshold=0)
+        gaps.complete(data, minimum_completeness=0)
     )
 
 
 def test_complete_threshold_one():
-    """If threshold=1 then any missing data on a day means all data for
-    the day is flagged False."""
+    """If minimum_completeness=1 then any missing data on a day means all
+    data for the day is flagged False."""
     ten_days = pd.date_range(
         start='01/01/2020', freq='15T', end='01/10/2020', closed='left')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(False, index=data.index),
-        gaps.complete(data, threshold=1.0)
+        gaps.complete(data, minimum_completeness=1.0)
     )
     data.loc[:] = 1
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, threshold=1.0)
+        gaps.complete(data, minimum_completeness=1.0)
     )
     # remove one data-point per day
     days = pd.date_range(
@@ -505,7 +505,7 @@ def test_complete_threshold_one():
     data.loc[days] = np.nan
     assert_series_equal(
         pd.Series(False, index=data.index),
-        gaps.complete(data, threshold=1.0)
+        gaps.complete(data, minimum_completeness=1.0)
     )
     # check that dropping the NaNs still gives the same result with
     # and without passing `freq`. (There should be enough data to infer the
@@ -513,11 +513,11 @@ def test_complete_threshold_one():
     data.dropna()
     assert_series_equal(
         pd.Series(False, index=data.index),
-        gaps.complete(data, threshold=1.0)
+        gaps.complete(data, minimum_completeness=1.0)
     )
     assert_series_equal(
-        gaps.complete(data, threshold=1.0),
-        gaps.complete(data, threshold=1.0, freq='15T')
+        gaps.complete(data, minimum_completeness=1.0),
+        gaps.complete(data, minimum_completeness=1.0, freq='15T')
     )
 
 
@@ -543,22 +543,22 @@ def test_complete():
     expected.loc['1/5/2020':] = True
     assert_series_equal(
         expected,
-        gaps.complete(data, threshold=1.0)
+        gaps.complete(data, minimum_completeness=1.0)
     )
 
     expected.loc['1/2/2020'] = True
     assert_series_equal(
         expected,
-        gaps.complete(data, threshold=0.5)
+        gaps.complete(data, minimum_completeness=0.5)
     )
 
     expected.loc['1/3/2020'] = True
     assert_series_equal(
         expected,
-        gaps.complete(data, threshold=0.3)
+        gaps.complete(data, minimum_completeness=0.3)
     )
 
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, threshold=0.2)
+        gaps.complete(data, minimum_completeness=0.2)
     )

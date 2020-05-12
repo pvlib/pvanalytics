@@ -189,21 +189,21 @@ def daily_completeness(series, freq=None):
     return (daily_counts * seconds_per_sample) / (1440*60)
 
 
-def complete(series, threshold=0.333, freq=None):
+def complete(series, minimum_completeness=0.333, freq=None):
     """Select only data points that are part of a day with complete data.
 
     A day is complete if its completeness score is greater than or
-    equal to `threshold`. See :py:func:`daily_completeness` for more
+    equal to `minimum_completeness`. See :py:func:`daily_completeness` for more
     information. For example, a day with 24 non-NaN values in a series
     with 30 minute timestamp spacing would have 12 hours of data and
     therefore a completeness score of 0.5; with the default
-    `threshold=0.333` the day would be marked complete.
+    `minimum_completeness=0.333` the day would be marked complete.
 
     Parameters
     ----------
     series : Series
         The data to be checked for completeness.
-    threshold : float, default 0.333
+    minimum_completeness : float, default 0.333
         Fraction of the day that must have data.
     freq : str, default None
         The expected frequency of the data in `series`. If none then
@@ -213,7 +213,7 @@ def complete(series, threshold=0.333, freq=None):
     -------
     Series
         A series of booleans with True for each value that is part of
-        a day with completeness greater than `threshold`.
+        a day with completeness greater than `minimum_completeness`.
 
     Raises
     ------
@@ -226,7 +226,8 @@ def complete(series, threshold=0.333, freq=None):
 
     """
     completeness = daily_completeness(series, freq)
-    return (completeness >= threshold).reindex(series.index, method='pad')
+    return ((completeness >= minimum_completeness)
+            .reindex(series.index, method='pad'))
 
 
 def start_stop_dates(series, days=10, minimum_completeness=0.333333,
