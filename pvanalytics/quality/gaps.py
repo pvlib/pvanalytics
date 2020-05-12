@@ -148,30 +148,29 @@ def _freq_to_seconds(freq):
 
 
 def daily_completeness(series, freq=None):
-    """Calculate a completeness index for each day in the data.
+    """Calculate a completeness score for each day.
 
-    The completeness for a given day is the fraction of time in the
-    day for which there is data (a value other than NaN). The amount
-    of time that a value is attributed is equal to the timestamp
-    spacing in `series` or `freq` if it is specified. For example, a
-    day with 24 non-NaN values in a series with 30 minute timestamp
-    spacing would have 12 hours of data and therefore completeness of
-    0.5.
+    The completeness score for a given day is the fraction of time in
+    the day for which there is data (a value other than NaN). The time
+    attributed to each value is equal to the timestamp spacing of
+    `series` or `freq` if it is specified. For example, a day with 24
+    non-NaN values in a series with 30 minute timestamp spacing would
+    have 12 hours of data and therefore completeness score of 0.5.
 
     Parameters
     ----------
     series : Series
         A DatetimeIndexed series.
-    freq : string, default None
-        Interval between samples in the series, as a pandas frequency
+    freq : str, default None
+        Interval between samples in the series as a pandas frequency
         string. If None, the frequency is inferred using
         :py:func:`pandas.infer_freq`.
 
     Returns
     -------
     Series
-        A series of floats indexed by day giving the completeness of
-        each day (fraction of hours in the day for which `series` has
+        A series of floats, indexed by day, giving the completeness
+        score for each day (fraction of the day for which `series` has
         data).
 
     Raises
@@ -193,12 +192,12 @@ def daily_completeness(series, freq=None):
 def complete(series, threshold=0.333, freq=None):
     """Select only data points that are part of a day with complete data.
 
-    A day has complete data if the fraction of the day that has
-    non-NaN values is at least `threshold`. The fraction of the day
-    assigned to each value is equal to the timestamp spacing of the
-    series or `freq` if it is provided. For example, a day with 24
-    non-NaN values in a series with 30 minute timestamp spacing would
-    have 12 hours of data and therefore completeness of 0.5.
+    A day is complete if its completeness score is greater than or
+    equal to `threshold`. See :py:func:`daily_completeness` for more
+    information. For example, a day with 24 non-NaN values in a series
+    with 30 minute timestamp spacing would have 12 hours of data and
+    therefore a completeness score of 0.5; with the default
+    `threshold=0.333` the day would be marked complete.
 
     Parameters
     ----------
@@ -221,6 +220,10 @@ def complete(series, threshold=0.333, freq=None):
     ValueError
         See :py:func:`daily_completeness`.
 
+    See Also
+    --------
+    :py:func:`daily_completeness`
+
     """
     completeness = daily_completeness(series, freq)
     return (completeness >= threshold).reindex(series.index, method='pad')
@@ -231,12 +234,13 @@ def start_stop_dates(series, days=10, minimum_completeness=0.333333,
     """Get the start and end of data excluding leading and trailing gaps.
 
     The start and end dates returned by this function can be used to
-    remove large periods of missing data from the begining and end of
+    remove large periods of missing data from the beginning and end of
     the series. The data starts when there are `days` consecutive days
-    with completeness greater than `minimum_completeness` (see
-    :py:func:`daily_completeness`) and ends on the last day with
+    with completeness greater than or equal to `minimum_completeness`
+    (see :py:func:`daily_completeness`) and ends on the last day with
     `days` consecutive days with completeness at least
-    `minimum_completeness` preceeding it.
+    `minimum_completeness` preceeding it. Periods of incomplete days
+    between these two dates have no effect on the dates returned.
 
     Parameters
     ----------
@@ -246,18 +250,18 @@ def start_stop_dates(series, days=10, minimum_completeness=0.333333,
         The minimum number of consecutive valid days for data to be
         considered valid.
     minimum_completeness : float, default 0.333333
-        The fraction of a day that must have data for the day to be
-        considered complete.
-    freq : string or None, default None
-        The frequency of data in the series. If None, then frequency
-        is inferred from the index.
+        The minimum completeness score for a day to be considered
+        complete. (see :py:func:`daily_completeness`).
+    freq : str or None, default None
+        The frequency of data in the series as a pandas frequency
+        string. If None, then frequency is inferred from the index.
 
     Returns
     -------
     start : Datetime or None
         The first valid day. If there are no sufficiently long periods
         of valid days then None is returned.
-    end : Datetime or None
+    stop : Datetime or None
         The last valid day. None if start is None.
 
     See Also
@@ -300,25 +304,33 @@ def start_stop_dates(series, days=10, minimum_completeness=0.333333,
 
 
 def trim(series, **kwargs):
-    """Mask out missing data from the begining and end of the data.
+    """Mask out missing data from the beginning and end of the data.
 
-    Missing data is determined by the criteria in
-    :py:func:`valid_between`.
+    Removes data preceeding the start date and following the stop date
+    returned by :py:func:`start_stop_dates`. If no start and stop
+    dates are identified then a series of all False is returned.
 
     Parameters
     ----------
     series : Series
-        A DatatimeIndexed series.
+        A DatetimeIndexed series.
     kwargs :
         Any of the keyword arguments that can be passed to
-        :py:func:`valid_between`.
+        :py:func:`start_stop_dates`.
 
     Returns
     -------
     Series
         A series of booleans with the same index as `series` with
-        False up to the first good day, True from the first to the
-        last good day, and False from the last good day to the end.
+        False up to the first complete day, True between the first and
+        the last complete days, and False following the last complete
+        day.
+
+    See Also
+    --------
+    :py:func:`start_stop_dates`
+
+    :py:func:`daily_completeness`
 
     """
     start, end = start_stop_dates(series, **kwargs)
