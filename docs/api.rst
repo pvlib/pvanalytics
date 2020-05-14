@@ -58,7 +58,7 @@ The following functions identify days with incomplete data.
 .. autosummary::
    :toctree: generated/
 
-   quality.gaps.daily_completeness
+   quality.gaps.completeness_score
    quality.gaps.complete
 
 Many data sets may have leading and trailing periods of days with sporadic or

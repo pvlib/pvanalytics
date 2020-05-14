@@ -147,7 +147,7 @@ def _freq_to_seconds(freq):
     return delta.days * (1440 * 60) + delta.seconds
 
 
-def daily_completeness(series, freq=None):
+def completeness_score(series, freq=None, keep_index=True):
     """Calculate a data completeness score for each day.
 
     The completeness score for a given day is the fraction of time in
@@ -166,13 +166,15 @@ def daily_completeness(series, freq=None):
         Interval between samples in the series as a pandas frequency
         string. If None, the frequency is inferred using
         :py:func:`pandas.infer_freq`.
+    keep_index : boolean, default True
+        Whether or not the returned series has the same index as
+        `series`. If False the returned series will be indexed by day.
 
     Returns
     -------
     Series
-        A series of floats, indexed by day, giving the completeness
-        score for each day (fraction of the day for which `series` has
-        data).
+        A series of floats giving the completeness score for each day
+        (fraction of the day for which `series` has data).
 
     Raises
     ------
@@ -187,7 +189,10 @@ def daily_completeness(series, freq=None):
         raise ValueError("freq must be less than or equal to the"
                          + " frequency of the series")
     daily_counts = series.resample('D').count()
-    return (daily_counts * seconds_per_sample) / (1440*60)
+    daily_completeness = (daily_counts * seconds_per_sample) / (1440*60)
+    if keep_index:
+        return daily_completeness.reindex(series.index, method='pad')
+    return daily_completeness
 
 
 def complete(series, minimum_completeness=0.333, freq=None):
@@ -223,8 +228,7 @@ def complete(series, minimum_completeness=0.333, freq=None):
     :py:func:`daily_completeness`
 
     """
-    complete_days = daily_completeness(series, freq) >= minimum_completeness
-    return complete_days.reindex(series.index, method='pad')
+    return completeness_score(series, freq=freq) >= minimum_completeness
 
 
 def start_stop_dates(series, days=10, minimum_completeness=0.333333,
@@ -276,7 +280,7 @@ def start_stop_dates(series, days=10, minimum_completeness=0.333333,
     information.
 
     """
-    completeness = daily_completeness(series, freq)
+    completeness = completeness_score(series, freq=freq, keep_index=False)
     complete_days = completeness >= minimum_completeness
     good_days_preceeding = complete_days.astype('int').rolling(
         days, closed='right'

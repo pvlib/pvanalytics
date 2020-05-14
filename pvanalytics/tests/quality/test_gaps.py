@@ -385,14 +385,15 @@ def test_trim_empty():
     assert (~gaps.trim(series, days=3)).all()
 
 
-def test_daily_completeness_all_nans():
+def test_completeness_score_all_nans():
     """A data set with all nans has completeness 0 for each day."""
-    completeness = gaps.daily_completeness(
+    completeness = gaps.completeness_score(
         pd.Series(
             np.nan,
             index=pd.date_range('01/01/2020 00:00', freq='1H', periods=48),
             dtype='float64'
-        )
+        ),
+        keep_index=False
     )
     assert_series_equal(
         pd.Series(
@@ -403,12 +404,14 @@ def test_daily_completeness_all_nans():
     )
 
 
-def test_daily_completeness_no_data():
+def test_completeness_score_no_data():
     """A data set with completely missing timestamps and NaNs has
     completeness 0."""
     four_days = pd.date_range(start='01/01/2020', freq='D', periods=4)
-    completeness = gaps.daily_completeness(
-        pd.Series(index=four_days, dtype='float64'), freq='15T'
+    completeness = gaps.completeness_score(
+        pd.Series(index=four_days, dtype='float64'),
+        freq='15T',
+        keep_index=False
     )
     assert_series_equal(
         pd.Series(0.0, index=four_days),
@@ -416,14 +419,14 @@ def test_daily_completeness_no_data():
     )
 
 
-def test_daily_completeness_incomplete_index():
+def test_completeness_score_incomplete_index():
     """A series with one data point per hour has 25% completeness at
     15-minute sample frequency"""
     data = pd.Series(
         1,
         index=pd.date_range(start='01/01/2020', freq='1H', periods=72),
     )
-    completeness = gaps.daily_completeness(data, freq='15T')
+    completeness = gaps.completeness_score(data, freq='15T', keep_index=False)
     assert_series_equal(
         pd.Series(
             0.25,
@@ -433,12 +436,12 @@ def test_daily_completeness_incomplete_index():
     )
 
 
-def test_daily_completeness_complete():
+def test_completeness_score_complete():
     """A series with data at every point has completeness 1.0"""
     data = pd.Series(
         1, index=pd.date_range(start='01/01/2020', freq='15T', periods=24*4*2)
     )
-    completeness = gaps.daily_completeness(data)
+    completeness = gaps.completeness_score(data, keep_index=False)
     assert_series_equal(
         pd.Series(
             1.0,
@@ -448,7 +451,7 @@ def test_daily_completeness_complete():
     )
 
 
-def test_daily_completeness_freq_too_high():
+def test_completeness_score_freq_too_high():
     """If the infered freq is shorter than the passed freq an exception is
     raised."""
     data = pd.Series(
@@ -456,9 +459,31 @@ def test_daily_completeness_freq_too_high():
         index=pd.date_range(start='1/1/2020', freq='15T', periods=24*4*4)
     )
     with pytest.raises(ValueError):
-        gaps.daily_completeness(data, freq='16T')
+        gaps.completeness_score(data, freq='16T')
     with pytest.raises(ValueError):
-        gaps.daily_completeness(data, freq='1H')
+        gaps.completeness_score(data, freq='1H')
+
+
+def test_completeness_score_reindex():
+    """Every timestamp is marked with completeness for the day when
+    keep_index=True"""
+    data = pd.Series(
+        1,
+        index=pd.date_range(
+            start='1/1/2020', freq='15T', end='1/4/2020', closed='left'
+        )
+    )
+    data.loc[pd.date_range(start='1/1/2020', freq='30T', periods=48)] = np.nan
+    data.loc[pd.date_range(start='1/3/2020', freq='1H', periods=24)] = np.nan
+
+    expected = pd.Series(index=data.index, dtype='float64')
+    expected.loc['1/1/2020'] = 0.5
+    expected.loc['1/2/2020'] = 1.0
+    expected.loc['1/3/2020'] = 0.75
+    assert_series_equal(
+        expected,
+        gaps.completeness_score(data, keep_index=True)
+    )
 
 
 def test_complete_threshold_zero():
