@@ -9,7 +9,12 @@ def _minute_of_day(time):
 
 
 def daytime_frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
-    """Get the times when the sun is up based on frequency of positive data.
+    """Identify daytime periods based on frequency of positive data.
+
+    Data is aggregated by minute of the day and the mean number of
+    positive values for each minute is calculated. Each minute with at
+    least `threshold` times the mean number of positive values is
+    considered day-time.
 
     Parameters
     ----------
@@ -31,7 +36,7 @@ def daytime_frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
     Raises
     ------
     ValueError
-        if there are less than `minimum_days` of actual data.
+        if there are less than `minimum_days` of positive data.
 
     Notes
     -----
@@ -57,7 +62,7 @@ def daytime_frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
 
 
 def daytime_level(power_or_irradiance, threshold=0.2, quantile=0.95):
-    """Identify daytime periods based on a threshold.
+    """Identify daytime periods based on a minimum power/irradiance threshold.
 
     Power or irradiance data is aggregated by minute of day and times
     where the mean power is greater than `threshold` * max are marked
@@ -78,7 +83,7 @@ def daytime_level(power_or_irradiance, threshold=0.2, quantile=0.95):
     Returns
     -------
     Series
-        A series of booleans with true for timestamps when the sun is
+        A series of booleans with True for timestamps when the sun is
         up.
 
     """

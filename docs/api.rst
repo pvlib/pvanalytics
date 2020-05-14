@@ -111,9 +111,29 @@ Clearsky
 
    features.clearsky.reno
 
+Time
+----
+
+The following functions can be used to differentiate night-time and
+day-time based on power or irradiance data. This is useful if you do
+not know the time-zone of the index for your data of for verifying
+that the time-zone is correct. Both functions identify the same
+feature, but in slightly different ways.
+:py:func:`features.time.daytime_frequency` is useful if your data has
+substantial outliers or other excessively large values; however, it
+may fail if substantial portions of the night time data is greater
+than 0. :py:func:`features.time.daytime_level` can handle positive
+night-time data (so long as it is still substantially lower than
+day-time data) but may be more suceptible to large outliers.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.time.daytime_frequency
+   features.time.daytime_level
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
         Algorithm for Surface Radiation Measurements, The Open Atmospheric
         Science Journal 2, pp. 23-37, 2008.
-
