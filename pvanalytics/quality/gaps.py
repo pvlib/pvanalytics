@@ -148,14 +148,15 @@ def _freq_to_seconds(freq):
 
 
 def daily_completeness(series, freq=None):
-    """Calculate a completeness score for each day.
+    """Calculate a data completeness score for each day.
 
     The completeness score for a given day is the fraction of time in
     the day for which there is data (a value other than NaN). The time
-    attributed to each value is equal to the timestamp spacing of
-    `series` or `freq` if it is specified. For example, a day with 24
-    non-NaN values in a series with 30 minute timestamp spacing would
-    have 12 hours of data and therefore completeness score of 0.5.
+    duration attributed to each value is equal to the timestamp
+    spacing of `series` or `freq` if it is specified. For example, a
+    24-hour time series with 30 minute timestamp spacing and 24
+    non-NaN values would have data for a total of 12 hours and
+    therefore a completeness score of 0.5.
 
     Parameters
     ----------
@@ -190,14 +191,11 @@ def daily_completeness(series, freq=None):
 
 
 def complete(series, minimum_completeness=0.333, freq=None):
-    """Select only data points that are part of a day with complete data.
+    """Select data points that are part of days with complete data.
 
-    A day is complete if its completeness score is greater than or
-    equal to `minimum_completeness`. See :py:func:`daily_completeness` for more
-    information. For example, a day with 24 non-NaN values in a series
-    with 30 minute timestamp spacing would have 12 hours of data and
-    therefore a completeness score of 0.5; with the default
-    `minimum_completeness=0.333` the day would be marked complete.
+    A day has complete data if its completeness score is greater than
+    or equal to `minimum_completeness`. The completeness score is
+    calculated by :py:func:`daily_completeness`.
 
     Parameters
     ----------

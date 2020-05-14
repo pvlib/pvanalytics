@@ -61,7 +61,7 @@ The following functions identify days with incomplete data.
    quality.gaps.daily_completeness
    quality.gaps.complete
 
-Many data sets may have leading and trailing periods with sparodic or
+Many data sets may have leading and trailing periods of days with sporadic or
 no data. The following functions can be used to remove those periods.
 
 .. autosummary::
@@ -133,4 +133,3 @@ Clearsky
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
         Algorithm for Surface Radiation Measurements, The Open Atmospheric
         Science Journal 2, pp. 23-37, 2008.
-
