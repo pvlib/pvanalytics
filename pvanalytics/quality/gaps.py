@@ -277,6 +277,28 @@ def start_stop_dates(series, days=10):
     return start, end
 
 
+def trim(series, days=10):
+    """Mask the begining and end of the data if there are gaps.
+
+    Parameters
+    ----------
+    series : Series
+        A DatetimeIndexed series of booleans
+    days : int, default 10
+        Minimum number of consecutive days that are all True for
+        'good' data to start.
+
+    Returns
+    -------
+    Series
+        A series of booleans with True for all data points between the
+        first and last block of `days` consecutive days that are all
+        True in `series`
+
+    """
+    pass
+
+
 def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
     """Mask out missing data from the beginning and end of the data.
 
