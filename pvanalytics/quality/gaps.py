@@ -338,8 +338,8 @@ def trim(series, **kwargs):
 
     """
     start, end = start_stop_dates(series, **kwargs)
-    s = pd.Series(index=series.index, dtype='bool')
-    s.loc[:] = False
+    mask = pd.Series(index=series.index, dtype='bool')
+    mask.loc[:] = False
     if start:
-        s.loc[start.date():end.date()] = True
-    return s
+        mask.loc[start.date():end.date()] = True
+    return mask
