@@ -139,8 +139,6 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8):
 
 
 def _freq_to_seconds(freq):
-    if not freq:
-        return None
     if freq.isalpha():
         freq = '1' + freq
     delta = pd.to_timedelta(freq)
@@ -183,8 +181,12 @@ def completeness_score(series, freq=None, keep_index=True):
 
     """
     inferred_seconds = _freq_to_seconds(pd.infer_freq(series.index))
-    freq_seconds = _freq_to_seconds(freq)
-    seconds_per_sample = freq_seconds or inferred_seconds
+    if freq:
+        freq_seconds = _freq_to_seconds(freq)
+        seconds_per_sample = freq_seconds
+    else:
+        seconds_per_sample = inferred_seconds
+
     if freq and inferred_seconds < freq_seconds:
         raise ValueError("freq must be less than or equal to the"
                          + " frequency of the series")
