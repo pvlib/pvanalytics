@@ -202,7 +202,7 @@ def complete(series, minimum_completeness=0.333, freq=None):
 
     A day has complete data if its completeness score is greater than
     or equal to `minimum_completeness`. The completeness score is
-    calculated by :py:func:`daily_completeness`.
+    calculated by :py:func:`completeness_score`.
 
     Parameters
     ----------
@@ -223,11 +223,11 @@ def complete(series, minimum_completeness=0.333, freq=None):
     Raises
     ------
     ValueError
-        See :py:func:`daily_completeness`.
+        See :py:func:`completeness_score`.
 
     See Also
     --------
-    :py:func:`daily_completeness`
+    :py:func:`completeness_score`
 
     """
     return completeness_score(series, freq=freq) >= minimum_completeness
