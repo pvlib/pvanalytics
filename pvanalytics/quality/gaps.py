@@ -233,7 +233,51 @@ def complete(series, minimum_completeness=0.333, freq=None):
     return completeness_score(series, freq=freq) >= minimum_completeness
 
 
-def start_stop_dates(series, days=10, minimum_completeness=0.333333,
+def start_stop_dates(series, days=10):
+    """Get the start and end of data excluding leading and trailing gaps.
+
+    Parameters
+    ----------
+    series : Series
+        A DatetimeIndexed series of booleans.
+    days : int, default 10
+        The minimum number of consecutive days where every value in
+        `series` is True for data to start or stop.
+
+    Returns
+    -------
+    start : Datetime or None
+        The first valid day. If there are no sufficiently long periods
+        of valid days then None is returned.
+    stop : Datetime or None
+        The last valid day. None if start is None.
+
+    """
+    good_days = series.resample('D').apply(all)
+    good_days_preceeding = good_days.astype('int').rolling(
+        days, closed='right'
+    ).sum()
+    good_days_following = good_days_preceeding.shift(periods=-(days-1))
+    following_above_threshold = good_days_following[
+        good_days_following >= days
+    ]
+    preceeding_above_threshold = good_days_preceeding[
+        good_days_preceeding >= days
+    ]
+
+    start = None
+    end = None
+
+    if len(following_above_threshold) > 0:
+        start = following_above_threshold.index[0]
+
+    if len(preceeding_above_threshold) > 0:
+        end = preceeding_above_threshold.index[-1]
+
+    return start, end
+
+
+def start_stop_complete(series, days=10, minimum_completeness=0.333333,
                      freq=None):
     """Get the start and end of data excluding leading and trailing gaps.
 
