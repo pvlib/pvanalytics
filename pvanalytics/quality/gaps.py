@@ -277,81 +277,7 @@ def start_stop_dates(series, days=10):
     return start, end
 
 
-def start_stop_complete(series, days=10, minimum_completeness=0.333333,
-                     freq=None):
-    """Get the start and end of data excluding leading and trailing gaps.
-
-    The start and end dates returned by this function can be used to
-    remove large periods of missing data from the beginning and end of
-    the series. The data starts when there are `days` consecutive days
-    with completeness greater than or equal to `minimum_completeness`
-    (see :py:func:`daily_completeness`) and ends on the last day with
-    `days` consecutive days with completeness at least
-    `minimum_completeness` preceeding it. Periods of incomplete days
-    between these two dates have no effect on the dates returned.
-
-    Parameters
-    ----------
-    series : Series
-        A DatetimeIndexed series.
-    days : int, default 10
-        The minimum number of consecutive valid days for data to be
-        considered valid.
-    minimum_completeness : float, default 0.333333
-        The minimum completeness score for a day to be considered
-        complete. (see :py:func:`daily_completeness`).
-    freq : str or None, default None
-        The frequency of data in the series as a pandas frequency
-        string. If None, then frequency is inferred from the index.
-
-    Returns
-    -------
-    start : Datetime or None
-        The first valid day. If there are no sufficiently long periods
-        of valid days then None is returned.
-    stop : Datetime or None
-        The last valid day. None if start is None.
-
-    See Also
-    --------
-    :py:func:`daily_completeness`
-
-    Notes
-    -----
-    This function was derived from the pvfleets_qa_analysis project,
-    Copyright (c) 2020 Alliance for Sustainable Energy, LLC. See the
-    file LICENSES/PVFLEETS_QA_LICENSE at the top level directory of
-    this distribution and at `<https://github.com/pvlib/
-    pvanalytics/blob/master/LICENSES/PVFLEETS_QA_LICENSE>`_ for more
-    information.
-
-    """
-    completeness = completeness_score(series, freq=freq, keep_index=False)
-    complete_days = completeness >= minimum_completeness
-    good_days_preceeding = complete_days.astype('int').rolling(
-        days, closed='right'
-    ).sum()
-    good_days_following = good_days_preceeding.shift(periods=-(days-1))
-    following_above_threshold = good_days_following[
-        good_days_following >= days
-    ]
-    preceeding_above_threshold = good_days_preceeding[
-        good_days_preceeding >= days
-    ]
-
-    start = None
-    end = None
-
-    if len(following_above_threshold) > 0:
-        start = following_above_threshold.index[0]
-
-    if len(preceeding_above_threshold) > 0:
-        end = preceeding_above_threshold.index[-1]
-
-    return start, end
-
-
-def trim(series, **kwargs):
+def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
     """Mask out missing data from the beginning and end of the data.
 
     Removes data preceeding the start date and following the stop date
@@ -362,9 +288,15 @@ def trim(series, **kwargs):
     ----------
     series : Series
         A DatetimeIndexed series.
-    kwargs :
-        Any of the keyword arguments that can be passed to
-        :py:func:`start_stop_dates`.
+    minimum_completeness : float, default 0.333333
+        The minimum completeness score for each day.
+    days : int, default 10
+        The number of consecutive days with completeness greater than
+        `minumum_completeness` for the 'good' data to start or
+        end. See :py:func:`start_stop_dates` for more information.
+    freq : str, default None
+        The expected frequency of the series. See
+        :py:func:`completeness_score` fore more information.
 
     Returns
     -------
@@ -378,10 +310,12 @@ def trim(series, **kwargs):
     --------
     :py:func:`start_stop_dates`
 
-    :py:func:`daily_completeness`
+    :py:func:`completeness_score`
 
     """
-    start, end = start_stop_dates(series, **kwargs)
+    completeness = completeness_score(series, freq=freq, keep_index=False)
+    complete_days = completeness >= minimum_completeness
+    start, end = start_stop_dates(complete_days, days=days)
     mask = pd.Series(index=series.index, dtype='bool')
     mask.loc[:] = False
     if start:

@@ -322,8 +322,8 @@ def test_start_stop_dates_with_gaps_in_middle():
     assert end.date() == index[-1].date()
 
 
-def test_trim():
-    """gaps.trim() should return a boolean mask that selects only the good
+def test_trim_incomplete():
+    """gaps.trim_incomplete() should return a boolean mask that selects only the good
     data in the middle of a series.
 
     """
@@ -336,13 +336,13 @@ def test_trim():
     series['01-02-2020':'01-07-2020 13:00'] = np.nan
     series['01-10-2020':'01-11-2020'] = np.nan
     assert_series_equal(
-        series[gaps.trim(series, days=3)],
+        series[gaps.trim_incomplete(series, days=3)],
         series['01-07-2020':'08-01-2020 00:00']
     )
 
 
-def test_trim_empty():
-    """gaps.trim() returns all False for series with no valid days."""
+def test_trim_incomplete_empty():
+    """gaps.trim_incomplete() returns all False for series with no valid days."""
     index = pd.date_range(
         freq='15T',
         start='01-01-2020',
@@ -350,7 +350,7 @@ def test_trim_empty():
     )
     series = pd.Series(index=index, dtype='float64')
     series.iloc[::(24*60)] = 1
-    assert (~gaps.trim(series, days=3)).all()
+    assert (~gaps.trim_incomplete(series, days=3)).all()
 
 
 def test_completeness_score_all_nans():
