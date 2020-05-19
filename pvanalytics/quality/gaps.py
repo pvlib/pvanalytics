@@ -151,7 +151,7 @@ def completeness_score(series, freq=None, keep_index=True):
     The completeness score for a given day is the fraction of time in
     the day for which there is data (a value other than NaN). The time
     duration attributed to each value is equal to the timestamp
-    spacing of `series` or `freq` if it is specified. For example, a
+    spacing of `series`, or `freq` if it is specified. For example, a
     24-hour time series with 30 minute timestamp spacing and 24
     non-NaN values would have data for a total of 12 hours and
     therefore a completeness score of 0.5.
@@ -306,7 +306,7 @@ def trim(series, days=10):
 def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
     """Mask out missing data from the beginning and end of the data.
 
-    Removes data preceeding the start date and following the stop date
+    False for times preceeding the start date and following the stop date
     returned by :py:func:`start_stop_dates`. If no start and stop
     dates are identified then a series of all False is returned.
 
