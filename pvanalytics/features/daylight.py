@@ -1,4 +1,4 @@
-"""Features related to time."""
+"""Functions for identifying when the sun is up."""
 import numpy as np
 import pandas as pd
 
@@ -8,7 +8,7 @@ def _minute_of_day(time):
     return time.hour * 60 + time.minute
 
 
-def daytime_frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
+def frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
     """Identify daytime periods based on frequency of positive data.
 
     Data is aggregated by minute of the day and the mean number of
@@ -61,7 +61,7 @@ def daytime_frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
     return minutes.isin(daylight_minutes)
 
 
-def daytime_level(power_or_irradiance, threshold=0.2, quantile=0.95):
+def level(power_or_irradiance, threshold=0.2, quantile=0.95):
     """Identify daytime periods based on a minimum power/irradiance threshold.
 
     Power or irradiance data is aggregated by minute of day and times
