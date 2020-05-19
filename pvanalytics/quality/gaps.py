@@ -296,7 +296,11 @@ def trim(series, days=10):
         True in `series`
 
     """
-    pass
+    start, end = start_stop_dates(series, days=days)
+    mask = pd.Series(False, index=series.index)
+    if start:
+        mask.loc[start.date():end.date()] = True
+    return mask
 
 
 def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
@@ -335,11 +339,6 @@ def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
     :py:func:`completeness_score`
 
     """
-    completeness = completeness_score(series, freq=freq, keep_index=False)
+    completeness = completeness_score(series, freq=freq)
     complete_days = completeness >= minimum_completeness
-    start, end = start_stop_dates(complete_days, days=days)
-    mask = pd.Series(index=series.index, dtype='bool')
-    mask.loc[:] = False
-    if start:
-        mask.loc[start.date():end.date()] = True
-    return mask
+    return trim(complete_days, days=days)

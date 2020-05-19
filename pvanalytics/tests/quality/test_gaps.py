@@ -323,10 +323,8 @@ def test_start_stop_dates_with_gaps_in_middle():
 
 
 def test_trim_incomplete():
-    """gaps.trim_incomplete() should return a boolean mask that selects only the good
-    data in the middle of a series.
-
-    """
+    """gaps.trim_incomplete() should return a boolean mask that selects
+    only the good data in the middle of a series."""
     index = pd.date_range(
         freq='15T',
         start='01-01-2020',
@@ -342,7 +340,8 @@ def test_trim_incomplete():
 
 
 def test_trim_incomplete_empty():
-    """gaps.trim_incomplete() returns all False for series with no valid days."""
+    """gaps.trim_incomplete() returns all False for series with no valid
+    days."""
     index = pd.date_range(
         freq='15T',
         start='01-01-2020',
@@ -351,6 +350,27 @@ def test_trim_incomplete_empty():
     series = pd.Series(index=index, dtype='float64')
     series.iloc[::(24*60)] = 1
     assert (~gaps.trim_incomplete(series, days=3)).all()
+
+
+def test_trim_daily_index():
+    """trim works when data has a daily index."""
+    data = pd.Series(True, index=pd.date_range(
+        start='1/1/2020', end='3/1/2020', freq='D', closed='left'))
+    assert gaps.trim(data).all()
+    data.iloc[0:8] = False
+    data.iloc[9] = False
+    expected = data.copy()
+    expected.iloc[0:10] = False
+    assert_series_equal(
+        expected,
+        gaps.trim(data)
+    )
+    data.iloc[-5:] = False
+    expected.iloc[-5:] = False
+    assert_series_equal(
+        expected,
+        gaps.trim(data)
+    )
 
 
 def test_completeness_score_all_nans():
