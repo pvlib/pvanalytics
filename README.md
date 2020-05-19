@@ -33,13 +33,13 @@ content evolves.  The functions in `quality`, `filtering`, and
 
   Other quality checks such as detecting timestamp errors will also be
   included in `quality`.
-* `filtering` as the name implies, contains functions for data
-  filtering (e.g. day/night or solar position)
+* `filtering` contains functions for data filtering (e.g. based on solar position).
 * `features` contains submodules with different methods for
   identifying and labeling salient features.
   * `clipping` functions for labeling inverter clipping.
   * `clearsky` functions for identifying periods of clear sky
     conditions.
+  * `daylight` functions for identifying when the sun is up.
 * `system` identification of PV system characteristics from data
   (e.g. nameplate power, orientation, azimuth)
 * `translate` contains functions for translating data to other
