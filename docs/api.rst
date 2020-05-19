@@ -53,6 +53,24 @@ Identify gaps in the data.
    quality.gaps.interpolation_diff
    quality.gaps.stale_values_diff
 
+The following functions identify days with incomplete data.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.gaps.completeness_score
+   quality.gaps.complete
+
+Many data sets may have leading and trailing periods of days with sporadic or
+no data. The following functions can be used to remove those periods.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.gaps.start_stop_dates
+   quality.gaps.trim
+   quality.gaps.trim_incomplete
+
 Outliers
 --------
 
