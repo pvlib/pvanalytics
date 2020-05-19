@@ -69,6 +69,7 @@ no data. The following functions can be used to remove those periods.
 
    quality.gaps.start_stop_dates
    quality.gaps.trim
+   quality.gaps.trim_incomplete
 
 Outliers
 --------

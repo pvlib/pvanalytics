@@ -278,7 +278,7 @@ def start_stop_dates(series, days=10):
 
 
 def trim(series, days=10):
-    """Mask the begining and end of the data if there are gaps.
+    """Mask the beginning and end of the data if not all True.
 
     Parameters
     ----------
@@ -293,7 +293,13 @@ def trim(series, days=10):
     Series
         A series of booleans with True for all data points between the
         first and last block of `days` consecutive days that are all
-        True in `series`
+        True in `series`. If `series` does not contain such a block of
+        consecutive True values, then the returned series will be
+        entirely False.
+
+    See Also
+    --------
+    :py:func:`start_stop_dates`
 
     """
     start, end = start_stop_dates(series, days=days)
@@ -304,11 +310,9 @@ def trim(series, days=10):
 
 
 def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
-    """Mask out missing data from the beginning and end of the data.
+    """Trim the series based on the completeness score.
 
-    False for times preceeding the start date and following the stop date
-    returned by :py:func:`start_stop_dates`. If no start and stop
-    dates are identified then a series of all False is returned.
+    Combines :py:func:`completeness_score` and :py:func:`trim`.
 
     Parameters
     ----------
@@ -334,7 +338,7 @@ def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
 
     See Also
     --------
-    :py:func:`start_stop_dates`
+    :py:func:`trim`
 
     :py:func:`completeness_score`
 
