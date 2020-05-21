@@ -112,7 +112,9 @@ def _clipped(power, derivative, clip_derivative, minimum):
     return (np.abs(derivative) <= clip_derivative) and (power > minimum)
 
 
-def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
+def _clipping_power(ac_power, clip_derivative=0.0035,
+                    power_quantile=0.995, frequency_quantile=0.25,
+                    freq=None):
     # Returns the clipping power threshold or None if no clipping is
     # identified in the data.
     #
@@ -152,7 +154,9 @@ def _clipping_power(ac_power, clip_derivative=0.0035, freq=None):
     return None
 
 
-def threshold(ac_power, clip_derivative=0.0035, freq=None):
+def threshold(ac_power, clip_derivative=0.0035,
+              power_quantile=0.995, frequency_quantile=0.25,
+              freq=None):
     """Detect clipping based on a maximum power threshold.
 
     A clipping threshold is calculated from the AC power data and any
@@ -176,6 +180,14 @@ def threshold(ac_power, clip_derivative=0.0035, freq=None):
         Minimum derivative for clipping to be indicated. The default
         value has been derived empirically to prevent false positives
         for tracking PV systems.
+    power_quantile : float, default 0.995
+        quantile used to determine the maximum power for each minute
+        of the day
+    frequency_quantile : float, default 0.25
+        After taking the count of positive values in `ac_power` at
+        each minute of the day, any minute with a count less than the
+        `frequency_quantile`-quantile of all counts is excluded from
+        the calculation of the clipping threshold.
     freq : string, default None
         A pandas string offset giving the frequency of data in
         `ac_power`. If None then the frequency is infered from the
@@ -195,6 +207,8 @@ def threshold(ac_power, clip_derivative=0.0035, freq=None):
     threshold = _clipping_power(
         ac_power,
         clip_derivative=clip_derivative,
+        power_quantile=power_quantile,
+        frequency_quantile=frequency_quantile,
         freq=freq
     )
     return ac_power >= threshold
