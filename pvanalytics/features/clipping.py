@@ -107,8 +107,9 @@ def _daytime_powercurve(ac_power, power_quantile=0.995,
 
 
 def _clipped(power, derivative, power_min, derivative_max):
-    # test whether a `power` is greater than `power_min` and
-    # `derivative` is less than `derivative_max`
+    # return a mask that is true where `power` is greater than
+    # `power_min` and the absolute value of `derivative` is less
+    # than `derivative_max`
     return (np.abs(derivative) <= derivative_max) and (power > power_min)
 
 
