@@ -90,22 +90,20 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
     return flags
 
 
-def _daytime_powercurve(ac_power):
+def _daytime_powercurve(ac_power, power_quantile=0.995,
+                        frequency_quantile=0.25):
     # return the 99.5% quantile of daytime power data after removing
     # night time data.
-    #
-    # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
-    power = ac_power.to_frame()
-    power_column = power.columns[0]
-    power['minutes'] = power.index.hour * 60 + power.index.minute
+    minutes = ac_power.index.hour * 60 + ac_power.index.minute
+    positive_power = ac_power >= 0
+    powerfreq = positive_power.groupby(minutes).sum()
+    min_daytime_freq = powerfreq.quantile(frequency_quantile)
+    daytimes = powerfreq[powerfreq >= min_daytime_freq].index
+    daytime_power = ac_power[minutes.isin(daytimes)]
 
-    power['positive_power'] = ac_power
-    power.loc[power.positive_power >= 0, 'positive_power'] = 1
-    powerfreq = power.groupby('minutes').positive_power.sum()
-    daytimes = powerfreq[powerfreq >= powerfreq.quantile(0.25)].index
-    daytime_power = power[power.minutes.isin(daytimes)]
-
-    return daytime_power.groupby('minutes')[power_column].quantile(0.995)
+    return daytime_power.groupby(
+        daytime_power.index.hour * 60 + daytime_power.index.minute
+    ).quantile(power_quantile)
 
 
 def _clipped(power, derivative, clip_derivative, minimum):
