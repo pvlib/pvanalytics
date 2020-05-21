@@ -106,13 +106,13 @@ def _daytime_powercurve(ac_power, power_quantile=0.995,
     ).quantile(power_quantile)
 
 
-def _clipped(power, derivative, clip_derivative, minimum):
+def _clipped(power, derivative, derivative_max, minimum):
     # test whether a `power` is greater than `minimum` and
-    # `derivative` is less than `clip_derivative`
-    return (np.abs(derivative) <= clip_derivative) and (power > minimum)
+    # `derivative` is less than `derivative_max`
+    return (np.abs(derivative) <= derivative_max) and (power > minimum)
 
 
-def _clipping_power(ac_power, clip_derivative=0.0035,
+def _clipping_power(ac_power, derivative_max=0.0035,
                     power_quantile=0.995, frequency_quantile=0.25,
                     freq=None):
     # Returns the clipping power threshold or None if no clipping is
@@ -137,7 +137,7 @@ def _clipping_power(ac_power, clip_derivative=0.0035,
     longest_powersum = 0
     longest_count = 0
     for derivative, power in zip(power_derivative, powercurve):
-        if _clipped(power, derivative, clip_derivative, power_median * 0.75):
+        if _clipped(power, derivative, derivative_max, power_median * 0.75):
             count += 1
             powersum += power
         else:
@@ -154,7 +154,7 @@ def _clipping_power(ac_power, clip_derivative=0.0035,
     return None
 
 
-def threshold(ac_power, clip_derivative=0.0035,
+def threshold(ac_power, derivative_max=0.0035,
               power_quantile=0.995, frequency_quantile=0.25,
               freq=None):
     """Detect clipping based on a maximum power threshold.
@@ -165,18 +165,18 @@ def threshold(ac_power, clip_derivative=0.0035,
     To calculate the clipping threshold, `ac_power` is aggregated at
     each minute of the day. Low power data is removed to eliminate
     night-time periods and the 99.5% quantile is computed. If the
-    derivative of the 99.5% quantile is less than `clip_derivative`
+    derivative of the 99.5% quantile is less than `derivative_max`
     for a continuous period of at least one hour then clipping is
     indicated. The mean power for that period is used as the
     threshold. If there are multiple periods with a derivative less
-    than `clip_derivative` then the longest period is used to compute
+    than `derivative_max` then the longest period is used to compute
     the threshold.
 
     Parameters
     ----------
     ac_power : Series
         DatetimeIndexed series of AC power data.
-    clip_derivative : float, default 0.0035
+    derivative_max : float, default 0.0035
         Minimum derivative for clipping to be indicated. The default
         value has been derived empirically to prevent false positives
         for tracking PV systems.
@@ -206,7 +206,7 @@ def threshold(ac_power, clip_derivative=0.0035,
     """
     threshold = _clipping_power(
         ac_power,
-        clip_derivative=clip_derivative,
+        derivative_max=derivative_max,
         power_quantile=power_quantile,
         frequency_quantile=frequency_quantile,
         freq=freq
