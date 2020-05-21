@@ -113,11 +113,30 @@ def _clipped(power, derivative, power_min, derivative_max):
     return (np.abs(derivative) <= derivative_max) and (power > power_min)
 
 
-def _clipping_power(ac_power, derivative_max=0.0035,
+def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
                     power_quantile=0.995, frequency_quantile=0.25,
                     freq=None):
-    # Returns the clipping power threshold or None if no clipping is
-    # identified in the data.
+    # Calculate a power threshold, above which the power is being
+    # clipped.
+    #
+    # - The daytime power curve is calculated using
+    #   _daytime_powercurve(). This function groups `ac_power` by
+    #   minute of the day and returns the `power_quantile`-quantile of
+    #   power for each minute, excluding night time, early morning,
+    #   and late afternoon/evening (the amount of data that is
+    #   excluded is controlled by `frequency_quantile`).
+    #
+    # - Each timestamp in the daytime power curve that satisfies the
+    #   clipping criteria[*] is flagged.
+    #
+    # - The clipping threshold is calculated as the mean of the
+    #   longest flagged period in the daytime power curve
+    #
+    # [*] clipping criteria: a timestamp satisfies the clipping
+    # criteria if the derivative of the daytime power curve at that
+    # time is less than `derivative_max` and the value of the daytime
+    # power curve is greater than `power_min` times the median of the
+    # daytime power curve.
     #
     # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
     if not freq:
@@ -138,7 +157,8 @@ def _clipping_power(ac_power, derivative_max=0.0035,
     longest_powersum = 0
     longest_count = 0
     for derivative, power in zip(power_derivative, powercurve):
-        if _clipped(power, derivative, power_median * 0.75, derivative_max):
+        if _clipped(power, derivative, power_median * power_min,
+                    derivative_max):
             count += 1
             powersum += power
         else:
