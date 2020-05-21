@@ -85,9 +85,9 @@ def daily_min(series, minimum, inclusive=False):
     2020 Alliance for Sustainable Energy, LLC.
 
     """
-    operator = np.greater
+    greater_than = np.greater
     if inclusive:
-        operator = np.greater_equal
+        greater_than = np.greater_equal
     dailymin = series.resample('D').min()
-    flags = operator(dailymin, minimum)
+    flags = greater_than(dailymin, minimum)
     return flags.reindex(index=series.index, method='ffill', fill_value=False)
