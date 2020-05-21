@@ -179,12 +179,13 @@ def threshold(ac_power, derivative_max=0.0035,
     To calculate the clipping threshold, `ac_power` is aggregated at
     each minute of the day. Low power data is removed to eliminate
     night-time periods and the 99.5% quantile is computed at each
-    minute. If the derivative of the 99.5% quantile is less than
-    `derivative_max` for a continuous period of at least one hour then
-    clipping is indicated. The mean power for that period is used as
-    the threshold. If there are multiple periods with a derivative
-    less than `derivative_max` then the longest period is used to
-    compute the threshold.
+    minute. If the absolute value of the derivative of the 99.5%
+    quantile (with respect to time) is less than `derivative_max` for
+    a continuous period of at least one hour then clipping is
+    indicated. The mean power for that period is used as the
+    threshold. If there are multiple periods with a derivative less
+    than `derivative_max` then the longest period is used to compute
+    the threshold.
 
     Parameters
     ----------
