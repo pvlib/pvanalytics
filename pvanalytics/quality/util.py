@@ -61,22 +61,21 @@ def check_limits(val, lower_bound=None, upper_bound=None,
 
 
 def daily_min(series, minimum, inclusive=False):
-    """Select only data on days where the daily minimum is less than minimum.
+    """Return True for data on days when the daily minimum is greater than (or equal to) daily_min.
 
     Parameters
     ----------
     series : Series
         A Datetimeindexed series of floats.
-    maximum : float
-        The largest acceptable value for the daily minumum.
+    minimum : float
+        The smallest acceptable value for the daily minimum.
     inclusive : boolean, default False
-        Whether values equal to `maximum` are considered too large.
+        Use less than or equal to when comparing ``series`` to ``daily_min``.
 
     Returns
     -------
     Series
-        True for every value that occurs on a day where the minimim
-        value recorded on that day is less than `minimum`. False for
+        value recorded on that day is greater than (or equal to) ``minimum``.
         all values on days where the daily minimum is >= minimum.
 
     Notes
