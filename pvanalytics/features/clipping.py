@@ -138,7 +138,8 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     # power curve is greater than `power_min` times the median of the
     # daytime power curve.
     #
-    # Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
+    # Based on the PVFleets QA Analysis project, Copyright (c) 2020
+    # Alliance for Sustainable Energy, LLC.
     if not freq:
         freq = pd.Timedelta(pd.infer_freq(ac_power.index)).seconds * 60
     elif isinstance(freq, str):
@@ -152,8 +153,8 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
                         / normalized_power.index.to_series().diff()) * freq
 
     clipped_times = _clipped(powercurve, power_derivative,
-                        powercurve.median() * power_min,
-                        derivative_max)
+                             powercurve.median() * power_min,
+                             derivative_max)
     clipping_cumsum = (~clipped_times).cumsum()
     # get the value of the cumulative sum the longest True span
     longest_clipped = clipping_cumsum.value_counts().idxmax()
