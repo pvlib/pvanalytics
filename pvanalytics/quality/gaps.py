@@ -35,7 +35,7 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     return np.allclose(a=x, b=x[0], rtol=rtol, atol=atol)
 
 
-def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8):
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
@@ -87,7 +87,7 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8):
     return flags
 
 
-def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8):
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
