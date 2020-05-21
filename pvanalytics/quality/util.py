@@ -60,7 +60,7 @@ def check_limits(val, lower_bound=None, upper_bound=None,
         raise ValueError('must provide either upper or lower bound')
 
 
-def daily_maxmin(series, maximum, inclusive=False):
+def daily_min(series, minimum, inclusive=False):
     """Select only data on days where the daily minimum is less than minimum.
 
     Parameters
@@ -86,9 +86,9 @@ def daily_maxmin(series, maximum, inclusive=False):
     2020 Alliance for Sustainable Energy, LLC.
 
     """
-    operator = np.less
+    operator = np.greater
     if inclusive:
-        operator = np.less_equal
+        operator = np.greater_equal
     dailymin = series.resample('D').min()
-    flags = operator(dailymin, maximum)
+    flags = operator(dailymin, minimum)
     return flags.reindex(index=series.index, method='ffill', fill_value=False)
