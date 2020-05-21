@@ -110,7 +110,7 @@ def _clipped(power, derivative, power_min, derivative_max):
     # return a mask that is true where `power` is greater than
     # `power_min` and the absolute value of `derivative` is less
     # than `derivative_max`
-    return (np.abs(derivative) <= derivative_max) and (power > power_min)
+    return (np.abs(derivative) <= derivative_max) & (power > power_min)
 
 
 def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
@@ -150,28 +150,20 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     normalized_power = powercurve / powercurve.max()
     power_derivative = (normalized_power.diff()
                         / normalized_power.index.to_series().diff()) * freq
-    power_median = powercurve.median()
 
-    powersum = 0
-    count = 0
-    longest_powersum = 0
-    longest_count = 0
-    for derivative, power in zip(power_derivative, powercurve):
-        if _clipped(power, derivative, power_median * power_min,
-                    derivative_max):
-            count += 1
-            powersum += power
-        else:
-            count = 0
-            powersum = 0
+    clipped_times = _clipped(powercurve, power_derivative,
+                        powercurve.median() * power_min,
+                        derivative_max)
+    clipping_cumsum = (~clipped_times).cumsum()
+    # get the value of the cumulative sum the longest True span
+    longest_clipped = clipping_cumsum.value_counts().idxmax()
+    # select the longest span that satisfies the clipping criteria
+    longest = powercurve[clipping_cumsum == longest_clipped]
 
-        if count > longest_count:
-            longest_count = count
-            longest_powersum = powersum
-
-    if (longest_count * freq) >= 60:
-        return longest_powersum / longest_count
-
+    if longest.index[-1] - longest.index[0] >= 60:
+        # if the period of clipping is at least 60 minutes then we
+        # have enough evidence to determine the clipping threshold.
+        return longest.mean()
     return None
 
 
