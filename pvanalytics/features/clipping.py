@@ -106,10 +106,10 @@ def _daytime_powercurve(ac_power, power_quantile=0.995,
     ).quantile(power_quantile)
 
 
-def _clipped(power, derivative, derivative_max, minimum):
-    # test whether a `power` is greater than `minimum` and
+def _clipped(power, derivative, power_min, derivative_max):
+    # test whether a `power` is greater than `power_min` and
     # `derivative` is less than `derivative_max`
-    return (np.abs(derivative) <= derivative_max) and (power > minimum)
+    return (np.abs(derivative) <= derivative_max) and (power > power_min)
 
 
 def _clipping_power(ac_power, derivative_max=0.0035,
@@ -137,7 +137,7 @@ def _clipping_power(ac_power, derivative_max=0.0035,
     longest_powersum = 0
     longest_count = 0
     for derivative, power in zip(power_derivative, powercurve):
-        if _clipped(power, derivative, derivative_max, power_median * 0.75):
+        if _clipped(power, derivative, power_median * 0.75, derivative_max):
             count += 1
             powersum += power
         else:
