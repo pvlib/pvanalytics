@@ -2,6 +2,7 @@
 import pytest
 import pandas as pd
 from pvanalytics.features import daylight
+from pandas.util.testing import assert_series_equal
 
 
 def test_frequency_too_few_days(quadratic):
@@ -54,3 +55,21 @@ def test_level_nonzero_night(quadratic_day):
     quadratic_day.iloc[61:] = 10
     assert not daylight.level(quadratic_day).iloc[61:0].any()
     assert (quadratic_day[daylight.level(quadratic_day)] > 10).all()
+
+
+def test_level_daytime_split(quadratic_day):
+    """The correct mask is returned when daytime spans two dates"""
+    shifted_day = quadratic_day.shift(freq='20H')
+    assert_series_equal(
+        daylight.level(quadratic_day).shift(freq='20H'),
+        daylight.level(shifted_day)
+    )
+
+
+def test_frequency_daytime_split(quadratic_day):
+    """The correct mask is returned when daytime spans two dates"""
+    shifted_day = quadratic_day.shift(freq='20H')
+    assert_series_equal(
+        daylight.frequency(quadratic_day, minimum_days=1).shift(freq='20H'),
+        daylight.frequency(shifted_day, minimum_days=1)
+    )
