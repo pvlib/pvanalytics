@@ -1,1 +1,1 @@
-from pvanalytics.fitting import temperature
+from pvanalytics.fitting import temperature  # noqa: F401
