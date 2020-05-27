@@ -55,6 +55,9 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     stale if all values in the window are close to the first value
     (index 0).
 
+    Parameters `rtol` and `atol` have the same meaning as in
+    :py:func:`numpy.allclose`.
+
     Parameters
     ----------
     x : Series
@@ -69,9 +72,6 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     label_all : bool, default False
         Whether to label the full window. If False, then just the
         endpoints of the window are labeled.
-
-    Parameters rtol and atol have the same meaning as in
-    numpy.allclose
 
     Returns
     -------
@@ -111,6 +111,9 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     Sequences are linear if the first difference appears to be
     constant.  For a window of length N, the last value (index N-1) is
     flagged if all values in the window appear to be a line segment.
+
+    Parameters `rtol` and `atol` have the same meaning as in
+    :py:func:`numpy.allclose`.
 
     Parameters
     ----------
