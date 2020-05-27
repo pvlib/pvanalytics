@@ -70,13 +70,14 @@ def daily_min(series, minimum, inclusive=False):
     minimum : float
         The smallest acceptable value for the daily minimum.
     inclusive : boolean, default False
-        Use less than or equal to when comparing ``series`` to ``daily_min``.
+        Use less than or equal to when comparing daily minimums from
+        `series` to `minimum`.
 
     Returns
     -------
     Series
-        value recorded on that day is greater than (or equal to) ``minimum``.
-        all values on days where the daily minimum is >= minimum.
+        True for values on days where the minimum value recorded on
+        that day is greater than (or eaqual) `minimum`.
 
     Notes
     -----

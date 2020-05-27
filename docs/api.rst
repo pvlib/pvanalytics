@@ -86,7 +86,7 @@ functions for building your own quality checks.
    :toctree: generated/
 
    quality.util.check_limits
-   quality.util.daily_maxmin
+   quality.util.daily_min
 
 Weather
 -------
