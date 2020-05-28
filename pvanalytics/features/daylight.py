@@ -64,10 +64,10 @@ def frequency(power_or_irradiance, threshold=0.8, minimum_days=60):
 def level(power_or_irradiance, threshold=0.2, quantile=0.95):
     """Identify daytime periods based on a minimum power/irradiance threshold.
 
-    Power or irradiance data is aggregated by minute of day and times
-    where the mean power is greater than `threshold` * max are marked
-    as daytime, where max is the `quantile`-percent quantile of the
-    data.
+    Power or irradiance data is aggregated by minute of day and the
+    mean is computed at each minute. A minute is marked as daytime
+    when the mean value is greater than or equal to `threshold` times
+    the `quantile`-percent of `power_or_irradiance`.
 
     Parameters
     ----------
