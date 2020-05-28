@@ -38,7 +38,7 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
 def _backfill_window(endpoints, window):
     # propagate Trues in `endpoints` back `window` periods.  This
     # makes Trues fill the entire window, rather than just marking the
-    # endpoints of the window.
+    # right endpoint of each window.
     #
     # `endpoints` must be the output of Series.rolling with `label='right'`
     flags = endpoints
@@ -70,8 +70,8 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
     label_all : bool, default False
-        Whether to label the full window. If False, then just the
-        endpoints of the window are labeled.
+        Whether to label the full window. If False, then only the right
+        endpoint of the window is labeled.
 
     Returns
     -------
@@ -127,8 +127,8 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     atol : float, default 1e-8
         absolute tolerance for detecting a change in first difference
     label_all : bool, default False
-        Whether to label all values in the window. If False only the
-        endpoints of the window are labeled.
+        Whether to label all values in the window. If False, then only the
+        right endpoint of the window is labeled.
 
     Returns
     -------
