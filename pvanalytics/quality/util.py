@@ -61,7 +61,7 @@ def check_limits(val, lower_bound=None, upper_bound=None,
 
 
 def daily_min(series, minimum, inclusive=False):
-    """Return True for data on days when the minimum exceeds `minimum`.
+    """Return True for data on days when the day's minimum exceeds `minimum`.
 
     Parameters
     ----------
@@ -77,7 +77,7 @@ def daily_min(series, minimum, inclusive=False):
     -------
     Series
         True for values on days where the minimum value recorded on
-        that day is greater than (or eaqual) `minimum`.
+        that day is greater than (or equal to) `minimum`.
 
     Notes
     -----
