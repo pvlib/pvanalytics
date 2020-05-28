@@ -134,14 +134,14 @@ Time
 
 The following functions can be used to differentiate night-time and
 day-time based on power or irradiance data. This is useful if you do
-not know the time-zone of the index for your data of for verifying
-that the time-zone is correct. Both functions identify the same
+not know the timezone of the index for your data or for verifying
+that the timezone is correct. Both functions identify the same
 feature, but in slightly different ways.
 :py:func:`features.daylight.frequency` is useful if your data has
 substantial outliers or other excessively large values; however, it
-may fail if substantial portions of the night time data is greater
+may fail if substantial portions of the night-time data is greater
 than 0. :py:func:`features.daylight.level` can handle positive
-night-time data (so long as it is still substantially lower than
+night-time data (so long as night-time values are substantially lower than
 day-time data) but may be more suceptible to large outliers.
 
 .. autosummary::
