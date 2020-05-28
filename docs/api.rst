@@ -94,6 +94,18 @@ spacing, time-shifts, and time zone validation.
 
    quality.time.spacing
 
+Utilities
+---------
+
+The :py:mod:`quality.util` module contains general-purpose/utility
+functions for building your own quality checks.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.util.check_limits
+   quality.util.daily_min
+
 Weather
 -------
 
