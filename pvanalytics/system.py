@@ -11,10 +11,10 @@ class Orientation(enum.Enum):
     TRACKING = enum.auto()
 
 
-def _remove_morning_evening(power, threshold):
-    # Remove morning and evening power by excluding times where
-    # `power` is less than ``threshold * power.max()``
-    return power[power > threshold * power.max()]
+def _remove_morning_evening(data, threshold):
+    # Remove morning and evening data by excluding times where
+    # `data` is less than ``threshold * data.max()``
+    return data[data > threshold * data.max()]
 
 
 def _group_by_minute(data):
@@ -83,20 +83,22 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
     return None
 
 
-def orientation(power, daytime, clipping, fit_median=True):
-    """Infer the orientation of the system from power data.
+def orientation(series, daytime, clipping, fit_median=True):
+    """Infer the orientation of the system from power or irradiance data.
 
     Parameters
     ----------
-    power : Series
-        Time series of AC power data.
+    series : Series
+        Time series of power or irradiance data.
     daytime : Series
         Boolean Series with True for times that are during the day.
     clipping : Series
-        Boolean Series identifying where power is being clipped.
+        Boolean Series identifying where power or irradiance is being
+        clipped.
     fit_median : boolean, default True
-        Perform a secondary fit with the median power to validate that
-        the orientation is consistent through the entire data set.
+        Perform a secondary fit with the median power or irradiance to
+        validate that the orientation is consistent through the entire
+        data set.
 
     Returns
     -------
@@ -106,7 +108,7 @@ def orientation(power, daytime, clipping, fit_median=True):
 
     """
     envelope = _remove_morning_evening(
-        _group_by_minute(power[daytime]).quantile(0.995),
+        _group_by_minute(series[daytime]).quantile(0.995),
         0.05
     )
     middle = (envelope.index.max() + envelope.index.min()) / 2
@@ -118,7 +120,7 @@ def orientation(power, daytime, clipping, fit_median=True):
     )
     if fit_median:
         median = _remove_morning_evening(
-            _group_by_minute(power[daytime]).median(),
+            _group_by_minute(series[daytime]).median(),
             0.025
         )
         if system_orientation is Orientation.FIXED:
