@@ -25,9 +25,10 @@ def _group_by_minute(data):
 def _fit_quadratic(data):
     # Fit a quadratic to `data` returning R^2 for the fit.
     coefficients = np.polyfit(data.index, data, 2)
+    quadratic = np.poly1d(coefficients)
     # Calculate the R^2 for the fit
     _, _, correlation, _, _ = scipy.stats.linregress(
-        data, np.poly1d(coefficients)
+        data, quadratic(data.index)
     )
     return correlation**2
 
