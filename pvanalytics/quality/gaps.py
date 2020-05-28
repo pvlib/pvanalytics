@@ -70,8 +70,8 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
     label_all : bool, default False
-        Whether to label the full window. If False, then only the right
-        endpoint of the window is labeled.
+        Whether to label all values in the window. If False, then only
+        the right endpoint of the window is labeled.
 
     Returns
     -------
