@@ -5,10 +5,11 @@ import scipy.stats
 import scipy.optimize
 
 
+@enum.unique
 class Orientation(enum.Enum):
     """Orientation of a PV System can be either Fixed or Tracking."""
-    FIXED = enum.auto()
-    TRACKING = enum.auto()
+    FIXED = 1
+    TRACKING = 2
 
 
 def _remove_morning_evening(data, threshold):
