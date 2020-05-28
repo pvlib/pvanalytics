@@ -15,9 +15,12 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     ----------
     x : array
     rtol : float, default 1e-5
-        Relative tolerance for detecting a change in data values.
+        Tolerance for detecting a change relative to x[0].
     atol : float, default 1e-8
-        Absolute tolerance for detecting a change in data values.
+        Absolute tolerance for detecting a change from x[0].
+
+    Parameters rtol and atol have the same meaning as in
+    numpy.allclose.
 
     Returns
     -------

@@ -61,7 +61,7 @@ def test_stale_values_diff(stale_data):
     res6 = gaps.stale_values_diff(stale_data[1:], window=3)
     res7 = gaps.stale_values_diff(stale_data[1:8], window=3)
     assert_series_equal(res0, pd.Series([False, False, False, False, False,
-                                         False, False, False, False, False]))
+                                         False, True, True, False, False]))
     assert_series_equal(res1, pd.Series([False, False, False, True, True, True,
                                          True, True, False, False]))
     assert_series_equal(res2, pd.Series([False, False, True, True, True, False,
