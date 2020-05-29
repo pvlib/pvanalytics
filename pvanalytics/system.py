@@ -63,27 +63,33 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
     #
     # Returns Orientation.UNKNOWN if orientation cannot be determined,
     # otherwise returns the orientation.
-    if clip_percent < 0.5:
-        if rsquared_quadratic >= 0.945:
-            return Orientation.FIXED
-        if rsquared_quartic >= 0.945 and rsquared_quadratic < 0.92:
-            return Orientation.TRACKING
-    elif clip_percent <= 3.0:
-        if rsquared_quadratic >= 0.92:
-            return Orientation.FIXED
-        if rsquared_quartic >= 0.92 and rsquared_quadratic < 0.92:
-            return Orientation.TRACKING
-    elif clip_percent <= 4.0:
-        if rsquared_quadratic >= 0.90:
-            return Orientation.FIXED
-        if rsquared_quartic >= 0.92 and rsquared_quadratic < 0.92:
-            return Orientation.TRACKING
-    elif clip_percent <= 10.0:
-        if rsquared_quadratic >= 0.88:
-            return Orientation.FIXED
-        if rsquared_quartic >= 0.92 and rsquared_quadratic < 0.92:
-            return Orientation.TRACKING
+    if clip_percent > 10.0:
+        # Too much clipping means the orientation cannot be determined
+        return Orientation.UNKNOWN
+    bounds = _get_bounds(clip_percent)
+    if rsquared_quadratic >= bounds['fixed']:
+        return Orientation.FIXED
+    if rsquared_quartic >= bounds['tracking'] and rsquared_quadratic < 0.92:
+        return Orientation.TRACKING
     return Orientation.UNKNOWN
+
+
+def _get_bounds(clip_percent):
+    # get the minimum r^2 for fits to determin tracking or fixed
+    # orientation. The bounds vary by the amount of clipping in the
+    # data, passed as a percentage in `clip_percent`.
+    quadratic_min = 0.945
+    quartic_min = 0.945
+    if clip_percent >= 0.5:
+        quartic_min = 0.92
+    if 0.5 <= clip_percent <= 3.0:
+        quadratic_min = 0.92
+    elif clip_percent <= 4.0:
+        quadratic_min = 0.9
+    elif clip_percent <= 10.0:
+        quadratic_min = 0.88
+    return {'tracking': quadratic_min,
+            'fixed': quartic_min}
 
 
 def orientation(series, daytime, clipping, fit_median=True):
