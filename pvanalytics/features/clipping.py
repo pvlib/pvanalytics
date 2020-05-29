@@ -106,14 +106,14 @@ def _daytime_powercurve(ac_power, power_quantile=0.995,
     ).quantile(power_quantile)
 
 
-def _clipped(power, derivative, power_min, derivative_max):
+def _clipped(power, slope, power_min, slope_max):
     # return a mask that is true where `power` is greater than
-    # `power_min` and the absolute value of `derivative` is less
-    # than or equal to `derivative_max`
-    return (np.abs(derivative) <= derivative_max) & (power > power_min)
+    # `power_min` and the absolute value of `slope` is less
+    # than or equal to `slope_max`
+    return (np.abs(slope) <= slope_max) & (power > power_min)
 
 
-def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
+def _clipping_power(ac_power, slope_max=0.0035, power_min=0.75,
                     power_quantile=0.995, frequency_quantile=0.25,
                     freq=None):
     # Calculate a power threshold, above which the power is being
@@ -134,7 +134,7 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     #
     # [*] clipping criteria: a timestamp satisfies the clipping
     # criteria if the absolute value of the slope of the daytime power curve
-    # is less than `derivative_max` and the value of the daytime
+    # is less than `slope_max` and the value of the daytime
     # power curve is greater than `power_min` times the median of the
     # daytime power curve.
     #
@@ -144,16 +144,16 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     elif isinstance(freq, str):
         freq = pd.Timedelta(freq).seconds / 60
 
-    # Use the derivative of the 99.5% quantile of daytime power at
+    # Use the slope of the 99.5% quantile of daytime power at
     # each minute to identify clipping.
     powercurve = _daytime_powercurve(ac_power)
     normalized_power = powercurve / powercurve.max()
-    power_derivative = (normalized_power.diff()
-                        / normalized_power.index.to_series().diff()) * freq
+    power_slope = (normalized_power.diff()
+                   / normalized_power.index.to_series().diff()) * freq
 
-    clipped_times = _clipped(powercurve, power_derivative,
+    clipped_times = _clipped(powercurve, power_slope,
                              powercurve.median() * power_min,
-                             derivative_max)
+                             slope_max)
     clipping_cumsum = (~clipped_times).cumsum()
     # get the value of the cumulative sum of the longest True span
     longest_clipped = clipping_cumsum.value_counts().idxmax()
@@ -167,7 +167,7 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     return None
 
 
-def threshold(ac_power, derivative_max=0.0035,
+def threshold(ac_power, slope_max=0.0035,
               power_quantile=0.995, frequency_quantile=0.25,
               freq=None):
     """Detect clipping based on a maximum power threshold.
@@ -179,19 +179,19 @@ def threshold(ac_power, derivative_max=0.0035,
     each minute of the day. Low power data is removed to eliminate
     night-time periods and the 99.5% quantile is computed at each
     minute. If the absolute value of the slope of the 99.5%
-    quantile is less than `derivative_max` for
+    quantile is less than `slope_max` for
     a continuous period of at least one hour then clipping is
     indicated. The mean power for that period is used as the
     threshold. If there are multiple periods with a slope less
-    than `derivative_max` then the longest period is used to compute
+    than `slope_max` then the longest period is used to compute
     the threshold.
 
     Parameters
     ----------
     ac_power : Series
         DatetimeIndexed series of AC power data.
-    derivative_max : float, default 0.0035
-        Maximum absolute value of derivative of AC power quantile for
+    slope_max : float, default 0.0035
+        Maximum absolute value of slope of AC power quantile for
         clipping to be indicated. The default value has been derived
         empirically to prevent false positives for tracking PV
         systems.
@@ -219,7 +219,7 @@ def threshold(ac_power, derivative_max=0.0035,
     """
     threshold = _clipping_power(
         ac_power,
-        derivative_max=derivative_max,
+        slope_max=slope_max,
         power_quantile=power_quantile,
         frequency_quantile=frequency_quantile,
         freq=freq
