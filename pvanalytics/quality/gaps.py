@@ -38,27 +38,43 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     return np.allclose(a=x, b=x[0], rtol=rtol, atol=atol)
 
 
-def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8):
+def _backfill_window(endpoints, window):
+    # propagate Trues in `endpoints` back `window` periods.  This
+    # makes Trues fill the entire window, rather than just marking the
+    # right endpoint of each window.
+    #
+    # `endpoints` must be the output of Series.rolling with `label='right'`
+    flags = endpoints
+    while window > 0:
+        window = window - 1
+        flags = flags | endpoints.shift(-window).fillna(False)
+    return flags
+
+
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
     stale if all values in the window are close to the first value
     (index 0).
 
+    Parameters `rtol` and `atol` have the same meaning as in
+    :py:func:`numpy.allclose`.
+
     Parameters
     ----------
     x : Series
         data to be processed
-    window : int, default 3
+    window : int, default 6
         number of consecutive values which, if unchanged, indicates
         stale data
     rtol : float, default 1e-5
         relative tolerance for detecting a change in data values
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
-
-    Parameters rtol and atol have the same meaning as in
-    numpy.allclose
+    label_all : bool, default False
+        Whether to label all values in the window. If False, then only
+        the right endpoint of the window is labeled.
 
     Returns
     -------
@@ -87,27 +103,35 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8):
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
+    if label_all:
+        return _backfill_window(flags, window)
     return flags
 
 
-def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8):
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
     constant.  For a window of length N, the last value (index N-1) is
     flagged if all values in the window appear to be a line segment.
 
+    Parameters `rtol` and `atol` have the same meaning as in
+    :py:func:`numpy.allclose`.
+
     Parameters
     ----------
     x : Series
         data to be processed
-    window : int, default 3
+    window : int, default 6
         number of sequential values that, if the first difference is
         constant, are classified as a linear sequence
     rtol : float, default 1e-5
         tolerance relative to max(abs(x.diff()) for detecting a change
     atol : float, default 1e-8
         absolute tolerance for detecting a change in first difference
+    label_all : bool, default False
+        Whether to label all values in the window. If False, then only the
+        right endpoint of the window is labeled.
 
     Returns
     -------
@@ -138,6 +162,8 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8):
         rtol=rtol,
         atol=atol
     )
+    if label_all:
+        return _backfill_window(flags, window)
     return flags
 
 

@@ -58,3 +58,37 @@ def check_limits(val, lower_bound=None, upper_bound=None,
         return ub_op(val, upper_bound)
     else:
         raise ValueError('must provide either upper or lower bound')
+
+
+def daily_min(series, minimum, inclusive=False):
+    """Return True for data on days when the day's minimum exceeds `minimum`.
+
+    Parameters
+    ----------
+    series : Series
+        A Datetimeindexed series of floats.
+    minimum : float
+        The smallest acceptable value for the daily minimum.
+    inclusive : boolean, default False
+        Use greater than or equal to when comparing daily minimums from
+        `series` to `minimum`.
+
+    Returns
+    -------
+    Series
+        True for values on days where the minimum value recorded on
+        that day is greater than (or equal to) `minimum`.
+
+    Notes
+    -----
+    This function is derived from code in the pvfleets_qa_analysis
+    project under the terms of the 3-clause BSD license. Copyright (c)
+    2020 Alliance for Sustainable Energy, LLC.
+
+    """
+    greater_than = np.greater
+    if inclusive:
+        greater_than = np.greater_equal
+    dailymin = series.resample('D').min()
+    flags = greater_than(dailymin, minimum)
+    return flags.reindex(index=series.index, method='ffill', fill_value=False)

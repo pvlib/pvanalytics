@@ -121,6 +121,17 @@ def test_stale_values_diff_raises_error(stale_data):
         gaps.stale_values_diff(stale_data, window=1)
 
 
+def test_stale_values_diff_label_all(stale_data):
+    """When label_all is True the full window is marked stale"""
+    assert_series_equal(
+        pd.Series([False, True, True, True, True,
+                   True, True, True, False, False]),
+        gaps.stale_values_diff(
+            stale_data, window=4, label_all=True
+        )
+    )
+
+
 @pytest.fixture
 def interpolated_data():
     """A series that contains linear interpolation.
@@ -137,6 +148,17 @@ def interpolated_data():
     data = [1.0, 1.001, 1.002001, 1.003, 1.004, 1.001001, 1.001001, 1.001001,
             1.2, 1.3, 1.5, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0]
     return pd.Series(data=data)
+
+
+def test_interpolation_diff_label_all(interpolated_data):
+    """When label_all is True the full window is marked interpoated"""
+    assert_series_equal(
+        gaps.interpolation_diff(interpolated_data, window=3, label_all=True),
+        pd.Series([False, False, False, False, False,
+                   True, True, True, False, False,
+                   False, True, True, True, True, True,
+                   False])
+    )
 
 
 def test_interpolation_diff(interpolated_data):
