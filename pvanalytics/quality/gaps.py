@@ -15,9 +15,12 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     ----------
     x : array
     rtol : float, default 1e-5
-        Relative tolerance for detecting a change in data values.
+        Tolerance for detecting a change relative to x[0].
     atol : float, default 1e-8
-        Absolute tolerance for detecting a change in data values.
+        Absolute tolerance for detecting a change from x[0].
+
+    Parameters rtol and atol have the same meaning as in
+    numpy.allclose.
 
     Returns
     -------
@@ -48,7 +51,7 @@ def _backfill_window(endpoints, window):
     return flags
 
 
-def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
@@ -62,7 +65,7 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     ----------
     x : Series
         data to be processed
-    window : int, default 3
+    window : int, default 6
         number of consecutive values which, if unchanged, indicates
         stale data
     rtol : float, default 1e-5
@@ -105,7 +108,7 @@ def stale_values_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     return flags
 
 
-def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
@@ -119,7 +122,7 @@ def interpolation_diff(x, window=3, rtol=1e-5, atol=1e-8, label_all=False):
     ----------
     x : Series
         data to be processed
-    window : int, default 3
+    window : int, default 6
         number of sequential values that, if the first difference is
         constant, are classified as a linear sequence
     rtol : float, default 1e-5

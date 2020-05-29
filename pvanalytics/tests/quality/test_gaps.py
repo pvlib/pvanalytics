@@ -52,13 +52,16 @@ def test_stale_values_diff(stale_data):
     for more information.
 
     """
-    res1 = gaps.stale_values_diff(stale_data)
+    res0 = gaps.stale_values_diff(stale_data)
+    res1 = gaps.stale_values_diff(stale_data, window=3)
     res2 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=2)
     res3 = gaps.stale_values_diff(stale_data, window=7)
     res4 = gaps.stale_values_diff(stale_data, window=8)
     res5 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=4)
-    res6 = gaps.stale_values_diff(stale_data[1:])
-    res7 = gaps.stale_values_diff(stale_data[1:8])
+    res6 = gaps.stale_values_diff(stale_data[1:], window=3)
+    res7 = gaps.stale_values_diff(stale_data[1:8], window=3)
+    assert_series_equal(res0, pd.Series([False, False, False, False, False,
+                                         False, True, True, False, False]))
     assert_series_equal(res1, pd.Series([False, False, False, True, True, True,
                                          True, True, False, False]))
     assert_series_equal(res2, pd.Series([False, False, True, True, True, False,
@@ -88,16 +91,16 @@ def test_stale_values_diff_handles_negatives(data_with_negatives):
     for more information.
 
     """
-    res = gaps.stale_values_diff(data_with_negatives)
+    res = gaps.stale_values_diff(data_with_negatives, window=3)
     assert_series_equal(res, pd.Series([False, False, True, True, False, False,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, atol=1e-3)
+    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-3)
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
-    res = gaps.stale_values_diff(data_with_negatives, atol=1e-5)
+    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-5)
     assert_series_equal(res, pd.Series([False, False, True, True, True, False,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, atol=2e-5)
+    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=2e-5)
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
 
@@ -170,12 +173,17 @@ def test_interpolation_diff(interpolated_data):
     for more information.
 
     """
-    res1 = gaps.interpolation_diff(interpolated_data)
+    res0 = gaps.interpolation_diff(interpolated_data)
+    assert_series_equal(res0, pd.Series([False, False, False, False, False,
+                                         False, False, False, False, False,
+                                         False, False, False, False, False,
+                                         False, False]))
+    res1 = gaps.interpolation_diff(interpolated_data, window=3)
     assert_series_equal(res1, pd.Series([False, False, False, False, False,
                                          False, False, True, False, False,
                                          False, False, False, True, True, True,
                                          False]))
-    res2 = gaps.interpolation_diff(interpolated_data, rtol=1e-2)
+    res2 = gaps.interpolation_diff(interpolated_data, window=3, rtol=1e-2)
     assert_series_equal(res2, pd.Series([False, False, True, True, True,
                                          False, False, True, False, False,
                                          False, False, False, True, True, True,
@@ -185,7 +193,7 @@ def test_interpolation_diff(interpolated_data):
                                          False, False, False, False, False,
                                          False, False, False, False, False,
                                          True, False]))
-    res4 = gaps.interpolation_diff(interpolated_data, atol=1e-2)
+    res4 = gaps.interpolation_diff(interpolated_data, window=3, atol=1e-2)
     assert_series_equal(res4, pd.Series([False, False, True, True, True,
                                          True, True, True, False, False,
                                          False, False, False, True, True, True,
@@ -204,10 +212,10 @@ def test_interpolation_diff_handles_negatives(data_with_negatives):
     for more information.
 
     """
-    res = gaps.interpolation_diff(data_with_negatives, atol=1e-5)
+    res = gaps.interpolation_diff(data_with_negatives, window=3, atol=1e-5)
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, atol=1e-4)
+    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-4)
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
 
