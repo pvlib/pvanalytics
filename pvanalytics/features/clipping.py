@@ -91,8 +91,9 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
 
 
 def _daytime_powercurve(ac_power, power_quantile, frequency_quantile):
-    # return the 99.5% quantile of daytime power data after removing
-    # night time data.
+    # return the `power_quantile` quantile of power at each minute of
+    # the day after removing night time, early morning, and late
+    # evening data.
     minutes = ac_power.index.hour * 60 + ac_power.index.minute
     positive_power = ac_power >= 0
     powerfreq = positive_power.groupby(minutes).sum()
