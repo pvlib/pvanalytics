@@ -206,8 +206,8 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         systems.
     power_min: float, default 0.75
         The power during periods with slope less than `slope_max` must
-        be greater than `power_min` time the median normalized daytime
-        power.
+        be greater than `power_min` times the median normalized
+        daytime power.
     power_quantile : float, default 0.995
         Quantile used to calculate the daily power curve.
     frequency_quantile : float, default 0.25
