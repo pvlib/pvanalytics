@@ -2,28 +2,26 @@
 import pytest
 import pandas as pd
 from pvlib import location
-from pvlib import irradiance
 from pvanalytics import system
 
 
-# TODO testing plan for system.orientation
+# Rought testing plan
 #
 # Generate several data sets (winter/summer only) using PVLib with
 # different orientation and other characteristics and validate
 # system.orientation by making sure the correct orientation is
 # inferred.
-#
-# - Do this for GHI and POA which should both be identifified as
-#   Orientation.FIXED
-#
-# - Generate data using pvlib.tracking.SingleAxisTracker
-#
-# - Generate power data from a PVSystem without a a tracker
+
+# TODO Clearsky POA should be identifified as FIXED
+
+# TODO Generate data using pvlib.tracking.SingleAxisTracker (TRACKING)
+
+# TODO Generate power data from a PVSystem without a tracker
 
 
 @pytest.fixture
 def summer_times():
-    """ten-minute time stamps from 1 May through 31 September in GMT+7 time"""
+    """Ten-minute time stamps from May 1 through September 30, 2020 in GMT+7"""
     return pd.date_range(
         start='2020-5-1',
         end='2020-10-1',
@@ -47,16 +45,13 @@ def albuquerque():
 
 @pytest.fixture
 def summer_ghi(summer_times, albuquerque):
-    """GHI and POA irradiance for a site in Albuquerque.
-
-    The site has azimuth 180 and a 25 degree tilt.
-    """
+    """Clearsky GHI for Summer, 2020 in Albuquerque, NM."""
     clearsky = albuquerque.get_clearsky(summer_times)
     return clearsky['ghi']
 
 
 def test_ghi_orientation_fixed(summer_ghi):
-    """Clearsky GHI for summer months should has a FIXED Orientation"""
+    """Clearsky GHI for has a FIXED Orientation."""
     assert system.orientation(
         summer_ghi,
         summer_ghi > 0,
