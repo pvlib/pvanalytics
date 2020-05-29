@@ -174,19 +174,26 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
               freq=None):
     """Detect clipping based on a maximum power threshold.
 
-    A clipping threshold is calculated from the AC power data and any
-    power greater than the threshold is flagged as clipped.
+    This is a two-step process. First a clipping threshold is
+    identified, then any values in `ac_power` greater than or equal
+    to that threshold are flagged.
 
-    To calculate the clipping threshold, `ac_power` is aggregated at
-    each minute of the day. Low power data is removed to eliminate
-    night-time periods and the 99.5% quantile is computed at each
-    minute. If the absolute value of the slope of the 99.5%
-    quantile is less than `slope_max` for
-    a continuous period of at least one hour then clipping is
-    indicated. The mean power for that period is used as the
-    threshold. If there are multiple periods with a slope less
-    than `slope_max` then the longest period is used to compute
-    the threshold.
+    The clipping threshold is determined by computing a 'daily power
+    curve' which is the `power_quantile` quantile of all values in
+    `ac_power` at each minute of the day (excluding night, early morning,
+    and late evening). This gives a rough estimate of the maximum power
+    produced at each minute of the day.
+
+    The minutes of the day where the slope of the daily power curve,
+    normalized by its maximum, is less than `slope_max` are identified. If
+    there is a continuous period of time spanning at least one hour where
+    the slope is less than `slope_max` and the value of the normalized
+    daily power curve is greater than `power_min` times the median of the
+    normalized daily power curve then the data has clipping in it. The
+    average for those minutes in the (not normalized) daily power curve is
+    used as the clipping threshold. If no sufficiently long period with
+    both a low slope and high power exists then there is no clipping in
+    the data.
 
     Parameters
     ----------
@@ -199,17 +206,18 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         systems.
     power_min: float, default 0.75
         The power during periods with slope less than `slope_max` must
-        be greater than `power_min` time the median daytime power.
+        be greater than `power_min` time the median normalized daytime
+        power.
     power_quantile : float, default 0.995
-        quantile of AC power to consider for determining clipping.
+        Quantile used to calculate the daily power curve.
     frequency_quantile : float, default 0.25
         After taking the count of positive values in `ac_power` at
         each minute of the day, any minute with a count less than the
-        `frequency_quantile`-quantile of all counts is excluded from
-        the calculation of the clipping threshold.
+        `frequency_quantile`-quantile of all counts is excluded. This
+        eliminates early morning/evening times.
     freq : string, default None
         A pandas string offset giving the frequency of data in
-        `ac_power`. If None then the frequency is infered from the
+        `ac_power`. If None then the frequency is inferred from the
         series index.
 
     Returns
