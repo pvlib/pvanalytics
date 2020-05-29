@@ -109,7 +109,7 @@ def _daytime_powercurve(ac_power, power_quantile=0.995,
 def _clipped(power, derivative, power_min, derivative_max):
     # return a mask that is true where `power` is greater than
     # `power_min` and the absolute value of `derivative` is less
-    # than `derivative_max`
+    # than or equal to `derivative_max`
     return (np.abs(derivative) <= derivative_max) & (power > power_min)
 
 
@@ -129,12 +129,12 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
     # - Each timestamp in the daytime power curve that satisfies the
     #   clipping criteria[*] is flagged.
     #
-    # - The clipping threshold is calculated as the mean of the
-    #   longest flagged period in the daytime power curve
+    # - The clipping threshold is calculated as the mean power during the
+    #   longest flagged period in the daytime power curve.
     #
     # [*] clipping criteria: a timestamp satisfies the clipping
-    # criteria if the derivative of the daytime power curve at that
-    # time is less than `derivative_max` and the value of the daytime
+    # criteria if the absolute value of the slope of the daytime power curve
+    # is less than `derivative_max` and the value of the daytime
     # power curve is greater than `power_min` times the median of the
     # daytime power curve.
     #
@@ -155,7 +155,7 @@ def _clipping_power(ac_power, derivative_max=0.0035, power_min=0.75,
                              powercurve.median() * power_min,
                              derivative_max)
     clipping_cumsum = (~clipped_times).cumsum()
-    # get the value of the cumulative sum the longest True span
+    # get the value of the cumulative sum of the longest True span
     longest_clipped = clipping_cumsum.value_counts().idxmax()
     # select the longest span that satisfies the clipping criteria
     longest = powercurve[clipping_cumsum == longest_clipped]
@@ -178,11 +178,11 @@ def threshold(ac_power, derivative_max=0.0035,
     To calculate the clipping threshold, `ac_power` is aggregated at
     each minute of the day. Low power data is removed to eliminate
     night-time periods and the 99.5% quantile is computed at each
-    minute. If the absolute value of the derivative of the 99.5%
-    quantile (with respect to time) is less than `derivative_max` for
+    minute. If the absolute value of the slope of the 99.5%
+    quantile is less than `derivative_max` for
     a continuous period of at least one hour then clipping is
     indicated. The mean power for that period is used as the
-    threshold. If there are multiple periods with a derivative less
+    threshold. If there are multiple periods with a slope less
     than `derivative_max` then the longest period is used to compute
     the threshold.
 
@@ -196,8 +196,7 @@ def threshold(ac_power, derivative_max=0.0035,
         empirically to prevent false positives for tracking PV
         systems.
     power_quantile : float, default 0.995
-        quantile used to determine the maximum power for each minute
-        of the day
+        quantile of AC power to consider for determining clipping.
     frequency_quantile : float, default 0.25
         After taking the count of positive values in `ac_power` at
         each minute of the day, any minute with a count less than the
