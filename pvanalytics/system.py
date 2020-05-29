@@ -10,6 +10,7 @@ class Orientation(enum.Enum):
     """Orientation of a PV System can be either Fixed or Tracking."""
     FIXED = 1
     TRACKING = 2
+    UNKNOWN = 3
 
 
 def _remove_morning_evening(data, threshold):
@@ -60,8 +61,8 @@ def _fit_quartic(data, middle):
 def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
     # Determine orientation based on fit and percent of clipping in the data
     #
-    # Returns None if orientation cannot be determined, otherwise
-    # returns the orientation
+    # Returns Orientation.UNKNOWN if orientation cannot be determined,
+    # otherwise returns the orientation.
     if clip_percent < 0.5:
         if rsquared_quadratic >= 0.945:
             return Orientation.FIXED
@@ -82,7 +83,7 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
             return Orientation.FIXED
         if rsquared_quartic >= 0.92 and rsquared_quadratic < 0.92:
             return Orientation.TRACKING
-    return None
+    return Orientation.UNKNOWN
 
 
 def orientation(series, daytime, clipping, fit_median=True):
@@ -104,9 +105,8 @@ def orientation(series, daytime, clipping, fit_median=True):
 
     Returns
     -------
-    orientation : Orientation or None
-        If the orientation could not be determined returns None,
-        otherwise returns the inferred orientation.
+    Orientation
+        The orientation determined by curve fitting.
 
     """
     envelope = _remove_morning_evening(
@@ -128,9 +128,9 @@ def orientation(series, daytime, clipping, fit_median=True):
         if system_orientation is Orientation.FIXED:
             quadratic_median = _fit_quadratic(median)
             if quadratic_median < 0.9:
-                return None
+                return Orientation.UNKNOWN
         elif system_orientation is Orientation.TRACKING:
             quartic_median = _fit_quartic(median, middle)
             if quartic_median < 0.9:
-                return None
+                return Orientation.UNKNOWN
     return system_orientation
