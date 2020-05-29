@@ -90,8 +90,7 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
     return flags
 
 
-def _daytime_powercurve(ac_power, power_quantile=0.995,
-                        frequency_quantile=0.25):
+def _daytime_powercurve(ac_power, power_quantile, frequency_quantile):
     # return the 99.5% quantile of daytime power data after removing
     # night time data.
     minutes = ac_power.index.hour * 60 + ac_power.index.minute
@@ -113,8 +112,8 @@ def _clipped(power, slope, power_min, slope_max):
     return (np.abs(slope) <= slope_max) & (power > power_min)
 
 
-def _clipping_power(ac_power, slope_max=0.0035, power_min=0.75,
-                    power_quantile=0.995, frequency_quantile=0.25,
+def _clipping_power(ac_power, slope_max, power_min,
+                    power_quantile, frequency_quantile,
                     freq=None):
     # Calculate a power threshold, above which the power is being
     # clipped.
@@ -146,7 +145,9 @@ def _clipping_power(ac_power, slope_max=0.0035, power_min=0.75,
 
     # Use the slope of the 99.5% quantile of daytime power at
     # each minute to identify clipping.
-    powercurve = _daytime_powercurve(ac_power)
+    powercurve = _daytime_powercurve(
+        ac_power, power_quantile, frequency_quantile
+    )
     normalized_power = powercurve / powercurve.max()
     power_slope = (normalized_power.diff()
                    / normalized_power.index.to_series().diff()) * freq
@@ -167,7 +168,7 @@ def _clipping_power(ac_power, slope_max=0.0035, power_min=0.75,
     return None
 
 
-def threshold(ac_power, slope_max=0.0035,
+def threshold(ac_power, slope_max=0.0035, power_min=0.75,
               power_quantile=0.995, frequency_quantile=0.25,
               freq=None):
     """Detect clipping based on a maximum power threshold.
@@ -195,6 +196,9 @@ def threshold(ac_power, slope_max=0.0035,
         clipping to be indicated. The default value has been derived
         empirically to prevent false positives for tracking PV
         systems.
+    power_min: float, default 0.75
+        The power during periods with slope less than `slope_max` must
+        be greater than `power_min` time the median daytime power.
     power_quantile : float, default 0.995
         quantile of AC power to consider for determining clipping.
     frequency_quantile : float, default 0.25
@@ -219,9 +223,10 @@ def threshold(ac_power, slope_max=0.0035,
     """
     threshold = _clipping_power(
         ac_power,
-        slope_max=slope_max,
-        power_quantile=power_quantile,
-        frequency_quantile=frequency_quantile,
+        slope_max,
+        power_min,
+        power_quantile,
+        frequency_quantile,
         freq=freq
     )
     return ac_power >= threshold
