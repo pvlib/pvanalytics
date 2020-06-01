@@ -51,7 +51,15 @@ def _backfill_window(endpoints, window):
     return flags
 
 
-def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
+def _label(flags, window, label):
+    if label == 'all':
+        return _backfill_window(flags, window)
+    if label == 'tail':
+        return _backfill_window(flags, window - 1)
+    return flags
+
+
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
@@ -72,9 +80,17 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         relative tolerance for detecting a change in data values
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
-    label_all : bool, default False
-        Whether to label all values in the window. If False, then only
-        the right endpoint of the window is labeled.
+    label : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        stale values is detected. Can be of 'tail', 'end', or 'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
+        - If 'end' then only the endpoints of the window are marked
+          ``True``. The first `window - 1` values in a stale sequence
+          sequence are marked ``False``.
 
     Returns
     -------
@@ -103,12 +119,10 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
-    if label_all:
-        return _backfill_window(flags, window)
-    return flags
+    return _label(flags, window, label)
 
 
-def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
@@ -129,9 +143,18 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         tolerance relative to max(abs(x.diff()) for detecting a change
     atol : float, default 1e-8
         absolute tolerance for detecting a change in first difference
-    label_all : bool, default False
-        Whether to label all values in the window. If False, then only the
-        right endpoint of the window is labeled.
+    label : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        interpolated values is detected. Can be 'tail', 'end', or
+        'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
+        - If 'end' then only the endpoints of the window are marked
+          ``True``. The first `window - 1` values in an interpolated
+          sequence are marked ``False``.
 
     Returns
     -------
@@ -160,11 +183,10 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         x.diff(periods=1),
         window=window-1,
         rtol=rtol,
-        atol=atol
+        atol=atol,
+        label='end'
     )
-    if label_all:
-        return _backfill_window(flags, window)
-    return flags
+    return _label(flags, window, label)
 
 
 def _freq_to_seconds(freq):

@@ -52,14 +52,14 @@ def test_stale_values_diff(stale_data):
     for more information.
 
     """
-    res0 = gaps.stale_values_diff(stale_data)
-    res1 = gaps.stale_values_diff(stale_data, window=3)
-    res2 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=2)
-    res3 = gaps.stale_values_diff(stale_data, window=7)
-    res4 = gaps.stale_values_diff(stale_data, window=8)
-    res5 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=4)
-    res6 = gaps.stale_values_diff(stale_data[1:], window=3)
-    res7 = gaps.stale_values_diff(stale_data[1:8], window=3)
+    res0 = gaps.stale_values_diff(stale_data, label='end')
+    res1 = gaps.stale_values_diff(stale_data, window=3, label='end')
+    res2 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=2, label='end')
+    res3 = gaps.stale_values_diff(stale_data, window=7, label='end')
+    res4 = gaps.stale_values_diff(stale_data, window=8, label='end')
+    res5 = gaps.stale_values_diff(stale_data, rtol=1e-8, window=4, label='end')
+    res6 = gaps.stale_values_diff(stale_data[1:], window=3, label='end')
+    res7 = gaps.stale_values_diff(stale_data[1:8], window=3, label='end')
     assert_series_equal(res0, pd.Series([False, False, False, False, False,
                                          False, True, True, False, False]))
     assert_series_equal(res1, pd.Series([False, False, False, True, True, True,
@@ -91,16 +91,22 @@ def test_stale_values_diff_handles_negatives(data_with_negatives):
     for more information.
 
     """
-    res = gaps.stale_values_diff(data_with_negatives, window=3)
+    res = gaps.stale_values_diff(data_with_negatives, window=3, label='end')
     assert_series_equal(res, pd.Series([False, False, True, True, False, False,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-3)
+    res = gaps.stale_values_diff(
+        data_with_negatives, window=3, atol=1e-3, label='end'
+    )
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
-    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-5)
+    res = gaps.stale_values_diff(
+        data_with_negatives, window=3, atol=1e-5, label='end'
+    )
     assert_series_equal(res, pd.Series([False, False, True, True, True, False,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=2e-5)
+    res = gaps.stale_values_diff(
+        data_with_negatives, window=3, atol=2e-5, label='end'
+    )
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
 
@@ -122,13 +128,21 @@ def test_stale_values_diff_raises_error(stale_data):
 
 
 def test_stale_values_diff_label_all(stale_data):
-    """When label_all is True the full window is marked stale"""
+    """When label='all' the full window is marked stale"""
     assert_series_equal(
         pd.Series([False, True, True, True, True,
                    True, True, True, False, False]),
-        gaps.stale_values_diff(
-            stale_data, window=4, label_all=True
-        )
+        gaps.stale_values_diff(stale_data, window=4, label='all')
+    )
+
+
+def test_stale_values_diff_label_tail(stale_data):
+    """When label='tail' (the default), every point in the window except
+    the first is marked stale."""
+    assert_series_equal(
+        pd.Series([False, False, True, True, True,
+                   True, True, True, False, False]),
+        gaps.stale_values_diff(stale_data, window=4)
     )
 
 
@@ -151,12 +165,24 @@ def interpolated_data():
 
 
 def test_interpolation_diff_label_all(interpolated_data):
-    """When label_all is True the full window is marked interpoated"""
+    """When label='all' the full window is marked interpoated"""
     assert_series_equal(
-        gaps.interpolation_diff(interpolated_data, window=3, label_all=True),
+        gaps.interpolation_diff(interpolated_data, window=3, label='all'),
         pd.Series([False, False, False, False, False,
                    True, True, True, False, False,
                    False, True, True, True, True, True,
+                   False])
+    )
+
+
+def test_interpolation_diff_label_tail(interpolated_data):
+    """When label='tail' (the default), all but the first point an the
+    window is marked interpolated."""
+    assert_series_equal(
+        gaps.interpolation_diff(interpolated_data, window=3),
+        pd.Series([False, False, False, False, False,
+                   False, True, True, False, False,
+                   False, False, True, True, True, True,
                    False])
     )
 
@@ -173,27 +199,31 @@ def test_interpolation_diff(interpolated_data):
     for more information.
 
     """
-    res0 = gaps.interpolation_diff(interpolated_data)
+    res0 = gaps.interpolation_diff(interpolated_data, label='end')
     assert_series_equal(res0, pd.Series([False, False, False, False, False,
                                          False, False, False, False, False,
                                          False, False, False, False, False,
                                          False, False]))
-    res1 = gaps.interpolation_diff(interpolated_data, window=3)
+    res1 = gaps.interpolation_diff(interpolated_data, window=3, label='end')
     assert_series_equal(res1, pd.Series([False, False, False, False, False,
                                          False, False, True, False, False,
                                          False, False, False, True, True, True,
                                          False]))
-    res2 = gaps.interpolation_diff(interpolated_data, window=3, rtol=1e-2)
+    res2 = gaps.interpolation_diff(
+        interpolated_data, window=3, rtol=1e-2, label='end'
+    )
     assert_series_equal(res2, pd.Series([False, False, True, True, True,
                                          False, False, True, False, False,
                                          False, False, False, True, True, True,
                                          False]))
-    res3 = gaps.interpolation_diff(interpolated_data, window=5)
+    res3 = gaps.interpolation_diff(interpolated_data, window=5, label='end')
     assert_series_equal(res3, pd.Series([False, False, False, False, False,
                                          False, False, False, False, False,
                                          False, False, False, False, False,
                                          True, False]))
-    res4 = gaps.interpolation_diff(interpolated_data, window=3, atol=1e-2)
+    res4 = gaps.interpolation_diff(
+        interpolated_data, window=3, atol=1e-2, label='end'
+    )
     assert_series_equal(res4, pd.Series([False, False, True, True, True,
                                          True, True, True, False, False,
                                          False, False, False, True, True, True,
@@ -212,10 +242,14 @@ def test_interpolation_diff_handles_negatives(data_with_negatives):
     for more information.
 
     """
-    res = gaps.interpolation_diff(data_with_negatives, window=3, atol=1e-5)
+    res = gaps.interpolation_diff(
+        data_with_negatives, window=3, atol=1e-5, label='end'
+    )
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         False]))
-    res = gaps.stale_values_diff(data_with_negatives, window=3, atol=1e-4)
+    res = gaps.stale_values_diff(
+        data_with_negatives, window=3, atol=1e-4, label='end'
+    )
     assert_series_equal(res, pd.Series([False, False, True, True, True, True,
                                         True]))
 
@@ -233,7 +267,7 @@ def test_interpolation_diff_raises_error(interpolated_data):
 
     """
     with pytest.raises(ValueError):
-        gaps.interpolation_diff(interpolated_data, window=2)
+        gaps.interpolation_diff(interpolated_data, window=2, label='end')
 
 
 def test_start_stop_dates_all_true():
