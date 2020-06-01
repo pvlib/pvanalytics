@@ -20,19 +20,19 @@ from pvanalytics import system
 # TODO Address data with wrong timezone (midnight is during th day)
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def summer_times():
-    """Ten-minute time stamps from May 1 through September 30, 2020 in GMT+7"""
+    """One hour time stamps from May 1 through September 30, 2020 in GMT+7"""
     return pd.date_range(
         start='2020-5-1',
         end='2020-10-1',
-        freq='10T',
+        freq='H',
         closed='left',
         tz='Etc/GMT+7'
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def albuquerque():
     """pvlib Location for Albuquerque, NM."""
     return location.Location(
@@ -61,15 +61,20 @@ def system_parameters():
     }
 
 
+@pytest.fixture(scope='module')
+def summer_clearsky(summer_times, albuquerque):
+    """Clearsky irradiance for `sumer_times` in Albuquerque, NM."""
+    return albuquerque.get_clearsky(summer_times)
+
+
 @pytest.fixture
-def summer_ghi(summer_times, albuquerque):
+def summer_ghi(summer_clearsky):
     """Clearsky GHI for Summer, 2020 in Albuquerque, NM."""
-    clearsky = albuquerque.get_clearsky(summer_times)
-    return clearsky['ghi']
+    return summer_clearsky['ghi']
 
 
 @pytest.fixture
-def summer_power_fixed(summer_times, albuquerque, system_parameters):
+def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
     """Simulated power from a FIXED PVSystem in Albuquerque, NM."""
     system = pvsystem.PVSystem(**system_parameters)
     mc = modelchain.ModelChain(
@@ -77,12 +82,12 @@ def summer_power_fixed(summer_times, albuquerque, system_parameters):
         albuquerque,
         orientation_strategy='south_at_latitude_tilt'
     )
-    mc.run_model(albuquerque.get_clearsky(summer_times))
+    mc.run_model(summer_clearsky)
     return mc.ac
 
 
 @pytest.fixture
-def summer_power_tracking(summer_times, albuquerque, system_parameters):
+def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
     """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
     system = tracking.SingleAxisTracker(**system_parameters)
     mc = modelchain.ModelChain(
@@ -90,7 +95,7 @@ def summer_power_tracking(summer_times, albuquerque, system_parameters):
         albuquerque,
         orientation_strategy='south_at_latitude_tilt'
     )
-    mc.run_model(albuquerque.get_clearsky(summer_times))
+    mc.run_model(summer_clearsky)
     return mc.ac
 
 
