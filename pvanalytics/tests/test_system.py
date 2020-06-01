@@ -1,7 +1,7 @@
 """Tests for funcitons that identify system characteristics."""
 import pytest
 import pandas as pd
-from pvlib import location, pvsystem, modelchain
+from pvlib import location, pvsystem, tracking, modelchain
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics import system
 
@@ -81,6 +81,19 @@ def summer_power_fixed(summer_times, albuquerque, system_parameters):
     return mc.ac
 
 
+@pytest.fixture
+def summer_power_tracking(summer_times, albuquerque, system_parameters):
+    """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
+    system = tracking.SingleAxisTracker(**system_parameters)
+    mc = modelchain.ModelChain(
+        system,
+        albuquerque,
+        orientation_strategy='south_at_latitude_tilt'
+    )
+    mc.run_model(albuquerque.get_clearsky(summer_times))
+    return mc.ac
+
+
 def test_ghi_orientation_fixed(summer_ghi):
     """Clearsky GHI for has a FIXED Orientation."""
     assert system.orientation(
@@ -97,3 +110,12 @@ def test_power_orientation_fixed(summer_power_fixed):
         summer_power_fixed > 0,
         pd.Series(False, index=summer_power_fixed.index)
     ) is system.Orientation.FIXED
+
+
+def test_power_orientation_tracking(summer_power_tracking):
+    """Simulated single axis tracker is identifified as TRACKING."""
+    assert system.orientation(
+        summer_power_tracking,
+        summer_power_tracking > 0,
+        pd.Series(False, index=summer_power_tracking.index)
+    ) is system.Orientation.TRACKING
