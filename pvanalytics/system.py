@@ -81,7 +81,6 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
         # Too much clipping means the orientation cannot be determined
         return Orientation.UNKNOWN
     bounds = _get_bounds(clip_percent, fit_params)
-    print(f"{bounds}")
     if rsquared_quadratic >= bounds['fixed']:
         return Orientation.FIXED
     if rsquared_quartic >= bounds['tracking'] and rsquared_quadratic < bounds['fixed_max']:
