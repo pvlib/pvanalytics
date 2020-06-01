@@ -13,6 +13,19 @@ class Orientation(enum.Enum):
     UNKNOWN = 3
 
 
+# Default minimum R^2 values for curve fits.
+#
+# Minimums vary by the fraction of the data that has clipping. Keys
+# are tuples with lower (inclusive) and upper (exclusive) bounds for
+# the clipping percent.
+PVFLEETS_FIT_PARAMS = {
+    (0, 0.5): {'fixed': 0.945, 'tracking': 0.945, 'fixed_max': 0.92},
+    (0.5, 3): {'fixed': 0.92, 'tracking': 0.92, 'fixed_max': 0.92},
+    (3, 4): {'fixed': 0.9, 'tracking': 0.92, 'fixed_max': 0.92},
+    (4, 10): {'fixed': 0.88, 'tracking': 0.92, 'fixed_max': 0.92},
+}
+
+
 def _remove_morning_evening(data, threshold):
     # Remove morning and evening data by excluding times where
     # `data` is less than ``threshold * data.max()``
@@ -58,7 +71,8 @@ def _fit_quartic(data, middle):
     return 1 - (np.sum(residuals**2) / np.sum((data - np.mean(data))**2))
 
 
-def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
+def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
+                          clip_percent, fit_params):
     # Determine orientation based on fit and percent of clipping in the data
     #
     # Returns Orientation.UNKNOWN if orientation cannot be determined,
@@ -66,33 +80,26 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic, clip_percent):
     if clip_percent > 10.0:
         # Too much clipping means the orientation cannot be determined
         return Orientation.UNKNOWN
-    bounds = _get_bounds(clip_percent)
+    bounds = _get_bounds(clip_percent, fit_params)
+    print(f"{bounds}")
     if rsquared_quadratic >= bounds['fixed']:
         return Orientation.FIXED
-    if rsquared_quartic >= bounds['tracking'] and rsquared_quadratic < 0.92:
+    if rsquared_quartic >= bounds['tracking'] and rsquared_quadratic < bounds['fixed_max']:
         return Orientation.TRACKING
     return Orientation.UNKNOWN
 
 
-def _get_bounds(clip_percent):
-    # get the minimum r^2 for fits to determin tracking or fixed
+def _get_bounds(clip_percent, fit_params):
+    # get the minimum r^2 for fits to determine tracking or fixed
     # orientation. The bounds vary by the amount of clipping in the
     # data, passed as a percentage in `clip_percent`.
-    quadratic_min = 0.945
-    quartic_min = 0.945
-    if clip_percent >= 0.5:
-        quartic_min = 0.92
-    if 0.5 <= clip_percent <= 3.0:
-        quadratic_min = 0.92
-    elif clip_percent <= 4.0:
-        quadratic_min = 0.9
-    elif clip_percent <= 10.0:
-        quadratic_min = 0.88
-    return {'tracking': quadratic_min,
-            'fixed': quartic_min}
+    for clip, bounds in fit_params.items():
+        if clip[0] <= clip_percent <= clip[1]:
+            return bounds
+    return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
-def orientation(series, daytime, clipping, fit_median=True):
+def orientation(series, daytime, clipping, fit_median=True, fit_params=None):
     """Infer the orientation of the system from power or irradiance data.
 
     Parameters
@@ -108,6 +115,10 @@ def orientation(series, daytime, clipping, fit_median=True):
         Perform a secondary fit with the median power or irradiance to
         validate that the orientation is consistent through the entire
         data set.
+    fit_params : dict or None, default None
+        Minimum r-squared for curve fits according to the fraction of
+        data with clipping. If None :py:data:`PVFLEETS_FIT_PARAMS` is
+        used.
 
     Returns
     -------
@@ -115,6 +126,7 @@ def orientation(series, daytime, clipping, fit_median=True):
         The orientation determined by curve fitting.
 
     """
+    fit_params = fit_params or PVFLEETS_FIT_PARAMS
     envelope = _remove_morning_evening(
         _group_by_minute(series[daytime]).quantile(0.995),
         0.05
@@ -124,7 +136,8 @@ def orientation(series, daytime, clipping, fit_median=True):
     rsquared_quartic = _fit_quartic(envelope, middle)
     system_orientation = _orientation_from_fit(
         rsquared_quadratic, rsquared_quartic,
-        (clipping[daytime].sum() / len(clipping[daytime])) * 100
+        (clipping[daytime].sum() / len(clipping[daytime])) * 100,
+        fit_params
     )
     if fit_median:
         median = _remove_morning_evening(
