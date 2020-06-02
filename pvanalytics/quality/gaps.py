@@ -53,7 +53,7 @@ def _backfill_window(endpoints, window):
 
 def _mark(flags, window, mark):
     if mark not in ['all', 'tail', 'end']:
-        raise ValueError("mark must be one of 'all', 'tail', or 'end'")
+        raise ValueError("mark must be one of'tail', 'end' or 'all'")
     if mark == 'all':
         return _backfill_window(flags, window)
     if mark == 'tail':
@@ -88,11 +88,11 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'all' then every point in the window *including* the
-          first point is marked ``True``.
         - If 'end' then only the endpoints of the window are marked
           ``True``. The first `window - 1` values in a stale sequence
           sequence are marked ``False``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
 
     Returns
     -------
@@ -102,8 +102,8 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     Raises
     ------
     ValueError
-        If `window < 2` or `mark` is not one of 'tail', 'all', or
-        'end'.
+        If `window < 2` or `mark` is not one of 'tail', 'end', or
+        'all'.
 
     Notes
     -----
@@ -153,11 +153,11 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'all' then every point in the window *including* the
-          first point is marked ``True``.
         - If 'end' then only the endpoints of the window are marked
           ``True``. The first `window - 1` values in an interpolated
           sequence are marked ``False``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
 
     Returns
     -------
@@ -167,8 +167,8 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     Raises
     ------
     ValueError
-        If `window < 3` or `mark` is not one of 'tail', 'all', or
-        'end'.
+        If `window < 3` or `mark` is not one of 'tail', 'end', or
+        'all'.
 
     Notes
     -----
