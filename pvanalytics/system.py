@@ -72,12 +72,12 @@ def _fit_quartic(data, middle):
 
 
 def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
-                          clip_percent, fit_params):
+                          clip_percent, clip_max, fit_params):
     # Determine orientation based on fit and percent of clipping in the data
     #
     # Returns Orientation.UNKNOWN if orientation cannot be determined,
     # otherwise returns the orientation.
-    if clip_percent > 10.0:
+    if clip_percent > clip_max:
         # Too much clipping means the orientation cannot be determined
         return Orientation.UNKNOWN
     bounds = _get_bounds(clip_percent, fit_params)
@@ -98,7 +98,8 @@ def _get_bounds(clip_percent, fit_params):
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
-def orientation(series, daytime, clipping, fit_median=True, fit_params=None):
+def orientation(series, daytime, clipping, clip_max=10.0,
+                fit_median=True, fit_params=None):
     """Infer the orientation of the system from power or irradiance data.
 
     Parameters
@@ -110,6 +111,10 @@ def orientation(series, daytime, clipping, fit_median=True, fit_params=None):
     clipping : Series
         Boolean Series identifying where power or irradiance is being
         clipped.
+    clip_max : float, default 10.0
+        If the percent of data flagged as clipped is greater than
+        `clip_max` then the orientation cannot be determined and
+        :py:const:`Orientation.UNKNOWN` is returned.
     fit_median : boolean, default True
         Perform a secondary fit with the median power or irradiance to
         validate that the orientation is consistent through the entire
@@ -136,6 +141,7 @@ def orientation(series, daytime, clipping, fit_median=True, fit_params=None):
     system_orientation = _orientation_from_fit(
         rsquared_quadratic, rsquared_quartic,
         (clipping[daytime].sum() / len(clipping[daytime])) * 100,
+        clip_max,
         fit_params
     )
     if fit_median:
