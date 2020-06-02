@@ -162,7 +162,7 @@ def _clipping_power(ac_power, slope_max, power_min,
     # select the longest span that satisfies the clipping criteria
     longest = powercurve[clipping_cumsum == longest_clipped]
 
-    if longest.index[-1] - longest.index[0] >= 60:
+    if longest.index.max() - longest.index.min() >= 60:
         # if the period of clipping is at least 60 minutes then we
         # have enough evidence to determine the clipping threshold.
         return longest.mean()
