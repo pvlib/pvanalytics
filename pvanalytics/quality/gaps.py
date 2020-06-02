@@ -51,15 +51,17 @@ def _backfill_window(endpoints, window):
     return flags
 
 
-def _label(flags, window, label):
-    if label == 'all':
+def _mark(flags, window, mark):
+    if mark not in ['all', 'tail', 'end']:
+        raise ValueError("mark must be one of 'all', 'tail', or 'end'")
+    if mark == 'all':
         return _backfill_window(flags, window)
-    if label == 'tail':
+    if mark == 'tail':
         return _backfill_window(flags, window - 1)
     return flags
 
 
-def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
@@ -80,7 +82,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
         relative tolerance for detecting a change in data values
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
-    label : str, default 'tail'
+    mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
         stale values is detected. Can be of 'tail', 'end', or 'all'.
 
@@ -100,7 +102,8 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
     Raises
     ------
     ValueError
-        If window < 2.
+        If `window < 2` or `mark` is not one of 'tail', 'all', or
+        'end'.
 
     Notes
     -----
@@ -119,10 +122,10 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
-    return _label(flags, window, label)
+    return _mark(flags, window, mark)
 
 
-def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
@@ -143,7 +146,7 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
         tolerance relative to max(abs(x.diff()) for detecting a change
     atol : float, default 1e-8
         absolute tolerance for detecting a change in first difference
-    label : str, default 'tail'
+    mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
         interpolated values is detected. Can be 'tail', 'end', or
         'all'.
@@ -164,7 +167,8 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
     Raises
     ------
     ValueError
-        If window < 3.
+        If `window < 3` or `mark` is not one of 'tail', 'all', or
+        'end'.
 
     Notes
     -----
@@ -184,9 +188,9 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label='tail'):
         window=window-1,
         rtol=rtol,
         atol=atol,
-        label='end'
+        mark='end'
     )
-    return _label(flags, window, label)
+    return _mark(flags, window, mark)
 
 
 def _freq_to_seconds(freq):
