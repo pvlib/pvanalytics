@@ -124,3 +124,16 @@ def test_power_orientation_tracking(summer_power_tracking):
         summer_power_tracking > 0,
         pd.Series(False, index=summer_power_tracking.index)
     ) is system.Orientation.TRACKING
+
+
+def test_high_clipping_unknown_orientation(summer_power_fixed):
+    """If the amount of clipping is high then orientation is UNKNOWN"""
+    clipping = pd.Series(False, index=summer_power_fixed.index)
+    # 50% clipping
+    clipping.iloc[0:len(clipping) // 2] = True
+    assert system.orientation(
+        summer_power_fixed,
+        summer_power_fixed > 0,
+        clipping,
+        clip_max=40.0
+    ) is system.Orientation.UNKNOWN
