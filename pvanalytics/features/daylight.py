@@ -35,9 +35,7 @@ def sunny_days(power_or_irradiance, daytime,
     if tracking:
         fit = _fit.quartic
     daytime_data = power_or_irradiance[daytime]
-    print(f"{daytime_data.values}")
     sunny = daytime_data.resample('D').apply(fit)
-    print(f"{sunny}")
     # TODO Make sure that when we reindex, Trues don't propagate past
     # midnight if there is a missing day following a sunny day.
     return (sunny > correlation_min).reindex(power_or_irradiance.index, method='pad')
