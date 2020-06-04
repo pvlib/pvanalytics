@@ -4,6 +4,16 @@ import scipy.optimize
 import pandas as pd
 
 
+def _to_minute_of_day(index):
+    # Transform the index into minutes of the day. If `index` is a
+    # DatetimeIndex then it is converted to an Int64Index with values
+    # equal to the minute of the day since midnight. Any other type
+    # and a ValueError is raised.
+    if isinstance(index, pd.DatetimeIndex):
+        return index.hour * 60 + index.minute
+    raise ValueError("cannot convert index to minutes since midnight")
+
+
 def quadratic(data):
     """Fit a quadratic to the data.
 
@@ -23,15 +33,13 @@ def quadratic(data):
     Alliance for Sustainable Energy, LLC.
 
     """
-    index = data.index
-    if isinstance(index, pd.DatetimeIndex):
-        index = index.hour * 60 + index.minute
+    minute_of_day = _to_minute_of_day(data.index)
     # Fit a quadratic to `data` returning R^2 for the fit.
-    coefficients = np.polyfit(index, data, 2)
+    coefficients = np.polyfit(minute_of_day, data, 2)
     quadratic = np.poly1d(coefficients)
     # Calculate the R^2 for the fit
     _, _, correlation, _, _ = scipy.stats.linregress(
-        data, quadratic(index)
+        data, quadratic(minute_of_day)
     )
     return correlation**2
 
@@ -68,13 +76,14 @@ def quartic(data, noon=None):
     """
     def _quartic(x, a, b, c, e):
         return a * (x - e)**4 + b * (x - e)**2 + c
+    minute_of_day = _to_minute_of_day(data.index)
     median = data.median()
     params, _ = scipy.optimize.curve_fit(
         _quartic,
-        data.index, data,
+        minute_of_day, data,
         bounds=((-1e-05, 0, median * 0.85, noon - 70),
                 (-1e-10, median * 3e-05, median * 1.15, noon + 70))
     )
-    model = _quartic(data.index, params[0], params[1], params[2], params[3])
+    model = _quartic(minute_of_day, params[0], params[1], params[2], params[3])
     residuals = data - model
     return 1 - (np.sum(residuals**2) / np.sum((data - np.mean(data))**2))
