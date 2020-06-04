@@ -184,16 +184,15 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     and late evening). This gives a rough estimate of the maximum power
     produced at each minute of the day.
 
-    The minutes of the day where the slope of the daily power curve,
-    normalized by its maximum, is less than `slope_max` are identified. If
+    The daily power curve is normalized by its maximum and the minutes of the
+    day are identified where the normalized curve's slope is less than `slope_max`. If
     there is a continuous period of time spanning at least one hour where
     the slope is less than `slope_max` and the value of the normalized
     daily power curve is greater than `power_min` times the median of the
-    normalized daily power curve then the data has clipping in it. The
-    average for those minutes in the (not normalized) daily power curve is
-    used as the clipping threshold. If no sufficiently long period with
-    both a low slope and high power exists then there is no clipping in
-    the data.
+    normalized daily power curve then the data has clipping in it. If no
+    sufficiently long period with both a low slope and high power exists
+    then there is no clipping in the data.  The average of the daily power
+    curve (not normalized) is the clipping threshold. 
 
     Parameters
     ----------
