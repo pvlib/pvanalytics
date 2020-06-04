@@ -175,24 +175,25 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     """Detect clipping based on a maximum power threshold.
 
     This is a two-step process. First a clipping threshold is
-    identified, then any values in `ac_power` greater than or equal
-    to that threshold are flagged.
+    identified, then any values in `ac_power` greater than or equal to
+    that threshold are flagged.
 
     The clipping threshold is determined by computing a 'daily power
     curve' which is the `power_quantile` quantile of all values in
-    `ac_power` at each minute of the day (excluding night, early morning,
-    and late evening). This gives a rough estimate of the maximum power
-    produced at each minute of the day.
+    `ac_power` at each minute of the day (excluding night, early
+    morning, and late evening). This gives a rough estimate of the
+    maximum power produced at each minute of the day.
 
-    The daily power curve is normalized by its maximum and the minutes of the
-    day are identified where the normalized curve's slope is less than `slope_max`. If
-    there is a continuous period of time spanning at least one hour where
-    the slope is less than `slope_max` and the value of the normalized
-    daily power curve is greater than `power_min` times the median of the
-    normalized daily power curve then the data has clipping in it. If no
-    sufficiently long period with both a low slope and high power exists
-    then there is no clipping in the data.  The average of the daily power
-    curve (not normalized) is the clipping threshold. 
+    The daily power curve is normalized by its maximum and the minutes
+    of the day are identified where the normalized curve's slope is
+    less than `slope_max`. If there is a continuous period of time
+    spanning at least one hour where the slope is less than
+    `slope_max` and the value of the normalized daily power curve is
+    greater than `power_min` times the median of the normalized daily
+    power curve then the data has clipping in it. If no sufficiently
+    long period with both a low slope and high power exists then there
+    is no clipping in the data.  The average of the daily power curve
+    (not normalized) is the clipping threshold.
 
     Parameters
     ----------
