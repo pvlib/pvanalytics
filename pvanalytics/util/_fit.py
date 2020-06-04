@@ -1,6 +1,7 @@
 """Internal module for curve fitting functions."""
 import numpy as np
 import scipy.optimize
+import pandas as pd
 
 
 def quadratic(data):
@@ -13,25 +14,26 @@ def quadratic(data):
 
     Reurns
     ------
-    rsquared : float
+    float
         The :math:`R^2` value for the fit.
-    coefficients : list(float)
-        The coefficients of the quadratic.
 
     Notes
     -----
-    Based on the PVFleest QA Analysis project. Copyright (c) 2020
+    Based on the PVFleets QA Analysis project. Copyright (c) 2020
     Alliance for Sustainable Energy, LLC.
 
     """
+    index = data.index
+    if isinstance(index, pd.DatetimeIndex):
+        index = index.hour * 60 + index.minute
     # Fit a quadratic to `data` returning R^2 for the fit.
-    coefficients = np.polyfit(data.index, data, 2)
+    coefficients = np.polyfit(index, data, 2)
     quadratic = np.poly1d(coefficients)
     # Calculate the R^2 for the fit
     _, _, correlation, _, _ = scipy.stats.linregress(
-        data, quadratic(data.index)
+        data, quadratic(index)
     )
-    return correlation**2, coefficients
+    return correlation**2
 
 
 def quartic(data, noon=None):
@@ -60,7 +62,7 @@ def quartic(data, noon=None):
 
     Notes
     -----
-    Based on the PVFleest QA Analysis project. Copyright (c) 2020
+    Based on the PVFleets QA Analysis project. Copyright (c) 2020
     Alliance for Sustainable Energy, LLC.
 
     """
