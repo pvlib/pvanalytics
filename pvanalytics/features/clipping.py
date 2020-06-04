@@ -90,19 +90,12 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
     return flags
 
 
-def _daytime_powercurve(ac_power, power_quantile, frequency_quantile):
+def _daytime_powercurve(ac_power, power_quantile):
     # return the `power_quantile` quantile of power at each minute of
-    # the day after removing night time, early morning, and late
-    # evening data.
-    minutes = ac_power.index.hour * 60 + ac_power.index.minute
-    positive_power = ac_power >= 0
-    powerfreq = positive_power.groupby(minutes).sum()
-    min_daytime_freq = powerfreq.quantile(frequency_quantile)
-    daytimes = powerfreq[powerfreq >= min_daytime_freq].index
-    daytime_power = ac_power[minutes.isin(daytimes)]
-
-    return daytime_power.groupby(
-        daytime_power.index.hour * 60 + daytime_power.index.minute
+    # the day.
+    positive_power = ac_power[ac_power >= 0]
+    return positive_power.groupby(
+        positive_power.index.hour * 60 + positive_power.index.minute
     ).quantile(power_quantile)
 
 
@@ -114,17 +107,14 @@ def _clipped(power, slope, power_min, slope_max):
 
 
 def _clipping_power(ac_power, slope_max, power_min,
-                    power_quantile, frequency_quantile,
-                    freq=None):
+                    power_quantile, freq=None):
     # Calculate a power threshold, above which the power is being
     # clipped.
     #
     # - The daytime power curve is calculated using
     #   _daytime_powercurve(). This function groups `ac_power` by
     #   minute of the day and returns the `power_quantile`-quantile of
-    #   power for each minute, excluding night time, early morning,
-    #   and late afternoon/evening (the amount of data that is
-    #   excluded is controlled by `frequency_quantile`).
+    #   power for each minute.
     #
     # - Each timestamp in the daytime power curve that satisfies the
     #   clipping criteria[*] is flagged.
@@ -147,7 +137,7 @@ def _clipping_power(ac_power, slope_max, power_min,
     # Use the slope of the 99.5% quantile of daytime power at
     # each minute to identify clipping.
     powercurve = _daytime_powercurve(
-        ac_power, power_quantile, frequency_quantile
+        ac_power, power_quantile
     )
     normalized_power = powercurve / powercurve.max()
     power_slope = (normalized_power.diff()
@@ -170,8 +160,7 @@ def _clipping_power(ac_power, slope_max, power_min,
 
 
 def threshold(ac_power, slope_max=0.0035, power_min=0.75,
-              power_quantile=0.995, frequency_quantile=0.25,
-              freq=None):
+              power_quantile=0.995, freq=None):
     """Detect clipping based on a maximum power threshold.
 
     This is a two-step process. First a clipping threshold is
@@ -210,11 +199,6 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         daytime power.
     power_quantile : float, default 0.995
         Quantile used to calculate the daily power curve.
-    frequency_quantile : float, default 0.25
-        After taking the count of positive values in `ac_power` at
-        each minute of the day, any minute with a count less than the
-        `frequency_quantile`-quantile of all counts is excluded. This
-        eliminates early morning/evening times.
     freq : string, default None
         A pandas string offset giving the frequency of data in
         `ac_power`. If None then the frequency is inferred from the
@@ -235,7 +219,6 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         slope_max,
         power_min,
         power_quantile,
-        frequency_quantile,
         freq=freq
     )
     return ac_power >= threshold
