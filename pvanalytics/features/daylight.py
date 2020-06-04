@@ -1,3 +1,4 @@
+"""Functions for identifying when the sun is shining."""
 from pvanalytics.util import _fit
 
 
@@ -17,7 +18,13 @@ def sunny_days(power_or_irradiance, daytime, correlation_min, tracking=False):
     to the power data is greater than `correlation_min`. If `tracking`
     is True then a quartic is fit instead of a quadratic.
 
+    Notes
+    -----
+    Based on the PVFleest QA Analysis project. Copyright (c) 2020
+    Alliance for Sustainable Energy, LLC.
+
     """
-    power_or_irradiance.resample('D').apply(
+    sunny = power_or_irradiance.resample('D').apply(
         lambda day: _is_sunny(day, correlation_min, tracking)
     )
+    return sunny.reindex(power_or_irradiance.index, fill='pad')

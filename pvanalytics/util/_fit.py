@@ -17,6 +17,12 @@ def quadratic(data):
         The :math:`R^2` value for the fit.
     coefficients : list(float)
         The coefficients of the quadratic.
+
+    Notes
+    -----
+    Based on the PVFleest QA Analysis project. Copyright (c) 2020
+    Alliance for Sustainable Energy, LLC.
+
     """
     # Fit a quadratic to `data` returning R^2 for the fit.
     coefficients = np.polyfit(data.index, data, 2)
@@ -51,6 +57,11 @@ def quartic(data, noon=None):
     -------
     rsquared : float
         The :math:`R^2` value for the fit.
+
+    Notes
+    -----
+    Based on the PVFleest QA Analysis project. Copyright (c) 2020
+    Alliance for Sustainable Energy, LLC.
 
     """
     def _quartic(x, a, b, c, e):
