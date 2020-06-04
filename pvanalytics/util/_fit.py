@@ -44,7 +44,7 @@ def quadratic(data):
     return correlation**2
 
 
-def quartic(data, noon=None):
+def quartic(data, noon=720):
     """Fit a restricted quartic to the data.
 
     The quartic is restricted to match the expected shape for a
@@ -60,8 +60,8 @@ def quartic(data, noon=None):
     ----------
     data : Series
         power or irradiance data.
-    noon : int or None, default None
-       The index of solar noon. If None then
+    noon : int, default 720
+       The minute for solar noon. Defaults to the clock-noon.
 
     Returns
     -------

@@ -2,7 +2,8 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import location
+from pvlib import location, pvsystem, tracking, modelchain
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import daylight
 
 
@@ -85,3 +86,32 @@ def test_perturbed_ghi_sunny(clearsky, solarposition):
         ),
         check_names=False
     )
+
+
+def test_ghi_not_sunny_when_tracking(clearsky, solarposition):
+    """If we pass GHI measurements and tracking=True then no days are sunny."""
+    assert (~daylight.sunny_days(
+        clearsky['ghi'], solarposition['zenith'] < 85, tracking=True
+    )).all()
+
+
+@pytest.fixture
+def power_tracking(clearsky, albuquerque, system_parameters):
+    """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
+    system = tracking.SingleAxisTracker(**system_parameters)
+    mc = modelchain.ModelChain(
+        system,
+        albuquerque,
+        orientation_strategy='south_at_latitude_tilt'
+    )
+    mc.run_model(clearsky)
+    return mc.ac
+
+
+def test_tracking_power_sunny(power_tracking, solarposition):
+    """simulated power from a single axis tracker is identified as sunny with tracking=True"""
+    assert daylight.sunny_days(
+        power_tracking,
+        solarposition['zenith'] < 85,
+        tracking=True
+    ).all()

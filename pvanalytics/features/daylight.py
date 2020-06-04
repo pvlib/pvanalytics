@@ -2,8 +2,8 @@
 from pvanalytics.util import _fit
 
 
-def sunny_days(power_or_irradiance, daytime,
-               correlation_min=0.94, tracking=False):
+def sunny_days(power_or_irradiance, daytime, correlation_min=0.94,
+               fixed_max=0.96, tracking=False):
     """Return True for values on days that are sunny.
 
     Sunny days are identified when the :math:`r^2` for a quadratic fit
@@ -31,11 +31,23 @@ def sunny_days(power_or_irradiance, daytime,
     Alliance for Sustainable Energy, LLC.
 
     """
-    fit = _fit.quadratic
+    # PVFleets has two funcitons: sunny_days() which is used for fixed
+    # systems, and tracking_onsun_days() which is used for tracking
+    # systems. sunny_days() just fits the quadratic, but
+    # tracking_onsun_days() fits a quartic _and_ a quadratic, if the
+    # r^2 for the quadratic fit is too large (> 0.96) or is larger
+    # than the r^2 for the quartic fit then the system is not marked
+    # as 'sunny'/'tracking'.
+    daytime_data = power_or_irradiance[daytime].resample('D')
+    sunny_fixed = daytime_data.apply(_fit.quadratic)
     if tracking:
-        fit = _fit.quartic
-    daytime_data = power_or_irradiance[daytime]
-    sunny = daytime_data.resample('D').apply(fit)
-    # TODO Make sure that when we reindex, Trues don't propagate past
-    # midnight if there is a missing day following a sunny day.
-    return (sunny > correlation_min).reindex(power_or_irradiance.index, method='pad')
+        sunny_tracking = daytime_data.apply(_fit.quartic)
+        tracking_days = (
+            (sunny_tracking > correlation_min)
+            & (sunny_fixed < fixed_max)
+            & (sunny_fixed < sunny_tracking)
+        )
+        # TODO Make sure that when we reindex, Trues don't propagate past
+        # midnight if there is a missing day following a sunny day.
+        return tracking_days.reindex(power_or_irradiance.index, method='pad')
+    return (sunny_fixed > correlation_min).reindex(power_or_irradiance.index, method='pad')
