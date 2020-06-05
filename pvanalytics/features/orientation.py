@@ -9,7 +9,8 @@ def _filter_low(data, multiplier):
 
 
 def tracking(power_or_irradiance, daytime, correlation_min=0.94,
-             fixed_max=0.96, power_min=0.1):
+             fixed_max=0.96, power_min=0.1, late_morning='08:45',
+             early_afternoon='17:15'):
     """Flag days where the data matches the profile of a tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
@@ -39,12 +40,19 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     power_min : float, default 0.1
         Data less than `power_min * power_or_irradiance.mean()` is
         removed.
+    late_morning : str, default '08:45'
+        The earliest time to include in quadratic fits when checking
+        for stuck trackers.
+    early_afternoon : str, default '17:15'
+        The latest time to include in quadtratic fits when checking
+        for stuck trackers.
 
     Returns
     -------
     Series
         Boolean series with True for every value on a day that has a
         tracking profile (see criteria above).
+
     """
     positive_mean = power_or_irradiance[power_or_irradiance > 0].mean()
     high_data = _filter_low(power_or_irradiance[daytime], power_min)
@@ -52,7 +60,9 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     tracking = daily_data.apply(
         lambda day: 0.0 if day.max() < positive_mean else _fit.quartic(day)
     )
-    fixed = high_data.between_time('08:45', '17:15').resample('D').apply(
+    fixed = high_data.between_time(
+        late_morning, early_afternoon
+    ).resample('D').apply(
         lambda day: 0.0 if day.max() < positive_mean else _fit.quadratic(day)
     )
     return (
