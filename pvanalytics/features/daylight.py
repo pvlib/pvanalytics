@@ -27,6 +27,12 @@ def sunny_days(power_or_irradiance, daytime, correlation_min=0.94,
     tracking : bool, default False
         Whether the system has a tracker.
 
+    Returns
+    -------
+    Series
+        Boolean series with True for data on days that are 'sunny'
+        according to the criteria above.
+
     Notes
     -----
     Based on the PVFleets QA Analysis project. Copyright (c) 2020
