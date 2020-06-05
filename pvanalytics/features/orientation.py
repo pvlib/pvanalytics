@@ -59,7 +59,7 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
         (tracking > correlation_min)
         & (tracking > fixed)
         & (fixed < fixed_max)
-    ).reindex(power_or_irradiance.index, method='pad')
+    ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
 
 
 def fixed(power_or_irradiance, daytime, correlation_min=0.94,
@@ -98,4 +98,4 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
     fixed = daily_data.apply(_fit.quadratic)
     return (
         fixed > correlation_min
-    ).reindex(power_or_irradiance.index, method='pad')
+    ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
