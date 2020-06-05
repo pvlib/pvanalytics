@@ -1,10 +1,9 @@
-"""Tests for daylight related feature extraction"""
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
 from pvlib import location, pvsystem, tracking, modelchain
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-from pvanalytics.features import daylight
+from pvanalytics.features import orientation
 
 
 @pytest.fixture
@@ -60,19 +59,18 @@ def solarposition(times, albuquerque):
     return albuquerque.get_solarposition(times)
 
 
-def test_clearsky_ghi_sunny(clearsky, solarposition):
+def test_clearsky_ghi_fixed(clearsky, solarposition):
     """every day of clearsky GHI is a sunny day."""
-    assert daylight.sunny_days(
+    assert orientation.fixed(
         clearsky['ghi'],
         solarposition['zenith'] < 85,
         correlation_min=0.94,
-        tracking=False
     ).all()
 
 
 @pytest.mark.filterwarnings("ignore:invalid value encountered in",
                             "ignore:divide by zero encountered in")
-def test_perturbed_ghi_sunny(clearsky, solarposition):
+def test_perturbed_ghi_fixed(clearsky, solarposition):
     """If the clearsky for one day is perturbed then that day is not sunny."""
     ghi = clearsky['ghi']
     ghi.iloc[0:(24*60) // 15] = 1
@@ -80,7 +78,7 @@ def test_perturbed_ghi_sunny(clearsky, solarposition):
     expected[0:(24*60) // 15] = False
     assert_series_equal(
         expected,
-        daylight.sunny_days(
+        orientation.fixed(
             ghi,
             solarposition['zenith'] < 85
         ),
@@ -88,10 +86,10 @@ def test_perturbed_ghi_sunny(clearsky, solarposition):
     )
 
 
-def test_ghi_not_sunny_when_tracking(clearsky, solarposition):
+def test_ghi_not_tracking(clearsky, solarposition):
     """If we pass GHI measurements and tracking=True then no days are sunny."""
-    assert (~daylight.sunny_days(
-        clearsky['ghi'], solarposition['zenith'] < 85, tracking=True
+    assert (~orientation.tracking(
+        clearsky['ghi'], solarposition['zenith'] < 85
     )).all()
 
 
@@ -108,10 +106,9 @@ def power_tracking(clearsky, albuquerque, system_parameters):
     return mc.ac
 
 
-def test_tracking_power_sunny(power_tracking, solarposition):
+def test_power_tracking(power_tracking, solarposition):
     """simulated power from a single axis tracker is identified as sunny with tracking=True"""
-    assert daylight.sunny_days(
+    assert orientation.tracking(
         power_tracking,
-        solarposition['zenith'] < 85,
-        tracking=True
+        solarposition['zenith'] < 85
     ).all()
