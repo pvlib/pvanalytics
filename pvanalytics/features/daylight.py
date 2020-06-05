@@ -22,6 +22,8 @@ def sunny_days(power_or_irradiance, daytime, correlation_min=0.94,
         do not necessarily indicate that the day was not sunny.
     correlation_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
+    fixed_max : float, default 0.96
+        Maximum :math:`r^2` for a quadratic fit when `tracking=True`
     tracking : bool, default False
         Whether the system has a tracker.
 
