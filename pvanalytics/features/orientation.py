@@ -102,7 +102,7 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     positive_mean = power_or_irradiance[power_or_irradiance > 0].mean()
     high_data = _filter_low(power_or_irradiance[daytime], power_min)
     daily_data = _group_by_day(high_data)
-    tracking = daily_data.apply(
+    tracking_days = daily_data.apply(
         _fit_if(
             lambda day: (
                 (_hours(day, freq) >= min_hours)
@@ -111,7 +111,7 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
             _fit.quartic
         )
     )
-    fixed = _group_by_day(high_data.between_time(
+    fixed_days = _group_by_day(high_data.between_time(
         late_morning, early_afternoon
     )).apply(
         _fit_if(
@@ -123,9 +123,9 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
         )
     )
     return (
-        (tracking > correlation_min)
-        & (tracking > fixed)
-        & (fixed < fixed_max)
+        (tracking_days > correlation_min)
+        & (tracking_days > fixed_days)
+        & (fixed_days < fixed_max)
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
 
 
@@ -165,12 +165,12 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
     daily_data = _group_by_day(_filter_low(
         power_or_irradiance[daytime], power_min
     ))
-    fixed = daily_data.apply(
+    fixed_days = daily_data.apply(
         _fit_if(
             lambda day: _hours(day, freq) >= min_hours,
             _fit.quadratic
         )
     )
     return (
-        fixed > correlation_min
+        fixed_days > correlation_min
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
