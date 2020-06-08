@@ -63,7 +63,7 @@ def test_clearsky_ghi_fixed(clearsky, solarposition):
     """every day of clearsky GHI is a sunny day."""
     assert orientation.fixed(
         clearsky['ghi'],
-        solarposition['zenith'] < 85,
+        solarposition['zenith'] < 87,
         correlation_min=0.94,
     ).all()
 
@@ -80,7 +80,7 @@ def test_perturbed_ghi_fixed(clearsky, solarposition):
         expected,
         orientation.fixed(
             ghi,
-            solarposition['zenith'] < 85
+            solarposition['zenith'] < 87
         ),
         check_names=False
     )
@@ -89,7 +89,7 @@ def test_perturbed_ghi_fixed(clearsky, solarposition):
 def test_ghi_not_tracking(clearsky, solarposition):
     """If we pass GHI measurements and tracking=True then no days are sunny."""
     assert (~orientation.tracking(
-        clearsky['ghi'], solarposition['zenith'] < 85
+        clearsky['ghi'], solarposition['zenith'] < 87
     )).all()
 
 
@@ -107,8 +107,10 @@ def power_tracking(clearsky, albuquerque, system_parameters):
 
 
 def test_power_tracking(power_tracking, solarposition):
-    """simulated power from a single axis tracker is identified as sunny with tracking=True"""
+    """simulated power from a single axis tracker is identified as sunny
+    with tracking=True"""
     assert orientation.tracking(
         power_tracking,
-        solarposition['zenith'] < 85
+        solarposition['zenith'] < 87,
+        power_min=0.0
     ).all()

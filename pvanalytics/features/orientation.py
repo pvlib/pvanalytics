@@ -8,9 +8,51 @@ def _filter_low(data, multiplier):
     return positive_data[positive_data > multiplier * data.mean()]
 
 
+def _fit_if(pred, fit_function, default=0.0):
+    # Returns a funciton that fits `fit_function` to data if
+    # `pred(data)` is satisfied. If `pred(data)` is not satisfied then
+    # returns `default`
+    def do_fit(day):
+        if pred(day):
+            return fit_function(day)
+        return default
+    return do_fit
+
+
+def _freqstr_to_hours(freq):
+    # Convert pandas freqstr to hours (as a float)
+    if freq.isalpha():
+        freq = '1' + freq
+    return pd.to_timedelta(freq).seconds / 60
+
+
+def _hours(data, freq):
+    # Return the number of hours in `data` with data where timestamp
+    # spacing is given by `freq`.
+    return data.count() * _freqstr_to_hours(freq)
+
+
+def _group_by_day(data):
+    # Group data by timezone localized date.
+    #
+    # We use this function (rather than `data.resample('D')`) because
+    # Resampler.apply() makes the data tz-naive when passed to the
+    # function being applied. This causes the curve fitting functions
+    # to fail when the minut-of-the-day is used as the x-coordinate
+    # since removing timezone information can cause data for a day to
+    # span two dates.
+    #
+    # The date needs to be localized in the same timezone as
+    # data.index so we can easily reindex the series with the original
+    # index at a later time.
+    return data.groupby(
+        pd.to_datetime(data.index.date).tz_localize(data.index.tz)
+    )
+
+
 def tracking(power_or_irradiance, daytime, correlation_min=0.94,
-             fixed_max=0.96, power_min=0.1, late_morning='08:45',
-             early_afternoon='17:15'):
+             fixed_max=0.96, min_hours=5, power_min=0.1,
+             late_morning='08:45', early_afternoon='17:15'):
     """Flag days where the data matches the profile of a tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
@@ -37,6 +79,8 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
         Maximum :math:`r^2` for a quadratic fit, if the quadratic fit
         is better than this, then tracking/fixed cannot be determined
         and the day is marked False.
+    min_hours : float, default 5.0
+        Minimum number of hours with data to attempt a fit on a day.
     power_min : float, default 0.1
         Data less than `power_min * power_or_irradiance.mean()` is
         removed.
@@ -54,16 +98,29 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
         tracking profile (see criteria above).
 
     """
+    freq = pd.infer_freq(power_or_irradiance.index)
     positive_mean = power_or_irradiance[power_or_irradiance > 0].mean()
     high_data = _filter_low(power_or_irradiance[daytime], power_min)
-    daily_data = high_data.resample('D')
+    daily_data = _group_by_day(high_data)
     tracking = daily_data.apply(
-        lambda day: 0.0 if day.max() < positive_mean else _fit.quartic(day)
+        _fit_if(
+            lambda day: (
+                (_hours(day, freq) >= min_hours)
+                and (day.max() >= positive_mean)
+            ),
+            _fit.quartic
+        )
     )
-    fixed = high_data.between_time(
+    fixed = _group_by_day(high_data.between_time(
         late_morning, early_afternoon
-    ).resample('D').apply(
-        lambda day: 0.0 if day.max() < positive_mean else _fit.quadratic(day)
+    )).apply(
+        _fit_if(
+            lambda day: (
+                (_hours(day, freq) >= min_hours)
+                and (day.max() >= positive_mean)
+            ),
+            _fit.quadratic
+        )
     )
     return (
         (tracking > correlation_min)
@@ -73,7 +130,7 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
 
 
 def fixed(power_or_irradiance, daytime, correlation_min=0.94,
-          power_min=0.4):
+          min_hours=5, power_min=0.4):
     """Flag days where the data matches the profile of a fixed PV system.
 
     Fixed days are identified when the :math:`r^2` for a quadratic fit
@@ -91,6 +148,8 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
         do not necessarily indicate that the day was not sunny.
     correlation_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
+    min_hours : float, default 5.0
+        Minimum number of hours with data to attempt a fit on a day.
     power_min : float, default 0.1
         Data less than `power_min * power_or_irradiance.mean()` is
         removed.
@@ -102,10 +161,16 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
         the expected parabolic profile for a fixed PV system.
 
     """
-    daily_data = _filter_low(
+    freq = pd.infer_freq(power_or_irradiance.index)
+    daily_data = _group_by_day(_filter_low(
         power_or_irradiance[daytime], power_min
-    ).resample('D')
-    fixed = daily_data.apply(_fit.quadratic)
+    ))
+    fixed = daily_data.apply(
+        _fit_if(
+            lambda day: _hours(day, freq) >= min_hours,
+            _fit.quadratic
+        )
+    )
     return (
         fixed > correlation_min
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
