@@ -704,7 +704,7 @@ def test_stale_values_larger_window():
 
 def test_stale_values_round_bad_mark():
     """passing an invalid value for `mark` raises a ValueError."""
-    data = pd.Series(1, index=range(1,10))
+    data = pd.Series(1, index=range(1, 10))
     with pytest.raises(ValueError):
         gaps.stale_values_round(data, mark='bad')
 
