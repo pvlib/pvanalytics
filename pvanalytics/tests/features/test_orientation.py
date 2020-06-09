@@ -6,14 +6,14 @@ from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import orientation
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def times():
-    """Three days with 15 minute timestamp spacing in Etc/GMT+7"""
+    """Three days with one hour timestamp spacing in Etc/GMT+7"""
     return pd.date_range(
         start='03/01/2020',
         end='03/04/2020',
         closed='left',
-        freq='15T',
+        freq='H',
         tz='Etc/GMT+7'
     )
 
@@ -30,7 +30,7 @@ def albuquerque():
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def system_parameters():
     """System parameters for generating simulated power data."""
     sandia_modules = pvsystem.retrieve_sam('SandiaMod')
@@ -47,13 +47,13 @@ def system_parameters():
     }
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def clearsky(times, albuquerque):
     """Clearsky at `times` in `albuquerque`."""
     return albuquerque.get_clearsky(times)
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def solarposition(times, albuquerque):
     """Solar position at `times` in `albuquerque`."""
     return albuquerque.get_solarposition(times)
