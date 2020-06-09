@@ -128,31 +128,40 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 def stale_values_round(x, decimals=3, window=6, mark='tail'):
     """Identify stale values by rounding.
 
-    A value is considered stale if it is part of a sequence of
-    of length `window` of values that are identical when
-    rounded to `decimals` decimal places.
-
-    This function is more aggressive than :py:func:`stale_values_diff`
-    in that every value in a repeated sequence is marked as
-    stale. :py:func:`stale_values_diff` only marks values as stale
-    when there have been at least `window` preceding instances of the
-    same value (the first `window`-1 values in the sequence are not
-    marked as stale).
+    A value is considered stale if it is part of a sequence of length
+    `window` of values that are identical when rounded to `decimals`
+    decimal places.
 
     Parameters
     ----------
     x : Series
         Data to be processed.
-    decimals : int
+    decimals : int, default 3
         Number of decimal places to round to.
-    window : int
+    window : int, default 6
         Number of consecutive identical values for a data point to be
         considered stale.
+    mark : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        stale values is detected. Can be of 'tail', 'end', or 'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'end' then only the endpoints of the window are marked
+          ``True``. The first `window - 1` values in a stale sequence
+          sequence are marked ``False``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
 
     Returns
     -------
     Series
         True for each value that is part of a stale sequence of data.
+
+    Raises
+    ------
+    ValueError
+        If `mark` is not one of 'tail', 'end', or 'all'.
 
     Notes
     -----
