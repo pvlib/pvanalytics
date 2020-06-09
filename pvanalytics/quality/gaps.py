@@ -89,9 +89,9 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'end' then only the endpoints of the window are marked
-          ``True``. The first `window - 1` values in a stale sequence
-          sequence are marked ``False``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
         - If 'all' then every point in the window *including* the
           first point is marked ``True``.
 
@@ -149,9 +149,9 @@ def stale_values_round(x, decimals=3, window=6, mark='tail'):
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'end' then only the endpoints of the window are marked
-          ``True``. The first `window - 1` values in a stale sequence
-          sequence are marked ``False``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
         - If 'all' then every point in the window *including* the
           first point is marked ``True``.
 
@@ -206,9 +206,9 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'end' then only the endpoints of the window are marked
-          ``True``. The first `window - 1` values in an interpolated
-          sequence are marked ``False``.
+        - If 'end' then the first `window - 1` values in an
+          interpolated sequence are marked ``False`` and all
+          subsequent values in the sequence are marked ``True``.
         - If 'all' then every point in the window *including* the
           first point is marked ``True``.
 
