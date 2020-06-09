@@ -96,7 +96,9 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
 
     """
     freq = pd.infer_freq(power_or_irradiance.index)
-    positive_mean = power_or_irradiance[power_or_irradiance > 0].mean()
+    positive_mean = power_or_irradiance[
+        daytime & (power_or_irradiance > 0)
+    ].mean()
     daily_data = _group_by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
