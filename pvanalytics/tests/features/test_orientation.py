@@ -111,6 +111,5 @@ def test_power_tracking(power_tracking, solarposition):
     with tracking=True"""
     assert orientation.tracking(
         power_tracking,
-        solarposition['zenith'] < 87,
-        power_min=0.0
+        solarposition['zenith'] < 87
     ).all()
