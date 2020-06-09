@@ -126,7 +126,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     return _mark(flags, window, mark)
 
 
-def stale_values_round(x, decimals=3, window=6, mark='tail'):
+def stale_values_round(x, window=6, decimals=3, mark='tail'):
     """Identify stale values by rounding.
 
     A value is considered stale if it is part of a sequence of length
@@ -137,11 +137,11 @@ def stale_values_round(x, decimals=3, window=6, mark='tail'):
     ----------
     x : Series
         Data to be processed.
-    decimals : int, default 3
-        Number of decimal places to round to.
     window : int, default 6
         Number of consecutive identical values for a data point to be
         considered stale.
+    decimals : int, default 3
+        Number of decimal places to round to.
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
         stale values is detected. Can be one of 'tail', 'end', or
