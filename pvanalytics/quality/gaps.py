@@ -84,7 +84,8 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
         absolute tolerance for detecting a change in data values
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
-        stale values is detected. Can be of 'tail', 'end', or 'all'.
+        stale values is detected. Can one be of 'tail', 'end', or
+        'all'.
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
@@ -143,7 +144,8 @@ def stale_values_round(x, decimals=3, window=6, mark='tail'):
         considered stale.
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
-        stale values is detected. Can be of 'tail', 'end', or 'all'.
+        stale values is detected. Can be one of 'tail', 'end', or
+        'all'.
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
@@ -199,8 +201,8 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
         absolute tolerance for detecting a change in first difference
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
-        interpolated values is detected. Can be 'tail', 'end', or
-        'all'.
+        interpolated values is detected. Can be one of 'tail', 'end',
+        or 'all'.
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
