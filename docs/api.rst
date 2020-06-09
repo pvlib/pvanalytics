@@ -54,7 +54,7 @@ Identify gaps in the data.
 
 Data sometimes contains sequences of values that are "stale" or
 "stuck." These are contiguous spans of data where the value does not
-change (or changes by only a very small amount). The functions below
+change within the precision given. The functions below
 can be used to detect stale values.
 
 .. note::
