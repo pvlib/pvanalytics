@@ -679,7 +679,7 @@ def test_stale_values_round_span_in_middle():
         [1.0, 1.1, 1.2, 1.5, 1.5, 1.5, 1.5, 1.9, 2.0, 2.2]
     )
     assert_series_equal(
-        gaps.stale_values_round(data, mark='all'),
+        gaps.stale_values_round(data, window=4, mark='all'),
         pd.Series([False, False, False,
                    True, True, True, True,
                    False, False, False], dtype='bool')

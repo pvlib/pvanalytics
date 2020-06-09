@@ -125,7 +125,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     return _mark(flags, window, mark)
 
 
-def stale_values_round(x, decimals=3, window=4, mark='tail'):
+def stale_values_round(x, decimals=3, window=6, mark='tail'):
     """Identify stale values by rounding.
 
     A value is considered stale if it is part of a sequence of
