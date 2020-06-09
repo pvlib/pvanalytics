@@ -8,15 +8,15 @@ def _filter_low(data, multiplier):
     return positive_data[positive_data > multiplier * data.mean()]
 
 
-def _fit_if(pred, fit_function, default=0.0):
-    # Returns a funciton that fits `fit_function` to data if
-    # `pred(data)` is satisfied. If `pred(data)` is not satisfied then
-    # returns `default`
-    def do_fit(day):
-        if pred(day):
-            return fit_function(day)
-        return default
-    return do_fit
+def _conditional_fit(day, fitfunc, freq, default=0.0, min_hours=0.0,
+                     minimum=None):
+    # apply the fit function `fitfunc` if certain conditions are met.
+    high_enough = True
+    if minimum:
+        high_enough = day.max() > minimum
+    if (_hours(day, freq) > min_hours) and high_enough:
+        return fitfunc(day)
+    return default
 
 
 def _freqstr_to_hours(freq):
@@ -103,24 +103,20 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     high_data = _filter_low(power_or_irradiance[daytime], power_min)
     daily_data = _group_by_day(high_data)
     tracking_days = daily_data.apply(
-        _fit_if(
-            lambda day: (
-                (_hours(day, freq) >= min_hours)
-                and (day.max() >= positive_mean)
-            ),
-            _fit.quartic
-        )
+        _conditional_fit,
+        _fit.quartic,
+        freq=freq,
+        min_hours=min_hours,
+        minimum=positive_mean
     )
     fixed_days = _group_by_day(high_data.between_time(
         late_morning, early_afternoon
     )).apply(
-        _fit_if(
-            lambda day: (
-                (_hours(day, freq) >= min_hours)
-                and (day.max() >= positive_mean)
-            ),
-            _fit.quadratic
-        )
+        _conditional_fit,
+        _fit.quadratic,
+        freq=freq,
+        min_hours=min_hours,
+        minimum=positive_mean
     )
     return (
         (tracking_days > correlation_min)
@@ -166,10 +162,10 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
         power_or_irradiance[daytime], power_min
     ))
     fixed_days = daily_data.apply(
-        _fit_if(
-            lambda day: _hours(day, freq) >= min_hours,
-            _fit.quadratic
-        )
+        _conditional_fit,
+        _fit.quadratic,
+        freq=freq,
+        min_hours=min_hours
     )
     return (
         fixed_days > correlation_min
