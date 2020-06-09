@@ -88,3 +88,138 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
         flags = flags | _label_clipping(temp, window=window,
                                         frac=fraction_in_window)
     return flags
+
+
+def _daytime_powercurve(ac_power, power_quantile):
+    # return the `power_quantile` quantile of power at each minute of
+    # the day.
+    positive_power = ac_power[ac_power >= 0]
+    return positive_power.groupby(
+        positive_power.index.hour * 60 + positive_power.index.minute
+    ).quantile(power_quantile)
+
+
+def _clipped(power, slope, power_min, slope_max):
+    # return a mask that is true where `power` is greater than
+    # `power_min` and the absolute value of `slope` is less
+    # than or equal to `slope_max`
+    return (np.abs(slope) <= slope_max) & (power > power_min)
+
+
+def _clipping_power(ac_power, slope_max, power_min,
+                    power_quantile, freq=None):
+    # Calculate a power threshold, above which the power is being
+    # clipped.
+    #
+    # - The daytime power curve is calculated using
+    #   _daytime_powercurve(). This function groups `ac_power` by
+    #   minute of the day and returns the `power_quantile`-quantile of
+    #   power for each minute.
+    #
+    # - Each timestamp in the daytime power curve that satisfies the
+    #   clipping criteria[*] is flagged.
+    #
+    # - The clipping threshold is calculated as the mean power during the
+    #   longest flagged period in the daytime power curve.
+    #
+    # [*] clipping criteria: a timestamp satisfies the clipping
+    # criteria if the absolute value of the slope of the daytime power curve
+    # is less than `slope_max` and the value of the daytime
+    # power curve is greater than `power_min` times the median of the
+    # daytime power curve.
+    #
+    # Based on the PVFleets QA Analysis project
+    if not freq:
+        freq = pd.Timedelta(pd.infer_freq(ac_power.index)).seconds / 60
+    elif isinstance(freq, str):
+        freq = pd.Timedelta(freq).seconds / 60
+
+    # Use the slope of the 99.5% quantile of daytime power at
+    # each minute to identify clipping.
+    powercurve = _daytime_powercurve(
+        ac_power, power_quantile
+    )
+    normalized_power = powercurve / powercurve.max()
+    power_slope = (normalized_power.diff()
+                   / normalized_power.index.to_series().diff()) * freq
+
+    clipped_times = _clipped(powercurve, power_slope,
+                             powercurve.median() * power_min,
+                             slope_max)
+    clipping_cumsum = (~clipped_times).cumsum()
+    # get the value of the cumulative sum of the longest True span
+    longest_clipped = clipping_cumsum.value_counts().idxmax()
+    # select the longest span that satisfies the clipping criteria
+    longest = powercurve[clipping_cumsum == longest_clipped]
+
+    if longest.index.max() - longest.index.min() >= 60:
+        # if the period of clipping is at least 60 minutes then we
+        # have enough evidence to determine the clipping threshold.
+        return longest.mean()
+    return None
+
+
+def threshold(ac_power, slope_max=0.0035, power_min=0.75,
+              power_quantile=0.995, freq=None):
+    """Detect clipping based on a maximum power threshold.
+
+    This is a two-step process. First a clipping threshold is
+    identified, then any values in `ac_power` greater than or equal to
+    that threshold are flagged.
+
+    The clipping threshold is determined by computing a 'daily power
+    curve' which is the `power_quantile` quantile of all values in
+    `ac_power` at each minute of the day. This gives a rough estimate
+    of the maximum power produced at each minute of the day.
+
+    The daily power curve is normalized by its maximum and the minutes
+    of the day are identified where the normalized curve's slope is
+    less than `slope_max`. If there is a continuous period of time
+    spanning at least one hour where the slope is less than
+    `slope_max` and the value of the normalized daily power curve is
+    greater than `power_min` times the median of the normalized daily
+    power curve then the data has clipping in it. If no sufficiently
+    long period with both a low slope and high power exists then there
+    is no clipping in the data.  The average of the daily power curve
+    (not normalized) during the longest period that satisfies the
+    criteria above is the clipping threshold.
+
+    Parameters
+    ----------
+    ac_power : Series
+        DatetimeIndexed series of AC power data.
+    slope_max : float, default 0.0035
+        Maximum absolute value of slope of AC power quantile for
+        clipping to be indicated. The default value has been derived
+        empirically to prevent false positives for tracking PV
+        systems.
+    power_min: float, default 0.75
+        The power during periods with slope less than `slope_max` must
+        be greater than `power_min` times the median normalized
+        daytime power.
+    power_quantile : float, default 0.995
+        Quantile used to calculate the daily power curve.
+    freq : string, default None
+        A pandas string offset giving the frequency of data in
+        `ac_power`. If None then the frequency is inferred from the
+        series index.
+
+    Returns
+    -------
+    Series
+        True when `ac_power` is greater than or equal to the clipping
+        threshold.
+
+    Notes
+    -----
+    This function is based on the pvfleets_qa_analysis project.
+
+    """
+    threshold = _clipping_power(
+        ac_power,
+        slope_max,
+        power_min,
+        power_quantile,
+        freq=freq
+    )
+    return ac_power >= threshold

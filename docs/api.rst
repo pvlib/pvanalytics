@@ -148,6 +148,7 @@ Functions for identifying inverter clipping
    :toctree: generated/
 
    features.clipping.levels
+   features.clipping.threshold
 
 Clearsky
 --------
