@@ -125,7 +125,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     return _mark(flags, window, mark)
 
 
-def stale_values_round(x, decimals=3, window=4):
+def stale_values_round(x, decimals=3, window=4, mark='tail'):
     """Identify stale values by rounding.
 
     A value is considered stale if it is part of a sequence of
@@ -164,11 +164,7 @@ def stale_values_round(x, decimals=3, window=4):
     endpoints = rounded_diff.rolling(window=window-1).apply(
         lambda xs: len(xs[xs == 0]) == window-1
     ).fillna(False).astype(bool)
-    flags = endpoints
-    while window > 0:
-        window = window - 1
-        flags = flags | endpoints.shift(-window).fillna(False)
-    return flags
+    return _mark(endpoints, window, mark)
 
 
 def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
