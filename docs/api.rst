@@ -51,7 +51,23 @@ Identify gaps in the data.
    :toctree: generated/
 
    quality.gaps.interpolation_diff
+
+Data sometimes contains sequences of values that are "stale" or
+"stuck." These are contiguous spans of data where the value does not
+change within the precision given. The functions below
+can be used to detect stale values.
+
+.. note::
+
+   If the data has been altered in some way (i.e. temperature that has
+   been rounded to an integer value) before being passed to these
+   functions you may see unexpectedly large amounts of stale data.
+
+.. autosummary::
+   :toctree: generated/
+
    quality.gaps.stale_values_diff
+   quality.gaps.stale_values_round
 
 The following functions identify days with incomplete data.
 

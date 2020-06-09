@@ -84,13 +84,14 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
         absolute tolerance for detecting a change in data values
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
-        stale values is detected. Can be of 'tail', 'end', or 'all'.
+        stale values is detected. Can one be of 'tail', 'end', or
+        'all'.
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'end' then only the endpoints of the window are marked
-          ``True``. The first `window - 1` values in a stale sequence
-          sequence are marked ``False``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
         - If 'all' then every point in the window *including* the
           first point is marked ``True``.
 
@@ -125,6 +126,58 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     return _mark(flags, window, mark)
 
 
+def stale_values_round(x, window=6, decimals=3, mark='tail'):
+    """Identify stale values by rounding.
+
+    A value is considered stale if it is part of a sequence of length
+    `window` of values that are identical when rounded to `decimals`
+    decimal places.
+
+    Parameters
+    ----------
+    x : Series
+        Data to be processed.
+    window : int, default 6
+        Number of consecutive identical values for a data point to be
+        considered stale.
+    decimals : int, default 3
+        Number of decimal places to round to.
+    mark : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        stale values is detected. Can be one of 'tail', 'end', or
+        'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
+
+    Returns
+    -------
+    Series
+        True for each value that is part of a stale sequence of data.
+
+    Raises
+    ------
+    ValueError
+        If `mark` is not one of 'tail', 'end', or 'all'.
+
+    Notes
+    -----
+        Based on code from the pvfleets_qa_analysis project. Copyright
+        (c) 2020 Alliance for Sustainable Energy, LLC.
+
+    """
+    rounded_diff = x.round(decimals=decimals).diff()
+    endpoints = rounded_diff.rolling(window=window-1).apply(
+        lambda xs: len(xs[xs == 0]) == window-1
+    ).fillna(False).astype(bool)
+    return _mark(endpoints, window, mark)
+
+
 def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify sequences which appear to be linear.
 
@@ -148,14 +201,14 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
         absolute tolerance for detecting a change in first difference
     mark : str, default 'tail'
         How much of the window to mark ``True`` when a sequence of
-        interpolated values is detected. Can be 'tail', 'end', or
-        'all'.
+        interpolated values is detected. Can be one of 'tail', 'end',
+        or 'all'.
 
         - If 'tail' (the default) then every point in the window
           *except* the first point is marked ``True``.
-        - If 'end' then only the endpoints of the window are marked
-          ``True``. The first `window - 1` values in an interpolated
-          sequence are marked ``False``.
+        - If 'end' then the first `window - 1` values in an
+          interpolated sequence are marked ``False`` and all
+          subsequent values in the sequence are marked ``True``.
         - If 'all' then every point in the window *including* the
           first point is marked ``True``.
 
