@@ -169,9 +169,8 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
 
     The clipping threshold is determined by computing a 'daily power
     curve' which is the `power_quantile` quantile of all values in
-    `ac_power` at each minute of the day (excluding night, early
-    morning, and late evening). This gives a rough estimate of the
-    maximum power produced at each minute of the day.
+    `ac_power` at each minute of the day. This gives a rough estimate
+    of the maximum power produced at each minute of the day.
 
     The daily power curve is normalized by its maximum and the minutes
     of the day are identified where the normalized curve's slope is
@@ -182,7 +181,8 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     power curve then the data has clipping in it. If no sufficiently
     long period with both a low slope and high power exists then there
     is no clipping in the data.  The average of the daily power curve
-    (not normalized) is the clipping threshold.
+    (not normalized) during the longest period that satisfies the
+    criteria above is the clipping threshold.
 
     Parameters
     ----------
@@ -207,7 +207,8 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     Returns
     -------
     Series
-        True when clipping is indicated.
+        True when `ac_power` is greater than or equal to the clipping
+        threshold.
 
     Notes
     -----
