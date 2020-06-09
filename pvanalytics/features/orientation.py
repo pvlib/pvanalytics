@@ -89,6 +89,11 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
         Boolean series with True for every value on a day that has a
         tracking profile (see criteria above).
 
+    Notes
+    -----
+    This algorithm is based on the PVFleets QA Analysis
+    project. Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
+
     """
     freq = pd.infer_freq(power_or_irradiance.index)
     positive_mean = power_or_irradiance[power_or_irradiance > 0].mean()
@@ -145,6 +150,11 @@ def fixed(power_or_irradiance, daytime, correlation_min=0.94,
     Series
         True for values on days where `power_or_irradiance` matches
         the expected parabolic profile for a fixed PV system.
+
+    Notes
+    -----
+    This algorithm is based on the PVFleets QA Analysis
+    project. Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
     freq = pd.infer_freq(power_or_irradiance.index)
