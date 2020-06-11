@@ -113,3 +113,25 @@ def test_power_tracking(power_tracking, solarposition):
         power_tracking,
         solarposition['zenith'] < 87
     ).all()
+
+
+def test_power_tracking_perturbed(power_tracking, solarposition):
+    """A day with perturbed values is not marked as tracking."""
+    power_tracking.iloc[6:18] = 10
+    expected = pd.Series(True, index=power_tracking.index)
+    expected.iloc[0:24] = False
+    assert_series_equal(
+        expected,
+        orientation.tracking(
+            power_tracking,
+            solarposition['zenith'] < 87
+        )
+    )
+    assert_series_equal(
+        expected,
+        orientation.tracking(
+            power_tracking,
+            solarposition['zenith'] < 87,
+            peak_min=100
+        )
+    )
