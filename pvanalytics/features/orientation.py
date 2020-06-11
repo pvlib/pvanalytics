@@ -5,7 +5,12 @@ from pvanalytics.util import _fit
 
 def _conditional_fit(day, fitfunc, freq, default=0.0, min_hours=0.0,
                      peak_min=None):
-    # apply the fit function `fitfunc` if certain conditions are met.
+    # If there are at least `min_hours` of data in `day` and the
+    # maximum for the day is greater than `peak_min` then `fitfunc` is
+    # applied to fit a curve to the data. `fitfunc` must be a function
+    # that takes a Series and returns the :math:`r^2` for a curve fit.
+    # If the two conditions are not met then `default` is returned and
+    # no curve fitting is performed.
     high_enough = True
     if peak_min is not None:
         high_enough = day.max() > peak_min
@@ -33,7 +38,7 @@ def _group_by_day(data):
     # We use this function (rather than `data.resample('D')`) because
     # Resampler.apply() makes the data tz-naive when passed to the
     # function being applied. This causes the curve fitting functions
-    # to fail when the minut-of-the-day is used as the x-coordinate
+    # to fail when the minute-of-the-day is used as the x-coordinate
     # since removing timezone information can cause data for a day to
     # span two dates.
     #
