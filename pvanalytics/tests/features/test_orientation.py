@@ -73,9 +73,9 @@ def test_clearsky_ghi_fixed(clearsky, solarposition):
 def test_perturbed_ghi_fixed(clearsky, solarposition):
     """If the clearsky for one day is perturbed then that day is not sunny."""
     ghi = clearsky['ghi']
-    ghi.iloc[0:(24*60) // 15] = 1
+    ghi.iloc[0:24] = 1
     expected = pd.Series(True, ghi.index)
-    expected[0:(24*60) // 15] = False
+    expected[0:24] = False
     assert_series_equal(
         expected,
         orientation.fixed(
