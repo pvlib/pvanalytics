@@ -141,7 +141,7 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
 
 def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
                min_hours=5, peak_min=None):
-    """Flag days where the data matches the profile of a fixed PV system.
+    """Flag days that match the profile of a fixed PV system.
 
     Fixed days are identified when the :math:`r^2` for a quadratic fit
     to the power data is greater than `correlation_min`.

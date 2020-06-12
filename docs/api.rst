@@ -145,12 +145,12 @@ Orientation
 -----------
 
 The following funcitons examine power or irradiance data to identify
-when the profile matches the expected profile for a PV system with a
-fixed orientation or a single-axis tracker. These functions fit a
-polynomial (quadratic for fixed, quartic for tracking) to the data for
-each day and determine the orientation based on the goodness of the
-fit. Both functions will mark days with substantial variability (for
-example, due to cloudiness) as False, but may mark consistently
+days when the profile matches the expected profile for a PV system
+with a fixed orientation or a single-axis tracker. These functions fit
+a polynomial (quadratic for fixed, quartic for tracking) to the data
+for each day and determine the orientation based on the goodness of
+the fit. Both functions will mark days with substantial variability
+(for example, due to cloudiness) as False, but may mark consistently
 overcast days as True. This behavior can be controlled through the
 `peak_min` parameter to both functions which specifies a minimum power
 or irradiance value that must be exceeded for a day to be marked
