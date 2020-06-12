@@ -108,7 +108,7 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     daily_data = _group_by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
-        _fit.quartic,
+        _fit.quartic_restricted,
         freq=freq,
         min_hours=min_hours,
         peak_min=peak_min

@@ -44,7 +44,7 @@ def quadratic(data):
     return correlation**2
 
 
-def quartic(data, noon=720):
+def quartic_restricted(data, noon=720):
     """Fit a restricted quartic to the data.
 
     The quartic is restricted to match the expected shape for a
