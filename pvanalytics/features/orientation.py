@@ -27,8 +27,8 @@ def _freqstr_to_hours(freq):
 
 
 def _hours(data, freq):
-    # Return the number of hours in `data` with data where timestamp
-    # spacing is given by `freq`.
+    # Return the number of hours in `data` with timestamp
+    # spacing given by `freq`.
     return data.count() * _freqstr_to_hours(freq)
 
 
@@ -53,7 +53,7 @@ def _group_by_day(data):
 def tracking(power_or_irradiance, daytime, correlation_min=0.94,
              fixed_max=0.96, min_hours=5, peak_min=None,
              late_morning='08:45', early_afternoon='17:15'):
-    """Flag days where the data matches the profile of a tracking PV system.
+    """Flag days where the data matches the profile of a single-axis tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
     the data for each day. If the :math:`r^2` for the fit is greater
@@ -70,9 +70,9 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     daytime : Series
         Boolean series with True for times that are during the
         day. For best results this mask should exclude early morning
-        and evening as well as night. Morning and evening may have
+        and late afternoon as well as night. These times may have
         problems with shadows that interfere with curve fitting, but
-        do not necessarily indicate that the day was not sunny.
+        do not necessarily indicate that the tracker is not working.
     correlation_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
     fixed_max : float, default 0.96
