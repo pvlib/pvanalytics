@@ -61,7 +61,7 @@ def solarposition(times, albuquerque):
 
 def test_clearsky_ghi_fixed(clearsky, solarposition):
     """every day of clearsky GHI is a sunny day."""
-    assert orientation.fixed(
+    assert orientation.fixed_nrel(
         clearsky['ghi'],
         solarposition['zenith'] < 87,
         correlation_min=0.94,
@@ -78,7 +78,7 @@ def test_perturbed_ghi_fixed(clearsky, solarposition):
     expected[0:24] = False
     assert_series_equal(
         expected,
-        orientation.fixed(
+        orientation.fixed_nrel(
             ghi,
             solarposition['zenith'] < 87
         ),
@@ -88,7 +88,7 @@ def test_perturbed_ghi_fixed(clearsky, solarposition):
 
 def test_ghi_not_tracking(clearsky, solarposition):
     """If we pass GHI measurements and tracking=True then no days are sunny."""
-    assert (~orientation.tracking(
+    assert (~orientation.tracking_nrel(
         clearsky['ghi'], solarposition['zenith'] < 87
     )).all()
 
@@ -109,7 +109,7 @@ def power_tracking(clearsky, albuquerque, system_parameters):
 def test_power_tracking(power_tracking, solarposition):
     """simulated power from a single axis tracker is identified as sunny
     with tracking=True"""
-    assert orientation.tracking(
+    assert orientation.tracking_nrel(
         power_tracking,
         solarposition['zenith'] < 87
     ).all()
@@ -122,14 +122,14 @@ def test_power_tracking_perturbed(power_tracking, solarposition):
     expected.iloc[0:24] = False
     assert_series_equal(
         expected,
-        orientation.tracking(
+        orientation.tracking_nrel(
             power_tracking,
             solarposition['zenith'] < 87
         )
     )
     assert_series_equal(
         expected,
-        orientation.tracking(
+        orientation.tracking_nrel(
             power_tracking,
             solarposition['zenith'] < 87,
             peak_min=100

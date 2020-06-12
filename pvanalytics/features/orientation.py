@@ -50,9 +50,9 @@ def _group_by_day(data):
     )
 
 
-def tracking(power_or_irradiance, daytime, correlation_min=0.94,
-             fixed_max=0.96, min_hours=5, peak_min=None,
-             late_morning='08:45', early_afternoon='17:15'):
+def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
+                  fixed_max=0.96, min_hours=5, peak_min=None,
+                  late_morning='08:45', early_afternoon='17:15'):
     """Flag days that match the profile of a single-axis tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
@@ -131,8 +131,8 @@ def tracking(power_or_irradiance, daytime, correlation_min=0.94,
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
 
 
-def fixed(power_or_irradiance, daytime, correlation_min=0.94,
-          min_hours=5, peak_min=None):
+def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
+               min_hours=5, peak_min=None):
     """Flag days where the data matches the profile of a fixed PV system.
 
     Fixed days are identified when the :math:`r^2` for a quadratic fit
