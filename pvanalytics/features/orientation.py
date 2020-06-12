@@ -55,13 +55,22 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
                   midday=None):
     """Flag days that match the profile of a single-axis tracking PV system.
 
-    Tracking days are identified by fitting a restricted quartic to
-    the data for each day. If the :math:`r^2` for the fit is greater
-    than `correlation_min` and the :math:`r^2` for a quadratic fit is
-    less than `fixed_max` then the data on that day is all marked
-    True. Data on days where the tracker is stuck, or there is
-    substantial variability in the data (i.e. caused by cloudiness) is
+    For the values on a day to be marked True, they must satisfy the
+    following three conditions:
+
+    1. a restricted quartic [#]_ must fit the data with :math:`r^2`
+       greater than `correlation_min`
+    2. the :math:`r^2` for a quadratic fit must be less than
+       `fixed_max`
+    3. the :math:`r^2` for the restricted quartic fit must be greater
+       than the :math:`r^2` for a quadratic fit
+
+    Values on days where any one of these conditions is not met are
     marked False.
+
+    .. [#] The specific quartic used for this fit is centered within
+       70 minutes of 12:00, the y-value at the center must be within
+       15% of the median for the day, and it must open downwards.
 
     Parameters
     ----------
