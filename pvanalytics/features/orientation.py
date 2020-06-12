@@ -52,7 +52,7 @@ def _group_by_day(data):
 
 def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
                   fixed_max=0.96, min_hours=5, peak_min=None,
-                  late_morning='08:45', early_afternoon='17:15'):
+                  midday=None):
     """Flag days that match the profile of a single-axis tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
@@ -85,12 +85,13 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         The maximum value for a day must be greater than `peak_min`
         for a fit to be attempted. If the maximum for a day is less
         than `peak_min` then the day will be marked False.
-    late_morning : str, default '08:45'
-        The earliest time to include in quadratic fits when checking
-        for stuck trackers.
-    early_afternoon : str, default '17:15'
-        The latest time to include in quadtratic fits when checking
-        for stuck trackers.
+    midday : Series, default None
+        Boolean series with True for times in the middle of the
+        day. If None then `daytime` is used. This Series is used to
+        remove morning and afternoon times from the data before
+        applying a quadratic fit, it should typically exclude more
+        data than `daytime` in order to eliminate long tails in the
+        morning or afternoon that appear when a tracker is stuck.
 
     Returns
     -------
@@ -104,6 +105,8 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     project. Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
+    if midday is None:
+        midday = daytime
     freq = pd.infer_freq(power_or_irradiance.index)
     daily_data = _group_by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
@@ -113,11 +116,7 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         min_hours=min_hours,
         peak_min=peak_min
     )
-    fixed_days = _group_by_day(
-        power_or_irradiance[daytime].between_time(
-            late_morning, early_afternoon
-        )
-    ).apply(
+    fixed_days = _group_by_day(power_or_irradiance[midday]).apply(
         _conditional_fit,
         _fit.quadratic,
         freq=freq,
