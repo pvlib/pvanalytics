@@ -53,7 +53,7 @@ def _group_by_day(data):
 def tracking(power_or_irradiance, daytime, correlation_min=0.94,
              fixed_max=0.96, min_hours=5, peak_min=None,
              late_morning='08:45', early_afternoon='17:15'):
-    """Flag days where the data matches the profile of a single-axis tracking PV system.
+    """Flag days that match the profile of a single-axis tracking PV system.
 
     Tracking days are identified by fitting a restricted quartic to
     the data for each day. If the :math:`r^2` for the fit is greater
