@@ -50,7 +50,7 @@ def system_parameters():
 @pytest.fixture(scope='module')
 def clearsky(times, albuquerque):
     """Clearsky at `times` in `albuquerque`."""
-    return albuquerque.get_clearsky(times)
+    return albuquerque.get_clearsky(times, model='simplified_solis')
 
 
 @pytest.fixture(scope='module')
