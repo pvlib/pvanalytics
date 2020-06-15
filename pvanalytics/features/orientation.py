@@ -60,10 +60,10 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
 
     1. a restricted quartic [#]_ must fit the data with :math:`r^2`
        greater than `correlation_min`
-    2. the :math:`r^2` for a quadratic fit must be less than
-       `fixed_max`
-    3. the :math:`r^2` for the restricted quartic fit must be greater
+    2. the :math:`r^2` for the restricted quartic fit must be greater
        than the :math:`r^2` for a quadratic fit
+    3. the :math:`r^2` for a quadratic fit must be less than
+       `fixed_max`
 
     Values on days where any one of these conditions is not met are
     marked False.
@@ -79,9 +79,8 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     daytime : Series
         Boolean series with True for times that are during the
         day. For best results this mask should exclude early morning
-        and late afternoon as well as night. These times may have
-        problems with shadows that interfere with curve fitting, but
-        do not necessarily indicate that the tracker is not working.
+        and late afternoon as well as night. Data at these times may have
+        problems with shadows that interfere with curve fitting.
     correlation_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
     fixed_max : float, default 0.96
@@ -91,7 +90,7 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
     peak_min : float, default None
-        The maximum value for a day must be greater than `peak_min`
+        The maximum `power_or_irradiance` value for a day must be greater than `peak_min`
         for a fit to be attempted. If the maximum for a day is less
         than `peak_min` then the day will be marked False.
     midday : Series, default None
@@ -161,7 +160,7 @@ def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
     peak_min : float, default None
-        The maximum value for a day must be greater than `peak_min`
+        The maximum `power_or_irradiance` value for a day must be greater than `peak_min`
         for a fit to be attempted. If the maximum for a day is less
         than `peak_min` then the day will be marked False.
 

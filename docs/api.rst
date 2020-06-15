@@ -144,7 +144,7 @@ Clearsky
 Orientation
 -----------
 
-The following funcitons examine power or irradiance data to identify
+The following functions examine power or irradiance data to identify
 days when the profile matches the expected profile for a PV system
 with a fixed orientation or a single-axis tracker. These functions fit
 a polynomial (quadratic for fixed, quartic for tracking) to the data
