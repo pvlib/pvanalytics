@@ -90,9 +90,10 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
     peak_min : float, default None
-        The maximum `power_or_irradiance` value for a day must be greater than `peak_min`
-        for a fit to be attempted. If the maximum for a day is less
-        than `peak_min` then the day will be marked False.
+        The maximum `power_or_irradiance` value for a day must be
+        greater than `peak_min` for a fit to be attempted. If the
+        maximum for a day is less than `peak_min` then the day will be
+        marked False.
     midday : Series, default None
         Boolean series with True for times in the middle of the
         day. If None then `daytime` is used. This Series is used to
@@ -160,9 +161,10 @@ def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
     peak_min : float, default None
-        The maximum `power_or_irradiance` value for a day must be greater than `peak_min`
-        for a fit to be attempted. If the maximum for a day is less
-        than `peak_min` then the day will be marked False.
+        The maximum `power_or_irradiance` value for a day must be
+        greater than `peak_min` for a fit to be attempted. If the
+        maximum for a day is less than `peak_min` then the day will be
+        marked False.
 
     Returns
     -------
