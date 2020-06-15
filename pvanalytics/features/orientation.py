@@ -50,8 +50,8 @@ def _group_by_day(data):
     )
 
 
-def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
-                  fixed_max=0.96, min_hours=5, peak_min=None,
+def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
+                  r2_fixed_max=0.96, min_hours=5, peak_min=None,
                   midday=None):
     """Flag days that match the profile of a single-axis tracking PV system.
 
@@ -59,11 +59,11 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
     following three conditions:
 
     1. a restricted quartic [#]_ must fit the data with :math:`r^2`
-       greater than `correlation_min`
+       greater than `r2_min`
     2. the :math:`r^2` for the restricted quartic fit must be greater
        than the :math:`r^2` for a quadratic fit
     3. the :math:`r^2` for a quadratic fit must be less than
-       `fixed_max`
+       `r2_fixed_max`
 
     Values on days where any one of these conditions is not met are
     marked False.
@@ -81,9 +81,9 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         day. For best results this mask should exclude early morning
         and late afternoon as well as night. Data at these times may have
         problems with shadows that interfere with curve fitting.
-    correlation_min : float, default 0.94
+    r2_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
-    fixed_max : float, default 0.96
+    r2_fixed_max : float, default 0.96
         Maximum :math:`r^2` for a quadratic fit, if the quadratic fit
         is better than this, then tracking/fixed cannot be determined
         and the day is marked False.
@@ -133,18 +133,18 @@ def tracking_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         peak_min=peak_min
     )
     return (
-        (tracking_days > correlation_min)
+        (tracking_days > r2_min)
         & (tracking_days > fixed_days)
-        & (fixed_days < fixed_max)
+        & (fixed_days < r2_fixed_max)
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)
 
 
-def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
+def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
                min_hours=5, peak_min=None):
     """Flag days that match the profile of a fixed PV system.
 
     Fixed days are identified when the :math:`r^2` for a quadratic fit
-    to the power data is greater than `correlation_min`.
+    to the power data is greater than `r2_min`.
 
     Parameters
     ----------
@@ -156,7 +156,7 @@ def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         and evening as well as night. Morning and evening may have
         problems with shadows that interfere with curve fitting, but
         do not necessarily indicate that the day was not sunny.
-    correlation_min : float, default 0.94
+    r2_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
@@ -190,5 +190,5 @@ def fixed_nrel(power_or_irradiance, daytime, correlation_min=0.94,
         peak_min=peak_min
     )
     return (
-        fixed_days > correlation_min
+        fixed_days > r2_min
     ).reindex(power_or_irradiance.index, method='pad', fill_value=False)

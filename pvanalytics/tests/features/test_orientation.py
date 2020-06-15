@@ -64,7 +64,7 @@ def test_clearsky_ghi_fixed(clearsky, solarposition):
     assert orientation.fixed_nrel(
         clearsky['ghi'],
         solarposition['zenith'] < 87,
-        correlation_min=0.94,
+        r2_min=0.94,
     ).all()
 
 
