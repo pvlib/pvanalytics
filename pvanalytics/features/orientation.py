@@ -84,8 +84,8 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
     r2_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
     r2_fixed_max : float, default 0.96
-        Maximum :math:`r^2` for a quadratic fit, if the quadratic fit
-        is better than this, then tracking/fixed cannot be determined
+        If the :math:`r^2` of the quadratic fit exceeds
+        `r2_fixed_max`, then tracking/fixed cannot be distinguished
         and the day is marked False.
     min_hours : float, default 5.0
         Minimum number of hours with data to attempt a fit on a day.
