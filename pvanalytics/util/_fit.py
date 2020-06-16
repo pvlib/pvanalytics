@@ -1,6 +1,23 @@
 """Internal module for curve fitting functions."""
 import numpy as np
+import pandas as pd
 import scipy.optimize
+
+
+def _quadratic(xs, ys):
+    # fit a quadratic function of `xs` to the data in `ys`
+    coefficients = np.polyfit(xs, ys, 2)
+    return np.poly1d(coefficients)
+
+
+def quadratic_idxmax(data):
+    """Fit a quartic to the data returning the time where the vertex falls."""
+    quadratic = _quadratic(_to_minute_of_day(data.index), data)
+    model = quadratic(range(0, 1440))
+    return (
+        pd.Timestamp(data.index.min().date())
+        + pd.Timedelta(minutes=np.argmax(model))
+    )
 
 
 def quadratic(x, y):
@@ -37,8 +54,7 @@ def quadratic(x, y):
     Alliance for Sustainable Energy, LLC.
 
     """
-    coefficients = np.polyfit(x, y, 2)
-    quadratic = np.poly1d(coefficients)
+    quadratic = _quadratic(x, y)
     _, _, correlation, _, _ = scipy.stats.linregress(
         y, quadratic(x)
     )
