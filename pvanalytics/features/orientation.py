@@ -1,6 +1,6 @@
 """Functions for identifying system orientation."""
 import pandas as pd
-from pvanalytics.util import _fit
+from pvanalytics.util import _fit, _group
 
 
 def _conditional_fit(day, fitfunc, freq, default=0.0, min_hours=0.0,
@@ -30,24 +30,6 @@ def _hours(data, freq):
     # Return the number of hours in `data` with timestamp
     # spacing given by `freq`.
     return data.count() * _freqstr_to_hours(freq)
-
-
-def _group_by_day(data):
-    # Group data by timezone localized date.
-    #
-    # We use this function (rather than `data.resample('D')`) because
-    # Resampler.apply() makes the data tz-naive when passed to the
-    # function being applied. This causes the curve fitting functions
-    # to fail when the minute-of-the-day is used as the x-coordinate
-    # since removing timezone information can cause data for a day to
-    # span two dates.
-    #
-    # The date needs to be localized in the same timezone as
-    # data.index so we can easily reindex the series with the original
-    # index at a later time.
-    return data.groupby(
-        pd.to_datetime(data.index.date).tz_localize(data.index.tz)
-    )
 
 
 def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
@@ -117,7 +99,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
     if quadratic_mask is None:
         quadratic_mask = daytime
     freq = pd.infer_freq(power_or_irradiance.index)
-    daily_data = _group_by_day(power_or_irradiance[daytime])
+    daily_data = _group.by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
         _fit.quartic_restricted,
@@ -125,7 +107,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
         min_hours=min_hours,
         peak_min=peak_min
     )
-    fixed_days = _group_by_day(power_or_irradiance[quadratic_mask]).apply(
+    fixed_days = _group.by_day(power_or_irradiance[quadratic_mask]).apply(
         _conditional_fit,
         _fit.quadratic,
         freq=freq,
@@ -178,7 +160,7 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
 
     """
     freq = pd.infer_freq(power_or_irradiance.index)
-    daily_data = _group_by_day(
+    daily_data = _group.by_day(
         power_or_irradiance[daytime]
     )
     fixed_days = daily_data.apply(
