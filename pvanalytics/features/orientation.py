@@ -52,7 +52,7 @@ def _group_by_day(data):
 
 def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
                   r2_fixed_max=0.96, min_hours=5, peak_min=None,
-                  midday=None):
+                  quadratic_mask=None):
     """Flag days that match the profile of a single-axis tracking PV system.
 
     For the values on a day to be marked True, they must satisfy the
@@ -94,13 +94,13 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
         greater than `peak_min` for a fit to be attempted. If the
         maximum for a day is less than `peak_min` then the day will be
         marked False.
-    midday : Series, default None
-        Boolean series with True for times in the middle of the
-        day. If None then `daytime` is used. This Series is used to
-        remove morning and afternoon times from the data before
-        applying a quadratic fit, it should typically exclude more
-        data than `daytime` in order to eliminate long tails in the
-        morning or afternoon that appear when a tracker is stuck.
+    quadratic_mask : Series, default None
+        If None then `daytime` is used. This Series is used to remove
+        morning and afternoon times from the data before applying a
+        quadratic fit to check for a stuck tracker. It should
+        typically exclude more data than `daytime` in order to
+        eliminate long tails in the morning or afternoon that appear
+        when a tracker is stuck in a West or East orientation.
 
     Returns
     -------
@@ -114,8 +114,8 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
     project. Copyright (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
-    if midday is None:
-        midday = daytime
+    if quadratic_mask is None:
+        quadratic_mask = daytime
     freq = pd.infer_freq(power_or_irradiance.index)
     daily_data = _group_by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
@@ -125,7 +125,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
         min_hours=min_hours,
         peak_min=peak_min
     )
-    fixed_days = _group_by_day(power_or_irradiance[midday]).apply(
+    fixed_days = _group_by_day(power_or_irradiance[quadratic_mask]).apply(
         _conditional_fit,
         _fit.quadratic,
         freq=freq,
