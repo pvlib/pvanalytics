@@ -153,9 +153,8 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
     daytime : Series
         Boolean series with True for times that are during the
         day. For best results this mask should exclude early morning
-        and evening as well as night. Morning and evening may have
-        problems with shadows that interfere with curve fitting, but
-        do not necessarily indicate that the day was not sunny.
+        and evening as well as night. Data at these times may have
+        problems with shadows that interfere with curve fitting.
     r2_min : float, default 0.94
         Minimum :math:`r^2` for a day to be considered sunny.
     min_hours : float, default 5.0
