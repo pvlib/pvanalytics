@@ -7,30 +7,6 @@ from pvanalytics.features import orientation
 
 
 @pytest.fixture(scope='module')
-def times():
-    """Three days with one hour timestamp spacing in Etc/GMT+7"""
-    return pd.date_range(
-        start='03/01/2020',
-        end='03/04/2020',
-        closed='left',
-        freq='H',
-        tz='Etc/GMT+7'
-    )
-
-
-@pytest.fixture(scope='module')
-def albuquerque():
-    """pvlib Location for Albuquerque, NM."""
-    return location.Location(
-        35.0844,
-        -106.6504,
-        name='Albuquerque',
-        altitude=1500,
-        tx='Etc/GMT+7'
-    )
-
-
-@pytest.fixture(scope='module')
 def system_parameters():
     """System parameters for generating simulated power data."""
     sandia_modules = pvsystem.retrieve_sam('SandiaMod')
@@ -45,18 +21,6 @@ def system_parameters():
         'inverter_parameters': inverter,
         'temperature_model_parameters': temperature_model_parameters
     }
-
-
-@pytest.fixture(scope='module')
-def clearsky(times, albuquerque):
-    """Clearsky at `times` in `albuquerque`."""
-    return albuquerque.get_clearsky(times, model='simplified_solis')
-
-
-@pytest.fixture(scope='module')
-def solarposition(times, albuquerque):
-    """Solar position at `times` in `albuquerque`."""
-    return albuquerque.get_solarposition(times)
 
 
 def test_clearsky_ghi_fixed(clearsky, solarposition):
