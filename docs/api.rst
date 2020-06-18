@@ -144,17 +144,22 @@ Clearsky
 Orientation
 -----------
 
-The following functions examine power or irradiance data to identify
-days when the profile matches the expected profile for a PV system
-with a fixed orientation or a single-axis tracker. These functions fit
-a polynomial (quadratic for fixed, quartic for tracking) to the data
-for each day and determine the orientation based on the goodness of
-the fit. Both functions will mark days with substantial variability
-(for example, due to cloudiness) as False, but may mark consistently
-overcast days as True. This behavior can be controlled through the
-`peak_min` parameter to both functions which specifies a minimum power
-or irradiance value that must be exceeded for a day to be marked
-True. Setting `peak_min` higher will exclude more overcast days.
+Whether a system has a fixed orientation or is equipped with a tracker
+can be determined by examining power or POA irradiance on days that
+are relatively sunny. Two functions are provided that operate on power
+or POA irradiance to identify system orientation on a daily
+basis. These functions can tell you whether a day matches the profile
+of a fixed system or system with a single-axis tracker; however, care
+should be taken when interpreting negation of the output (i.e. looking
+for days when the tracker is not functioning) since other factors such
+as weather may interfere with classification.
+
+To get a better understanding of when a single-axis is not working
+(stuck in a fixed orientation) it may be possible to combine output
+from both functions, using :py:func:`features.orientation.fixed_nrel`
+to identify stuck days. Combining these fixed days with tracking days
+using an exclusive or should give a reasonable estimate of relatively
+sunny days where the tracker is stuck.
 
 .. autosummary::
    :toctree: generated/
