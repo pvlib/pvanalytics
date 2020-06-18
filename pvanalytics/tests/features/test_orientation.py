@@ -1,7 +1,7 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import location, pvsystem, tracking, modelchain
+from pvlib import location, pvsystem, tracking, modelchain, irradiance
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import orientation
 
@@ -135,3 +135,25 @@ def test_power_tracking_perturbed(power_tracking, solarposition):
             peak_min=100
         )
     )
+
+
+def test_stuck_tracker_profile(solarposition, clearsky):
+    """Test POA irradiance at a awkward orientation (high tilt and
+    oriented West)."""
+    poa = irradiance.get_total_irradiance(
+        surface_tilt=45,
+        surface_azimuth=270,
+        **clearsky,
+        solar_zenith=solarposition['apparent_zenith'],
+        solar_azimuth=solarposition['azimuth']
+    )
+    assert not orientation.tracking_nrel(
+        poa['poa_global'],
+        solarposition['zenith'] < 87,
+    ).any()
+    # by restricting the data to the middle of the day (lower zenith
+    # angles) we should classify the system as fixed
+    assert orientation.fixed_nrel(
+        poa['poa_global'],
+        solarposition['zenith'] < 70
+    ).all()
