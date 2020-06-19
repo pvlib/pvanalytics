@@ -15,7 +15,7 @@ def quadratic_idxmax(data):
     quadratic = _quadratic(_to_minute_of_day(data.index), data)
     model = quadratic(range(0, 1440))
     return (
-        pd.Timestamp(data.index.min().date())
+        pd.Timestamp(data.index.min().date(), tz=data.index.tz)
         + pd.Timedelta(minutes=np.argmax(model))
     )
 
