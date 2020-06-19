@@ -64,7 +64,7 @@ def system_parameters():
 @pytest.fixture(scope='module')
 def summer_clearsky(summer_times, albuquerque):
     """Clearsky irradiance for `sumer_times` in Albuquerque, NM."""
-    return albuquerque.get_clearsky(summer_times)
+    return albuquerque.get_clearsky(summer_times, model='simplified_solis')
 
 
 @pytest.fixture
