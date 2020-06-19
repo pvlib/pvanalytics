@@ -17,6 +17,17 @@ def quadratic():
 
 
 @pytest.fixture(scope='module')
+def one_year_hourly():
+    return pd.date_range(
+        start='03/01/2020',
+        end='03/01/2021',
+        closed='left',
+        freq='H',
+        tz='Etc/GMT+7'
+    )
+
+
+@pytest.fixture(scope='module')
 def three_days_hourly():
     """Three days with one hour timestamp spacing in Etc/GMT+7"""
     return pd.date_range(
@@ -53,3 +64,18 @@ def clearsky(three_days_hourly, albuquerque):
 def solarposition(three_days_hourly, albuquerque):
     """Solar position at `three_days_hourly` in `albuquerque`."""
     return albuquerque.get_solarposition(three_days_hourly)
+
+
+@pytest.fixture(scope='module')
+def clearsky_year(one_year_hourly, albuquerque):
+    """One year of hourly clearsky data."""
+    return albuquerque.get_clearsky(
+        one_year_hourly,
+        model='simplified_solis'
+    )
+
+
+@pytest.fixture(scope='module')
+def solarposition_year(one_year_hourly, albuquerque):
+    """One year of solar position data in albuquerque"""
+    return albuquerque.get_solarposition(one_year_hourly)
