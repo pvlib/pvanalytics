@@ -92,7 +92,9 @@ def test_wind_limits(weather_data):
 
 def test_module_temperatuew():
     """Module temperature is correlated with GHI."""
-    albuquerque = location.Location(35.0844, -106.6504, altitude=5312, tz='MST')
+    albuquerque = location.Location(
+        35.0844, -106.6504, altitude=5312, tz='MST'
+    )
     times = pd.date_range(
         start='01/01/2020',
         end='03/01/2020',

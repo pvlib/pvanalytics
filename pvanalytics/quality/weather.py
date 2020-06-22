@@ -125,4 +125,3 @@ def module_temperature_check(module_temperature, irradiance,
     """
     _, _, r, _, _ = stats.linregress(module_temperature, irradiance)
     return r > correlation_min
-
