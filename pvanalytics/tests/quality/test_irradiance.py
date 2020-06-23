@@ -6,6 +6,7 @@ import numpy as np
 
 import pytest
 from pandas.util.testing import assert_series_equal
+from pvlib import location
 
 from pvanalytics.quality import irradiance
 
@@ -253,4 +254,37 @@ def test_clearsky_limits_csi_max(times):
     assert_series_equal(
         irradiance.clearsky_limits(measured, clearsky, csi_max=1.2),
         expected
+    )
+
+
+def test_daily_limits_nrel():
+    """"""
+    three_days = pd.date_range(
+        start='1/1/2020',
+        end='1/4/2020',
+        closed='left',
+        freq='H'
+    )
+    albuquerque = location.Location(
+        35,
+        -106,
+        elevation=5000,
+        tz='MST'
+    )
+    clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
+    assert irradiance.daily_limits(clearsky['ghi'], clearsky['ghi']).all()
+    assert not irradiance.daily_limits(
+        pd.Series(0, index=three_days),
+        clearsky['ghi']
+    ).any()
+    irrad = clearsky['ghi'].copy()
+    irrad.loc['1/1/2020'] = irrad['1/1/2020']*0.7
+    irrad.loc['1/2/2020'] = irrad['1/2/2020']*2.0
+    irrad.loc['1/3/2020'] = irrad['1/3/2020']*0.3
+    expected = pd.Series(False, irrad.index)
+    expected.loc['1/1/2020'] = True
+    assert_series_equal(
+        expected,
+        irradiance.daily_limits(irrad, clearsky['ghi']),
+        check_names=False
     )
