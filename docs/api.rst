@@ -42,6 +42,16 @@ eliminate data that is unrealistically high.
 
    quality.irradiance.clearsky_limits
 
+You may want to identify entire days that have unrealistically high or
+low irradiance. The following function examines summed daily
+irradiance, validating that it is within a reasonable range of the
+summed clearsky irradiance for the same day.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.daily_limits
+
 Gaps
 ----
 

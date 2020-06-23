@@ -1,6 +1,7 @@
 """Quality control functions for irradiance data."""
 
 import numpy as np
+import pandas as pd
 from pvlib.tools import cosd
 import pvlib
 
@@ -390,3 +391,66 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
         max_clearsky_index=np.Inf
     )
     return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)
+
+
+def _to_hours(freqstr):
+    if freqstr[0].isalpha():
+        freqstr = '1' + freqstr
+    return pd.to_timedelta(freqstr).seconds / 3600
+
+
+def _daily_total(series):
+    freq_hours = _to_hours(pd.infer_freq(series.index))
+    return series.resample('D').sum() * freq_hours
+
+
+def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
+    """Check that daily total irradiance is near the total clearsky irradiance.
+
+    Irradiance measurements on each day are integrated with the
+    left-hand rule and the total is compared to the total clearsky
+    irradiance for each day. If the ratio of total irradiance to total
+    clearsky is less than or equal to `daily_min` or greater than or
+    equal to `daily_max` then values on the day are marked False.
+
+    .. note::
+
+       This has been built to work on GHI and POA for both
+       tracking and fixed PV systems; however, if testing POA irradiance
+       for a tracking system it is recommended that you increase
+       `daily_max` to 1.35.
+
+    Parameters
+    ----------
+    irrad : Series
+        Irradiance measurements (GHI or POA).
+    clearsky : Series
+        Expected clearsky irradiance.
+    daily_min : float, default 0.4
+        Minimum ratio of daily total irradiance to daily total
+        clearsky irradiance.
+    daily_max : float, default 1.25
+        Maximum ratio of daily total irradiance to daily total
+        clearsky irradiance.
+
+    Returns
+    -------
+    Series
+        True for values on days where the ratio of total measured
+        irradiance to total clearsky irradiance is between `daily_min`
+        and `daily_max`.
+
+    Notes
+    -----
+    The default values for `daily_min` and `daily_max` were taken from
+    the PVFleets QA Analysis project.
+
+    """
+    daily_irradiance = _daily_total(irrad)
+    daily_cleasky = _daily_total(clearsky)
+    good_days = util.check_limits(
+        daily_irradiance/daily_cleasky,
+        upper_bound=daily_max,
+        lower_bound=daily_min
+    )
+    return good_days.reindex(irrad.index, method='pad', fill_value=False)
