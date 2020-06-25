@@ -44,7 +44,8 @@ def test_ghi_tilt_zero(clearsky_year, solarposition_year):
     assert tilt == 0
 
 
-def test_azimuth_different_index(clearsky_year, solarposition_year, albuquerque):
+def test_azimuth_different_index(clearsky_year, solarposition_year,
+                                 albuquerque):
     """Can use solar position and clearsky with finer time-resolution to
     get an accurate estimate of tilt and azimuth."""
     poa = irradiance.get_total_irradiance(
