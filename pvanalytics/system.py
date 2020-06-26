@@ -30,6 +30,17 @@ def _remove_morning_evening(data, threshold):
     return data[data > threshold * data.max()]
 
 
+def _is_fixed(rsquared_quadratic, bounds):
+    return rsquared_quadratic >= bounds['fixed']
+
+
+def _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
+    return (
+        rsquared_quartic >= bounds['tracking']
+        and rsquared_quadratic < bounds['fixed_max']
+    )
+
+
 def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
                           clip_percent, clip_max, fit_params):
     # Determine orientation based on fit and percent of clipping in the data
@@ -40,9 +51,9 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
         # Too much clipping means the orientation cannot be determined
         return Orientation.UNKNOWN
     bounds = _get_bounds(clip_percent, fit_params)
-    if rsquared_quadratic >= bounds['fixed']:
+    if _is_fixed(rsquared_quadratic, bounds):
         return Orientation.FIXED
-    if rsquared_quartic >= bounds['tracking'] and rsquared_quadratic < bounds['fixed_max']:
+    if _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
         return Orientation.TRACKING
     return Orientation.UNKNOWN
 
