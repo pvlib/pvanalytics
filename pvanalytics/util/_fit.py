@@ -11,7 +11,7 @@ def _to_minute_of_day(index):
     # and a ValueError is raised.
     if isinstance(index, pd.DatetimeIndex):
         return index.hour * 60 + index.minute
-    raise ValueError("cannot convert index to minutes since midnight")
+    return index
 
 
 def quadratic(data):
