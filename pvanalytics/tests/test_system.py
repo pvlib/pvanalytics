@@ -6,20 +6,6 @@ from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics import system
 
 
-# Rough testing plan
-#
-# Generate several data sets (winter/summer only) using PVLib with
-# different orientation and other characteristics and validate
-# system.orientation by making sure the correct orientation is
-# inferred.
-
-# TODO Clearsky POA should be identifified as FIXED
-
-# TODO Generate data using pvlib.tracking.SingleAxisTracker (TRACKING)
-
-# TODO Address data with wrong timezone (midnight is during th day)
-
-
 @pytest.fixture(scope='module')
 def summer_times():
     """One hour time stamps from May 1 through September 30, 2020 in GMT+7"""

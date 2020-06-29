@@ -75,7 +75,7 @@ def orientation(series, daytime, clipping, clip_max=10.0,
     Parameters
     ----------
     series : Series
-        Time series of power or irradiance data.
+        Timezone localized Series of power or irradiance data.
     daytime : Series
         Boolean Series with True for times that are during the day.
     clipping : Series
