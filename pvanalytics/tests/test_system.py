@@ -169,3 +169,23 @@ def test_median_mismatch_tracking(summer_power_tracking):
         pd.Series(True, index=power_half_tracking.index),
         pd.Series(False, index=power_half_tracking.index)
     ) is system.Orientation.UNKNOWN
+
+
+@pytest.mark.filterwarnings("ignore:invalid value encountered in",
+                            "ignore:divide by zero encountered in")
+def test_median_mismatch_fixed(summer_power_fixed):
+    """If the median does not have the same profile as the 99.5% quantile
+    then the orientation is UNKNOWN."""
+    power_half_fixed = summer_power_fixed.copy()
+    power_half_fixed.iloc[0:100*24] = 1
+    assert system.orientation(
+        power_half_fixed,
+        pd.Series(True, index=power_half_fixed.index),
+        pd.Series(False, index=power_half_fixed.index),
+        fit_median=False
+    ) is system.Orientation.FIXED
+    assert system.orientation(
+        power_half_fixed,
+        pd.Series(True, index=power_half_fixed.index),
+        pd.Series(False, index=power_half_fixed.index)
+    ) is system.Orientation.UNKNOWN
