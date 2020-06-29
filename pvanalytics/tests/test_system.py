@@ -175,3 +175,25 @@ def test_median_mismatch_fixed(summer_power_fixed):
         pd.Series(True, index=power_half_fixed.index),
         pd.Series(False, index=power_half_fixed.index)
     ) is system.Orientation.UNKNOWN
+
+
+def test_custom_orientation_thresholds(summer_power_fixed):
+    """Can pass a custom set of minimal r^2 values."""
+    assert system.orientation(
+        summer_power_fixed,
+        summer_power_fixed > 0,
+        pd.Series(False, index=summer_power_fixed.index),
+        fit_params={
+            (0.5, 1.0): {'fixed': 0.9, 'tracking': 0.9, 'fixed_max': 0.9}
+        }
+    ) is system.Orientation.FIXED
+
+    assert system.orientation(
+        summer_power_fixed,
+        summer_power_fixed > 0,
+        pd.Series(False, index=summer_power_fixed.index),
+        fit_params={
+            (0.0, 1.0): {'fixed': 1.0, 'tracking': 0.8, 'fixed_max': 1.0}
+        },
+        fit_median=False
+    ) is system.Orientation.TRACKING
