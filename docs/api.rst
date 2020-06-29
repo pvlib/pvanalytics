@@ -176,6 +176,7 @@ characteristics.
 .. autosummary::
    :toctree: generated/
 
+   system.Orientation
    system.orientation
 
 .. rubric:: References
