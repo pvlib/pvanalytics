@@ -143,7 +143,7 @@ def test_high_clipping_unknown_orientation(summer_power_fixed):
                             "ignore:divide by zero encountered in")
 def test_constant_unknown_orientation(summer_ghi):
     """A constant signal has unknown orientation."""
-    constant = pd.Series(True, index=summer_ghi.index)
+    constant = pd.Series(1, index=summer_ghi.index)
     assert system.orientation(
         constant,
         pd.Series(True, index=summer_ghi.index),
