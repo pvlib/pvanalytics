@@ -5,10 +5,14 @@ from pvanalytics.util import _fit, _group
 
 @enum.unique
 class Orientation(enum.Enum):
-    """Orientation of a PV System can be either Fixed or Tracking."""
+    """Enum describing the orientation of a PV System."""
+
     FIXED = 1
+    """A system with a fixed azimuth and tilt."""
     TRACKING = 2
+    """A system equipped with a tracker."""
     UNKNOWN = 3
+    """A system where the orientation cannot be determined."""
 
 
 # Default minimum R^2 values for curve fits.
@@ -72,6 +76,21 @@ def orientation(series, daytime, clipping, clip_max=10.0,
                 fit_median=True, fit_params=None):
     """Infer the orientation of the system from power or irradiance data.
 
+    Data is grouped by minute of the day and a maximum power or
+    irradiance envelope (the 99.5% quantile of data at each minute) is
+    calculated. Quadratic and quartic curves are fit to this daily
+    envelope and the :math:`r^2` of the curve fits are used determine
+    whether the system is tracking or fixed. Finally an additional fit
+    is performed on the median of the data at each minute to determine
+    if there is substantial data below the envelope that does not
+    match the same profile. If the quadratic has a sufficiently good
+    fit then :py:const:`Orientation.FIXED` is returned. If the quartic
+    has a sufficiently good fir and the quadratic has a sufficiently
+    bad fit then :py:const:`Orientation.TRACKING` is returned. If
+    neiher curve fits well or there is a mismatch between the fit to
+    the upper envelope and the fit to the median then
+    :py:const:`Orientation.UNKNOWN` is returned.
+
     Parameters
     ----------
     series : Series
@@ -91,13 +110,34 @@ def orientation(series, daytime, clipping, clip_max=10.0,
         data set.
     fit_params : dict or None, default None
         Minimum r-squared for curve fits according to the fraction of
-        data with clipping. If None :py:data:`PVFLEETS_FIT_PARAMS` is
-        used.
+        data with clipping. This should be a dictionary with tuple
+        keys and dictionary values. The key must be a 2-tuple of
+        ``(clipping_min, clipping_max)`` where the values specify the
+        minimum and maximum fraction of data with clipping for which
+        the associated fit parameters are applicable. The values of
+        the dicationary are themselves dictionaries with keys
+        ``'fixed'`` and ``'tracking'``, which give the minimum
+        :math:`r^2` for the curve fits, and ``'fixed_max'`` which
+        gives the maximum :math:`r^2` for a quadratic fit if the
+        system appears to have a tracker.
+
+        If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
 
     Returns
     -------
     Orientation
         The orientation determined by curve fitting.
+
+    Notes
+    -----
+    Derived from the PVFleets QA Analysis project.
+
+    See Also
+    --------
+
+    pvanalytics.features.orientation.tracking_nrel
+
+    pvanalytics.features.orientation.fixed_nrel
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS

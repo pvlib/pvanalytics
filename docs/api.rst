@@ -167,6 +167,17 @@ sunny days where the tracker is stuck.
    features.orientation.fixed_nrel
    features.orientation.tracking_nrel
 
+System
+======
+
+This module contains functions and classes for identifying system
+characteristics.
+
+.. autosummary::
+   :toctree: generated/
+
+   system.orientation
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
