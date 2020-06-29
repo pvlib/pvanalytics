@@ -139,6 +139,8 @@ def test_high_clipping_unknown_orientation(summer_power_fixed):
     ) is system.Orientation.UNKNOWN
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered in",
+                            "ignore:divide by zero encountered in")
 def test_constant_unknown_orientation(summer_ghi):
     """A constant signal has unknown orientation."""
     constant = pd.Series(True, index=summer_ghi.index)
