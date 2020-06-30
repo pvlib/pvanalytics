@@ -4,7 +4,7 @@ from pvanalytics.util import _fit, _group
 
 
 @enum.unique
-class Orientation(enum.Enum):
+class Tracker(enum.Enum):
     """Enum describing the orientation of a PV System."""
 
     FIXED = 1
@@ -49,17 +49,17 @@ def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
                           clip_percent, clip_max, fit_params):
     # Determine orientation based on fit and percent of clipping in the data
     #
-    # Returns Orientation.UNKNOWN if orientation cannot be determined,
+    # Returns Tracker.UNKNOWN if orientation cannot be determined,
     # otherwise returns the orientation.
     if clip_percent > clip_max:
         # Too much clipping means the orientation cannot be determined
-        return Orientation.UNKNOWN
+        return Tracker.UNKNOWN
     bounds = _get_bounds(clip_percent, fit_params)
     if _is_fixed(rsquared_quadratic, bounds):
-        return Orientation.FIXED
+        return Tracker.FIXED
     if _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
-        return Orientation.TRACKING
-    return Orientation.UNKNOWN
+        return Tracker.TRACKING
+    return Tracker.UNKNOWN
 
 
 def _get_bounds(clip_percent, fit_params):
@@ -72,8 +72,8 @@ def _get_bounds(clip_percent, fit_params):
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
-def orientation(series, daytime, clipping, clip_max=10.0,
-                fit_median=True, fit_params=None):
+def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
+                         fit_median=True, fit_params=None):
     """Infer the orientation of the system from power or irradiance data.
 
     Data is grouped by minute of the day and a maximum power or
@@ -84,12 +84,12 @@ def orientation(series, daytime, clipping, clip_max=10.0,
     is performed on the median of the data at each minute to determine
     if there is substantial data below the envelope that does not
     match the same profile. If the quadratic has a sufficiently good
-    fit then :py:const:`Orientation.FIXED` is returned. If the quartic
+    fit then :py:const:`Tracker.FIXED` is returned. If the quartic
     has a sufficiently good fir and the quadratic has a sufficiently
-    bad fit then :py:const:`Orientation.TRACKING` is returned. If
+    bad fit then :py:const:`Tracker.TRACKING` is returned. If
     neiher curve fits well or there is a mismatch between the fit to
     the upper envelope and the fit to the median then
-    :py:const:`Orientation.UNKNOWN` is returned.
+    :py:const:`Tracker.UNKNOWN` is returned.
 
     Parameters
     ----------
@@ -103,7 +103,7 @@ def orientation(series, daytime, clipping, clip_max=10.0,
     clip_max : float, default 10.0
         If the percent of data flagged as clipped is greater than
         `clip_max` then the orientation cannot be determined and
-        :py:const:`Orientation.UNKNOWN` is returned.
+        :py:const:`Tracker.UNKNOWN` is returned.
     fit_median : boolean, default True
         Perform a secondary fit with the median power or irradiance to
         validate that the orientation is consistent through the entire
@@ -125,7 +125,7 @@ def orientation(series, daytime, clipping, clip_max=10.0,
 
     Returns
     -------
-    Orientation
+    Tracker
         The orientation determined by curve fitting.
 
     Notes
@@ -159,12 +159,12 @@ def orientation(series, daytime, clipping, clip_max=10.0,
             _group.by_minute(series[daytime]).median(),
             0.025
         )
-        if system_orientation is Orientation.FIXED:
+        if system_orientation is Tracker.FIXED:
             quadratic_median = _fit.quadratic(median)
             if quadratic_median < 0.9:
-                return Orientation.UNKNOWN
-        elif system_orientation is Orientation.TRACKING:
+                return Tracker.UNKNOWN
+        elif system_orientation is Tracker.TRACKING:
             quartic_median = _fit.quartic_restricted(median, middle)
             if quartic_median < 0.9:
-                return Orientation.UNKNOWN
+                return Tracker.UNKNOWN
     return system_orientation

@@ -176,8 +176,8 @@ characteristics.
 .. autosummary::
    :toctree: generated/
 
-   system.Orientation
-   system.orientation
+   system.Tracker
+   system.is_tracking_envelope
 
 .. rubric:: References
 
