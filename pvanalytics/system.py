@@ -45,8 +45,8 @@ def _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
     )
 
 
-def _orientation_from_fit(rsquared_quadratic, rsquared_quartic,
-                          clip_percent, clip_max, fit_params):
+def _tracking_from_fit(rsquared_quadratic, rsquared_quartic,
+                       clip_percent, clip_max, fit_params):
     # Determine orientation based on fit and percent of clipping in the data
     #
     # Returns Tracker.UNKNOWN if orientation cannot be determined,
@@ -148,7 +148,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     middle = (envelope.index.max() + envelope.index.min()) / 2
     rsquared_quadratic = _fit.quadratic(envelope)
     rsquared_quartic = _fit.quartic_restricted(envelope, middle)
-    system_orientation = _orientation_from_fit(
+    system_orientation = _tracking_from_fit(
         rsquared_quadratic, rsquared_quartic,
         (clipping[daytime].sum() / len(clipping[daytime])) * 100,
         clip_max,
