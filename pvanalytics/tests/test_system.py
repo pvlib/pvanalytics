@@ -85,7 +85,7 @@ def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
     return mc.ac
 
 
-def test_ghi_orientation_fixed(summer_ghi):
+def test_ghi_tracking_envelope_fixed(summer_ghi):
     """Clearsky GHI for has a FIXED Tracker."""
     assert system.is_tracking_envelope(
         summer_ghi,
@@ -94,7 +94,7 @@ def test_ghi_orientation_fixed(summer_ghi):
     ) is system.Tracker.FIXED
 
 
-def test_power_orientation_fixed(summer_power_fixed):
+def test_power_tracking_envelope_fixed(summer_power_fixed):
     """Simulated system under clearsky condidtions is FIXED."""
     assert system.is_tracking_envelope(
         summer_power_fixed,
@@ -103,7 +103,7 @@ def test_power_orientation_fixed(summer_power_fixed):
     ) is system.Tracker.FIXED
 
 
-def test_power_orientation_tracking(summer_power_tracking):
+def test_power_tracking_envelope_tracking(summer_power_tracking):
     """Simulated single axis tracker is identifified as TRACKING."""
     assert system.is_tracking_envelope(
         summer_power_tracking,
@@ -112,8 +112,8 @@ def test_power_orientation_tracking(summer_power_tracking):
     ) is system.Tracker.TRACKING
 
 
-def test_high_clipping_unknown_orientation(summer_power_fixed):
-    """If the amount of clipping is high then orientation is UNKNOWN"""
+def test_high_clipping_unknown_tracking_envelope(summer_power_fixed):
+    """If the amount of clipping is high then tracking is UNKNOWN"""
     clipping = pd.Series(False, index=summer_power_fixed.index)
     # 50% clipping
     clipping.iloc[0:len(clipping) // 2] = True
@@ -127,8 +127,8 @@ def test_high_clipping_unknown_orientation(summer_power_fixed):
 
 @pytest.mark.filterwarnings("ignore:invalid value encountered in",
                             "ignore:divide by zero encountered in")
-def test_constant_unknown_orientation(summer_ghi):
-    """A constant signal has unknown orientation."""
+def test_constant_unknown_tracking_envelope(summer_ghi):
+    """A constant signal has unknown tracking."""
     constant = pd.Series(1, index=summer_ghi.index)
     assert system.is_tracking_envelope(
         constant,
@@ -141,7 +141,7 @@ def test_constant_unknown_orientation(summer_ghi):
                             "ignore:divide by zero encountered in")
 def test_median_mismatch_tracking(summer_power_tracking):
     """If the median does not have the same fit as the 99.5% quantile then
-    orientation is UNKNOWN."""
+    tracking is UNKNOWN."""
     power_half_tracking = summer_power_tracking.copy()
     power_half_tracking.iloc[0:100*24] = 1
     assert system.is_tracking_envelope(
@@ -161,7 +161,7 @@ def test_median_mismatch_tracking(summer_power_tracking):
                             "ignore:divide by zero encountered in")
 def test_median_mismatch_fixed(summer_power_fixed):
     """If the median does not have the same profile as the 99.5% quantile
-    then the orientation is UNKNOWN."""
+    then tracking is UNKNOWN."""
     power_half_fixed = summer_power_fixed.copy()
     power_half_fixed.iloc[0:100*24] = 1
     assert system.is_tracking_envelope(
@@ -177,7 +177,7 @@ def test_median_mismatch_fixed(summer_power_fixed):
     ) is system.Tracker.UNKNOWN
 
 
-def test_custom_orientation_thresholds(summer_power_fixed):
+def test_custom_tracking_envelope_thresholds(summer_power_fixed):
     """Can pass a custom set of minimal r^2 values."""
     assert system.is_tracking_envelope(
         summer_power_fixed,
@@ -211,7 +211,7 @@ def albuquerque_clearsky(albuquerque):
     )
 
 
-def test_full_year_orientation(albuquerque_clearsky):
+def test_full_year_tracking_envelope(albuquerque_clearsky):
     """A full year of GHI should be identified as FIXED."""
     assert system.is_tracking_envelope(
         albuquerque_clearsky['ghi'],
@@ -222,7 +222,7 @@ def test_full_year_orientation(albuquerque_clearsky):
 
 @pytest.mark.filterwarnings("ignore:invalid value encountered in",
                             "ignore:divide by zero encountered in")
-def test_year_bad_winter(albuquerque_clearsky):
+def test_year_bad_winter_tracking_envelope(albuquerque_clearsky):
     """If the data is perturbed during the winter months
     is_tracking_envelope() returns Tracker.UNKNOWN."""
     winter_perturbed = albuquerque_clearsky.copy()
