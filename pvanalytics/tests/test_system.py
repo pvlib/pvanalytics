@@ -197,3 +197,39 @@ def test_custom_orientation_thresholds(summer_power_fixed):
         },
         fit_median=False
     ) is system.Tracker.TRACKING
+
+
+@pytest.fixture(scope='module')
+def albuquerque_clearsky(albuquerque):
+    """One year of clearsky data in Albuquerque, NM."""
+    year_hourly = pd.date_range(
+        start='1/1/2020', end='1/1/2021', freq='H', tz='MST'
+    )
+    return albuquerque.get_clearsky(
+        year_hourly,
+        model='simplified_solis'
+    )
+
+
+def test_full_year_orientation(albuquerque_clearsky):
+    """A full year of GHI should be identified as FIXED."""
+    assert system.is_tracking_envelope(
+        albuquerque_clearsky['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index)
+    ) is system.Tracker.FIXED
+
+
+@pytest.mark.filterwarnings("ignore:invalid value encountered in",
+                            "ignore:divide by zero encountered in")
+def test_year_bad_winter(albuquerque_clearsky):
+    """If the data is perturbed during the winter months
+    is_tracking_envelope() returns Tracker.UNKNOWN."""
+    winter_perturbed = albuquerque_clearsky.copy()
+    winter = winter_perturbed.index.month.isin([10, 11, 12, 1, 2])
+    winter_perturbed.loc[winter] = 10
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index)
+    ) is system.Tracker.UNKNOWN

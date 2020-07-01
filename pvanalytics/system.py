@@ -176,7 +176,23 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
+    series_daytime = series[daytime]
     clip_percent = (clipping[daytime].sum() / len(clipping[daytime])) * 100
-    return _infer_tracking(
-        series[daytime], clip_percent, clip_max, fit_median, fit_params
+    march_september = series_daytime[
+        series_daytime.index.month.isin([5, 6, 7, 8])
+    ]
+    october_february = series_daytime[
+        series_daytime.index.month.isin([11, 12, 1, 2])
+    ]
+    # TODO handle not enough data in one/both halves
+    #
+    # What is not enough?
+    march_september_tracking = _infer_tracking(
+        march_september, clip_percent, clip_max, fit_median, fit_params
     )
+    october_february_tracking = _infer_tracking(
+        october_february, clip_percent, clip_max, fit_median, fit_params
+    )
+    if march_september_tracking is not october_february_tracking:
+        return Tracker.UNKNOWN
+    return march_september_tracking
