@@ -184,9 +184,10 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     october_february = series_daytime[
         series_daytime.index.month.isin([11, 12, 1, 2])
     ]
-    # TODO handle not enough data in one/both halves
-    #
-    # What is not enough?
+    if len(october_february) == 0 or len(march_september) == 0:
+        return _infer_tracking(
+            series_daytime, clip_percent, clip_max, fit_median, fit_params
+        )
     march_september_tracking = _infer_tracking(
         march_september, clip_percent, clip_max, fit_median, fit_params
     )
