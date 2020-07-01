@@ -12,7 +12,7 @@ class Tracker(enum.Enum):
     TRACKING = 2
     """A system equipped with a tracker."""
     UNKNOWN = 3
-    """A system where the orientation cannot be determined."""
+    """A system where the tracking cannot be determined."""
 
 
 # Default minimum R^2 values for curve fits.
@@ -47,12 +47,14 @@ def _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
 
 def _tracking_from_fit(rsquared_quadratic, rsquared_quartic,
                        clip_percent, clip_max, fit_params):
-    # Determine orientation based on fit and percent of clipping in the data
+    # Determine tracking based on fit and percent of clipping in the data.
     #
-    # Returns Tracker.UNKNOWN if orientation cannot be determined,
-    # otherwise returns the orientation.
+    # If `clip_percent` is greater than `clip_max` or the curve fits
+    # are not sufficiently good then Tracker.UNKNOWN is
+    # returned. Otherwise Tracker.FIXED or Tracker.TRACKING is
+    # returned.
     if clip_percent > clip_max:
-        # Too much clipping means the orientation cannot be determined
+        # Too much clipping means the tracking cannot be determined
         return Tracker.UNKNOWN
     bounds = _get_bounds(clip_percent, fit_params)
     if _is_fixed(rsquared_quadratic, bounds):
@@ -63,9 +65,9 @@ def _tracking_from_fit(rsquared_quadratic, rsquared_quartic,
 
 
 def _get_bounds(clip_percent, fit_params):
-    # get the minimum r^2 for fits to determine tracking or fixed
-    # orientation. The bounds vary by the amount of clipping in the
-    # data, passed as a percentage in `clip_percent`.
+    # get the minimum r^2 for fits to determine tracking or fixed. The
+    # bounds vary by the amount of clipping in the data, passed as a
+    # percentage in `clip_percent`.
     for clip, bounds in fit_params.items():
         if clip[0] <= clip_percent <= clip[1]:
             return bounds
@@ -74,7 +76,7 @@ def _get_bounds(clip_percent, fit_params):
 
 def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
                          fit_median=True, fit_params=None):
-    """Infer the orientation of the system from power or irradiance data.
+    """Infer whether the system is equipped with a tracker.
 
     Data is grouped by minute of the day and a maximum power or
     irradiance envelope (the 99.5% quantile of data at each minute) is
@@ -85,7 +87,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     if there is substantial data below the envelope that does not
     match the same profile. If the quadratic has a sufficiently good
     fit then :py:const:`Tracker.FIXED` is returned. If the quartic
-    has a sufficiently good fir and the quadratic has a sufficiently
+    has a sufficiently good fit and the quadratic has a sufficiently
     bad fit then :py:const:`Tracker.TRACKING` is returned. If
     neiher curve fits well or there is a mismatch between the fit to
     the upper envelope and the fit to the median then
@@ -102,11 +104,11 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         clipped.
     clip_max : float, default 10.0
         If the percent of data flagged as clipped is greater than
-        `clip_max` then the orientation cannot be determined and
+        `clip_max` then tracking cannot be determined and
         :py:const:`Tracker.UNKNOWN` is returned.
     fit_median : boolean, default True
         Perform a secondary fit with the median power or irradiance to
-        validate that the orientation is consistent through the entire
+        validate that the profile is consistent through the entire
         data set.
     fit_params : dict or None, default None
         Minimum r-squared for curve fits according to the fraction of
@@ -126,7 +128,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     Returns
     -------
     Tracker
-        The orientation determined by curve fitting.
+        The tracking determined by curve fitting (FIXED, TRACKING, or
+        UNKNOWN).
 
     Notes
     -----
