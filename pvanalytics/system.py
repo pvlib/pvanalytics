@@ -74,6 +74,38 @@ def _get_bounds(clip_percent, fit_params):
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
+def _infer_tracking(series, clip_percent, clip_max, fit_median, fit_params):
+    # Infer system tracking from the upper envolope and median of the
+    # data.
+    envelope = _remove_morning_evening(
+        _group.by_minute(series).quantile(0.995),
+        0.05
+    )
+    middle = (envelope.index.max() + envelope.index.min()) / 2
+    rsquared_quadratic = _fit.quadratic(envelope)
+    rsquared_quartic = _fit.quartic_restricted(envelope, middle)
+    system_tracking = _tracking_from_fit(
+        rsquared_quadratic, rsquared_quartic,
+        clip_percent,
+        clip_max,
+        fit_params
+    )
+    if fit_median:
+        median = _remove_morning_evening(
+            _group.by_minute(series).median(),
+            0.025
+        )
+        if system_tracking is Tracker.FIXED:
+            quadratic_median = _fit.quadratic(median)
+            if quadratic_median < 0.9:
+                return Tracker.UNKNOWN
+        elif system_tracking is Tracker.TRACKING:
+            quartic_median = _fit.quartic_restricted(median, middle)
+            if quartic_median < 0.9:
+                return Tracker.UNKNOWN
+    return system_tracking
+
+
 def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
                          fit_median=True, fit_params=None):
     """Infer whether the system is equipped with a tracker.
@@ -144,30 +176,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
-    envelope = _remove_morning_evening(
-        _group.by_minute(series[daytime]).quantile(0.995),
-        0.05
+    clip_percent = (clipping[daytime].sum() / len(clipping[daytime])) * 100
+    return _infer_tracking(
+        series[daytime], clip_percent, clip_max, fit_median, fit_params
     )
-    middle = (envelope.index.max() + envelope.index.min()) / 2
-    rsquared_quadratic = _fit.quadratic(envelope)
-    rsquared_quartic = _fit.quartic_restricted(envelope, middle)
-    system_tracking = _tracking_from_fit(
-        rsquared_quadratic, rsquared_quartic,
-        (clipping[daytime].sum() / len(clipping[daytime])) * 100,
-        clip_max,
-        fit_params
-    )
-    if fit_median:
-        median = _remove_morning_evening(
-            _group.by_minute(series[daytime]).median(),
-            0.025
-        )
-        if system_tracking is Tracker.FIXED:
-            quadratic_median = _fit.quadratic(median)
-            if quadratic_median < 0.9:
-                return Tracker.UNKNOWN
-        elif system_tracking is Tracker.TRACKING:
-            quartic_median = _fit.quartic_restricted(median, middle)
-            if quartic_median < 0.9:
-                return Tracker.UNKNOWN
-    return system_tracking
