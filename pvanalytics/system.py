@@ -151,7 +151,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     middle = (envelope.index.max() + envelope.index.min()) / 2
     rsquared_quadratic = _fit.quadratic(envelope)
     rsquared_quartic = _fit.quartic_restricted(envelope, middle)
-    system_orientation = _tracking_from_fit(
+    system_tracking = _tracking_from_fit(
         rsquared_quadratic, rsquared_quartic,
         (clipping[daytime].sum() / len(clipping[daytime])) * 100,
         clip_max,
@@ -162,12 +162,12 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
             _group.by_minute(series[daytime]).median(),
             0.025
         )
-        if system_orientation is Tracker.FIXED:
+        if system_tracking is Tracker.FIXED:
             quadratic_median = _fit.quadratic(median)
             if quadratic_median < 0.9:
                 return Tracker.UNKNOWN
-        elif system_orientation is Tracker.TRACKING:
+        elif system_tracking is Tracker.TRACKING:
             quartic_median = _fit.quartic_restricted(median, middle)
             if quartic_median < 0.9:
                 return Tracker.UNKNOWN
-    return system_orientation
+    return system_tracking
