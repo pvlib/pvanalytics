@@ -147,7 +147,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         data with clipping. This should be a dictionary with tuple
         keys and dictionary values. The key must be a 2-tuple of
         ``(clipping_min, clipping_max)`` where the values specify the
-        minimum and maximum fraction of data with clipping for which
+        minimum and maximum percent of data with clipping for which
         the associated fit parameters are applicable. The values of
         the dicationary are themselves dictionaries with keys
         ``'fixed'`` and ``'tracking'``, which give the minimum
