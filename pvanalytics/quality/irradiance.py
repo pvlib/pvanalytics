@@ -410,13 +410,6 @@ def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     Irradiance measurements and clear-sky irradiance on each day are
     integrated with the left-hand rule to calculate daily insolation.
 
-    .. note::
-
-       This has been built to work on GHI and POA for both
-       tracking and fixed PV systems; however, if testing POA irradiance
-       for a tracking system it is recommended that you increase
-       `daily_max` to 1.35.
-
     Parameters
     ----------
     irrad : Series
@@ -439,6 +432,10 @@ def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     -----
     The default values for `daily_min` and `daily_max` were taken from
     the PVFleets QA Analysis project.
+
+    The default limits (`daily_max` and `daily_min`) have been set for
+    GHI. If you pass POA it is recommended that you increase
+    `daily_max` to 1.35.
 
     """
     daily_irradiance = _daily_total(irrad)
