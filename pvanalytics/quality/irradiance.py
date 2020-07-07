@@ -442,9 +442,9 @@ def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
 
     """
     daily_irradiance = _daily_total(irrad)
-    daily_cleasky = _daily_total(clearsky)
+    daily_clearsky = _daily_total(clearsky)
     good_days = util.check_limits(
-        daily_irradiance/daily_cleasky,
+        daily_irradiance/daily_clearsky,
         upper_bound=daily_max,
         lower_bound=daily_min
     )
