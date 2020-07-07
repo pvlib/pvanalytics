@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     raise RuntimeError('setuptools is required')
 
@@ -58,7 +58,7 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering'
 ]
 
-PACKAGES = ['pvanalytics']
+PACKAGES = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
 setup(
     name=DISTNAME,
