@@ -407,8 +407,8 @@ def _daily_total(series):
 def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     """Check that daily insolation lies between minimum and maximum values.
 
-    Irradiance measurements and clear-sky irradiance on each day are integrated with the
-    left-hand rule to calculate daily insolation.
+    Irradiance measurements and clear-sky irradiance on each day are
+    integrated with the left-hand rule to calculate daily insolation.
 
     .. note::
 
@@ -432,8 +432,8 @@ def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     Returns
     -------
     Series
-        True for values on days where the ratio of daily insolation to daily clearsky insolation is between `daily_min`
-        and `daily_max`.
+        True for values on days where the ratio of daily insolation to
+        daily clearsky insolation is between `daily_min` and `daily_max`.
 
     Notes
     -----
