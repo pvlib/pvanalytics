@@ -32,7 +32,7 @@ def _hours(data, freq):
     return data.count() * _freqstr_to_hours(freq)
 
 
-def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
+def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
                   r2_fixed_max=0.96, min_hours=5, peak_min=None,
                   quadratic_mask=None):
     """Flag days that match the profile of a single-axis tracking PV system.
@@ -63,7 +63,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.94,
         day. For best results this mask should exclude early morning
         and late afternoon as well as night. Data at these times may have
         problems with shadows that interfere with curve fitting.
-    r2_min : float, default 0.94
+    r2_min : float, default 0.915
         Minimum :math:`r^2` for a day to be considered sunny.
     r2_fixed_max : float, default 0.96
         If the :math:`r^2` of the quadratic fit exceeds
