@@ -144,15 +144,18 @@ Clearsky
 Orientation
 -----------
 
-Whether a system has a fixed orientation or is equipped with a tracker
-can be determined by examining power or POA irradiance on days that
-are relatively sunny. Two functions are provided that operate on power
+System orientation refers to mounting type (fixed or tracker) and the
+azimuth and tilt of the mounting. A system's orientation can be determined
+by examining power or POA irradiance on days that are relatively sunny.
+
+ This module provides functions that operate on power
 or POA irradiance to identify system orientation on a daily
-basis. These functions can tell you whether a day matches the profile
-of a fixed system or system with a single-axis tracker; however, care
-should be taken when interpreting negation of the output (i.e. looking
-for days when the tracker is not functioning) since other factors such
-as weather may interfere with classification.
+basis. These functions can tell you whether a day's profile matches
+that of a fixed system or system with a single-axis tracker. 
+
+Care should be taken when interpreting function output since
+other factors such as malfunctioning trackers can interfere with
+identification.
 
 To get a better understanding of when a single-axis is not working
 (stuck in a fixed orientation) it may be possible to combine output

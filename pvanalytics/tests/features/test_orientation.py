@@ -60,7 +60,7 @@ def solarposition(times, albuquerque):
 
 
 def test_clearsky_ghi_fixed(clearsky, solarposition):
-    """every day of clearsky GHI is a sunny day."""
+    """Identify every day as fixed, since clearsky GHI is sunny."""
     assert orientation.fixed_nrel(
         clearsky['ghi'],
         solarposition['zenith'] < 87,
