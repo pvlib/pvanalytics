@@ -51,7 +51,17 @@ def _backfill_window(endpoints, window):
     return flags
 
 
-def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
+def _mark(flags, window, mark):
+    if mark not in ['all', 'tail', 'end']:
+        raise ValueError("mark must be one of'tail', 'end' or 'all'")
+    if mark == 'all':
+        return _backfill_window(flags, window)
+    if mark == 'tail':
+        return _backfill_window(flags, window - 1)
+    return flags
+
+
+def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify stale values in the data.
 
     For a window of length N, the last value (index N-1) is considered
@@ -72,9 +82,18 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         relative tolerance for detecting a change in data values
     atol : float, default 1e-8
         absolute tolerance for detecting a change in data values
-    label_all : bool, default False
-        Whether to label all values in the window. If False, then only
-        the right endpoint of the window is labeled.
+    mark : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        stale values is detected. Can one be of 'tail', 'end', or
+        'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
 
     Returns
     -------
@@ -84,7 +103,8 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     Raises
     ------
     ValueError
-        If window < 2.
+        If `window < 2` or `mark` is not one of 'tail', 'end', or
+        'all'.
 
     Notes
     -----
@@ -103,12 +123,62 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
-    if label_all:
-        return _backfill_window(flags, window)
-    return flags
+    return _mark(flags, window, mark)
 
 
-def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
+def stale_values_round(x, window=6, decimals=3, mark='tail'):
+    """Identify stale values by rounding.
+
+    A value is considered stale if it is part of a sequence of length
+    `window` of values that are identical when rounded to `decimals`
+    decimal places.
+
+    Parameters
+    ----------
+    x : Series
+        Data to be processed.
+    window : int, default 6
+        Number of consecutive identical values for a data point to be
+        considered stale.
+    decimals : int, default 3
+        Number of decimal places to round to.
+    mark : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        stale values is detected. Can be one of 'tail', 'end', or
+        'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'end' then the first `window - 1` values in a stale
+          sequence sequence are marked ``False`` and all subsequent
+          values in the sequence are marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
+
+    Returns
+    -------
+    Series
+        True for each value that is part of a stale sequence of data.
+
+    Raises
+    ------
+    ValueError
+        If `mark` is not one of 'tail', 'end', or 'all'.
+
+    Notes
+    -----
+        Based on code from the pvfleets_qa_analysis project. Copyright
+        (c) 2020 Alliance for Sustainable Energy, LLC.
+
+    """
+    rounded_diff = x.round(decimals=decimals).diff()
+    endpoints = rounded_diff.rolling(window=window-1).apply(
+        lambda xs: len(xs[xs == 0]) == window-1
+    ).fillna(False).astype(bool)
+    return _mark(endpoints, window, mark)
+
+
+def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """Identify sequences which appear to be linear.
 
     Sequences are linear if the first difference appears to be
@@ -129,9 +199,18 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         tolerance relative to max(abs(x.diff()) for detecting a change
     atol : float, default 1e-8
         absolute tolerance for detecting a change in first difference
-    label_all : bool, default False
-        Whether to label all values in the window. If False, then only the
-        right endpoint of the window is labeled.
+    mark : str, default 'tail'
+        How much of the window to mark ``True`` when a sequence of
+        interpolated values is detected. Can be one of 'tail', 'end',
+        or 'all'.
+
+        - If 'tail' (the default) then every point in the window
+          *except* the first point is marked ``True``.
+        - If 'end' then the first `window - 1` values in an
+          interpolated sequence are marked ``False`` and all
+          subsequent values in the sequence are marked ``True``.
+        - If 'all' then every point in the window *including* the
+          first point is marked ``True``.
 
     Returns
     -------
@@ -141,7 +220,8 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
     Raises
     ------
     ValueError
-        If window < 3.
+        If `window < 3` or `mark` is not one of 'tail', 'end', or
+        'all'.
 
     Notes
     -----
@@ -160,11 +240,10 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, label_all=False):
         x.diff(periods=1),
         window=window-1,
         rtol=rtol,
-        atol=atol
+        atol=atol,
+        mark='end'
     )
-    if label_all:
-        return _backfill_window(flags, window)
-    return flags
+    return _mark(flags, window, mark)
 
 
 def _freq_to_seconds(freq):

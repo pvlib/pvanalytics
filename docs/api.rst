@@ -51,7 +51,23 @@ Identify gaps in the data.
    :toctree: generated/
 
    quality.gaps.interpolation_diff
+
+Data sometimes contains sequences of values that are "stale" or
+"stuck." These are contiguous spans of data where the value does not
+change within the precision given. The functions below
+can be used to detect stale values.
+
+.. note::
+
+   If the data has been altered in some way (i.e. temperature that has
+   been rounded to an integer value) before being passed to these
+   functions you may see unexpectedly large amounts of stale data.
+
+.. autosummary::
+   :toctree: generated/
+
    quality.gaps.stale_values_diff
+   quality.gaps.stale_values_round
 
 The following functions identify days with incomplete data.
 
@@ -118,6 +134,12 @@ Quality checks for weather data.
    quality.weather.temperature_limits
    quality.weather.wind_limits
 
+.. rubric:: References
+
+.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
+        Algorithm for Surface Radiation Measurements, The Open Atmospheric
+        Science Journal 2, pp. 23-37, 2008.
+
 Features
 ========
 
@@ -132,6 +154,7 @@ Functions for identifying inverter clipping
    :toctree: generated/
 
    features.clipping.levels
+   features.clipping.threshold
 
 Clearsky
 --------
@@ -144,22 +167,19 @@ Clearsky
 Orientation
 -----------
 
-Whether a system has a fixed orientation or is equipped with a tracker
-can be determined by examining power or POA irradiance on days that
-are relatively sunny. Two functions are provided that operate on power
-or POA irradiance to identify system orientation on a daily
-basis. These functions can tell you whether a day matches the profile
-of a fixed system or system with a single-axis tracker; however, care
-should be taken when interpreting negation of the output (i.e. looking
-for days when the tracker is not functioning) since other factors such
-as weather may interfere with classification.
+System orientation refers to mounting type (fixed or tracker) and the
+azimuth and tilt of the mounting. A system's orientation can be
+determined by examining power or POA irradiance on days that are
+relatively sunny.
 
-To get a better understanding of when a single-axis is not working
-(stuck in a fixed orientation) it may be possible to combine output
-from both functions, using :py:func:`features.orientation.fixed_nrel`
-to identify stuck days. Combining these fixed days with tracking days
-using an exclusive or should give a reasonable estimate of relatively
-sunny days where the tracker is stuck.
+This module provides functions that operate on power or POA irradiance
+to identify system orientation on a daily basis. These functions can
+tell you whether a day's profile matches that of a fixed system or
+system with a single-axis tracker.
+
+Care should be taken when interpreting function output since
+other factors such as malfunctioning trackers can interfere with
+identification.
 
 .. autosummary::
    :toctree: generated/
@@ -178,9 +198,3 @@ characteristics.
 
    system.Tracker
    system.is_tracking_envelope
-
-.. rubric:: References
-
-.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-        Algorithm for Surface Radiation Measurements, The Open Atmospheric
-        Science Journal 2, pp. 23-37, 2008.
