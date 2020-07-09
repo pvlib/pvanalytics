@@ -257,7 +257,7 @@ def test_clearsky_limits_csi_max(times):
     )
 
 
-def test_daily_limits_nrel():
+def test_daily_insolation_limits_nrel():
     """"""
     three_days = pd.date_range(
         start='1/1/2020',
@@ -272,8 +272,10 @@ def test_daily_limits_nrel():
         tz='MST'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
-    assert irradiance.daily_limits(clearsky['ghi'], clearsky['ghi']).all()
-    assert not irradiance.daily_limits(
+    assert irradiance.daily_insolation_limits(
+        clearsky['ghi'], clearsky['ghi']
+    ).all()
+    assert not irradiance.daily_insolation_limits(
         pd.Series(0, index=three_days),
         clearsky['ghi']
     ).any()
@@ -285,6 +287,6 @@ def test_daily_limits_nrel():
     expected.loc['1/1/2020'] = True
     assert_series_equal(
         expected,
-        irradiance.daily_limits(irrad, clearsky['ghi']),
+        irradiance.daily_insolation_limits(irrad, clearsky['ghi']),
         check_names=False
     )

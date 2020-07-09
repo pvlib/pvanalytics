@@ -410,7 +410,7 @@ def _daily_total(series):
     )
 
 
-def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
+def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     """Check that daily insolation lies between minimum and maximum values.
 
     Irradiance measurements and clear-sky irradiance on each day are
