@@ -400,8 +400,14 @@ def _to_hours(freqstr):
 
 
 def _daily_total(series):
+    # Resample the series returning the integral for each day.
+    #
+    # Assumes that timestamps are evenly spaced and uses the Trapezoid
+    # rule for integration.
     freq_hours = _to_hours(pd.infer_freq(series.index))
-    return series.resample('D').sum() * freq_hours
+    return series.resample('D').apply(
+        lambda day: freq_hours * (day[:-1] + day[1:]).sum()
+    )
 
 
 def daily_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
