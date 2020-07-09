@@ -134,6 +134,12 @@ Quality checks for weather data.
    quality.weather.temperature_limits
    quality.weather.wind_limits
 
+.. rubric:: References
+
+.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
+        Algorithm for Surface Radiation Measurements, The Open Atmospheric
+        Science Journal 2, pp. 23-37, 2008.
+
 Features
 ========
 
@@ -158,8 +164,25 @@ Clearsky
 
    features.clearsky.reno
 
-.. rubric:: References
+Orientation
+-----------
 
-.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-        Algorithm for Surface Radiation Measurements, The Open Atmospheric
-        Science Journal 2, pp. 23-37, 2008.
+System orientation refers to mounting type (fixed or tracker) and the
+azimuth and tilt of the mounting. A system's orientation can be
+determined by examining power or POA irradiance on days that are
+relatively sunny.
+
+This module provides functions that operate on power or POA irradiance
+to identify system orientation on a daily basis. These functions can
+tell you whether a day's profile matches that of a fixed system or
+system with a single-axis tracker.
+
+Care should be taken when interpreting function output since
+other factors such as malfunctioning trackers can interfere with
+identification.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.orientation.fixed_nrel
+   features.orientation.tracking_nrel
