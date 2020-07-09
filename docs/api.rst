@@ -118,6 +118,12 @@ Quality checks for weather data.
    quality.weather.temperature_limits
    quality.weather.wind_limits
 
+.. rubric:: References
+
+.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
+        Algorithm for Surface Radiation Measurements, The Open Atmospheric
+        Science Journal 2, pp. 23-37, 2008.
+
 Features
 ========
 
@@ -163,9 +169,3 @@ identification.
 
    features.orientation.fixed_nrel
    features.orientation.tracking_nrel
-
-.. rubric:: References
-
-.. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-        Algorithm for Surface Radiation Measurements, The Open Atmospheric
-        Science Journal 2, pp. 23-37, 2008.
