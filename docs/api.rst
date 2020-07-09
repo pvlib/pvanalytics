@@ -145,24 +145,18 @@ Orientation
 -----------
 
 System orientation refers to mounting type (fixed or tracker) and the
-azimuth and tilt of the mounting. A system's orientation can be determined
-by examining power or POA irradiance on days that are relatively sunny.
+azimuth and tilt of the mounting. A system's orientation can be
+determined by examining power or POA irradiance on days that are
+relatively sunny.
 
- This module provides functions that operate on power
-or POA irradiance to identify system orientation on a daily
-basis. These functions can tell you whether a day's profile matches
-that of a fixed system or system with a single-axis tracker. 
+This module provides functions that operate on power or POA irradiance
+to identify system orientation on a daily basis. These functions can
+tell you whether a day's profile matches that of a fixed system or
+system with a single-axis tracker.
 
 Care should be taken when interpreting function output since
 other factors such as malfunctioning trackers can interfere with
 identification.
-
-To get a better understanding of when a single-axis is not working
-(stuck in a fixed orientation) it may be possible to combine output
-from both functions, using :py:func:`features.orientation.fixed_nrel`
-to identify stuck days. Combining these fixed days with tracking days
-using an exclusive or should give a reasonable estimate of relatively
-sunny days where the tracker is stuck.
 
 .. autosummary::
    :toctree: generated/
