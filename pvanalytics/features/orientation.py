@@ -38,16 +38,18 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     """Flag days that match the profile of a single-axis tracking PV system
     on a sunny day.
 
-    This algorithm relies on the observation that the power profile of a single-axis
-    tracking PV system tends to resemble a quartic polynomial on a sunny day, I.e.,
-    two peaks are observed, one before and one after the sun crosses the tracker
-    azimuth. By contrast, the power profile for a fixed tilt PV system often resembles
-    a quadratic polynomial on a sunny day, with a single peak when the sun is near
-    the system azimuth.
-    
-    The algorithm fits both a quartic and a quadratic polynomial to each day's data.
-    A day is marked True if the quartic fit has a sufficiently high :math:`r^2` and the
-    quadratic fit has a sufficiently low :math:`r^2`.  Specifically, a day is marked True
+    This algorithm relies on the observation that the power profile of
+    a single-axis tracking PV system tends to resemble a quartic
+    polynomial on a sunny day, I.e., two peaks are observed, one
+    before and one after the sun crosses the tracker azimuth. By
+    contrast, the power profile for a fixed tilt PV system often
+    resembles a quadratic polynomial on a sunny day, with a single
+    peak when the sun is near the system azimuth.
+
+    The algorithm fits both a quartic and a quadratic polynomial to
+    each day's data.  A day is marked True if the quartic fit has a
+    sufficiently high :math:`r^2` and the quadratic fit has a
+    sufficiently low :math:`r^2`.  Specifically, a day is marked True
     when three conditions are met:
 
     1. a restricted quartic [#]_ must fit the data with :math:`r^2`
@@ -138,7 +140,7 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
     This algorithm relies on the observation that the power profile of a
     fixed tilt PV system often resembles a quadratic polynomial on a
     sunny day, with a single peak when the sun is near the system azimuth.
-    
+
     A day is marked True when the :math:`r^2` for a quadratic fit to the
     power data is greater than `r2_min`.
 
