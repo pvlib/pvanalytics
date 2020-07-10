@@ -257,19 +257,23 @@ def test_clearsky_limits_csi_max(times):
     )
 
 
-def test_daily_insolation_limits_nrel():
-    """"""
+@pytest.fixture
+def albuquerque():
+    return location.Location(
+        35,
+        -106,
+        elevation=2000,
+        tz='MST'
+    )
+
+
+def test_daily_insolation_limits(albuquerque):
+    """Daily insolation limits works with uniform timestamp spacing."""
     three_days = pd.date_range(
         start='1/1/2020',
         end='1/4/2020',
         closed='left',
         freq='H'
-    )
-    albuquerque = location.Location(
-        35,
-        -106,
-        elevation=5000,
-        tz='MST'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
     assert irradiance.daily_insolation_limits(
@@ -288,5 +292,36 @@ def test_daily_insolation_limits_nrel():
     assert_series_equal(
         expected,
         irradiance.daily_insolation_limits(irrad, clearsky['ghi']),
+        check_names=False
+    )
+
+
+def test_daily_insolation_limits_uneven(albuquerque):
+    """daily_insolation_limits works with uneven timestamp spacing."""
+    three_days = pd.date_range(
+        start='1/1/2020',
+        end='1/4/2020',
+        closed='left',
+        freq='15T'
+    )
+    clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
+    ghi = clearsky['ghi'].copy()
+    assert_series_equal(
+        irradiance.daily_insolation_limits(ghi, ghi),
+        pd.Series(True, three_days),
+        check_names=False
+    )
+    ghi.loc[(ghi > 200) & (ghi < 202)] = np.nan
+    ghi.loc[ghi == 0] = np.nan
+    ghi.dropna(inplace=True)
+    assert_series_equal(
+        irradiance.daily_insolation_limits(
+            ghi,
+            albuquerque.get_clearsky(
+                ghi.index,
+                model='simplified_solis'
+            )['ghi']
+        ),
+        pd.Series(True, index=ghi.index),
         check_names=False
     )

@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from scipy import integrate
 from pvlib.tools import cosd
 import pvlib
 
@@ -400,13 +401,26 @@ def _to_hours(freqstr):
 
 
 def _daily_total(series):
-    # Resample the series returning the integral for each day.
+    # Resample the series returning the integral for each day
+    # calculated using the trapezoid rule.
     #
-    # Assumes that timestamps are evenly spaced and uses the Trapezoid
-    # rule for integration.
-    freq_hours = _to_hours(pd.infer_freq(series.index))
-    return series.resample('D').apply(
-        lambda day: freq_hours * (day[:-1] + day[1:]).sum()
+    # If the series has uniform timestamp spacing (i.e. pd.infer_freq
+    # returns a value other than None) then the frequency is used as
+    # the spacing between each value to speed up integration. If the
+    # frequency cannot be inferred, then the hour of the day is
+    # calculated for each value and used as the x-coordinate in the
+    # integration.
+    freq = pd.infer_freq(series.index)
+    if freq:
+        freq_hours = _to_hours(freq)
+        return series.resample('D').apply(
+            integrate.trapz,
+            dx=freq_hours
+        )
+    df = series.to_frame(name='value')
+    df['hour'] = (series.index.minute / 60) + series.index.hour
+    return df.resample('D').apply(
+        lambda day: integrate.trapz(y=day['value'], x=day['hour'])
     )
 
 
