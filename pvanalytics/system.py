@@ -75,7 +75,7 @@ def _get_bounds(clip_percent, fit_params):
 
 
 def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
-                    fit_median, fit_params):
+                    fit_median, median_r2_min, fit_params):
     # Infer system tracking from the upper envelope and median of the
     # data.
     envelope = _remove_morning_evening(
@@ -98,18 +98,18 @@ def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
         )
         if system_tracking is Tracker.FIXED:
             quadratic_median = _fit.quadratic(median)
-            if quadratic_median < 0.9:
+            if quadratic_median < median_r2_min:
                 return Tracker.UNKNOWN
         elif system_tracking is Tracker.TRACKING:
             quartic_median = _fit.quartic_restricted(median, middle)
-            if quartic_median < 0.9:
+            if quartic_median < median_r2_min:
                 return Tracker.UNKNOWN
     return system_tracking
 
 
 def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
                          envelope_quantile=0.995, fit_median=True,
-                         fit_params=None):
+                         median_r2_min=0.9, fit_params=None):
     """Infer whether the system is equipped with a tracker.
 
     Data is grouped by minute of the day and a maximum power or
@@ -147,6 +147,10 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         Perform a secondary fit with the median power or irradiance to
         validate that the profile is consistent through the entire
         data set.
+    median_r2_min : float, default 0.9
+        Minimum :math:`r^2` for a curve fit to the median power or
+        irradiance at each minute of the day (Applies only if
+        `fit_median` is True).
     fit_params : dict or None, default None
         Minimum r-squared for curve fits according to the fraction of
         data with clipping. This should be a dictionary with tuple
@@ -196,6 +200,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
             clip_max,
             envelope_quantile,
             fit_median,
+            median_r2_min,
             fit_params
         )
     march_september_tracking = _infer_tracking(
@@ -204,6 +209,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         clip_max,
         envelope_quantile,
         fit_median,
+        median_r2_min,
         fit_params
     )
     october_february_tracking = _infer_tracking(
@@ -212,6 +218,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         clip_max,
         envelope_quantile,
         fit_median,
+        median_r2_min,
         fit_params
     )
     if march_september_tracking is not october_february_tracking:
