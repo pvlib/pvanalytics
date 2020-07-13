@@ -417,10 +417,12 @@ def _daily_total(series):
             integrate.trapz,
             dx=freq_hours
         )
-    df = series.to_frame(name='value')
-    df['hour'] = (series.index.minute / 60) + series.index.hour
-    return df.resample('D').apply(
-        lambda day: integrate.trapz(y=day['value'], x=day['hour'])
+    hours = pd.Series(
+        (series.index.minute / 60) + series.index.hour,
+        index=series.index
+    )
+    return series.resample('D').apply(
+        lambda day: integrate.trapz(y=day, x=hours[day.index])
     )
 
 
