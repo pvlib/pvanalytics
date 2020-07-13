@@ -74,11 +74,12 @@ def _get_bounds(clip_percent, fit_params):
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
-def _infer_tracking(series, clip_percent, clip_max, fit_median, fit_params):
-    # Infer system tracking from the upper envolope and median of the
+def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
+                    fit_median, fit_params):
+    # Infer system tracking from the upper envelope and median of the
     # data.
     envelope = _remove_morning_evening(
-        _group.by_minute(series).quantile(0.995),
+        _group.by_minute(series).quantile(envelope_quantile),
         0.05
     )
     middle = (envelope.index.max() + envelope.index.min()) / 2
@@ -107,22 +108,23 @@ def _infer_tracking(series, clip_percent, clip_max, fit_median, fit_params):
 
 
 def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
-                         fit_median=True, fit_params=None):
+                         envelope_quantile=0.995, fit_median=True,
+                         fit_params=None):
     """Infer whether the system is equipped with a tracker.
 
     Data is grouped by minute of the day and a maximum power or
-    irradiance envelope (the 99.5% quantile of data at each minute) is
-    calculated. Quadratic and quartic curves are fit to this daily
+    irradiance envelope (the `envelope_quantile` value at each minute)
+    is calculated. Quadratic and quartic curves are fit to this daily
     envelope and the :math:`r^2` of the curve fits are used determine
     whether the system is tracking or fixed. Finally an additional fit
     is performed on the median of the data at each minute to determine
     if there is substantial data below the envelope that does not
     match the same profile. If the quadratic has a sufficiently good
-    fit then :py:const:`Tracker.FIXED` is returned. If the quartic
-    has a sufficiently good fit and the quadratic has a sufficiently
-    bad fit then :py:const:`Tracker.TRACKING` is returned. If
-    neiher curve fits well or there is a mismatch between the fit to
-    the upper envelope and the fit to the median then
+    fit then :py:const:`Tracker.FIXED` is returned. If the quartic has
+    a sufficiently good fit and the quadratic has a sufficiently bad
+    fit then :py:const:`Tracker.TRACKING` is returned. If neiher curve
+    fits well or there is a mismatch between the fit to the upper
+    envelope and the fit to the median then
     :py:const:`Tracker.UNKNOWN` is returned.
 
     Parameters
@@ -138,6 +140,9 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         If the percent of data flagged as clipped is greater than
         `clip_max` then tracking cannot be determined and
         :py:const:`Tracker.UNKNOWN` is returned.
+    envelope_quantile : float, default 0.995
+        Quantile used to determine the upper power or irradiance
+        envelope.
     fit_median : boolean, default True
         Perform a secondary fit with the median power or irradiance to
         validate that the profile is consistent through the entire
@@ -186,13 +191,28 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     ]
     if len(october_february) == 0 or len(march_september) == 0:
         return _infer_tracking(
-            series_daytime, clip_percent, clip_max, fit_median, fit_params
+            series_daytime,
+            clip_percent,
+            clip_max,
+            envelope_quantile,
+            fit_median,
+            fit_params
         )
     march_september_tracking = _infer_tracking(
-        march_september, clip_percent, clip_max, fit_median, fit_params
+        march_september,
+        clip_percent,
+        clip_max,
+        envelope_quantile,
+        fit_median,
+        fit_params
     )
     october_february_tracking = _infer_tracking(
-        october_february, clip_percent, clip_max, fit_median, fit_params
+        october_february,
+        clip_percent,
+        clip_max,
+        envelope_quantile,
+        fit_median,
+        fit_params
     )
     if march_september_tracking is not october_february_tracking:
         return Tracker.UNKNOWN
