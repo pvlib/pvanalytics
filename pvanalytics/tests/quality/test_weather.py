@@ -90,7 +90,7 @@ def test_wind_limits(weather_data):
     )
 
 
-def test_module_temperatuew():
+def test_module_temperature():
     """Module temperature is correlated with GHI."""
     albuquerque = location.Location(
         35.0844, -106.6504, altitude=5312, tz='MST'
