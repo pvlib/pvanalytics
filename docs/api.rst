@@ -190,8 +190,9 @@ identification.
 System
 ======
 
-This module contains functions and classes for identifying system
-characteristics.
+This module contains functions and classes relating to PV system 
+parameters such as nameplate power, tilt, azimuth, or whether the
+system is equipped with tracker.
 
 .. autosummary::
    :toctree: generated/
