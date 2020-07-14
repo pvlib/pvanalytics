@@ -456,7 +456,7 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     the PVFleets QA Analysis project.
 
     The default limits (`daily_max` and `daily_min`) have been set for
-    GHI and POA irradiance for systems with *fixed* azimuth and tilt. 
+    GHI and POA irradiance for systems with *fixed* azimuth and tilt.
     If you pass POA irradiance for a tracking system it is recommended
     that you increase `daily_max` to 1.35.
 
