@@ -5,8 +5,15 @@ from pvanalytics.util import _fit, _group
 
 
 def _peak_times(data):
+    minute_of_day = pd.Series(
+        data.index.hour * 60 + data.index.minute,
+        index=data.index
+    )
     return pd.DatetimeIndex(
-        _group.by_day(data).apply(_fit.quadratic_idxmax),
+        _group.by_day(data).apply(
+            _fit.quadratic_idxmax,
+            minutes=minute_of_day
+        ),
         tz=data.index.tz
     )
 

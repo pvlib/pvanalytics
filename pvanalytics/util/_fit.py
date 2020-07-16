@@ -10,9 +10,9 @@ def _quadratic(xs, ys):
     return np.poly1d(coefficients)
 
 
-def quadratic_idxmax(data):
+def quadratic_idxmax(data, minutes):
     """Fit a quartic to the data returning the time where the vertex falls."""
-    quadratic = _quadratic(_to_minute_of_day(data.index), data)
+    quadratic = _quadratic(minutes[data.index], data)
     model = quadratic(range(0, 1440))
     return (
         pd.Timestamp(data.index.min().date(), tz=data.index.tz)
