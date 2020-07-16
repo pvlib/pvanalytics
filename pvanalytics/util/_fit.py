@@ -1,7 +1,6 @@
 """Internal module for curve fitting functions."""
 import numpy as np
 import scipy.optimize
-import pandas as pd
 
 
 def quadratic(x, y):
