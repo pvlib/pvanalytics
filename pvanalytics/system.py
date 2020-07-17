@@ -51,10 +51,8 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
 
     """
     peak_times = _peak_times(power_or_poa[daytime])
-    modeled_azimuth = solar_azimuth.reindex(
-        peak_times,
-        method='bfill'
-    )
+    azimuth_by_minute = solar_azimuth.resample('T').interpolate(method='linear')
+    modeled_azimuth = azimuth_by_minute[peak_times]
     best_azimuth = None
     best_tilt = None
     smallest_sse = None
@@ -69,10 +67,9 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
                 dhi=dhi,
                 dni=dni
             ).poa_global
-            poa_azimuths = solar_azimuth.reindex(
-                _peak_times(poa[solar_zenith < 70]),
-                method='bfill'
-            )
+            poa_azimuths = azimuth_by_minute[
+                _peak_times(poa[solar_zenith < 70])
+            ]
             sum_of_squares = sum(
                 (poa_azimuths.values - modeled_azimuth.values)**2
             )
