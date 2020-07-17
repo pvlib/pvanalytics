@@ -68,11 +68,10 @@ def test_azimuth_different_index(clearsky_year, solarposition_year,
     azimuth, tilt = system.orientation(
         poa['poa_global'],
         daytime=solarposition_year['apparent_zenith'] < 87,
-        tilts=range(25, 60, 5),
+        tilts=[40],
         azimuths=range(105, 135, 5),
         solar_azimuth=fine_solarposition['azimuth'],
         solar_zenith=fine_solarposition['apparent_zenith'],
         **fine_clearsky,
     )
     _assert_within(azimuth, 120, 10)
-    _assert_within(tilt, 40, 10)
