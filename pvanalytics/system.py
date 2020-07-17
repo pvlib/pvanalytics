@@ -51,7 +51,9 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
 
     """
     peak_times = _peak_times(power_or_poa[daytime])
-    azimuth_by_minute = solar_azimuth.resample('T').interpolate(method='linear')
+    azimuth_by_minute = solar_azimuth.resample('T').interpolate(
+        method='linear'
+    )
     modeled_azimuth = azimuth_by_minute[peak_times]
     best_azimuth = None
     best_tilt = None
