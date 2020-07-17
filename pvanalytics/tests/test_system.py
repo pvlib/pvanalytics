@@ -5,8 +5,8 @@ from pvanalytics import system
 
 
 def _assert_within(x, expected, margin):
-    # test that x is within range(expected + margin, expected - margin)
-    assert x in range(expected - margin, expected + margin)
+    # test that x is in the range [expected - margin, expected + margin]
+    assert x in range(expected - margin, expected + margin + 1)
 
 
 def test_simple_poa_orientation(clearsky_year, solarposition_year):
