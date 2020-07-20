@@ -430,17 +430,16 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     """Check that daily insolation lies between minimum and maximum values.
 
     Irradiance measurements and clear-sky irradiance on each day are
-    integrated with the left-hand rule to calculate daily insolation.
+    integrated with the trapezoid rule to calculate daily insolation.
 
     Parameters
     ----------
     irrad : Series
         Irradiance measurements (GHI or POA).
     clearsky : Series
-        Expected clearsky irradiance.
+        Clearsky irradiance.
     daily_min : float, default 0.4
-        Minimum ratio of daily total irradiance to daily total
-        clearsky irradiance.
+        Minimum ratio of daily insolation to daily clearsky insolation.
     daily_max : float, default 1.25
         Maximum ratio of daily insolation to daily clearsky insolation.
 
