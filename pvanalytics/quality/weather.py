@@ -119,8 +119,8 @@ def module_temperature_check(module_temperature, irradiance,
     Returns
     -------
     bool
-        True if the `module_temperature` is correlated with
-        `irradiance`.
+        True if the correlation between `module_temperature` and
+        `irradiance` exceeds `correlation_min`.
 
     """
     _, _, r, _, _ = stats.linregress(module_temperature, irradiance)
