@@ -3,7 +3,7 @@ import pandas as pd
 from pvanalytics.util import _fit, _group
 
 
-def _conditional_fit(day, fitfunc, minutes, freq, default=0.0, min_hours=0.0,
+def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
                      peak_min=None):
     # Fit a curve to a single day of data if certain conditions are met.
     #
@@ -17,12 +17,12 @@ def _conditional_fit(day, fitfunc, minutes, freq, default=0.0, min_hours=0.0,
     # ----------
     # day : Series
     #     y-values to which `fitfunc` will be applied.
-    # fitfunc : function
-    #     Function to perform curve fit. Must accept two parameters,
-    #     the x-values and y-values
     # minutes : Series
     #     x-values for curve fitting. Must have an index that is a
     #     superset of the index of `day`.
+    # fitfunc : function
+    #     Function to perform curve fit. Must accept two parameters,
+    #     the x-values and y-values
     # freq : str
     #     Timestamp spacing for data in `day`.
     # default : float, default 0.0
@@ -146,7 +146,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     daily_data = _group.by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
-        _fit.quartic_restricted,
+        fitfunc=_fit.quartic_restricted,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,
@@ -154,7 +154,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     )
     fixed_days = _group.by_day(power_or_irradiance[quadratic_mask]).apply(
         _conditional_fit,
-        _fit.quadratic,
+        fitfunc=_fit.quadratic,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,
@@ -219,7 +219,7 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
     )
     fixed_days = daily_data.apply(
         _conditional_fit,
-        _fit.quadratic,
+        fitfunc=_fit.quadratic,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,
