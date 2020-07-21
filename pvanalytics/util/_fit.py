@@ -37,10 +37,8 @@ def quadratic(x, y):
     Alliance for Sustainable Energy, LLC.
 
     """
-    # Fit a quadratic to `data` returning R^2 for the fit.
     coefficients = np.polyfit(x, y, 2)
     quadratic = np.poly1d(coefficients)
-    # Calculate the R^2 for the fit
     _, _, correlation, _, _ = scipy.stats.linregress(
         y, quadratic(x)
     )
