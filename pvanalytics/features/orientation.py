@@ -5,13 +5,17 @@ from pvanalytics.util import _fit, _group
 
 def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
                      peak_min=None):
-    # Fit a curve to a single day of data if certain conditions are met.
+    # Return the :math:`r^2` of a curve fit to a single day of data if
+    # certain conditions are met.
     #
-    # For the fit to proceed there must be more than `min_hours` of
-    # data in `day` (determined by the number of values in `day` times
-    # `freq`). Additionally, if `peak_min` is specified then no curve
-    # fitting will be performed if the maximum value in `day` is less
-    # than `peak_min`. If no fit is performed the `default` is returned.
+    # `fitfunc` is only applied if two conditions are met:
+    # - There must be more than `min_hours` of data in `day`
+    #   (determined by the number of values in `day` times `freq`).
+    # - If `peak_min` is specified then no curve fitting will be
+    #   performed unless the maximum value in `day` is at least
+    #   `peak_min`.
+    #
+    # If either condition is not satisfied then `default` is returned.
     #
     # Parameters
     # ----------
