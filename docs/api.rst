@@ -42,6 +42,16 @@ eliminate data that is unrealistically high.
 
    quality.irradiance.clearsky_limits
 
+You may want to identify entire days that have unrealistically high or
+low insolation. The following function examines daily insolation,
+validating that it is within a reasonable range of the expected
+clearsky insolation for the same day.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.daily_insolation_limits
+
 Gaps
 ----
 

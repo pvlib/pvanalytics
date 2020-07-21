@@ -1,6 +1,8 @@
 """Quality control functions for irradiance data."""
 
 import numpy as np
+import pandas as pd
+from scipy import integrate
 from pvlib.tools import cosd
 import pvlib
 
@@ -390,3 +392,79 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
         max_clearsky_index=np.Inf
     )
     return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)
+
+
+def _to_hours(freqstr):
+    if freqstr[0].isalpha():
+        freqstr = '1' + freqstr
+    return pd.to_timedelta(freqstr).seconds / 3600
+
+
+def _daily_total(series):
+    # Resample the series returning the integral for each day
+    # calculated using the trapezoid rule.
+    #
+    # If the series has uniform timestamp spacing (i.e. pd.infer_freq
+    # returns a value other than None) then the frequency is used as
+    # the spacing between each value to speed up integration. If the
+    # frequency cannot be inferred, then the hour of the day is
+    # calculated for each value and used as the x-coordinate in the
+    # integration.
+    freq = pd.infer_freq(series.index)
+    if freq:
+        freq_hours = _to_hours(freq)
+        return series.resample('D').apply(
+            integrate.trapz,
+            dx=freq_hours
+        )
+    hours = pd.Series(
+        (series.index.minute / 60) + series.index.hour,
+        index=series.index
+    )
+    return series.resample('D').apply(
+        lambda day: integrate.trapz(y=day, x=hours[day.index])
+    )
+
+
+def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
+    """Check that daily insolation lies between minimum and maximum values.
+
+    Irradiance measurements and clear-sky irradiance on each day are
+    integrated with the trapezoid rule to calculate daily insolation.
+
+    Parameters
+    ----------
+    irrad : Series
+        Irradiance measurements (GHI or POA).
+    clearsky : Series
+        Clearsky irradiance.
+    daily_min : float, default 0.4
+        Minimum ratio of daily insolation to daily clearsky insolation.
+    daily_max : float, default 1.25
+        Maximum ratio of daily insolation to daily clearsky insolation.
+
+    Returns
+    -------
+    Series
+        True for values on days where the ratio of daily insolation to
+        daily clearsky insolation is between `daily_min` and `daily_max`.
+
+    Notes
+    -----
+    The default limits (`daily_max` and `daily_min`) have been set for
+    GHI and POA irradiance for systems with *fixed* azimuth and tilt.
+    If you pass POA irradiance for a tracking system it is recommended
+    that you increase `daily_max` to 1.35.
+
+    The default values for `daily_min` and `daily_max` were taken from
+    the PVFleets QA Analysis project.
+
+    """
+    daily_irradiance = _daily_total(irrad)
+    daily_clearsky = _daily_total(clearsky)
+    good_days = util.check_limits(
+        daily_irradiance/daily_clearsky,
+        upper_bound=daily_max,
+        lower_bound=daily_min
+    )
+    return good_days.reindex(irrad.index, method='pad', fill_value=False)
