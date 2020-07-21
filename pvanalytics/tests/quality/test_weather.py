@@ -2,6 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
+from pvlib import location
 from pandas.util.testing import assert_series_equal
 from pvanalytics.quality import weather
 
@@ -86,4 +87,24 @@ def test_wind_limits(weather_data):
         weather.wind_limits(weather_data['wind_speed']),
         weather_data['extreme_wind_flag'],
         check_names=False
+    )
+
+
+def test_module_temperature():
+    """Module temperature is correlated with GHI."""
+    albuquerque = location.Location(
+        35.0844, -106.6504, altitude=5312, tz='MST'
+    )
+    times = pd.date_range(
+        start='01/01/2020',
+        end='03/01/2020',
+        freq='H',
+        tz='MST'
+    )
+    clearsky = albuquerque.get_clearsky(times, model='simplified_solis')
+    assert weather.module_temperature_check(
+        clearsky['ghi']*0.6, clearsky['ghi']
+    )
+    assert not weather.module_temperature_check(
+        clearsky['ghi']*(-0.6), clearsky['ghi']
     )

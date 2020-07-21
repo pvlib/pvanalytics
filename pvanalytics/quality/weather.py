@@ -1,5 +1,6 @@
 """Quality control functions for weather data."""
 from pvanalytics.quality import util
+from scipy import stats
 
 
 def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
@@ -97,3 +98,30 @@ def wind_limits(wind_speed, limits=(0.0, 50.0)):
         upper_bound=limits[1],
         inclusive_lower=True
     )
+
+
+def module_temperature_check(module_temperature, irradiance,
+                             correlation_min=0.5):
+    """Test whether the module temperature is correlated with irradiance.
+
+    Parameters
+    ----------
+    module_temperature : Series
+        Time series of module temperature.
+    irradiance : Series
+        Time series of irradiance with the same index as
+        `module_temperature`. This should be of relatively high
+        quality (outliers and other problems removed).
+    correlation_min : float, default 0.5
+        Minimum correlation between `module_temperature` and
+        `irradiance` for the module temperature sensor to 'pass'
+
+    Returns
+    -------
+    bool
+        True if the correlation between `module_temperature` and
+        `irradiance` exceeds `correlation_min`.
+
+    """
+    _, _, r, _, _ = stats.linregress(module_temperature, irradiance)
+    return r > correlation_min

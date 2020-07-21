@@ -144,6 +144,20 @@ Quality checks for weather data.
    quality.weather.temperature_limits
    quality.weather.wind_limits
 
+In addition to validating temperature by comparing with limits, module
+temperature should be positively correlated with irradiance. Poor
+correlation could indicate that the sensor has become detached from
+the module, for example. Unlike other functions in the
+:py:mod:`quality` module which return Boolean masks over the input
+series, this function returns a single Boolean value indicating
+whether the entire series has passed (``True``) or failed (``False``)
+the quality check.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.weather.module_temperature_check
+
 .. rubric:: References
 
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
