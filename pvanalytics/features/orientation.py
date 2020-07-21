@@ -5,12 +5,40 @@ from pvanalytics.util import _fit, _group
 
 def _conditional_fit(day, fitfunc, minutes, freq, default=0.0, min_hours=0.0,
                      peak_min=None):
-    # If there are at least `min_hours` of data in `day` and the
-    # maximum for the day is greater than `peak_min` then `fitfunc` is
-    # applied to fit a curve to the data. `fitfunc` must be a function
-    # that takes a Series and returns the :math:`r^2` for a curve fit.
-    # If the two conditions are not met then `default` is returned and
-    # no curve fitting is performed.
+    # Fit a curve to a single day of data if certain conditions are met.
+    #
+    # For the fit to proceed there must be more than `min_hours` of
+    # data in `day` (determined by the number of values in `day` times
+    # `freq`). Additionally, if `peak_min` is specified then no curve
+    # fitting will be performed if the maximum value in `day` is less
+    # than `peak_min`. If no fit is performed the `default` is returned.
+    #
+    # Parameters
+    # ----------
+    # day : Series
+    #     y-values to which `fitfunc` will be applied.
+    # fitfunc : function
+    #     Function to perform curve fit. Must accept two parameters,
+    #     the x-values and y-values
+    # minutes : Series
+    #     x-values for curve fitting. Must have an index that is a
+    #     superset of the index of `day`.
+    # freq : str
+    #     Timestamp spacing for data in `day`.
+    # default : float, default 0.0
+    #     Value to be returned if the conditions above are not
+    #     satisfied and `fitfunc` is not applied.
+    # min_hours : float, default 0.0
+    #     Minimum hours with data for curve fitting to be performed.
+    # peak_min : float or None, default None
+    #     Maximum value in `day` must be at least `peak_min` for curve
+    #     fitting to be performed.
+    #
+    # Returns
+    # -------
+    # float
+    #     The :math:`r^2` of the curve fit from `fitfunc` or `default`
+    #     if fit was not performed.
     high_enough = True
     if peak_min is not None:
         high_enough = day.max() > peak_min
