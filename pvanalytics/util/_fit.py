@@ -18,6 +18,19 @@ def quadratic(x, y):
     float
         The :math:`R^2` value for the fit.
 
+    Examples
+    --------
+    This function is typically used for fitting a function to power or
+    irradiance data. In this case the irradiance measurements are
+    passed as `y` and the time of day for each value, in minutes since
+    midnight, is passed as `x`. Suppose ``ghi`` below is a time series
+    with one day of GHI measurements:
+
+    >>> r2 = quadratic(
+    ...     y=ghi
+    ...     x=ghi.index.minute + ghi.index.hour * 60,
+    ... )
+
     Notes
     -----
     Based on the PVFleets QA Analysis project. Copyright (c) 2020
@@ -59,6 +72,19 @@ def quartic_restricted(x, y, noon=720):
     -------
     rsquared : float
         The :math:`R^2` value for the fit.
+
+    Examples
+    --------
+    This function is typically used for fitting a function to power or
+    irradiance data. In this case the irradiance measurements are
+    passed as `y` and the time of day for each value, in minutes since
+    midnight, is passed as `x`. Suppose ``poa`` below is a time series
+    with one day of POA irradiance measurements:
+
+    >>> r2 = quartic_restricted(
+    ...     y=poa
+    ...     x=poa.index.minute + poa.index.hour * 60,
+    ... )
 
     Notes
     -----
