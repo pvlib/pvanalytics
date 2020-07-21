@@ -77,7 +77,7 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
                 dni=dni
             ).poa_global
             poa_azimuths = azimuth_by_minute[
-                _peak_times(poa[solar_zenith < 70])
+                _group.by_day(poa).idxmax()
             ]
             filtered_azimuths = poa_azimuths[np.isin(
                 poa_azimuths.index.date,
