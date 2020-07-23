@@ -8,7 +8,8 @@ def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
     # Return the :math:`r^2` of a curve fit to a single day of data if
     # certain conditions are met.
     #
-    # `fitfunc` is only applied if two conditions are met:
+    # `fitfunc` does the curve fitting and is only applied if two 
+    # conditions are met:
     # - There must be more than `min_hours` of data in `day`
     #   (determined by the number of values in `day` times `freq`).
     # - If `peak_min` is specified then no curve fitting will be
@@ -22,18 +23,19 @@ def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
     # day : Series
     #     y-values to which `fitfunc` will be applied.
     # minutes : Series
-    #     x-values for curve fitting. Must have an index that is a
-    #     superset of the index of `day`.
+    #     x-values for curve fitting. The index for `x` must be a 
+    #     superset of the index for `day`.
     # fitfunc : function
     #     Function to perform curve fit. Must accept two parameters,
-    #     the x-values and y-values
+    #     the x-values and y-values, and return the :math:`r^2`
+    #     of the curve fit.
     # freq : str
     #     Timestamp spacing for data in `day`.
     # default : float, default 0.0
     #     Value to be returned if the conditions above are not
     #     satisfied and `fitfunc` is not applied.
     # min_hours : float, default 0.0
-    #     Minimum hours with data for curve fitting to be performed.
+    #     Minimum hours in `day` with data for curve fitting to be performed.
     # peak_min : float or None, default None
     #     Maximum value in `day` must be at least `peak_min` for curve
     #     fitting to be performed.
