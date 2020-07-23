@@ -8,7 +8,7 @@ def quadratic(x, y):
 
     Parameters
     ----------
-    x : Series
+    x : array_like
         x values for data in `y`.
     y : Series
         data to which the curve should be fit.
@@ -59,7 +59,7 @@ def quartic_restricted(x, y, noon=720):
 
     Parameters
     ----------
-    x : Series
+    x : array_like
         x values for data in `y`
     y : Series
         values to which the curve should be fit
