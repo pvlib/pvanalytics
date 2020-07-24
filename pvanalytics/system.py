@@ -46,17 +46,24 @@ def _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
 
 
 def _tracking_from_fit(rsquared_quadratic, rsquared_quartic,
-                       clip_percent, clip_max, fit_params):
-    # Determine tracking based on fit and percent of clipping in the data.
+                       bounds):
+    # Determine if the system has a tracker based on curve fit results.
     #
-    # If `clip_percent` is greater than `clip_max` or the curve fits
-    # are not sufficiently good then Tracker.UNKNOWN is
-    # returned. Otherwise Tracker.FIXED or Tracker.TRACKING is
-    # returned.
-    if clip_percent > clip_max:
-        # Too much clipping means the tracking cannot be determined
-        return Tracker.UNKNOWN
-    bounds = _get_bounds(clip_percent, fit_params)
+    # Parameters
+    # ----------
+    # rsquared_quadratic : float
+    #     :math:`r^2` for a quadratic fit.
+    # rsquared_quartic : float
+    #     :math:`r^2` for a quartic fit.
+    # bounds : dictionary
+    #     Upper and lower bounds on :math:`r^2` values for a fixed or
+    #     tracking system. See values :py:const:`PVFLEETS_FIT_PARAMS` for an
+    #     example
+    #
+    # Returns
+    # -------
+    # Tracker
+    #     Tracking, Fixed, or Unknown.
     if _is_fixed(rsquared_quadratic, bounds):
         return Tracker.FIXED
     if _is_tracking(rsquared_quartic, rsquared_quadratic, bounds):
@@ -74,8 +81,8 @@ def _get_bounds(clip_percent, fit_params):
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
 
-def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
-                    fit_median, median_r2_min, fit_params,
+def _infer_tracking(series, envelope_quantile,
+                    fit_median, median_r2_min, fit_bounds,
                     envelope_min_fraction, median_min_fraction):
     # Infer system tracking from the upper envelope and median of the
     # data.
@@ -92,9 +99,7 @@ def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
     )
     system_tracking = _tracking_from_fit(
         rsquared_quadratic, rsquared_quartic,
-        clip_percent,
-        clip_max,
-        fit_params
+        fit_bounds
     )
     if fit_median:
         median = _remove_morning_evening(
@@ -216,6 +221,9 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
     series_daytime = series[daytime]
     clip_percent = (clipping[daytime].sum() / len(clipping[daytime])) * 100
+    if clip_percent > clip_max:
+        return Tracker.UNKNOWN
+    bounds = _get_bounds(clip_percent, fit_params)
     march_september = series_daytime[
         series_daytime.index.month.isin([5, 6, 7, 8])
     ]
@@ -225,34 +233,28 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     if len(october_february) == 0 or len(march_september) == 0:
         return _infer_tracking(
             series_daytime,
-            clip_percent,
-            clip_max,
             envelope_quantile,
             fit_median,
             median_r2_min,
-            fit_params,
+            bounds,
             envelope_min_fraction,
             median_min_fraction
         )
     march_september_tracking = _infer_tracking(
         march_september,
-        clip_percent,
-        clip_max,
         envelope_quantile,
         fit_median,
         median_r2_min,
-        fit_params,
+        bounds,
         envelope_min_fraction,
         median_min_fraction
     )
     october_february_tracking = _infer_tracking(
         october_february,
-        clip_percent,
-        clip_max,
         envelope_quantile,
         fit_median,
         median_r2_min,
-        fit_params,
+        bounds,
         envelope_min_fraction,
         median_min_fraction
     )
