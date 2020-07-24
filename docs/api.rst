@@ -42,6 +42,16 @@ eliminate data that is unrealistically high.
 
    quality.irradiance.clearsky_limits
 
+You may want to identify entire days that have unrealistically high or
+low insolation. The following function examines daily insolation,
+validating that it is within a reasonable range of the expected
+clearsky insolation for the same day.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.daily_insolation_limits
+
 Gaps
 ----
 
@@ -133,6 +143,20 @@ Quality checks for weather data.
    quality.weather.relative_humidity_limits
    quality.weather.temperature_limits
    quality.weather.wind_limits
+
+In addition to validating temperature by comparing with limits, module
+temperature should be positively correlated with irradiance. Poor
+correlation could indicate that the sensor has become detached from
+the module, for example. Unlike other functions in the
+:py:mod:`quality` module which return Boolean masks over the input
+series, this function returns a single Boolean value indicating
+whether the entire series has passed (``True``) or failed (``False``)
+the quality check.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.weather.module_temperature_check
 
 .. rubric:: References
 

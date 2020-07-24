@@ -84,8 +84,12 @@ def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
         envelope_min_fraction
     )
     middle = (envelope.index.max() + envelope.index.min()) / 2
-    rsquared_quadratic = _fit.quadratic(envelope)
-    rsquared_quartic = _fit.quartic_restricted(envelope, middle)
+    rsquared_quadratic = _fit.quadratic(x=envelope.index, y=envelope)
+    rsquared_quartic = _fit.quartic_restricted(
+        x=envelope.index,
+        y=envelope,
+        noon=middle
+    )
     system_tracking = _tracking_from_fit(
         rsquared_quadratic, rsquared_quartic,
         clip_percent,
@@ -98,11 +102,15 @@ def _infer_tracking(series, clip_percent, clip_max, envelope_quantile,
             median_min_fraction
         )
         if system_tracking is Tracker.FIXED:
-            quadratic_median = _fit.quadratic(median)
+            quadratic_median = _fit.quadratic(x=median.index, y=median)
             if quadratic_median < median_r2_min:
                 return Tracker.UNKNOWN
         elif system_tracking is Tracker.TRACKING:
-            quartic_median = _fit.quartic_restricted(median, middle)
+            quartic_median = _fit.quartic_restricted(
+                x=median.index,
+                y=median,
+                noon=middle
+            )
             if quartic_median < median_r2_min:
                 return Tracker.UNKNOWN
     return system_tracking
