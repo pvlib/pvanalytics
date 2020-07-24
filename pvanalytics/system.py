@@ -120,13 +120,16 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     is calculated. Quadratic and quartic curves are fit to this daily
     envelope and the :math:`r^2` of the curve fits are used determine
     whether the system is tracking or fixed.
-    
-    If the quadratic fit is a sufficiently good, then :py:const:`Tracker.FIXED` is returned.
-    
-    If the quartic fit is sufficiently good fit and the quadratic fit is sufficiently bad,
-    then :py:const:`Tracker.TRACKING` is returned.
-    
-    If neither fit is sufficiently good then :py:const:`Tracker.UNKNOWN` is returned.
+
+    If the quadratic fit is a sufficiently good, then
+    :py:const:`Tracker.FIXED` is returned.
+
+    If the quartic fit is sufficiently good fit and the quadratic fit
+    is sufficiently bad, then :py:const:`Tracker.TRACKING` is
+    returned.
+
+    If neither fit is sufficiently good then
+    :py:const:`Tracker.UNKNOWN` is returned.
 
     Optionally, an additional fit is made to the median of the
     data at each minute to confirm the determination of tracking
