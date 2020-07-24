@@ -1,31 +1,35 @@
 """Internal module for curve fitting functions."""
 import numpy as np
 import scipy.optimize
-import pandas as pd
 
 
-def _to_minute_of_day(index):
-    # Transform the index into minutes of the day. If `index` is a
-    # DatetimeIndex then it is converted to an Int64Index with values
-    # equal to the minute of the day since midnight. Any other type
-    # and a ValueError is raised.
-    if isinstance(index, pd.DatetimeIndex):
-        return index.hour * 60 + index.minute
-    raise ValueError("cannot convert index to minutes since midnight")
-
-
-def quadratic(data):
+def quadratic(x, y):
     """Fit a quadratic to the data.
 
     Parameters
     ----------
-    data : Series
-        Series of power or irradiance measurements.
+    x : array_like
+        x values for data in `y`.
+    y : Series
+        data to which the curve should be fit.
 
     Reurns
     ------
     float
         The :math:`R^2` value for the fit.
+
+    Examples
+    --------
+    This function is typically used for fitting a function to power or
+    irradiance data. In this case the irradiance measurements are
+    passed as `y` and the time of day for each value, in minutes since
+    midnight, is passed as `x`. Suppose ``ghi`` below is a time series
+    with one day of GHI measurements:
+
+    >>> r2 = quadratic(
+    ...     y=ghi
+    ...     x=ghi.index.minute + ghi.index.hour * 60,
+    ... )
 
     Notes
     -----
@@ -33,18 +37,15 @@ def quadratic(data):
     Alliance for Sustainable Energy, LLC.
 
     """
-    minute_of_day = _to_minute_of_day(data.index)
-    # Fit a quadratic to `data` returning R^2 for the fit.
-    coefficients = np.polyfit(minute_of_day, data, 2)
+    coefficients = np.polyfit(x, y, 2)
     quadratic = np.poly1d(coefficients)
-    # Calculate the R^2 for the fit
     _, _, correlation, _, _ = scipy.stats.linregress(
-        data, quadratic(minute_of_day)
+        y, quadratic(x)
     )
     return correlation**2
 
 
-def quartic_restricted(data, noon=720):
+def quartic_restricted(x, y, noon=720):
     """Fit a restricted quartic to the data.
 
     The quartic is restricted to match the expected shape for a
@@ -58,8 +59,10 @@ def quartic_restricted(data, noon=720):
 
     Parameters
     ----------
-    data : Series
-        power or irradiance data.
+    x : array_like
+        x values for data in `y`
+    y : Series
+        values to which the curve should be fit
     noon : int, default 720
        The minute for solar noon. Defaults to the clock-noon.
 
@@ -67,6 +70,19 @@ def quartic_restricted(data, noon=720):
     -------
     rsquared : float
         The :math:`R^2` value for the fit.
+
+    Examples
+    --------
+    This function is typically used for fitting a function to power or
+    irradiance data. In this case the irradiance measurements are
+    passed as `y` and the time of day for each value, in minutes since
+    midnight, is passed as `x`. Suppose ``poa`` below is a time series
+    with one day of POA irradiance measurements:
+
+    >>> r2 = quartic_restricted(
+    ...     y=poa
+    ...     x=poa.index.minute + poa.index.hour * 60,
+    ... )
 
     Notes
     -----
@@ -76,14 +92,13 @@ def quartic_restricted(data, noon=720):
     """
     def _quartic(x, a, b, c, e):
         return a * (x - e)**4 + b * (x - e)**2 + c
-    minute_of_day = _to_minute_of_day(data.index)
-    median = data.median()
+    median = y.median()
     params, _ = scipy.optimize.curve_fit(
         _quartic,
-        minute_of_day, data,
+        x, y,
         bounds=((-1e-05, 0, median * 0.85, noon - 70),
                 (-1e-10, median * 3e-05, median * 1.15, noon + 70))
     )
-    model = _quartic(minute_of_day, params[0], params[1], params[2], params[3])
-    residuals = data - model
-    return 1 - (np.sum(residuals**2) / np.sum((data - np.mean(data))**2))
+    model = _quartic(x, params[0], params[1], params[2], params[3])
+    residuals = y - model
+    return 1 - (np.sum(residuals**2) / np.sum((y - np.mean(y))**2))

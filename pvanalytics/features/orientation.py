@@ -3,19 +3,53 @@ import pandas as pd
 from pvanalytics.util import _fit, _group
 
 
-def _conditional_fit(day, fitfunc, freq, default=0.0, min_hours=0.0,
+def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
                      peak_min=None):
-    # If there are at least `min_hours` of data in `day` and the
-    # maximum for the day is greater than `peak_min` then `fitfunc` is
-    # applied to fit a curve to the data. `fitfunc` must be a function
-    # that takes a Series and returns the :math:`r^2` for a curve fit.
-    # If the two conditions are not met then `default` is returned and
-    # no curve fitting is performed.
+    # Return the :math:`r^2` of a curve fit to a single day of data if
+    # certain conditions are met.
+    #
+    # `fitfunc` does the curve fitting and is only applied if two
+    # conditions are met:
+    # - There must be more than `min_hours` of data in `day`
+    #   (determined by the number of values in `day` times `freq`).
+    # - If `peak_min` is specified then no curve fitting will be
+    #   performed unless the maximum value in `day` is at least
+    #   `peak_min`.
+    #
+    # If either condition is not satisfied then `default` is returned.
+    #
+    # Parameters
+    # ----------
+    # day : Series
+    #     y-values to which `fitfunc` will be applied.
+    # minutes : Series
+    #     x-values for curve fitting. The index for `x` must be a
+    #     superset of the index for `day`.
+    # fitfunc : function
+    #     Function to perform curve fit. Must accept two parameters,
+    #     the x-values and y-values, and return the :math:`r^2`
+    #     of the curve fit.
+    # freq : str
+    #     Timestamp spacing for data in `day`.
+    # default : float, default 0.0
+    #     Value to be returned if the conditions above are not
+    #     satisfied and `fitfunc` is not applied.
+    # min_hours : float, default 0.0
+    #     Minimum hours in `day` with data for curve fitting to be performed.
+    # peak_min : float or None, default None
+    #     Maximum value in `day` must be at least `peak_min` for curve
+    #     fitting to be performed.
+    #
+    # Returns
+    # -------
+    # float
+    #     The :math:`r^2` of the curve fit from `fitfunc` or `default`
+    #     if fit was not performed.
     high_enough = True
     if peak_min is not None:
         high_enough = day.max() > peak_min
     if (_hours(day, freq) > min_hours) and high_enough:
-        return fitfunc(day)
+        return fitfunc(minutes[day.index], day)
     return default
 
 
@@ -111,17 +145,23 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     if quadratic_mask is None:
         quadratic_mask = daytime
     freq = pd.infer_freq(power_or_irradiance.index)
+    minutes = pd.Series(
+        power_or_irradiance.index.hour * 60 + power_or_irradiance.index.minute,
+        index=power_or_irradiance.index
+    )
     daily_data = _group.by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
-        _fit.quartic_restricted,
+        fitfunc=_fit.quartic_restricted,
+        minutes=minutes,
         freq=freq,
         min_hours=min_hours,
         peak_min=peak_min
     )
     fixed_days = _group.by_day(power_or_irradiance[quadratic_mask]).apply(
         _conditional_fit,
-        _fit.quadratic,
+        fitfunc=_fit.quadratic,
+        minutes=minutes,
         freq=freq,
         min_hours=min_hours,
         peak_min=peak_min
@@ -179,9 +219,14 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
     daily_data = _group.by_day(
         power_or_irradiance[daytime]
     )
+    minutes = pd.Series(
+        power_or_irradiance.index.hour * 60 + power_or_irradiance.index.minute,
+        index=power_or_irradiance.index
+    )
     fixed_days = daily_data.apply(
         _conditional_fit,
-        _fit.quadratic,
+        fitfunc=_fit.quadratic,
+        minutes=minutes,
         freq=freq,
         min_hours=min_hours,
         peak_min=peak_min
