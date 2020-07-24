@@ -161,7 +161,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         ``(clipping_min, clipping_max)`` where the values specify the
         minimum and maximum percent of data with clipping for which
         the associated fit parameters are applicable. The values of
-        the dicationary are themselves dictionaries with keys
+        the dictionary are themselves dictionaries with keys
         ``'fixed'`` and ``'tracking'``, which give the minimum
         :math:`r^2` for the curve fits, and ``'fixed_max'`` which
         gives the maximum :math:`r^2` for a quadratic fit if the
@@ -174,8 +174,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         is removed. This excludes data from morning and evening that
         may interfere with curve fitting.
     median_min_fraction : float, default 0.025
-        After calucluating the median power or irradiance at each
-        minute data less than `median_min_fraction` times the maximum
+        After calculating the median power or irradiance at each
+        minute, data less than `median_min_fraction` times the maximum
         is removed. This excludes data from morning and evening that
         may interfere with curve fitting.
 
