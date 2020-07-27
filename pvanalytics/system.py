@@ -163,8 +163,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         clipped.
     clip_max : float, default 0.1
         If the fraction of data flagged as clipped is greater than
-        `clip_max` then tracking cannot be determined and
-        :py:const:`Tracker.UNKNOWN` is returned.
+        `clip_max` then it cannot be determined whether the system is
+        tracking or fixed and :py:const:`Tracker.UNKNOWN` is returned.
     envelope_quantile : float, default 0.995
         Quantile used to determine the upper power or irradiance
         envelope.
