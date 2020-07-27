@@ -19,12 +19,12 @@ class Tracker(enum.Enum):
 #
 # Minimums vary by the fraction of the data that has clipping. Keys
 # are tuples with lower (inclusive) and upper (exclusive) bounds for
-# the clipping percent.
+# the fraction of data with clipping.
 PVFLEETS_FIT_PARAMS = {
-    (0, 0.5): {'fixed': 0.945, 'tracking': 0.945, 'fixed_max': 0.92},
-    (0.5, 3): {'fixed': 0.92, 'tracking': 0.92, 'fixed_max': 0.92},
-    (3, 4): {'fixed': 0.9, 'tracking': 0.92, 'fixed_max': 0.92},
-    (4, 10): {'fixed': 0.88, 'tracking': 0.92, 'fixed_max': 0.92},
+    (0, 0.005): {'fixed': 0.945, 'tracking': 0.945, 'fixed_max': 0.92},
+    (0.005, 0.03): {'fixed': 0.92, 'tracking': 0.92, 'fixed_max': 0.92},
+    (0.03, 0.04): {'fixed': 0.9, 'tracking': 0.92, 'fixed_max': 0.92},
+    (0.04, 0.1): {'fixed': 0.88, 'tracking': 0.92, 'fixed_max': 0.92},
 }
 
 
@@ -71,12 +71,12 @@ def _tracking_from_fit(rsquared_quadratic, rsquared_quartic,
     return Tracker.UNKNOWN
 
 
-def _get_bounds(clip_percent, fit_params):
+def _get_bounds(clip_fraction, fit_params):
     # get the minimum r^2 for fits to determine tracking or fixed. The
-    # bounds vary by the amount of clipping in the data, passed as a
-    # percentage in `clip_percent`.
+    # bounds vary by the fraction of clipping in the data
+    # (`clip_fraction`).
     for clip, bounds in fit_params.items():
-        if clip[0] <= clip_percent <= clip[1]:
+        if clip[0] <= clip_fraction <= clip[1]:
             return bounds
     return {'tracking': 0.0, 'fixed': 0.0, 'fixed_max': 0.0}
 
@@ -121,7 +121,7 @@ def _infer_tracking(series, envelope_quantile,
     return system_tracking
 
 
-def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
+def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          envelope_quantile=0.995, fit_median=True,
                          median_r2_min=0.9, fit_params=None,
                          envelope_min_fraction=0.05,
@@ -160,8 +160,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     clipping : Series
         Boolean Series identifying where power or irradiance is being
         clipped.
-    clip_max : float, default 10.0
-        If the percent of data flagged as clipped is greater than
+    clip_max : float, default 0.1
+        If the fraction of data flagged as clipped is greater than
         `clip_max` then tracking cannot be determined and
         :py:const:`Tracker.UNKNOWN` is returned.
     envelope_quantile : float, default 0.995
@@ -180,7 +180,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
         data with clipping. This should be a dictionary with tuple
         keys and dictionary values. The key must be a 2-tuple of
         ``(clipping_min, clipping_max)`` where the values specify the
-        minimum and maximum percent of data with clipping for which
+        minimum and maximum fraction of data with clipping for which
         the associated fit parameters are applicable. The values of
         the dictionary are themselves dictionaries with keys
         ``'fixed'`` and ``'tracking'``, which give the minimum
@@ -220,10 +220,10 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=10.0,
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
     series_daytime = series[daytime]
-    clip_percent = (clipping[daytime].sum() / len(clipping[daytime])) * 100
-    if clip_percent > clip_max:
+    clip_fraction = (clipping[daytime].sum() / len(clipping[daytime])) * 100
+    if clip_fraction > clip_max:
         return Tracker.UNKNOWN
-    bounds = _get_bounds(clip_percent, fit_params)
+    bounds = _get_bounds(clip_fraction, fit_params)
     march_september = series_daytime[
         series_daytime.index.month.isin([5, 6, 7, 8])
     ]
