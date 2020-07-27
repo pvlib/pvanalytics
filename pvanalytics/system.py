@@ -125,7 +125,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          envelope_quantile=0.995, fit_median=True,
                          median_r2_min=0.9, fit_params=None,
                          envelope_min_fraction=0.05,
-                         median_min_fraction=0.025):
+                         median_min_fraction=0.025,
+                         seasonal_split=None):
     """Infer whether the system is equipped with a tracker.
 
     Data is grouped by minute of the day and a maximum power or
@@ -199,6 +200,16 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         minute, data less than `median_min_fraction` times the maximum
         is removed. This excludes data from morning and evening that
         may interfere with curve fitting.
+    seasonal_split : tuple of list of int, optional
+        Tuple specifying a set of winter months and a set of summer
+        months. The order is not important. The months are specified
+        as integers between 1 and 12. If not specified defaults to
+        ([5, 6, 7, 8], [11, 12, 1, 2]) which works well for North
+        America. Data is split in to two groups, one for each set and
+        curve fits are applied to the upper envelope of each group
+        independently. If the curve fits produce different results
+        (e.g. one TRACKING and one FIXED) then
+        :py:const:`Tracker.UNKNOWN` is returned.
 
     Returns
     -------
@@ -219,18 +230,19 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
+    seasonal_split = seasonal_split or ([5, 6, 7, 8], [11, 12, 1, 2])
     series_daytime = series[daytime]
     clip_fraction = (clipping[daytime].sum() / len(clipping[daytime])) * 100
     if clip_fraction > clip_max:
         return Tracker.UNKNOWN
     bounds = _get_bounds(clip_fraction, fit_params)
-    march_september = series_daytime[
-        series_daytime.index.month.isin([5, 6, 7, 8])
+    first_season = series_daytime[
+        series_daytime.index.month.isin(seasonal_split[0])
     ]
-    october_february = series_daytime[
-        series_daytime.index.month.isin([11, 12, 1, 2])
+    second_season = series_daytime[
+        series_daytime.index.month.isin(seasonal_split[1])
     ]
-    if len(october_february) == 0 or len(march_september) == 0:
+    if len(first_season) == 0 or len(second_season) == 0:
         return _infer_tracking(
             series_daytime,
             envelope_quantile,
@@ -240,8 +252,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
             envelope_min_fraction,
             median_min_fraction
         )
-    march_september_tracking = _infer_tracking(
-        march_september,
+    first_season_tracking = _infer_tracking(
+        first_season,
         envelope_quantile,
         fit_median,
         median_r2_min,
@@ -249,8 +261,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         envelope_min_fraction,
         median_min_fraction
     )
-    october_february_tracking = _infer_tracking(
-        october_february,
+    second_season_tracking = _infer_tracking(
+        second_season,
         envelope_quantile,
         fit_median,
         median_r2_min,
@@ -258,6 +270,6 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         envelope_min_fraction,
         median_min_fraction
     )
-    if march_september_tracking is not october_february_tracking:
+    if first_season_tracking is not second_season_tracking:
         return Tracker.UNKNOWN
-    return march_september_tracking
+    return first_season_tracking
