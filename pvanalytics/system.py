@@ -1,5 +1,6 @@
 """Functions for identifying system characteristics."""
 import pandas as pd
+import numpy as np
 import pvlib
 from pvanalytics.util import _fit, _group
 
@@ -9,13 +10,19 @@ def _peak_times(data):
         data.index.hour * 60 + data.index.minute,
         index=data.index
     )
-    return pd.DatetimeIndex(
-        _group.by_day(data).apply(
-            _fit.quadratic_idxmax,
-            minutes=minute_of_day
-        ),
-        tz=data.index.tz
+    peak_minutes = _group.by_day(data).apply(
+        lambda day: pd.Timedelta(
+            minutes=_fit.quadratic_idxmax(
+                x=minute_of_day[day.index],
+                y=day,
+                model_range=range(0, 1440)
+            )
+        )
     )
+    return pd.DatetimeIndex(
+        np.unique(data.index.date),
+        tz=data.index.tz
+    ) + peak_minutes
 
 
 def orientation(power_or_poa, daytime, tilts, azimuths,

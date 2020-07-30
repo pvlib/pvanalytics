@@ -1,6 +1,5 @@
 """Internal module for curve fitting functions."""
 import numpy as np
-import pandas as pd
 import scipy.optimize
 
 
@@ -10,14 +9,28 @@ def _quadratic(xs, ys):
     return np.poly1d(coefficients)
 
 
-def quadratic_idxmax(data, minutes):
-    """Fit a quartic to the data returning the time where the vertex falls."""
-    quadratic = _quadratic(minutes[data.index], data)
-    model = quadratic(range(0, 1440))
-    return (
-        pd.Timestamp(data.index.min().date(), tz=data.index.tz)
-        + pd.Timedelta(minutes=np.argmax(model))
-    )
+def quadratic_idxmax(x, y, model_range=None):
+    """Fit a quartic to the data and return the x-value of the vertex.
+
+    Parameters
+    ----------
+    x : array_like
+    y : Series
+        x and y-values to fit to.
+    model_range : array_like, optional
+        Range of values to find the max in. If not specified then `x`
+        is used.
+
+    Returns
+    -------
+    numeric
+        x-value of the vertex of a quadratic fit to the data in `x`
+        and `y`.
+    """
+    model_range = model_range or x
+    quadratic = _quadratic(x, y)
+    model = quadratic(model_range)
+    return model_range[np.argmax(model)]
 
 
 def quadratic(x, y):
