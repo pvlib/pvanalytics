@@ -47,25 +47,12 @@ def test_daytime_diff(albuquerque):
 
 def test_midday_zero(albuquerque):
     clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/2/2020', freq='15T', tz='MST'),
+        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
     day = ghi > 2
-    ghi.loc['1/1/2020 13:00':'1/1/2020 14:00'] = 0
-    assert_series_equal(
-        ghi[daytime.diff(ghi)],
-        ghi[day],
-        check_names=False
-    )
-
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi']
-    day = ghi > 2
-    ghi.loc[ghi.between_time('12:00', '14:00').index] = 0
+    ghi.loc[ghi['1/3/2020'].between_time('12:00', '14:00').index] = 0
     assert_series_equal(
         daytime.diff(ghi),
         day,
@@ -88,7 +75,7 @@ def test_daytime_with_clipping(albuquerque):
     )
     # Include a period where data goes to zero during clipping and
     # returns to normal after the clipping is done
-    ghi.loc[ghi.between_time('12:30', '15:30').index] = 0
+    ghi.loc[ghi['1/3/2020'].between_time('12:30', '15:30').index] = 0
     assert_series_equal(
         daytime.diff(ghi),
         day,
