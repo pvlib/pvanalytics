@@ -30,34 +30,32 @@ def albuquerque():
 # - [ ] Can detect daytime in a period where there are variable days.
 #
 # - [ ] Data with many missing values is handled gracefully
+#
+# - [ ] Data with different timestamp spacing
 
 def test_daytime_diff(albuquerque):
     clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/2/2020', freq='10T', tz='MST'),
+        pd.date_range(start='1/1/2020', end='1/2/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
-    # TODO Do I expect daytime.diff() to catch the early morning and
-    # late afternoon times that are near zero?
     assert_series_equal(
         daytime.diff(clearsky['ghi']),
-        clearsky['ghi'] > 0,
+        clearsky['ghi'] > 2,
         check_names=False
     )
 
 
 def test_midday_zero(albuquerque):
     clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/2/2020', freq='30T', tz='MST'),
+        pd.date_range(start='1/1/2020', end='1/2/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 0
+    day = ghi > 2
     ghi.loc['1/1/2020 13:00':'1/1/2020 14:00'] = 0
-    # TODO As with previous test, need to decide how accurate we really
-    # expect this funciton to be.
     assert_series_equal(
-        daytime.diff(ghi),
-        day,
+        ghi[daytime.diff(ghi)],
+        ghi[day],
         check_names=False
     )
 
@@ -66,7 +64,7 @@ def test_midday_zero(albuquerque):
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 0
+    day = ghi > 2
     ghi.loc[ghi.between_time('12:00', '14:00').index] = 0
     assert_series_equal(
         daytime.diff(ghi),
@@ -77,11 +75,11 @@ def test_midday_zero(albuquerque):
 
 def test_daytime_with_clipping(albuquerque):
     clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/10/2020', freq='10T', tz='MST'),
+        pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 0
+    day = ghi > 2
     ghi.loc[ghi >= 500] = 500
     assert_series_equal(
         daytime.diff(ghi),
@@ -104,7 +102,7 @@ def test_daytime_overcast(albuquerque):
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 0
+    day = ghi > 2
     ghi.loc['1/3/2020':'1/5/2020'] *= 0.5
     ghi.loc['1/7/2020':'1/8/2020'] *= 0.6
     assert_series_equal(
@@ -122,6 +120,6 @@ def test_daytime_split_day():
     )
     assert_series_equal(
         daytime.diff(clearsky['ghi']),
-        clearsky['ghi'] > 0,
+        clearsky['ghi'] > 2,
         check_names=False
     )
