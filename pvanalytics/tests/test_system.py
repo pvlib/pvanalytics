@@ -4,11 +4,6 @@ from pvlib import irradiance
 from pvanalytics import system
 
 
-def _assert_within(x, expected, margin):
-    # test that x is in the range [expected - margin, expected + margin]
-    assert x in range(expected - margin, expected + margin + 1)
-
-
 def test_simple_poa_orientation(clearsky_year, solarposition_year):
     poa = irradiance.get_total_irradiance(
         surface_tilt=15,
@@ -19,15 +14,15 @@ def test_simple_poa_orientation(clearsky_year, solarposition_year):
     )
     azimuth, tilt = system.orientation(
         poa['poa_global'],
-        tilts=range(5, 25, 5),
-        azimuths=range(150, 200, 5),
+        tilts=[15, 30],
+        azimuths=[110, 180, 220],
         solar_zenith=solarposition_year['apparent_zenith'],
         solar_azimuth=solarposition_year['azimuth'],
         daytime=solarposition_year['apparent_zenith'] < 87,
         **clearsky_year
     )
-    _assert_within(azimuth, 180, 10)
-    _assert_within(tilt, 15, 10)
+    assert azimuth == 180
+    assert tilt == 15
 
 
 def test_ghi_tilt_zero(clearsky_year, solarposition_year):
@@ -35,7 +30,7 @@ def test_ghi_tilt_zero(clearsky_year, solarposition_year):
     _, tilt = system.orientation(
         clearsky_year['ghi'],
         daytime=solarposition_year['apparent_zenith'] < 87,
-        tilts=[0, 2, 4],
+        tilts=[0, 5],
         azimuths=[180],
         solar_azimuth=solarposition_year['azimuth'],
         solar_zenith=solarposition_year['zenith'],
@@ -69,9 +64,9 @@ def test_azimuth_different_index(clearsky_year, solarposition_year,
         poa['poa_global'],
         daytime=solarposition_year['apparent_zenith'] < 87,
         tilts=[40],
-        azimuths=range(105, 135, 5),
+        azimuths=[100, 120, 150],
         solar_azimuth=fine_solarposition['azimuth'],
         solar_zenith=fine_solarposition['apparent_zenith'],
         **fine_clearsky,
     )
-    _assert_within(azimuth, 120, 10)
+    assert azimuth == 120
