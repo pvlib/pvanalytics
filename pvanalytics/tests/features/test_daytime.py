@@ -33,15 +33,25 @@ def albuquerque():
 #
 # - [ ] Data with different timestamp spacing
 
+
+def _assert_daytime_no_shoulder(clearsky, output):
+    day = clearsky > 0
+    shoulder = day & (clearsky <= 2)
+    assert_series_equal(
+        output | shoulder,
+        day,
+        check_names=False
+    )
+
+
 def test_daytime_diff(albuquerque):
     clearsky = albuquerque.get_clearsky(
         pd.date_range(start='1/1/2020', end='1/2/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
-    assert_series_equal(
-        daytime.diff(clearsky['ghi']),
-        clearsky['ghi'] > 2,
-        check_names=False
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(clearsky['ghi'])
     )
 
 
@@ -51,10 +61,11 @@ def test_midday_zero(albuquerque):
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 2
+    day = ghi > 0
+    shoulder_time = day & (ghi <= 2)
     ghi.loc[ghi['1/3/2020'].between_time('12:00', '14:00').index] = 0
     assert_series_equal(
-        daytime.diff(ghi),
+        daytime.diff(ghi) | shoulder_time,
         day,
         check_names=False
     )
@@ -65,21 +76,18 @@ def test_daytime_with_clipping(albuquerque):
         pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T', tz='MST'),
         model='simplified_solis'
     )
-    ghi = clearsky['ghi']
-    day = ghi > 2
+    ghi = clearsky['ghi'].copy()
     ghi.loc[ghi >= 500] = 500
-    assert_series_equal(
-        daytime.diff(ghi),
-        day,
-        check_names=False
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
     )
     # Include a period where data goes to zero during clipping and
     # returns to normal after the clipping is done
     ghi.loc[ghi['1/3/2020'].between_time('12:30', '15:30').index] = 0
-    assert_series_equal(
-        daytime.diff(ghi),
-        day,
-        check_names=False
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
     )
 
 
@@ -89,13 +97,11 @@ def test_daytime_overcast(albuquerque):
         model='simplified_solis'
     )
     ghi = clearsky['ghi']
-    day = ghi > 2
     ghi.loc['1/3/2020':'1/5/2020'] *= 0.5
     ghi.loc['1/7/2020':'1/8/2020'] *= 0.6
-    assert_series_equal(
-        daytime.diff(ghi),
-        day,
-        check_names=False
+    _assert_daytime_no_shoulder(
+        ghi,
+        daytime.diff(ghi)
     )
 
 
@@ -105,8 +111,7 @@ def test_daytime_split_day():
         pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T'),  # no tz
         model='simplified_solis'
     )
-    assert_series_equal(
-        daytime.diff(clearsky['ghi']),
-        clearsky['ghi'] > 2,
-        check_names=False
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(clearsky['ghi'])
     )
