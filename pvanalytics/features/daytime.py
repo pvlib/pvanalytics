@@ -57,7 +57,7 @@ def _from_numeric(series):
     # Inverse of :py:func:`_to_numeric()`
     boolean_series = series == 2
     boolean_series.loc[series == 3] = np.nan
-    return boolean_series
+    return boolean_series.astype('bool')
 
 
 def _filter_midday_errors(night):
@@ -74,7 +74,7 @@ def _filter_midday_errors(night):
             f=pd.core.window.RollingGroupby.median
         )
     )
-    return night | (invalid & _from_numeric(smoothed))
+    return (~invalid & night) | (invalid & _from_numeric(smoothed))
 
 
 def _filter_and_normalize(series, outliers):
