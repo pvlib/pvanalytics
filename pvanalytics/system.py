@@ -79,9 +79,12 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
             poa_azimuths = azimuth_by_minute[
                 _peak_times(poa[solar_zenith < 70])
             ]
+            filtered_azimuths = poa_azimuths[np.isin(
+                poa_azimuths.index.date,
+                modeled_azimuth.index.date
+            )]
             sum_of_squares = sum(
-                (poa_azimuths[modeled_azimuth.index].values
-                 - modeled_azimuth.values)**2
+                (filtered_azimuths.values - modeled_azimuth.values)**2
             )
             if (smallest_sse is None) or (smallest_sse > sum_of_squares):
                 smallest_sse = sum_of_squares
