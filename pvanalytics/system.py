@@ -29,6 +29,27 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
                 solar_azimuth, solar_zenith, ghi, dhi, dni):
     """Determine system azimuth and tilt from power or POA.
 
+    Solar noon is estimated on each day by fitting a quadratic to data
+    in `power_or_poa` and finding the vertex of the fit. A brute force
+    search is performed on clearsky POA irradiance for all pairs of
+    candidate azimuths and tilts (`azimuths` and `tilts`) to find the
+    pair that results in the closest azimuth at solar noon to the
+    azimuths calculated from the curve fitting step. Closest is
+    determined by minimizing the sum of squared error between the
+    azimuth at solar noon on each day in `power_or_poa` and the
+    azimuth at solar noon (maximum POA) in the clearsky POA
+    irradiance.
+
+    The accuracy of the values returned from this function will vary
+    with the time-resolution of the clearsky and solar position
+    data. For the best accuracy pass `solar_azimuth`, `solar_zenith`,
+    and the clearsky data (`ghi`, `dhi`, and `dni`) with one-minute
+    timestamp spacing. If `solar_azimuth` has timestamp spacing less
+    than one minute it will be resampled and interpolated to estimate
+    azimuth at each minute of the day. Regardless of the timestamp
+    spacing these parameters must cover the same days as
+    `power_or_poa`.
+
     Parameters
     ----------
     power_or_poa : Series
@@ -37,9 +58,9 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
     sunny : Series
         Boolean series with True for values when it is sunny.
     tilts : list of floats
-        list of tilts to check
+        List of candidate tilts.
     azimuths : list of floats
-        list of azimuths
+        List of candidate azimuths.
     solar_azimuth : Series
         Time series of solar azimuth.
     solar_zenith : Series
@@ -55,6 +76,10 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
     -------
     azimuth : float
     tilt : float
+
+    Notes
+    -----
+    Based on PVFleets QA project.
 
     """
     peak_times = _peak_times(power_or_poa[daytime])
