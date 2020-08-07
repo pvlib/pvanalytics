@@ -82,7 +82,6 @@ def test_orientation_with_gaps(clearsky_year, solarposition_year):
         solar_azimuth=solarposition_year['azimuth']
     )
     poa.loc['2020-07-19':'2020-07-23'] = np.nan
-    print(f"{poa['poa_global'].dropna().dtype}")
     azimuth, tilt = system.orientation(
         poa['poa_global'].dropna(),
         tilts=[15],
