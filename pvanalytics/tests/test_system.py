@@ -1,5 +1,6 @@
 """Tests for system paramter identification functions."""
 import pandas as pd
+import numpy as np
 from pvlib import irradiance
 from pvanalytics import system
 
@@ -70,3 +71,26 @@ def test_azimuth_different_index(clearsky_year, solarposition_year,
         **fine_clearsky,
     )
     assert azimuth == 120
+
+
+def test_orientation_with_gaps(clearsky_year, solarposition_year):
+    poa = irradiance.get_total_irradiance(
+        surface_tilt=15,
+        surface_azimuth=180,
+        **clearsky_year,
+        solar_zenith=solarposition_year['apparent_zenith'],
+        solar_azimuth=solarposition_year['azimuth']
+    )
+    poa.loc['2020-07-19':'2020-07-23'] = np.nan
+    print(f"{poa['poa_global'].dropna().dtype}")
+    azimuth, tilt = system.orientation(
+        poa['poa_global'].dropna(),
+        tilts=[15],
+        azimuths=[180],
+        solar_zenith=solarposition_year['apparent_zenith'],
+        solar_azimuth=solarposition_year['azimuth'],
+        daytime=solarposition_year['apparent_zenith'] < 87,
+        **clearsky_year
+    )
+    assert azimuth == 180
+    assert tilt == 15
