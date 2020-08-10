@@ -36,12 +36,11 @@ def orientation(power_or_poa, daytime, tilts, azimuths,
     pair that results in the closest azimuth at solar noon to the
     azimuths calculated from the curve fitting step. Closest is
     determined by minimizing the sum of squared error between the
-    azimuth at solar noon on each day in `power_or_poa` and the
-    azimuth at solar noon (maximum POA) in the clearsky POA
-    irradiance.
+    solar azimuth at solar noon on each day in `power_or_poa` and the
+    solar azimuth at maximum clearsky POA irradiance.
 
-    The accuracy of the values returned from this function will vary
-    with the time-resolution of the clearsky and solar position
+    The accuracy of the tilt and azimuth returned by this function will
+    vary with the time-resolution of the clearsky and solar position
     data. For the best accuracy pass `solar_azimuth`, `solar_zenith`,
     and the clearsky data (`ghi`, `dhi`, and `dni`) with one-minute
     timestamp spacing. If `solar_azimuth` has timestamp spacing less
