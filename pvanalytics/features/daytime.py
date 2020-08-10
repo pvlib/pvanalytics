@@ -1,6 +1,7 @@
 """Functions for identifying daytime"""
 import numpy as np
 import pandas as pd
+from pandas.tseries import frequencies
 
 
 def _rolling_by_minute(data, days, f, sort=True):
@@ -60,11 +61,10 @@ def _from_numeric(series):
     return boolean_series.astype('bool')
 
 
-def _filter_midday_errors(night):
+def _filter_midday_errors(night, minutes_per_value):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
-    # TODO make this adapable to the frequency of the series
-    invalid = _run_lengths(night) <= 20
+    invalid = _run_lengths(night)*minutes_per_value <= 5*60  # 5 hours
     # Need a numeric series so we can use Series.median()
     numeric_series = _to_numeric(night)
     smoothed = round(
@@ -85,8 +85,14 @@ def _filter_and_normalize(series, outliers):
     return (series - series.min()) / (series.max() - series.min())
 
 
+def _freqstr_to_minutes(freqstr):
+    return pd.to_timedelta(
+        frequencies.to_offset(freqstr)
+    ).seconds / 60
+
+
 def diff(series, outliers=None, low_value_threshold=0.003,
-         low_median_threshold=0.0015, low_diff_threshold=0.0015,
+         low_median_threshold=0.0015, low_diff_threshold=0.0005,
          clipping=None):
     """Return True for values that are during the day.
 
@@ -116,7 +122,8 @@ def diff(series, outliers=None, low_value_threshold=0.003,
         series,
         outliers or pd.Series(False, index=series.index)
     )
-    first_order_diff = series_norm.diff()
+    minutes_per_value = _freqstr_to_minutes(pd.infer_freq(series.index))
+    first_order_diff = series_norm.diff() / minutes_per_value
     rolling_median = _rolling_by_minute(
         series_norm,
         days=7,
@@ -136,7 +143,7 @@ def diff(series, outliers=None, low_value_threshold=0.003,
              | (low_diff & low_median))
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours)
-    night = _filter_midday_errors(night)
+    night = _filter_midday_errors(night, minutes_per_value)
     # TODO optional validation against clearsky daylight hours
     # If a clipping mask was provided mark all clipped values as
     # daytime
