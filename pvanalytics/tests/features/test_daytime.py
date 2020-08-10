@@ -31,12 +31,12 @@ def albuquerque():
 #
 # - [ ] Data with many missing values is handled gracefully
 #
-# - [ ] Data with different timestamp spacing
+# - [x] Data with different timestamp spacing
 
 
 def _assert_daytime_no_shoulder(clearsky, output):
     day = clearsky > 0
-    shoulder = day & (clearsky <= 2)
+    shoulder = day & (clearsky <= 3)
     assert_series_equal(
         output | shoulder,
         day,
@@ -150,4 +150,34 @@ def test_daytime_minute_spacing(albuquerque):
     _assert_daytime_no_shoulder(
         clearsky['ghi'],
         daytime.diff(ghi)
+    )
+
+def test_daytime_daylight_savings(albuquerque):
+    spring = pd.date_range(
+        start='2/10/2020',
+        end='4/10/2020',
+        freq='15T',
+        tz='America/Denver'
+    )
+    clearsky_spring = albuquerque.get_clearsky(
+        spring,
+        model='simplified_solis'
+    )
+    _assert_daytime_no_shoulder(
+        clearsky_spring['ghi'],
+        daytime.diff(clearsky_spring['ghi'])
+    )
+    fall = pd.date_range(
+        start='10/1/2020',
+        end='12/1/2020',
+        freq='15T',
+        tz='America/Denver'
+    )
+    clearsky_fall = albuquerque.get_clearsky(
+        fall,
+        model='simplified_solis'
+    )
+    _assert_daytime_no_shoulder(
+        clearsky_fall['ghi'],
+        daytime.diff(clearsky_fall['ghi'])
     )
