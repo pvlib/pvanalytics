@@ -26,6 +26,19 @@ def quadratic_idxmax(x, y, model_range=None):
     numeric
         x-value of the vertex of a quadratic fit to the data in `x`
         and `y`.
+
+    Examples
+    --------
+    >>> quadratic_idxmax(x=[-2, -1, 2, 4], y=[-4, -1, -4, -16])
+    -1
+
+    >>> quadratic_idxmax(
+    ...     x=[-2, -1, 2, 4],
+    ...     y=[-4, -1, -4, -16],
+    ...     model_range=[-4, -3, -2, -1, 0, 1, 2, 3, 4]
+    ... )
+    0
+
     """
     model_range = model_range or x
     quadratic = _quadratic(x, y)
