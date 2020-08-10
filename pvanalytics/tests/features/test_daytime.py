@@ -115,3 +115,39 @@ def test_daytime_split_day():
         clearsky['ghi'],
         daytime.diff(clearsky['ghi'])
     )
+
+
+def test_daytime_hour_spacing(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(start='1/1/2020', end='1/20/2020', freq='H'),
+        model='simplified_solis'
+    )
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(clearsky['ghi'])
+    )
+    # punch a mid-day hole
+    ghi = clearsky['ghi'].copy()
+    ghi.loc['1/10/2020 12:00':'1/10/2020 14:00'] = 0
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
+    )
+
+
+def test_daytime_minute_spacing(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(start='1/1/2020', end='1/20/2020', freq='T'),
+        model='simplified_solis'
+    )
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(clearsky['ghi'])
+    )
+    # punch a mid-day hole
+    ghi = clearsky['ghi'].copy()
+    ghi.loc['1/10/2020 12:00':'1/10/2020 14:00'] = 0
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
+    )
