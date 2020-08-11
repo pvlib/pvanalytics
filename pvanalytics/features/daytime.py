@@ -11,6 +11,7 @@ def _rolling_by_minute(data, days, f, sort=True):
         data.index.hour * 60 + data.index.minute
     ).rolling(
         min_periods=1,
+        center=True,
         window=days
     )
     result = f(rolling).reset_index(0, drop=True)
