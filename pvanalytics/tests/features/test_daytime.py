@@ -153,6 +153,7 @@ def test_daytime_minute_spacing(albuquerque):
         daytime.diff(ghi)
     )
 
+
 def test_daytime_daylight_savings(albuquerque):
     spring = pd.date_range(
         start='2/10/2020',
@@ -190,7 +191,25 @@ def test_daytime_zero_at_end_of_day(albuquerque):
         model='simplified_solis'
     )
     ghi = clearsky['ghi'].copy()
+    ghi.loc['1/5/2020 16:00':'1/6/2020 00:00'] = 0
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
+    )
     ghi.loc['1/5/2020 12:00':'1/6/2020 00:00'] = 0
+    _assert_daytime_no_shoulder(
+        clearsky['ghi'],
+        daytime.diff(ghi)
+    )
+
+
+def test_daytime_zero_at_start_of_day(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
+        model='simplified_solis'
+    )
+    ghi = clearsky['ghi'].copy()
+    ghi.loc['1/5/2020 00:00':'1/5/2020 09:00'] = 0
     _assert_daytime_no_shoulder(
         clearsky['ghi'],
         daytime.diff(ghi)
