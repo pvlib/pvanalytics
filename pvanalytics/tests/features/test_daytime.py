@@ -2,7 +2,6 @@
 import pytest
 import pandas as pd
 import numpy as np
-from pandas.testing import assert_series_equal
 from pvlib.location import Location
 from pvanalytics.features import daytime
 
@@ -50,13 +49,16 @@ def clearsky_january(request, albuquerque):
 
 
 def _assert_daytime_no_shoulder(clearsky, output):
-    day = clearsky > 0
-    shoulder = day & (clearsky <= 3)
-    assert_series_equal(
-        output | shoulder,
-        day,
-        check_names=False
-    )
+    # every night-time value in `output` has low or 0 irradiance
+    assert all(clearsky[~output] < 3)
+    if pd.infer_freq(clearsky.index) == 'T':
+        # Blur the boundaries between night and day if testing
+        # high-frequency data since the daytime filtering algorithm does
+        # not have one-minute accuracy.
+        clearsky = clearsky.rolling(window=30, center=True).max()
+    # every day-time value is within 15 minutes of a non-zero
+    # irradiance measurement
+    assert all(clearsky[output] > 0)
 
 
 def test_daytime_with_clipping(clearsky_january):
