@@ -12,6 +12,19 @@ def albuquerque():
     return Location(35, -106, altitude=1500)
 
 
+@pytest.fixture(scope='module', params=['H', '15T', 'T'])
+def clearsky_january(request, albuquerque):
+    return albuquerque.get_clearsky(
+        pd.date_range(
+            start='1/1/2020',
+            end='1/30/2020',
+            tz='MST',
+            freq=request.param
+        ),
+        model='simplified_solis'
+    )
+
+
 # Testing plan
 #
 # - [x] Can detect the daytime period in one day of data.
@@ -45,63 +58,28 @@ def _assert_daytime_no_shoulder(clearsky, output):
     )
 
 
-def test_daytime_diff(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/2/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    _assert_daytime_no_shoulder(
-        clearsky['ghi'],
-        daytime.diff(clearsky['ghi'])
-    )
-
-
-def test_midday_zero(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi']
-    day = ghi > 0
-    shoulder_time = day & (ghi <= 2)
-    ghi.loc[ghi['1/3/2020'].between_time('12:00', '14:00').index] = 0
-    assert_series_equal(
-        daytime.diff(ghi) | shoulder_time,
-        day,
-        check_names=False
-    )
-
-
-def test_daytime_with_clipping(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
+def test_daytime_with_clipping(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc[ghi >= 500] = 500
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
     # Include a period where data goes to zero during clipping and
     # returns to normal after the clipping is done
     ghi.loc[ghi['1/3/2020'].between_time('12:30', '15:30').index] = 0
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
 
 
-def test_daytime_overcast(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi']
+def test_daytime_overcast(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/3/2020':'1/5/2020'] *= 0.5
     ghi.loc['1/7/2020':'1/8/2020'] *= 0.6
     _assert_daytime_no_shoulder(
-        ghi,
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
 
@@ -118,38 +96,16 @@ def test_daytime_split_day():
     )
 
 
-def test_daytime_hour_spacing(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='H'),
-        model='simplified_solis'
-    )
+def test_daytime(clearsky_january):
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
-        daytime.diff(clearsky['ghi'])
+        clearsky_january['ghi'],
+        daytime.diff(clearsky_january['ghi'])
     )
     # punch a mid-day hole
-    ghi = clearsky['ghi'].copy()
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/10/2020 12:00':'1/10/2020 14:00'] = 0
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
-        daytime.diff(ghi)
-    )
-
-
-def test_daytime_minute_spacing(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='T'),
-        model='simplified_solis'
-    )
-    _assert_daytime_no_shoulder(
-        clearsky['ghi'],
-        daytime.diff(clearsky['ghi'])
-    )
-    # punch a mid-day hole
-    ghi = clearsky['ghi'].copy()
-    ghi.loc['1/10/2020 12:00':'1/10/2020 14:00'] = 0
-    _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
 
@@ -185,43 +141,32 @@ def test_daytime_daylight_savings(albuquerque):
     )
 
 
-def test_daytime_zero_at_end_of_day(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
+def test_daytime_zero_at_end_of_day(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/5/2020 16:00':'1/6/2020 00:00'] = 0
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
+    # test a period of zeros starting earlier in the day
     ghi.loc['1/5/2020 12:00':'1/6/2020 00:00'] = 0
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
 
 
-def test_daytime_zero_at_start_of_day(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
+def test_daytime_zero_at_start_of_day(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/5/2020 00:00':'1/5/2020 09:00'] = 0
     _assert_daytime_no_shoulder(
-        clearsky['ghi'],
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
 
 
-def test_daytime_missing_data(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/20/2020', freq='15T', tz='MST'),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
+def test_daytime_missing_data(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/5/2020 16:00':'1/6/2020 11:30'] = np.nan
     # test with NaNs
     _assert_daytime_no_shoulder(
