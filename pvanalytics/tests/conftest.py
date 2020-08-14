@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--runslow", action="store_true", default=False, help="run slow tests"
