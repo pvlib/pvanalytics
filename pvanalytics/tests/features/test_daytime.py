@@ -12,7 +12,8 @@ def albuquerque():
     return Location(35, -106, altitude=1500)
 
 
-@pytest.fixture(scope='module', params=['H', '15T', 'T'])
+@pytest.fixture(scope='module',
+                params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
 def clearsky_january(request, albuquerque):
     return albuquerque.get_clearsky(
         pd.date_range(
