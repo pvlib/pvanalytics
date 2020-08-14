@@ -122,7 +122,7 @@ def _freqstr_to_minutes(freqstr):
 
 def diff(series, outliers=None, low_value_threshold=0.003,
          low_median_threshold=0.0015, low_diff_threshold=0.0005,
-         clipping=None):
+         clipping=None, freq=None):
     """Return True for values that are during the day.
 
     Parameters
@@ -146,12 +146,21 @@ def diff(series, outliers=None, low_value_threshold=0.003,
         Boolean time series with True for times that are during the
         day.
 
+    Notes
+    -----
+
+    ``NA`` values are treated like zeros.
+
+    Derived from the PVFleets QA Analysis project.
     """
+    series = series.fillna(value=0)
     series_norm = _filter_and_normalize(
         series,
         outliers or pd.Series(False, index=series.index)
     )
-    minutes_per_value = _freqstr_to_minutes(pd.infer_freq(series.index))
+    minutes_per_value = _freqstr_to_minutes(
+        freq or pd.infer_freq(series.index)
+    )
     first_order_diff = series_norm.diff() / minutes_per_value
     rolling_median = _rolling_by_minute(
         series_norm,

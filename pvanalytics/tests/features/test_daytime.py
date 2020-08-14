@@ -43,7 +43,7 @@ def clearsky_january(request, albuquerque):
 #
 # - [ ] Can detect daytime in a period where there are variable days.
 #
-# - [ ] Data with many missing values is handled gracefully
+# - [x] Data with many missing values is handled gracefully
 #
 # - [x] Data with different timestamp spacing
 
@@ -173,12 +173,12 @@ def test_daytime_missing_data(clearsky_january):
     ghi.loc['1/5/2020 16:00':'1/6/2020 11:30'] = np.nan
     # test with NaNs
     _assert_daytime_no_shoulder(
-        ghi,
+        clearsky_january['ghi'],
         daytime.diff(ghi)
     )
     # test with completely missing data
     ghi.dropna(inplace=True)
     _assert_daytime_no_shoulder(
         ghi,
-        daytime.diff(ghi)
+        daytime.diff(ghi, freq=pd.infer_freq(clearsky_january.index))
     )
