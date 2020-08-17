@@ -25,29 +25,6 @@ def clearsky_january(request, albuquerque):
     )
 
 
-# Testing plan
-#
-# - [x] Can detect the daytime period in one day of data.
-#
-# - [x] Can detect the daytime period(s) in data where day spans two
-#   dates.
-#
-# - [x] Can detect the correct daytime period in data where there is
-#   1-2 hours of zeros mid-day
-#
-# - [x] Can detect daytime in a period where there are 'overcast' days
-#   (i.e. ghi is 1/2 the normal value for a day or two)
-#
-# - [x] Can detect the daytime period in data with clipping (without
-#   passing a "clipping mask")
-#
-# - [ ] Can detect daytime in a period where there are variable days.
-#
-# - [x] Data with many missing values is handled gracefully
-#
-# - [x] Data with different timestamp spacing
-
-
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
     assert all(clearsky[~output] < 3)
@@ -196,4 +173,15 @@ def test_daytime_missing_data(clearsky_january):
     _assert_daytime_no_shoulder(
         ghi,
         daytime.diff(ghi, freq=pd.infer_freq(clearsky_january.index))
+    )
+
+
+def test_daytime_variable(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    np.random.seed(1337)
+    ghi.loc['1/10/2020'] *= np.random.rand(len(ghi['1/10/2020']))
+    ghi.loc['1/11/2020'] *= np.random.rand(len(ghi['1/11/2020']))
+    _assert_daytime_no_shoulder(
+        clearsky_january['ghi'],
+        daytime.diff(ghi)
     )
