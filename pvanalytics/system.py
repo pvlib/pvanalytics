@@ -35,9 +35,9 @@ def infer_orientation_solarnoon(power_or_poa, daytime, tilts,
     in `power_or_poa` and finding the vertex of the fit. A brute force
     search is performed on clearsky POA irradiance for all pairs of
     candidate azimuths and tilts (`azimuths` and `tilts`) to find the
-    pair that results in the closest azimuth at solar noon to the
-    azimuths calculated from the curve fitting step. Closest is
-    determined by minimizing the sum of squared error between the
+    pair that results in the closest azimuth to the
+    azimuths calculated at solar noon  from the curve fitting step. Closest is
+    determined by minimizing the sum of squared difference between the
     solar azimuth at solar noon on each day in `power_or_poa` and the
     solar azimuth at maximum clearsky POA irradiance.
 
