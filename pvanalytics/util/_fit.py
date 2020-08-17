@@ -10,7 +10,7 @@ def _quadratic(xs, ys):
 
 
 def quadratic_idxmax(x, y, model_range=None):
-    """Fit a quartic to the data and return the x-value of the vertex.
+    """Fit a quadratic to the x, y data and return the x-value of the vertex.
 
     Parameters
     ----------
