@@ -168,6 +168,21 @@ def test_daytime_zero_at_start_of_day(clearsky_january):
     )
 
 
+def test_daytime_outliers(clearsky_january):
+    outliers = pd.Series(False, index=clearsky_january.index)
+    outliers.loc['1/5/2020 13:00'] = True
+    outliers.loc['1/5/2020 14:00'] = True
+    outliers.loc['1/10/2020 02:00'] = True
+    ghi = clearsky_january['ghi'].copy()
+    ghi.loc['1/5/2020 1300'] = 999
+    ghi.loc['1/5/2020 14:00'] = -999
+    ghi.loc['1/10/2020 02:00'] = -999
+    _assert_daytime_no_shoulder(
+        clearsky_january['ghi'],
+        daytime.diff(clearsky_january['ghi'], outliers=outliers)
+    )
+
+
 def test_daytime_missing_data(clearsky_january):
     ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/5/2020 16:00':'1/6/2020 11:30'] = np.nan

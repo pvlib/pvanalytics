@@ -109,7 +109,8 @@ def _filter_edge_of_day_errors(night, minutes_per_value):
 def _filter_and_normalize(series, outliers):
     # filter a series by removing outliers and clamping the minimum to
     # 0. Then normalize the series by the maximum deviation.
-    series = series[~outliers]
+    if outliers is not None:
+        series.loc[outliers] = np.nan
     series.loc[series < 0] = 0
     return (series - series.min()) / (series.max() - series.min())
 
@@ -154,10 +155,7 @@ def diff(series, outliers=None, low_value_threshold=0.003,
     Derived from the PVFleets QA Analysis project.
     """
     series = series.fillna(value=0)
-    series_norm = _filter_and_normalize(
-        series,
-        outliers or pd.Series(False, index=series.index)
-    )
+    series_norm = _filter_and_normalize(series, outliers).fillna(value=0)
     minutes_per_value = _freqstr_to_minutes(
         freq or pd.infer_freq(series.index)
     )
