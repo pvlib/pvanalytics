@@ -46,8 +46,8 @@ def quadratic_idxmax(x, y, model_range=None):
     return model_range[np.argmax(model)]
 
 
-def quadratic(x, y):
-    """Fit a quadratic to the data.
+def quadratic_r2(x, y):
+    """Return the r^2 for a quadratic fit the the data.
 
     Parameters
     ----------
@@ -87,8 +87,8 @@ def quadratic(x, y):
     return correlation**2
 
 
-def quartic_restricted(x, y, noon=720):
-    """Fit a restricted quartic to the data.
+def quartic_restricted_r2(x, y, noon=720):
+    """Return the r^2 for a restricted quartic fit to the data.
 
     The quartic is restricted to match the expected shape for a
     tracking pv system under clearsky conditions. The quartic must:
