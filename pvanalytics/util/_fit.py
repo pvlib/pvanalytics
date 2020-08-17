@@ -41,8 +41,8 @@ def quadratic_idxmax(x, y, model_range=None):
 
     """
     model_range = model_range or x
-    quadratic = _quadratic(x, y)
-    model = quadratic(model_range)
+    q = _quadratic(x, y)
+    model = q(model_range)
     return model_range[np.argmax(model)]
 
 
