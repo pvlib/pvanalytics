@@ -94,7 +94,7 @@ def _filter_edge_of_day_errors(night, minutes_per_value):
     day_length = night.groupby(night.cumsum()).transform(
         lambda x: len(x) * minutes_per_value
     )
-    # remove night time values so they don't interfer with the mediand
+    # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
     day_length_median = day_length.rolling(window='14D').median()
