@@ -58,10 +58,10 @@ def infer_orientation_least_squares(power_or_poa, daytime, tilts,
         measurements.
     daytime : Series
         Boolean series with True for values when it is daytime.
-    tilts : list of floats
-        List of candidate tilts.
-    azimuths : list of floats
-        List of candidate azimuths.
+    tilts : array-like
+        Candidate tilts in degrees.
+    azimuths : array-like
+        Candidate azimuths in degrees.
     solar_azimuth : Series
         Time series of solar azimuth.
     solar_zenith : Series
