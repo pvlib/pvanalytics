@@ -56,8 +56,8 @@ def infer_orientation_least_squares(power_or_poa, daytime, tilts,
     power_or_poa : Series
         Timezone localized series of power or POA irradiance
         measurements.
-    sunny : Series
-        Boolean series with True for values when it is sunny.
+    daytime : Series
+        Boolean series with True for values when it is daytime.
     tilts : list of floats
         List of candidate tilts.
     azimuths : list of floats
