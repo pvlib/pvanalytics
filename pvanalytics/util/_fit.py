@@ -16,7 +16,6 @@ def quadratic_idxmax(x, y, model_range=None):
     ----------
     x : array_like
     y : Series
-        x and y-values to fit to.
     model_range : array_like, optional
         Range of x-values to find the max over. If not specified then
         `x` is used.
