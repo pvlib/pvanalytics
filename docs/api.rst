@@ -210,3 +210,14 @@ identification.
 
    features.orientation.fixed_nrel
    features.orientation.tracking_nrel
+
+System
+======
+
+The following function can be used to infer system orientation from
+power or plane of array irradiance measurements.
+
+.. autosummary::
+   :toctree: generated/
+
+   system.infer_orientation_least_squares
