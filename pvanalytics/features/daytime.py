@@ -126,6 +126,26 @@ def diff(series, outliers=None, low_value_threshold=0.003,
          clipping=None, freq=None):
     """Return True for values that are during the day.
 
+    After removing outliers and normalizing the data, periods of
+    low-slope and low-value are identified as night. A time is
+    classified as night when two of the following three criteria are
+    satisfied:
+
+    - near-zero value
+    - near-zero first-order derivative
+    - near-zero rolling median at the same time over the surrounding
+      week
+
+    It is possible that mid-day times where power goes near zero or
+    stops changing can be incorrectly classified as night. To correct
+    these errors times where the total duration of periods marked
+    night or day is too long or too short are identified and values at
+    these times are compared to values at the same time for the
+    preceding two weeks and following two weeks. The day/night value
+    is adjusted to match the median value of these days.
+
+    Finally any values that are True in `clipping` are marked as day.
+
     Parameters
     ----------
     series : Series
@@ -137,6 +157,8 @@ def diff(series, outliers=None, low_value_threshold=0.003,
         Maximum normalized value for a time to be considered night.
     low_median_threshold : float, default 0.0015
         Minimum rolling median for a time to be considered night.
+    low_diff_threshold : float, default 0.0005
+        Maximum derivative for a time to be considered night.
     clipping : Series, optional
         True when clipping indicated. Any values where clipping is
         indicated are automatically considered 'daytime'.
@@ -153,6 +175,7 @@ def diff(series, outliers=None, low_value_threshold=0.003,
     ``NA`` values are treated like zeros.
 
     Derived from the PVFleets QA Analysis project.
+
     """
     series = series.fillna(value=0)
     series_norm = _filter_and_normalize(series, outliers).fillna(value=0)
