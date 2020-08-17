@@ -25,9 +25,11 @@ def _peak_times(data):
     ) + peak_minutes
 
 
-def orientation(power_or_poa, daytime, tilts, azimuths,
-                solar_azimuth, solar_zenith, ghi, dhi, dni):
-    """Determine system azimuth and tilt from power or POA.
+def infer_orientation_least_squares(power_or_poa, daytime, tilts,
+                                    azimuths, solar_azimuth,
+                                    solar_zenith, ghi, dhi, dni):
+    """Determine system azimuth and tilt from power or POA using least
+    squares.
 
     Solar noon is estimated on each day by fitting a quadratic to data
     in `power_or_poa` and finding the vertex of the fit. A brute force
