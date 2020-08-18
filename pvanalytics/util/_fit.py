@@ -9,16 +9,13 @@ def _quadratic(xs, ys):
     return np.poly1d(coefficients)
 
 
-def quadratic_idxmax(x, y, model_range=None):
+def quadratic_vertex(x, y):
     """Fit a quadratic to the x, y data and return the x-value of the vertex.
 
     Parameters
     ----------
     x : array_like
     y : Series
-    model_range : array_like, optional
-        Range of x-values to find the max over. If not specified then
-        `x` is used.
 
     Returns
     -------
@@ -26,23 +23,9 @@ def quadratic_idxmax(x, y, model_range=None):
         x-value of the vertex of a quadratic fit to the data in `x`
         and `y`.
 
-    Examples
-    --------
-    >>> quadratic_idxmax(x=[-2, -1, 2, 4], y=[-4, -1, -4, -16])
-    -1
-
-    >>> quadratic_idxmax(
-    ...     x=[-2, -1, 2, 4],
-    ...     y=[-4, -1, -4, -16],
-    ...     model_range=[-4, -3, -2, -1, 0, 1, 2, 3, 4]
-    ... )
-    0
-
     """
-    model_range = model_range or x
     q = _quadratic(x, y)
-    model = q(model_range)
-    return model_range[np.argmax(model)]
+    return -q.c[1] / (2 * q.c[0])
 
 
 def quadratic_r2(x, y):

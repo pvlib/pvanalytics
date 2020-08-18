@@ -12,10 +12,11 @@ def _peak_times(data):
     )
     peak_minutes = _group.by_day(data).apply(
         lambda day: pd.Timedelta(
-            minutes=_fit.quadratic_idxmax(
-                x=minute_of_day[day.index],
-                y=day,
-                model_range=range(0, 1440)
+            minutes=round(
+                _fit.quadratic_vertex(
+                    x=minute_of_day[day.index],
+                    y=day,
+                )
             )
         )
     )
