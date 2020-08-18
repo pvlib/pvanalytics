@@ -2,6 +2,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+from pvlib import location
 
 
 def pytest_addoption(parser):
@@ -22,6 +23,18 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
+
+@pytest.fixture(scope='module')
+def albuquerque():
+    """pvlib Location for Albuquerque, NM."""
+    return location.Location(
+        35.0844,
+        -106.6504,
+        name='Albuquerque',
+        altitude=1500,
+        tx='Etc/GMT+7'
+    )
 
 
 @pytest.fixture

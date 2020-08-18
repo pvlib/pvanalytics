@@ -1,7 +1,7 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import location, pvsystem, tracking, modelchain, irradiance
+from pvlib import pvsystem, tracking, modelchain, irradiance
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import orientation
 
@@ -15,18 +15,6 @@ def times():
         closed='left',
         freq='H',
         tz='Etc/GMT+7'
-    )
-
-
-@pytest.fixture(scope='module')
-def albuquerque():
-    """pvlib Location for Albuquerque, NM."""
-    return location.Location(
-        35.0844,
-        -106.6504,
-        name='Albuquerque',
-        altitude=1500,
-        tx='Etc/GMT+7'
     )
 
 
