@@ -129,9 +129,11 @@ def _freqstr_to_minutes(freqstr):
 def power_or_irradiance(series, outliers=None,
                         low_value_threshold=0.003,
                         low_median_threshold=0.0015,
-                        low_diff_threshold=0.0005, clipping=None,
-                        freq=None, correction_window=31, hours_min=5,
-                        daytime_difference_max=30, day_length_window=14):
+                        low_diff_threshold=0.0005, median_days=7,
+                        clipping=None, freq=None,
+                        correction_window=31, hours_min=5,
+                        daytime_difference_max=30,
+                        day_length_window=14):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, periods of
@@ -142,7 +144,7 @@ def power_or_irradiance(series, outliers=None,
     - near-zero value
     - near-zero first-order derivative
     - near-zero rolling median at the same time over the surrounding
-      week
+      week (see `median_days`)
 
     It is possible that mid-day times where power goes near zero or
     stops changing can be incorrectly classified as night. To correct
@@ -167,6 +169,9 @@ def power_or_irradiance(series, outliers=None,
         Maximum rolling median for a time to be considered night.
     low_diff_threshold : float, default 0.0005
         Maximum derivative for a time to be considered night.
+    median_days : int, default 7
+        Number of days to use to calculate the rolling median at each
+        minute.
     clipping : Series, optional
         True when clipping indicated. Any values where clipping is
         indicated are automatically considered 'daytime'.
@@ -209,7 +214,7 @@ def power_or_irradiance(series, outliers=None,
     first_order_diff = series_norm.diff() / minutes_per_value
     rolling_median = _rolling_by_minute(
         series_norm,
-        days=7,
+        days=median_days,
         f=pd.core.window.RollingGroupby.median
     )
 
