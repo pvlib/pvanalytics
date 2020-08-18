@@ -4,7 +4,7 @@ import pandas as pd
 from pandas.tseries import frequencies
 
 
-def _rolling_by_minute(data, days, f, sort=True):
+def _rolling_by_minute(data, days, f):
     # apply `f` to a rolling window of length `days` at each minute of
     # the day.
     rolling = data.groupby(
@@ -15,9 +15,7 @@ def _rolling_by_minute(data, days, f, sort=True):
         window=days
     )
     result = f(rolling).reset_index(0, drop=True)
-    if sort:
-        return result.sort_index()
-    return result
+    return result.sort_index()
 
 
 def _run_lengths(series):
