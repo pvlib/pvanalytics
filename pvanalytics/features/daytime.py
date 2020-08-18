@@ -154,7 +154,7 @@ def diff(series, outliers=None, low_value_threshold=0.003,
     low_value_threshold : float, default 0.003
         Maximum normalized value for a time to be considered night.
     low_median_threshold : float, default 0.0015
-        Minimum rolling median for a time to be considered night.
+        Maximum rolling median for a time to be considered night.
     low_diff_threshold : float, default 0.0005
         Maximum derivative for a time to be considered night.
     clipping : Series, optional
