@@ -72,14 +72,14 @@ def _smooth_if_invalid(series, invalid):
     return (~invalid & series) | (invalid & _from_numeric(smoothed))
 
 
-def _filter_midday_errors(night, minutes_per_value):
+def _correct_midday_errors(night, minutes_per_value):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= 5*60  # 5 hours
     return _smooth_if_invalid(night, invalid)
 
 
-def _filter_edge_of_day_errors(night, minutes_per_value):
+def _correct_edge_of_day_errors(night, minutes_per_value):
     # identify night-time periods that are "too long" and replace
     # values with the 31-day rolling median value for that minute.
     #
@@ -203,10 +203,10 @@ def power_or_irradiance(series, outliers=None,
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
-    night_corrected_midday = _filter_midday_errors(night, minutes_per_value)
+    night_corrected_midday = _correct_midday_errors(night, minutes_per_value)
     night_corrected_clipping = ~((clipping or False)
                                  | (~night_corrected_midday))
-    night_corrected_edges = _filter_edge_of_day_errors(
+    night_corrected_edges = _correct_edge_of_day_errors(
         night_corrected_clipping, minutes_per_value
     )
     return ~night_corrected_edges
