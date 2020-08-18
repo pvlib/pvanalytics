@@ -119,9 +119,11 @@ def _freqstr_to_minutes(freqstr):
     ).seconds / 60
 
 
-def diff(series, outliers=None, low_value_threshold=0.003,
-         low_median_threshold=0.0015, low_diff_threshold=0.0005,
-         clipping=None, freq=None):
+def power_or_irradiance(series, outliers=None,
+                        low_value_threshold=0.003,
+                        low_median_threshold=0.0015,
+                        low_diff_threshold=0.0005, clipping=None,
+                        freq=None):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, periods of

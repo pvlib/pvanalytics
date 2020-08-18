@@ -43,14 +43,14 @@ def test_daytime_with_clipping(clearsky_january):
     ghi.loc[ghi >= 500] = 500
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
     # Include a period where data goes to zero during clipping and
     # returns to normal after the clipping is done
     ghi.loc[ghi['1/3/2020'].between_time('12:30', '15:30').index] = 0
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
 
 
@@ -60,7 +60,7 @@ def test_daytime_overcast(clearsky_january):
     ghi.loc['1/7/2020':'1/8/2020'] *= 0.6
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
 
 
@@ -72,21 +72,21 @@ def test_daytime_split_day():
     )
     _assert_daytime_no_shoulder(
         clearsky['ghi'],
-        daytime.diff(clearsky['ghi'])
+        daytime.power_or_irradiance(clearsky['ghi'])
     )
 
 
 def test_daytime(clearsky_january):
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(clearsky_january['ghi'])
+        daytime.power_or_irradiance(clearsky_january['ghi'])
     )
     # punch a mid-day hole
     ghi = clearsky_january['ghi'].copy()
     ghi.loc['1/10/2020 12:00':'1/10/2020 14:00'] = 0
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
 
 
@@ -103,7 +103,7 @@ def test_daytime_daylight_savings(albuquerque):
     )
     _assert_daytime_no_shoulder(
         clearsky_spring['ghi'],
-        daytime.diff(clearsky_spring['ghi'])
+        daytime.power_or_irradiance(clearsky_spring['ghi'])
     )
     fall = pd.date_range(
         start='10/1/2020',
@@ -117,7 +117,7 @@ def test_daytime_daylight_savings(albuquerque):
     )
     _assert_daytime_no_shoulder(
         clearsky_fall['ghi'],
-        daytime.diff(clearsky_fall['ghi'])
+        daytime.power_or_irradiance(clearsky_fall['ghi'])
     )
 
 
@@ -126,13 +126,13 @@ def test_daytime_zero_at_end_of_day(clearsky_january):
     ghi.loc['1/5/2020 16:00':'1/6/2020 00:00'] = 0
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
     # test a period of zeros starting earlier in the day
     ghi.loc['1/5/2020 12:00':'1/6/2020 00:00'] = 0
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
 
 
@@ -141,7 +141,7 @@ def test_daytime_zero_at_start_of_day(clearsky_january):
     ghi.loc['1/5/2020 00:00':'1/5/2020 09:00'] = 0
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
 
 
@@ -156,7 +156,7 @@ def test_daytime_outliers(clearsky_january):
     ghi.loc['1/10/2020 02:00'] = -999
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(clearsky_january['ghi'], outliers=outliers)
+        daytime.power_or_irradiance(clearsky_january['ghi'], outliers=outliers)
     )
 
 
@@ -166,13 +166,15 @@ def test_daytime_missing_data(clearsky_january):
     # test with NaNs
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
     # test with completely missing data
     ghi.dropna(inplace=True)
     _assert_daytime_no_shoulder(
         ghi,
-        daytime.diff(ghi, freq=pd.infer_freq(clearsky_january.index))
+        daytime.power_or_irradiance(
+            ghi, freq=pd.infer_freq(clearsky_january.index)
+        )
     )
 
 
@@ -183,5 +185,5 @@ def test_daytime_variable(clearsky_january):
     ghi.loc['1/11/2020'] *= np.random.rand(len(ghi['1/11/2020']))
     _assert_daytime_no_shoulder(
         clearsky_january['ghi'],
-        daytime.diff(ghi)
+        daytime.power_or_irradiance(ghi)
     )
