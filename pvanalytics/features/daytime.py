@@ -59,49 +59,56 @@ def _from_numeric(series):
     return boolean_series.astype('bool')
 
 
-def _smooth_if_invalid(series, invalid):
+def _smooth_if_invalid(series, invalid, correction_window):
     # replace values in `series` marked as True in `invalid` with the
-    # 31-day rolling median at each minute.
+    # `correction_window`-day rolling median at each minute.
     smoothed = round(
         _rolling_by_minute(
             _to_numeric(series),
-            days=31,
+            days=correction_window,
             f=pd.core.window.RollingGroupby.median
         )
     )
     return (~invalid & series) | (invalid & _from_numeric(smoothed))
 
 
-def _correct_midday_errors(night, minutes_per_value):
+def _correct_midday_errors(night, minutes_per_value, hours_min,
+                           correction_window):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
-    invalid = _run_lengths(night)*minutes_per_value <= 5*60  # 5 hours
-    return _smooth_if_invalid(night, invalid)
+    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
+    return _smooth_if_invalid(night, invalid, correction_window)
 
 
-def _correct_edge_of_day_errors(night, minutes_per_value):
+def _correct_edge_of_day_errors(night, minutes_per_value,
+                                daytime_difference_max,
+                                day_length_window, correction_window):
     # identify night-time periods that are "too long" and replace
-    # values with the 31-day rolling median value for that minute.
+    # values with the `correction_window`-day rolling median value for
+    # that minute.
     #
     # Because daylight savings shifts happen at night we cannot look
     # at night-length directly. Instead we look for too-short days and
-    # flag the full day for substitution. This may result in slightly
+    # flag the full day for correction. This may result in slightly
     # reduced accuracy for sunrise/sunset times on these days (even if
-    # one end of the day - sunrise or sunset - was correctly flagged,
-    # it will be replaced with the rolling median for that minute).
+    # the day/night boundary at one end of the day - sunrise or sunset
+    # - was correctly marked, it will be replaced with the rolling
+    # median for that minute).
     day_length = night.groupby(night.cumsum()).transform(
         lambda x: len(x) * minutes_per_value
     )
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
-    day_length_median = day_length.rolling(window='14D').median()
+    day_length_median = day_length.rolling(
+        window=str(day_length_window) + 'D'
+    ).median()
     # flag days that are more than 30 minutes shorter than the median
-    short_days = day_length < (day_length_median - 30)
+    short_days = day_length < (day_length_median - daytime_difference_max)
     invalid = short_days.groupby(short_days.index.date).transform(
         lambda day: any(day)
     )
-    return _smooth_if_invalid(night, invalid)
+    return _smooth_if_invalid(night, invalid, correction_window)
 
 
 def _filter_and_normalize(series, outliers):
@@ -123,7 +130,8 @@ def power_or_irradiance(series, outliers=None,
                         low_value_threshold=0.003,
                         low_median_threshold=0.0015,
                         low_diff_threshold=0.0005, clipping=None,
-                        freq=None):
+                        freq=None, correction_window=31, hours_min=5,
+                        daytime_difference_max=30, day_length_window=14):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, periods of
@@ -162,6 +170,22 @@ def power_or_irradiance(series, outliers=None,
     clipping : Series, optional
         True when clipping indicated. Any values where clipping is
         indicated are automatically considered 'daytime'.
+    correction_window : int, default 31
+        Number of adjacent days to examine when correcting
+        day/night classification errors.
+    hours_min : float, default 5
+        Minimum number of hours in a contiguous period of day or
+        night. If a day/night period is shorter than this then it is
+        flagged for error correction.
+    daytime_difference_max : float, default 30
+        When looking for day that end too early or start too late any
+        day where the hours of daylight is more then
+        `daytime_difference_max` minutes shorter than the median
+        length of surrounding days.
+    day_length_window : int, default 14
+        The length of the rolling window used for calculating the
+        median length of the day when correcting errors in the morning
+        or afternoon.
 
     Returns
     -------
@@ -203,10 +227,16 @@ def power_or_irradiance(series, outliers=None,
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
-    night_corrected_midday = _correct_midday_errors(night, minutes_per_value)
+    night_corrected_midday = _correct_midday_errors(
+        night, minutes_per_value, hours_min, correction_window
+    )
     night_corrected_clipping = ~((clipping or False)
                                  | (~night_corrected_midday))
     night_corrected_edges = _correct_edge_of_day_errors(
-        night_corrected_clipping, minutes_per_value
+        night_corrected_clipping,
+        minutes_per_value,
+        daytime_difference_max,
+        day_length_window,
+        correction_window
     )
     return ~night_corrected_edges
