@@ -28,7 +28,7 @@ def _peak_times(data):
 def infer_orientation_solarnoon(power_or_poa, daytime, tilts,
                                 azimuths, solar_azimuth,
                                 solar_zenith, ghi, dhi, dni):
-    """Determine system azimuth and tilt from power or POA using apparent
+    """Determine system azimuth and tilt from power or POA using inferred
     solar noon.
 
     Solar noon is estimated on each day by fitting a quadratic to data
