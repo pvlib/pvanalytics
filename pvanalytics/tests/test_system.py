@@ -47,7 +47,7 @@ def test_simple_poa_orientation(clearsky_year, solarposition_year,
         azimuths=[110, 180, 220],
         solar_zenith=fine_solarposition['apparent_zenith'],
         solar_azimuth=fine_solarposition['azimuth'],
-        daytime=solarposition_year['apparent_zenith'] < 87,
+        sunny=solarposition_year['apparent_zenith'] < 87,
         **fine_clearsky
     )
     assert azimuth == 180
@@ -58,7 +58,7 @@ def test_ghi_tilt_zero(clearsky_year, solarposition_year):
     """ghi has tilt equal to 0"""
     _, tilt = system.infer_orientation_solarnoon(
         clearsky_year['ghi'],
-        daytime=solarposition_year['apparent_zenith'] < 87,
+        sunny=solarposition_year['apparent_zenith'] < 87,
         tilts=[0, 5],
         azimuths=[180],
         solar_azimuth=solarposition_year['azimuth'],
@@ -81,7 +81,7 @@ def test_azimuth_different_index(clearsky_year, solarposition_year,
     )
     azimuth, tilt = system.infer_orientation_solarnoon(
         poa['poa_global'],
-        daytime=solarposition_year['apparent_zenith'] < 87,
+        sunny=solarposition_year['apparent_zenith'] < 87,
         tilts=[40],
         azimuths=[100, 120, 150],
         solar_azimuth=fine_solarposition['azimuth'],
@@ -106,7 +106,7 @@ def test_orientation_with_gaps(clearsky_year, solarposition_year):
         azimuths=[180],
         solar_zenith=solarposition_year['apparent_zenith'],
         solar_azimuth=solarposition_year['azimuth'],
-        daytime=solarposition_year['apparent_zenith'] < 87,
+        sunny=solarposition_year['apparent_zenith'] < 87,
         **clearsky_year
     )
     assert azimuth == 180

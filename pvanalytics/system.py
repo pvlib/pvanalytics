@@ -25,7 +25,7 @@ def _peak_times(data):
     ) + peak_minutes
 
 
-def infer_orientation_solarnoon(power_or_poa, daytime, tilts,
+def infer_orientation_solarnoon(power_or_poa, sunny, tilts,
                                 azimuths, solar_azimuth,
                                 solar_zenith, ghi, dhi, dni):
     """Determine system azimuth and tilt from power or POA using inferred
@@ -56,8 +56,9 @@ def infer_orientation_solarnoon(power_or_poa, daytime, tilts,
     power_or_poa : Series
         Timezone localized series of power or POA irradiance
         measurements.
-    daytime : Series
-        Boolean series with True for values when it is daytime.
+    sunny : Series
+        Boolean series with True for values during clearsky
+        conditions.
     tilts : array-like
         Candidate tilts in degrees.
     azimuths : array-like
@@ -83,7 +84,7 @@ def infer_orientation_solarnoon(power_or_poa, daytime, tilts,
     Based on PVFleets QA project.
 
     """
-    peak_times = _peak_times(power_or_poa[daytime])
+    peak_times = _peak_times(power_or_poa[sunny])
     azimuth_by_minute = solar_azimuth.resample('T').interpolate(
         method='linear'
     )
