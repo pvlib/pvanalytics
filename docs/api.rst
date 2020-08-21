@@ -179,6 +179,7 @@ Functions for identifying inverter clipping
 
    features.clipping.levels
    features.clipping.threshold
+   features.clipping.slope
 
 Clearsky
 --------

@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 
+from pvanalytics.util import _normalize, _group
+
 
 def _detect_levels(x, count=3, num_bins=100):
     """Identify plateau levels in data.
@@ -223,3 +225,49 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         freq=freq
     )
     return ac_power >= threshold
+
+
+def slope(ac_power, outliers=None, duration_min=1):
+    """Identify clipping as times when slope is low and power is
+    relatively high.
+
+    Parameters
+    ----------
+    ac_power : Series
+    outliers : Series, optional
+        True for values that are outliers.
+
+    Returns
+    -------
+    Series
+        True when clipping is indicated.
+
+    Notes
+    -----
+    Derived from PVFleets QA project.
+
+    """
+    power = ac_power.copy()
+    if outliers is not None:
+        power.loc[outliers] = np.nan
+    power.loc[power < 0] = 0
+    power_norm = _normalize.min_max(power)
+    # TODO Needs to be a derivative, not just a difference to work
+    # with different timestamp spacing
+    power_slope = power_norm.diff()
+    # TODO window=4 assumes 15 minute timestamps for a 1 hour window.
+    rolling_mean_slope = power_slope.rolling(
+        min_periods=1,
+        center=True,
+        window=4
+    ).mean()
+    # value must be above the 99.5th percentile and greater than 10
+    # XXX This is described as the 99.5th percentile, but I don't
+    #     think the calculation is correct.
+    high_value = (power_norm >= 0.995) & (power > 10)
+    low_slope = abs(power_slope) <= 0.0035
+    low_mean_slope = abs(rolling_mean_slope) <= 0.0035
+    clipping = (high_value & low_slope) | (high_value & low_mean_slope)
+    # filter clipping and only accept clipped periods longer than duration_min
+    run_lengths = _group.run_lengths(clipping)
+    return clipping & (run_lengths > duration_min/0.25)
