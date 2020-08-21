@@ -220,4 +220,4 @@ power or plane of array irradiance measurements.
 .. autosummary::
    :toctree: generated/
 
-   system.infer_orientation_least_squares
+   system.infer_orientation_daily_peak

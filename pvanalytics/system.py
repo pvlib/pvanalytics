@@ -26,21 +26,22 @@ def _peak_times(data):
     ) + peak_minutes
 
 
-def infer_orientation_solarnoon(power_or_poa, sunny, tilts,
-                                azimuths, solar_azimuth,
-                                solar_zenith, ghi, dhi, dni):
-    """Determine system azimuth and tilt from power or POA using inferred
-    solar noon.
+def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
+                                 azimuths, solar_azimuth,
+                                 solar_zenith, ghi, dhi, dni):
+    """Determine system azimuth and tilt from power or POA using solar
+    azimuth at the daily peak.
 
-    Solar noon is estimated on each day by fitting a quadratic to data
-    in `power_or_poa` and finding the vertex of the fit. A brute force
-    search is performed on clearsky POA irradiance for all pairs of
-    candidate azimuths and tilts (`azimuths` and `tilts`) to find the
-    pair that results in the closest azimuth to the
-    azimuths calculated at solar noon  from the curve fitting step. Closest is
-    determined by minimizing the sum of squared difference between the
-    solar azimuth at solar noon on each day in `power_or_poa` and the
-    solar azimuth at maximum clearsky POA irradiance.
+    The time of the daily peak is estimated by fitting a quadratic to
+    to the data for each day in `power_or_poa` and finding the vertex
+    of the fit. A brute force search is performed on clearsky POA
+    irradiance for all pairs of candidate azimuths and tilts
+    (`azimuths` and `tilts`) to find the pair that results in the
+    closest azimuth to the azimuths calculated at the peak times from
+    the curve fitting step. Closest is determined by minimizing the
+    sum of squared difference between the solar azimuth at the peak
+    time in `power_or_poa` and the solar azimuth at maximum clearsky
+    POA irradiance.
 
     The accuracy of the tilt and azimuth returned by this function will
     vary with the time-resolution of the clearsky and solar position

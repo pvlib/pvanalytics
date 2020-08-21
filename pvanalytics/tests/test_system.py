@@ -41,7 +41,7 @@ def test_simple_poa_orientation(clearsky_year, solarposition_year,
         solar_zenith=solarposition_year['apparent_zenith'],
         solar_azimuth=solarposition_year['azimuth']
     )
-    azimuth, tilt = system.infer_orientation_solarnoon(
+    azimuth, tilt = system.infer_orientation_daily_peak(
         poa['poa_global'],
         tilts=[15, 30],
         azimuths=[110, 180, 220],
@@ -56,7 +56,7 @@ def test_simple_poa_orientation(clearsky_year, solarposition_year,
 
 def test_ghi_tilt_zero(clearsky_year, solarposition_year):
     """ghi has tilt equal to 0"""
-    _, tilt = system.infer_orientation_solarnoon(
+    _, tilt = system.infer_orientation_daily_peak(
         clearsky_year['ghi'],
         sunny=solarposition_year['apparent_zenith'] < 87,
         tilts=[0, 5],
@@ -79,7 +79,7 @@ def test_azimuth_different_index(clearsky_year, solarposition_year,
         solar_zenith=solarposition_year['apparent_zenith'],
         solar_azimuth=solarposition_year['azimuth']
     )
-    azimuth, tilt = system.infer_orientation_solarnoon(
+    azimuth, tilt = system.infer_orientation_daily_peak(
         poa['poa_global'],
         sunny=solarposition_year['apparent_zenith'] < 87,
         tilts=[40],
@@ -100,7 +100,7 @@ def test_orientation_with_gaps(clearsky_year, solarposition_year):
         solar_azimuth=solarposition_year['azimuth']
     )
     poa.loc['2020-07-19':'2020-07-23'] = np.nan
-    azimuth, tilt = system.infer_orientation_solarnoon(
+    azimuth, tilt = system.infer_orientation_daily_peak(
         poa['poa_global'].dropna(),
         tilts=[15],
         azimuths=[180],
