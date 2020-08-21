@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from pandas.tseries import frequencies
-from pvanalytics.util import _normalize
+from pvanalytics.util import _normalize, _group
 
 
 def _rolling_by_minute(data, days, f):
@@ -17,29 +17,6 @@ def _rolling_by_minute(data, days, f):
     )
     result = f(rolling).reset_index(0, drop=True)
     return result.sort_index()
-
-
-def _run_lengths(series):
-    # Count the number of equal values adjacent to each value.
-    #
-    # Examples
-    # --------
-    # >>> _run_lengths(pd.Series([True, True, True]))
-    # 0    3
-    # 1    3
-    # 2    3
-    #
-    # >>> _run_lengths(
-    # ...     pd.Series([True, False, False, True, True, False]
-    # ... ))
-    # 0    1
-    # 1    2
-    # 2    2
-    # 3    2
-    # 4    2
-    # 5    1
-    runs = (series != series.shift(1)).cumsum()
-    return runs.groupby(runs).transform('count')
 
 
 def _correct_if_invalid(series, invalid, correction_window):
@@ -59,7 +36,7 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
                            correction_window):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
-    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
+    invalid = _group.run_lengths(night)*minutes_per_value <= hours_min*60
     return _correct_if_invalid(night, invalid, correction_window)
 
 
