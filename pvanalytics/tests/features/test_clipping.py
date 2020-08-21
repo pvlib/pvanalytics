@@ -232,3 +232,37 @@ def test_threshold_no_clipping_four_days(quadratic):
     clipped = clipping.threshold(power)
 
     assert not clipped.any()
+
+
+def test_slope_no_clipping(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(
+            start='7/1/2020',
+            end='8/1/2020',
+            freq='15T'
+        ),
+        model='simplified_solis'
+    )
+    clipped = clipping.slope(clearsky['ghi'])
+    assert not clipped.any()
+
+
+def test_slope_simple_clipping(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(
+            start='7/1/2020',
+            end='8/1/2020',
+            freq='15T'
+        ),
+        model='simplified_solis'
+    )
+    ghi = clearsky['ghi'].copy()
+    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
+    clipped = clipping.slope(ghi)
+    expected = pd.Series(False, index=clearsky.index)
+    expected.loc['7/10/2020'] = ghi['7/10/2020'] == ghi.max()*0.95
+    assert_series_equal(
+        clipped,
+        expected,
+        check_names=False
+    )
