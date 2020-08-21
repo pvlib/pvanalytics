@@ -266,3 +266,25 @@ def test_slope_simple_clipping(albuquerque):
         expected,
         check_names=False
     )
+
+
+def test_slope_clipping_too_short(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(
+            start='7/1/2020',
+            end='8/1/2020',
+            freq='15T'
+        ),
+        model='simplified_solis'
+    )
+    ghi = clearsky['ghi'].copy()
+    # 4.5 hours of clipping on the 10th
+    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
+    # clipping must be ongoing for at least 5 hours
+    clipped = clipping.slope(ghi, duration_min=5)
+    expected = pd.Series(False, index=clearsky.index)
+    assert_series_equal(
+        clipped,
+        expected,
+        check_names=False
+    )
