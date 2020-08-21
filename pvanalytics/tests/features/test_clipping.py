@@ -260,7 +260,7 @@ def test_slope_simple_clipping(albuquerque):
     ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
     clipped = clipping.slope(ghi)
     expected = pd.Series(False, index=clearsky.index)
-    expected.loc['7/10/2020'] = ghi['7/10/2020'] == ghi.max()*0.95
+    expected.loc['7/10/2020'] = ghi['7/10/2020'] == clearsky['ghi'].max()*0.95
     assert_series_equal(
         clipped,
         expected,
@@ -282,6 +282,26 @@ def test_slope_clipping_too_short(albuquerque):
     ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
     # clipping must be ongoing for at least 5 hours
     clipped = clipping.slope(ghi, duration_min=5)
+    expected = pd.Series(False, index=clearsky.index)
+    assert_series_equal(
+        clipped,
+        expected,
+        check_names=False
+    )
+
+
+def test_slope_outliers(albuquerque):
+    clearsky = albuquerque.get_clearsky(
+        pd.date_range(
+            start='7/1/2020',
+            end='8/1/2020',
+            freq='15T'
+        ),
+        model='simplified_solis'
+    )
+    ghi = clearsky['ghi'].copy()
+    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
+    clipped = clipping.slope(ghi, outliers=(ghi == clearsky['ghi'].max()*0.95))
     expected = pd.Series(False, index=clearsky.index)
     assert_series_equal(
         clipped,
