@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from pandas.tseries import frequencies
+from pvanalytics.util import _normalize
 
 
 def _rolling_by_minute(data, days, f):
@@ -99,7 +100,7 @@ def _filter_and_normalize(series, outliers):
     if outliers is not None:
         series.loc[outliers] = np.nan
     series.loc[series < 0] = 0
-    return (series - series.min()) / (series.max() - series.min())
+    return _normalize.min_max(series)
 
 
 def _freqstr_to_minutes(freqstr):
