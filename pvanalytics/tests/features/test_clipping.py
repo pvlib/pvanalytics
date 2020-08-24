@@ -247,20 +247,58 @@ def test_slope_no_clipping(albuquerque):
     assert not clipped.any()
 
 
-def test_slope_simple_clipping(albuquerque):
+@pytest.fixture(scope='module',
+                params=['H', '15T', '30T', pytest.param('T', marks=pytest.mark.slow)])
+def simple_clipped(request, albuquerque):
     clearsky = albuquerque.get_clearsky(
         pd.date_range(
             start='7/1/2020',
             end='8/1/2020',
-            freq='15T'
+            freq=request.param
         ),
         model='simplified_solis'
     )
     ghi = clearsky['ghi'].copy()
-    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
-    clipped = clipping.slope(ghi)
-    expected = pd.Series(False, index=clearsky.index)
-    expected.loc['7/10/2020'] = ghi['7/10/2020'] == clearsky['ghi'].max()*0.95
+    level = ghi['7/10/2020'].quantile(0.90)
+    ghi.loc[ghi > level] = level
+    expected = ghi == level
+    return {
+        'data': ghi,
+        'expected': expected,
+        'level': level
+    }
+
+
+def test_slope_simple_clipping(simple_clipped):
+    with pd.option_context('display.max_rows', None):
+        df = pd.DataFrame({
+            'data': simple_clipped['data'],
+            'expected': simple_clipped['expected'],
+            'got': clipping.slope(simple_clipped['data'])
+        })
+        print(df['7/20/2020'])
+    assert_series_equal(
+        clipping.slope(simple_clipped['data']),
+        simple_clipped['expected'],
+        check_names=False
+    )
+
+
+def test_slope_clipping_too_short(simple_clipped):
+    clipped = clipping.slope(simple_clipped['data'], duration_min=5)
+    assert_series_equal(
+        clipped,
+        simple_clipped['expected'],
+        check_names=False
+    )
+
+
+def test_slope_outliers(simple_clipped):
+    clipped = clipping.slope(
+        simple_clipped['data'],
+        outliers=simple_clipped['expected']
+    )
+    expected = pd.Series(False, index=simple_clipped['expected'].index)
     assert_series_equal(
         clipped,
         expected,
@@ -268,43 +306,16 @@ def test_slope_simple_clipping(albuquerque):
     )
 
 
-def test_slope_clipping_too_short(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(
-            start='7/1/2020',
-            end='8/1/2020',
-            freq='15T'
-        ),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
-    # 4.5 hours of clipping on the 10th
-    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
-    # clipping must be ongoing for at least 5 hours
-    clipped = clipping.slope(ghi, duration_min=5)
-    expected = pd.Series(False, index=clearsky.index)
+def test_slope_uneven_timestamps(simple_clipped):
+    data = simple_clipped['data'].copy()
+    data.loc['7/3/2020 10:00':'7/3/2020 12:00'] = np.nan
+    data.loc['7/10/2020 01:00':'7/10/2020 03:00'] = np.nan
+    freq = pd.infer_freq(data.index)
+    if freq != 'H':
+        data.loc['7/10/2020 13:00':'7/3/2020 13:30'] = np.nan
+    data.dropna(inplace=True)
     assert_series_equal(
-        clipped,
-        expected,
-        check_names=False
-    )
-
-
-def test_slope_outliers(albuquerque):
-    clearsky = albuquerque.get_clearsky(
-        pd.date_range(
-            start='7/1/2020',
-            end='8/1/2020',
-            freq='15T'
-        ),
-        model='simplified_solis'
-    )
-    ghi = clearsky['ghi'].copy()
-    ghi.loc[ghi > ghi.max()*0.95]['7/10/2020'] = ghi.max()*0.95
-    clipped = clipping.slope(ghi, outliers=(ghi == clearsky['ghi'].max()*0.95))
-    expected = pd.Series(False, index=clearsky.index)
-    assert_series_equal(
-        clipped,
-        expected,
+        clipping.slope(data),
+        simple_clipped['expected'][data.index],
         check_names=False
     )
