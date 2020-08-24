@@ -152,7 +152,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     daily_data = _group.by_day(power_or_irradiance[daytime])
     tracking_days = daily_data.apply(
         _conditional_fit,
-        fitfunc=_fit.quartic_restricted,
+        fitfunc=_fit.quartic_restricted_r2,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,
@@ -160,7 +160,7 @@ def tracking_nrel(power_or_irradiance, daytime, r2_min=0.915,
     )
     fixed_days = _group.by_day(power_or_irradiance[quadratic_mask]).apply(
         _conditional_fit,
-        fitfunc=_fit.quadratic,
+        fitfunc=_fit.quadratic_r2,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,
@@ -225,7 +225,7 @@ def fixed_nrel(power_or_irradiance, daytime, r2_min=0.94,
     )
     fixed_days = daily_data.apply(
         _conditional_fit,
-        fitfunc=_fit.quadratic,
+        fitfunc=_fit.quadratic_r2,
         minutes=minutes,
         freq=freq,
         min_hours=min_hours,

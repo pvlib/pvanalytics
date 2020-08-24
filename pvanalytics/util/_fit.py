@@ -3,8 +3,33 @@ import numpy as np
 import scipy.optimize
 
 
-def quadratic(x, y):
-    """Fit a quadratic to the data.
+def _quadratic(xs, ys):
+    # fit a quadratic function of `xs` to the data in `ys`
+    coefficients = np.polyfit(xs, ys, 2)
+    return np.poly1d(coefficients)
+
+
+def quadratic_vertex(x, y):
+    """Fit a quadratic to the x, y data and return the x-value of the vertex.
+
+    Parameters
+    ----------
+    x : array_like
+    y : Series
+
+    Returns
+    -------
+    numeric
+        x-value of the vertex of a quadratic fit to the data in `x`
+        and `y`.
+
+    """
+    q = _quadratic(x, y)
+    return -q.c[1] / (2 * q.c[0])
+
+
+def quadratic_r2(x, y):
+    """Return the r^2 for a quadratic fit the the data.
 
     Parameters
     ----------
@@ -37,16 +62,15 @@ def quadratic(x, y):
     Alliance for Sustainable Energy, LLC.
 
     """
-    coefficients = np.polyfit(x, y, 2)
-    quadratic = np.poly1d(coefficients)
+    quadratic = _quadratic(x, y)
     _, _, correlation, _, _ = scipy.stats.linregress(
         y, quadratic(x)
     )
     return correlation**2
 
 
-def quartic_restricted(x, y, noon=720):
-    """Fit a restricted quartic to the data.
+def quartic_restricted_r2(x, y, noon=720):
+    """Return the r^2 for a restricted quartic fit to the data.
 
     The quartic is restricted to match the expected shape for a
     tracking pv system under clearsky conditions. The quartic must:
