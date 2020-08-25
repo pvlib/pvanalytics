@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import pvlib
+from pvlib import solarposition
 from pvanalytics.util import _fit, _group
 
 
@@ -120,3 +121,34 @@ def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
                 best_azimuth = azimuth
                 best_tilt = tilt
     return best_azimuth, best_tilt
+
+
+def longitude_solar_noon(solar_noon, utc_offset):
+    """Get system longitude from solar noon.
+
+    Uses the method presented in [1]_.
+
+    Parameters
+    ----------
+    solar_noon : Series
+        Time of solar noon (local time in minutes since midnight) on each day.
+    utc_offset : int
+        Difference between local times zone and UTC (e.g. Denver in is UTC-7).
+
+    Returns
+    -------
+    float
+        Longitude of the system.
+
+    References
+    ----------
+    .. [1] Haghdadi, N., et al. (2017) A method to estimate the location and
+           orientation of distributed photovoltaic systems from their generation
+           output data.
+    """
+    # 720 minutes is noon local time
+    time_correction = solar_noon - 720
+    eot = solarposition.equation_of_time_pvcdrom(solar_noon.index.dayofyear)
+    # calculate the local standard time meridian
+    lstm = 15 * utc_offset
+    return ((time_correction / 4 - eot/4) + lstm).median()
