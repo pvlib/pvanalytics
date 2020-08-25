@@ -1,26 +1,8 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import pvsystem, tracking, modelchain, irradiance
-from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
+from pvlib import tracking, modelchain, irradiance
 from pvanalytics.features import orientation
-
-
-@pytest.fixture(scope='module')
-def system_parameters():
-    """System parameters for generating simulated power data."""
-    sandia_modules = pvsystem.retrieve_sam('SandiaMod')
-    sapm_inverters = pvsystem.retrieve_sam('cecinverter')
-    module = sandia_modules['Canadian_Solar_CS5P_220M___2009_']
-    inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
-    temperature_model_parameters = (
-        TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
-    )
-    return {
-        'module_parameters': module,
-        'inverter_parameters': inverter,
-        'temperature_model_parameters': temperature_model_parameters
-    }
 
 
 def test_clearsky_ghi_fixed(clearsky, solarposition):

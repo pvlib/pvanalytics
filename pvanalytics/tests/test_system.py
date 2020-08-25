@@ -1,8 +1,9 @@
-"""Tests for funcitons that identify system characteristics."""
+"""Tests for system parameter identification functions."""
 import pytest
-import numpy as np
 import pandas as pd
-from pvlib import pvsystem, tracking, modelchain, irradiance
+import numpy as np
+import pvlib
+from pvlib import location, pvsystem, tracking, modelchain, irradiance
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics import system
 
@@ -51,9 +52,9 @@ def summer_ghi(summer_clearsky):
 @pytest.fixture
 def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
     """Simulated power from a FIXED PVSystem in Albuquerque, NM."""
-    system = pvsystem.PVSystem(**system_parameters)
+    pv_system = pvsystem.PVSystem(**system_parameters)
     mc = modelchain.ModelChain(
-        system,
+        pv_system,
         albuquerque,
         orientation_strategy='south_at_latitude_tilt'
     )
@@ -64,9 +65,9 @@ def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
 @pytest.fixture
 def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
     """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
-    system = tracking.SingleAxisTracker(**system_parameters)
+    pv_system = tracking.SingleAxisTracker(**system_parameters)
     mc = modelchain.ModelChain(
-        system,
+        pv_system,
         albuquerque,
         orientation_strategy='south_at_latitude_tilt'
     )
@@ -406,3 +407,85 @@ def test_orientation_with_gaps(clearsky_year, solarposition_year):
     )
     assert azimuth == 180
     assert tilt == 15
+
+
+@pytest.fixture(scope='module')
+def naive_times():
+    """One year at 1-hour intervals"""
+    return pd.date_range(
+        start='2020',
+        end='2021',
+        freq='H'
+    )
+
+
+@pytest.fixture(scope='module',
+                params=[(35, -106, 'Etc/GMT+7'),
+                        (50, 10, 'Etc/GMT-1'),
+                        (-37, 144, 'Etc/GMT-10')],
+                ids=['Albuquerque', 'Berlin', 'Melbourne'])
+def system_location(request):
+    """Location of the system."""
+    return location.Location(
+        request.param[0], request.param[1], tz=request.param[2]
+    )
+
+
+@pytest.fixture(scope='module',
+                params=[(0, 180), (30, 180), (30, 90), (30, 270), (30, 0)],
+                ids=['South-0', 'South-30', 'East-30', 'West-30', 'North-30'])
+def system_power(request, system_location, naive_times):
+    tilt = request.param[0]
+    azimuth = request.param[1]
+    local_time = naive_times.tz_localize(system_location.tz)
+    clearsky = system_location.get_clearsky(
+        local_time, model='simplified_solis'
+    )
+    solar_position = system_location.get_solarposition(local_time)
+    poa = irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solar_position['zenith'],
+        solar_position['azimuth'],
+        **clearsky
+    )
+    temp_cell = pvlib.temperature.sapm_cell(
+        poa['poa_global'],
+        25, 0,
+        **pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS[
+            'sapm'
+        ][
+            'open_rack_glass_glass'
+        ]
+    )
+    pdc = pvsystem.pvwatts_dc(poa['poa_global'], temp_cell, 100, -0.002)
+    pac = pvsystem.inverter.pvwatts(pdc, 120)
+    return {
+        'location': system_location,
+        'tilt': tilt,
+        'azimuth': azimuth,
+        'clearsky': clearsky,
+        'solar_position': solar_position,
+        'ac': pac
+    }
+
+
+@pytest.mark.slow
+def test_orientation_fit_pvwatts(system_power):
+    day_mask = system_power['ac'] > 0
+    tilt, azimuth, rsquared = system.orientation_fit_pvwatts(
+        system_power['ac'][day_mask],
+        solar_zenith=system_power['solar_position']['zenith'][day_mask],
+        solar_azimuth=system_power['solar_position']['azimuth'][day_mask],
+        **system_power['clearsky'][day_mask]
+    )
+    assert rsquared > 0.9
+    assert tilt == pytest.approx(system_power['tilt'], abs=10)
+    if system_power['tilt'] == 0:
+        # Any azimuth will give the same results at tilt 0.
+        return
+    if system_power['azimuth'] == 0:
+        # 0 degrees equals 360 degrees.
+        assert (azimuth == pytest.approx(0, abs=10)
+                or azimuth == pytest.approx(360, abs=10))
+    else:
+        assert azimuth == pytest.approx(system_power['azimuth'], abs=10)
