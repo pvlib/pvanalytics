@@ -219,4 +219,15 @@ Functions that return a Boolean mask indicating day and night.
 .. autosummary::
    :toctree: generated/
 
-   features.daytime.diff
+   features.daytime.power_or_irradiance
+
+System
+======
+
+The following function can be used to infer system orientation from
+power or plane of array irradiance measurements.
+
+.. autosummary::
+   :toctree: generated/
+
+   system.infer_orientation_daily_peak
