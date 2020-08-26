@@ -1,9 +1,9 @@
 from pvlib.temperature import sapm_cell
 from pvlib.pvsystem import pvwatts_dc
 
+
 def get_performance_ratio(poa_global, temp_air, wind_speed, pac, pdc0, a=-3.56,
                           b=-0.075, deltaT=3, gamma_pdc=-0.00433):
-
     r'''
     Calculate NREL Performance Ratio.
 
@@ -37,7 +37,7 @@ def get_performance_ratio(poa_global, temp_air, wind_speed, pac, pdc0, a=-3.56,
         Parameter :math:`\Delta T` in SAPM model [C].
 
     gamma_pdc : float
-        The temperature coefficient in units of 1/C. Typically -0.002 to 
+        The temperature coefficient in units of 1/C. Typically -0.002 to
         -0.005 per degree C [1/C].
 
     Returns
@@ -47,7 +47,7 @@ def get_performance_ratio(poa_global, temp_air, wind_speed, pac, pdc0, a=-3.56,
 
     References
     ----------
-    .. [1] Dierauf et al. "Weather-Corrected Performance Ratio". NREL, 2013. 
+    .. [1] Dierauf et al. "Weather-Corrected Performance Ratio". NREL, 2013.
        https://www.nrel.gov/docs/fy13osti/57991.pdf
     '''
 
