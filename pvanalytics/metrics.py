@@ -53,23 +53,14 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0, a=-3.56,
        https://www.nrel.gov/docs/fy13osti/57991.pdf
     '''
 
-    cell_temperature = sapm_cell(poa_global,
-                                 temp_air,
-                                 wind_speed,
-                                 a,
-                                 b,
-                                 deltaT
-                                 )
+    cell_temperature = sapm_cell(poa_global, temp_air, wind_speed, a, b,
+                                 deltaT)
 
-    Tcell_poa_global = poa_global * cell_temperature
-    Tref = Tcell_poa_global.sum() / poa_global.sum()
+    tcell_poa_global = poa_global * cell_temperature
+    tref = tcell_poa_global.sum() / poa_global.sum()
 
-    pdc = pvwatts_dc(poa_global,
-                     cell_temperature,
-                     pdc0,
-                     gamma_pdc,
-                     temp_ref=Tref
-                     )
+    pdc = pvwatts_dc(poa_global, cell_temperature, pdc0, gamma_pdc,
+                     temp_ref=tref)
 
     performance_ratio = pac.sum() / pdc.sum()
 
