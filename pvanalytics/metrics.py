@@ -5,7 +5,7 @@ from pvlib.pvsystem import pvwatts_dc
 
 
 def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0, a=-3.56,
-                          b=-0.075, deltaT=3, gamma_pdc=-0.00433):
+                           b=-0.075, deltaT=3, gamma_pdc=-0.00433):
     r'''
     Calculate NREL Performance Ratio.
 
