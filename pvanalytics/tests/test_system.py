@@ -75,7 +75,7 @@ def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
 
 
 def test_ghi_tracking_envelope_fixed(summer_ghi):
-    """Clearsky GHI for has a FIXED Tracker."""
+    """Clearsky GHI for a system that is FIXED."""
     assert system.is_tracking_envelope(
         summer_ghi,
         summer_ghi > 0,
@@ -93,7 +93,7 @@ def test_power_tracking_envelope_fixed(summer_power_fixed):
 
 
 def test_power_tracking_envelope_tracking(summer_power_tracking):
-    """Simulated single axis tracker is identifified as TRACKING."""
+    """Simulated single axis tracker is identified as TRACKING."""
     assert system.is_tracking_envelope(
         summer_power_tracking,
         summer_power_tracking > 0,
