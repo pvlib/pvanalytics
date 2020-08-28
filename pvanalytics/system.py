@@ -131,26 +131,26 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          seasonal_split=None):
     """Infer whether the system is equipped with a tracker.
 
-    Data is grouped by minute of the day and a maximum power or
-    irradiance envelope (the `envelope_quantile` value at each minute)
-    is calculated. Quadratic and quartic curves are fit to this daily
-    envelope and the :math:`r^2` of the curve fits are used determine
-    whether the system is tracking or fixed.
+    Data is grouped by season and within each season by the minute
+    of the day. A maximum power or irradiance envelope (the
+    `envelope_quantile` value at each minute) is calculated. Quadratic
+    and quartic curves are fit to this daily envelope and the :math:`r^2`
+    of the curve fits are used determine whether the system is tracking
+    or fixed.
 
-    If the quadratic fit is a sufficiently good, then
+    If the quadratic fit is a sufficiently good in both seasons, then
     :py:const:`Tracker.FIXED` is returned.
 
-    If the quartic fit is sufficiently good fit and the quadratic fit
-    is sufficiently bad, then :py:const:`Tracker.TRACKING` is
-    returned.
+    If, in both seasons, the quartic fit is sufficiently good and the
+    quadratic fit is sufficiently bad, then :py:const:`Tracker.TRACKING`
+    is returned.
 
-    If neither fit is sufficiently good then
-    :py:const:`Tracker.UNKNOWN` is returned.
+    If neither fit is sufficiently good, or the results from each season
+    disagree, then :py:const:`Tracker.UNKNOWN` is returned.
 
     Optionally, an additional fit is made to the median of the
     data at each minute to confirm the determination of tracking
-    or fixed. If performed, tracking or fixed is judged from the fit
-    to the median and this result must be consistent with the fit
+    or fixed. If performed, this result must be consistent with the fit
     to the upper envelope. If not, :py:const:`Tracker.UNKNOWN`
     is returned.
 
@@ -171,7 +171,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         Quantile used to determine the upper power or irradiance
         envelope.
     envelope_min_fraction : float, default 0.05
-        After calculating the power or irradiance envelope data less
+        After calculating the power or irradiance envelope, data less
         than `envelope_min_fraction` times the maximum of the envelope
         is removed. This excludes data from morning and evening that
         may interfere with curve fitting.
