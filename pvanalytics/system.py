@@ -125,10 +125,9 @@ def _infer_tracking(series, envelope_quantile,
 
 
 def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
-                         envelope_quantile=0.995, fit_median=True,
+                         envelope_quantile=0.995, envelope_min_fraction=0.05,
+                         fit_median=True, median_min_fraction=0.025,
                          median_r2_min=0.9, fit_params=None,
-                         envelope_min_fraction=0.05,
-                         median_min_fraction=0.025,
                          seasonal_split=None):
     """Infer whether the system is equipped with a tracker.
 
@@ -171,10 +170,20 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
     envelope_quantile : float, default 0.995
         Quantile used to determine the upper power or irradiance
         envelope.
+    envelope_min_fraction : float, default 0.05
+        After calculating the power or irradiance envelope data less
+        than `envelope_min_fraction` times the maximum of the envelope
+        is removed. This excludes data from morning and evening that
+        may interfere with curve fitting.
     fit_median : boolean, default True
         Perform a secondary fit with the median power or irradiance to
         validate that the profile is consistent through the entire
         data set.
+    median_min_fraction : float, default 0.025
+        After calculating the median power or irradiance at each
+        minute, data less than `median_min_fraction` times the maximum
+        is removed. This excludes data from morning and evening that
+        may interfere with curve fitting.
     median_r2_min : float, default 0.9
         Minimum :math:`r^2` for a curve fit to the median power or
         irradiance at each minute of the day (Applies only if
@@ -193,16 +202,6 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         system appears to have a tracker.
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
-    envelope_min_fraction : float, default 0.05
-        After calucluating the power or irradiance envelope data less
-        than `envelope_min_fraction` times the maximum of the envelope
-        is removed. This excludes data from morning and evening that
-        may interfere with curve fitting.
-    median_min_fraction : float, default 0.025
-        After calculating the median power or irradiance at each
-        minute, data less than `median_min_fraction` times the maximum
-        is removed. This excludes data from morning and evening that
-        may interfere with curve fitting.
     seasonal_split : tuple of list of int, optional
         Tuple specifying a set of winter months and a set of summer
         months. The order is not important. The months are specified
