@@ -202,11 +202,10 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         system appears to have a tracker.
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
-    seasonal_split : tuple of list of int, optional
+    seasonal_split : tuple of list of int, default ([5, 6, 7, 8],[11, 12, 1, 2])
         Tuple specifying a set of winter months and a set of summer
         months. The order is not important. The months are specified
-        as integers between 1 and 12. If not specified defaults to
-        ([5, 6, 7, 8], [11, 12, 1, 2]) which works well for North
+        as integers between 1 and 12. The default value works well for North
         America. Data is split in to two groups, one for each set and
         curve fits are applied to the upper envelope of each group
         independently. If the curve fits produce different results
