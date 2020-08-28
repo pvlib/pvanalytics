@@ -202,7 +202,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         system appears to have a tracker.
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
-    seasonal_split : tuple of list of int, default ([5, 6, 7, 8],[11, 12, 1, 2])
+    seasonal_split : tuple of list of int, default ([5,6,7,8],[11,12,1,2])
         Tuple specifying a set of winter months and a set of summer
         months. The order is not important. The months are specified
         as integers between 1 and 12. The default value works well for North
