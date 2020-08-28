@@ -128,7 +128,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          envelope_quantile=0.995, envelope_min_fraction=0.05,
                          fit_median=True, median_min_fraction=0.025,
                          median_r2_min=0.9, fit_params=None,
-                         seasonal_split=None):
+                         seasonal_split=((5, 6, 7, 8), (11, 12, 1, 2))):
     """Infer whether the system is equipped with a tracker.
 
     Data is grouped by season and within each season by the minute
@@ -202,8 +202,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         system appears to have a tracker.
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
-    seasonal_split : tuple of list of int, default ([5,6,7,8],[11,12,1,2])
-        Tuple specifying a set of winter months and a set of summer
+    seasonal_split : tuple of list-like, default ((5,6,7,8), (11,12,1,2))
+        Two-tuple specifying a set of winter months and a set of summer
         months. The order is not important. The months are specified
         as integers between 1 and 12. The default value works well for North
         America. Data is split in to two groups, one for each set and
@@ -231,7 +231,6 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
-    seasonal_split = seasonal_split or ([5, 6, 7, 8], [11, 12, 1, 2])
     series_daytime = series[daytime]
     clip_fraction = (clipping[daytime].sum() / len(clipping[daytime])) * 100
     if clip_fraction > clip_max:
