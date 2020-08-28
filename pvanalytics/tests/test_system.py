@@ -209,18 +209,80 @@ def test_full_year_tracking_envelope(albuquerque_clearsky):
     ) is system.Tracker.FIXED
 
 
+@pytest.fixture(scope='module')
+def winter_perturbed(albuquerque_clearsky):
+    winter_perturbed = albuquerque_clearsky.copy()
+    winter = winter_perturbed.index.month.isin([1, 2, 10, 11, 12])
+    winter_perturbed.loc[winter] = 10
+    return winter_perturbed
+
+
 @pytest.mark.filterwarnings("ignore:invalid value encountered in",
                             "ignore:divide by zero encountered in")
-def test_year_bad_winter_tracking_envelope(albuquerque_clearsky):
+def test_year_bad_winter_tracking_envelope(winter_perturbed,
+                                           albuquerque_clearsky):
     """If the data is perturbed during the winter months
     is_tracking_envelope() returns Tracker.UNKNOWN."""
-    winter_perturbed = albuquerque_clearsky.copy()
-    winter = winter_perturbed.index.month.isin([10, 11, 12, 1, 2])
-    winter_perturbed.loc[winter] = 10
     assert system.is_tracking_envelope(
         winter_perturbed['ghi'],
         albuquerque_clearsky['ghi'] > 0,
         pd.Series(False, index=albuquerque_clearsky.index)
+    ) is system.Tracker.UNKNOWN
+
+
+def test_tracking_envelope_seasonal_split(winter_perturbed,
+                                          albuquerque_clearsky):
+    """If winter or summer months are empty then only the season
+    that is specified is used to determine fixed/tracking.
+
+    Uses the fixture with perturbed winter months so that tests
+    will fail if the winter months are analyzed.
+    """
+    # no 'summer' months
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'summer': [], 'winter': [5, 6, 7, 8]}
+    ) is system.Tracker.FIXED
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'summer': None, 'winter': [5, 6, 7, 8]}
+    ) is system.Tracker.FIXED
+    # no 'winter' months
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'summer': [5, 6, 7, 8], 'winter': []}
+    ) is system.Tracker.FIXED
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'summer': [5, 6, 7, 8], 'winter': None}
+    ) is system.Tracker.FIXED
+    # Leaving out a key is equivalent to passing None as its value
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'summer': [5, 6, 7, 8]}
+    ) is system.Tracker.FIXED
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split={'winter': [5, 6, 7, 8]}
+    ) is system.Tracker.FIXED
+    # median fit should fail
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split=None
     ) is system.Tracker.UNKNOWN
 
 
