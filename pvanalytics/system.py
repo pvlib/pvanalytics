@@ -251,7 +251,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
     if seasonal_split == 'north-america':
         seasonal_split = {'summer': [5, 6, 7, 8], 'winter': [11, 12, 1, 2]}
     series_daytime = series[daytime]
-    clip_fraction = (clipping[daytime].sum() / len(clipping[daytime])) * 100
+    clip_fraction = (clipping[daytime].sum() / len(clipping[daytime]))
     if clip_fraction > clip_max:
         return Tracker.UNKNOWN
     bounds = _get_bounds(clip_fraction, fit_params)

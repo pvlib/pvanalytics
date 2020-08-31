@@ -110,7 +110,7 @@ def test_high_clipping_unknown_tracking_envelope(summer_power_fixed):
         summer_power_fixed,
         summer_power_fixed > 0,
         clipping,
-        clip_max=40.0
+        clip_max=0.4
     ) is system.Tracker.UNKNOWN
 
 
