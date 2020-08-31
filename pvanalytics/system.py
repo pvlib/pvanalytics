@@ -152,3 +152,55 @@ def longitude_solar_noon(solar_noon, utc_offset):
     # calculate the local standard time meridian
     lstm = 15 * utc_offset
     return ((time_correction / 4 - eot/4) + lstm).median()
+
+
+def infer_orientation_latitude_haghdadi(power, clearsky, longitude,
+                                        latitude=None,
+                                        tilt_min=0, tilt_max=360,
+                                        azimuth_min=0, azimuth_max=360,
+                                        latitude_min=-90, latitude_max=90):
+    """Infer the tilt, azimuth, and latitude of a PV system.
+
+    Uses the method presented in [1]_.
+
+    Parameters
+    ----------
+    power : Series
+        Time series of power output.
+    clearsky : Series
+        Boolean series with True for power measurements that occur
+        during clear-sky conditions.
+    longitude : float
+        System longitude.
+    latitude : float, optional
+        System latitude. If None, latitude will be inferred from `power`.
+    tilt_min : float, 0
+        Lower bound on acceptable tilt.
+    tilt_max : float, 360
+        Upper bound on acceptable tilt.
+    azimuth_min : float, 0
+        Lower bound on acceptable tilt.
+    azimuth_max : float, 360
+        Upper bound on acceptable tilt.
+    latitude_min : float, default -90
+        Lower bound on acceptable latitude.
+    latitude_max : float, default 90
+        Upper bound on acceptable latitude.
+
+    Returns
+    -------
+    tilt : float
+        System tilt in degrees.
+    azimuth : float
+        System azimuth in degrees.
+    latitude : float
+        System latitude.
+
+    References
+    ----------
+    .. [1] Haghdadi, N., et al. (2017) A method to estimate the location and
+       orientation of distributed photovoltaic systems from their generation
+       output data.
+    """
+    # TODO
+    return 0, 0, 0
