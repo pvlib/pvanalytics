@@ -148,8 +148,8 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          seasonal_split='north-america'):
     """Infer whether the system is equipped with a tracker.
 
-    Data is grouped by season and within each season by the minute
-    of the day. A maximum power or irradiance envelope (the
+    Data is grouped by season (optional) and within each season by the
+    minute of the day. A maximum power or irradiance envelope (the
     `envelope_quantile` value at each minute) is calculated. Quadratic
     and quartic curves are fit to this daily envelope and the :math:`r^2`
     of the curve fits are used determine whether the system is tracking
@@ -220,15 +220,13 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
     seasonal_split : dict or str or None, default 'north-america'
-        A dictionary with two keys, 'winter' and 'summer'. Each key
-        has a list of integers specifying the winter months and summer
-        months respectively. If either winter or summer months should be
-        ignored the key can be omitted or its value set to None. Passing
-        None will disable independent tests for winter and summer and run
-        a single test over the entire data set. The default value,
-        'north-america' uses ``{'winter': [11, 12, 1, 2],
-        'summer': [5, 6, 7, 8]}`` which works well for PV systems located in
-        North America.
+        A dictionary with two keys, 'winter' and 'summer' with a list of
+        integers specifying the winter months and summer months respectively.
+        Seasonal grouping can be disabled by passing `seasonal_split=None`.
+        Either season can be ignored by passing a dict that omits the key
+        or sets its value to None. The default value, 'north-america' uses
+        ``{'winter': [11, 12, 1, 2], 'summer': [5, 6, 7, 8]}`` which
+        works well for PV systems located in North America.
 
     Returns
     -------
