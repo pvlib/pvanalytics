@@ -124,11 +124,27 @@ def _infer_tracking(series, envelope_quantile,
     return system_tracking
 
 
+def _infer_tracking_winter_summer(winter, summer, *args):
+    # Infer tracking for winter months and summer months separately.
+    #
+    # *args should hold all parameters for :py:func:`_infer_tracking`
+    # except the data.
+    if len(winter) == 0:
+        return _infer_tracking(summer, *args)
+    if len(summer) == 0:
+        return _infer_tracking(winter, *args)
+    winter_tracking = _infer_tracking(winter, *args)
+    summer_tracking = _infer_tracking(summer, *args)
+    if winter_tracking is not summer_tracking:
+        return Tracker.UNKNOWN
+    return summer_tracking
+
+
 def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
                          envelope_quantile=0.995, envelope_min_fraction=0.05,
                          fit_median=True, median_min_fraction=0.025,
                          median_r2_min=0.9, fit_params=None,
-                         seasonal_split=((5, 6, 7, 8), (11, 12, 1, 2))):
+                         seasonal_split='north-america'):
     """Infer whether the system is equipped with a tracker.
 
     Data is grouped by season and within each season by the minute
@@ -202,15 +218,16 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         system appears to have a tracker.
 
         If None :py:data:`PVFLEETS_FIT_PARAMS` is used.
-    seasonal_split : tuple of list-like, default ((5,6,7,8), (11,12,1,2))
-        Two-tuple specifying a set of winter months and a set of summer
-        months. The order is not important. The months are specified
-        as integers between 1 and 12. The default value works well for North
-        America. Data is split in to two groups, one for each set and
-        curve fits are applied to the upper envelope of each group
-        independently. If the curve fits produce different results
-        (e.g. one TRACKING and one FIXED) then
-        :py:const:`Tracker.UNKNOWN` is returned.
+    seasonal_split : dict or str or None, default 'north-america'
+        A dictionary with two keys, 'winter' and 'summer'. Each key
+        has a list of integers specifying the winter months and summer
+        months respectively. If either winter or summer months should be
+        ignored the key can be omitted or its value set to None. Passing
+        None will disable independent tests for winter and summer and run
+        a single test over the entire data set. The default value,
+        'north-america' uses ``{'winter': [11, 12, 1, 2],
+        'summer': [5, 6, 7, 8]}`` which works well for PV systems located in
+        North America.
 
     Returns
     -------
@@ -231,18 +248,14 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
 
     """
     fit_params = fit_params or PVFLEETS_FIT_PARAMS
+    if seasonal_split == 'north-america':
+        seasonal_split = {'summer': [5, 6, 7, 8], 'winter': [11, 12, 1, 2]}
     series_daytime = series[daytime]
     clip_fraction = (clipping[daytime].sum() / len(clipping[daytime])) * 100
     if clip_fraction > clip_max:
         return Tracker.UNKNOWN
     bounds = _get_bounds(clip_fraction, fit_params)
-    first_season = series_daytime[
-        series_daytime.index.month.isin(seasonal_split[0])
-    ]
-    second_season = series_daytime[
-        series_daytime.index.month.isin(seasonal_split[1])
-    ]
-    if len(first_season) == 0 or len(second_season) == 0:
+    if not seasonal_split:
         return _infer_tracking(
             series_daytime,
             envelope_quantile,
@@ -252,27 +265,23 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
             envelope_min_fraction,
             median_min_fraction
         )
-    first_season_tracking = _infer_tracking(
-        first_season,
-        envelope_quantile,
-        fit_median,
-        median_r2_min,
-        bounds,
-        envelope_min_fraction,
-        median_min_fraction
-    )
-    second_season_tracking = _infer_tracking(
-        second_season,
-        envelope_quantile,
-        fit_median,
-        median_r2_min,
-        bounds,
-        envelope_min_fraction,
-        median_min_fraction
-    )
-    if first_season_tracking is not second_season_tracking:
+    summer = series_daytime[
+        series_daytime.index.month.isin(seasonal_split.get('summer') or [])
+    ]
+    winter = series_daytime[
+        series_daytime.index.month.isin(seasonal_split.get('winter') or [])
+    ]
+    if len(winter) == 0 and len(summer) == 0:
         return Tracker.UNKNOWN
-    return first_season_tracking
+    return _infer_tracking_winter_summer(
+        winter, summer,
+        envelope_quantile,
+        fit_median,
+        median_r2_min,
+        bounds,
+        envelope_min_fraction,
+        median_min_fraction
+    )
 
 
 def _peak_times(data):
