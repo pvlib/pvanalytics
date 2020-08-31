@@ -212,7 +212,7 @@ def test_full_year_tracking_envelope(albuquerque_clearsky):
 @pytest.fixture(scope='module')
 def winter_perturbed(albuquerque_clearsky):
     winter_perturbed = albuquerque_clearsky.copy()
-    winter = winter_perturbed.index.month.isin([1, 2, 10, 11, 12])
+    winter = winter_perturbed.index.month.isin([1, 2, 3, 4, 10, 11, 12])
     winter_perturbed.loc[winter] = 10
     return winter_perturbed
 
@@ -284,6 +284,13 @@ def test_tracking_envelope_seasonal_split(winter_perturbed,
         pd.Series(False, index=albuquerque_clearsky.index),
         seasonal_split=None
     ) is system.Tracker.UNKNOWN
+    assert system.is_tracking_envelope(
+        winter_perturbed['ghi'],
+        albuquerque_clearsky['ghi'] > 0,
+        pd.Series(False, index=albuquerque_clearsky.index),
+        seasonal_split=None,
+        fit_median=False
+    )
 
 
 @pytest.fixture(scope='module')
