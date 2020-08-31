@@ -1,5 +1,6 @@
 """Functions for identifying system characteristics."""
 import enum
+import warnings
 import numpy as np
 import pandas as pd
 import pvlib
@@ -272,6 +273,7 @@ def is_tracking_envelope(series, daytime, clipping, clip_max=0.1,
         series_daytime.index.month.isin(seasonal_split.get('winter') or [])
     ]
     if len(winter) == 0 and len(summer) == 0:
+        warnings.warn("no data in both winter and summer months")
         return Tracker.UNKNOWN
     return _infer_tracking_winter_summer(
         winter, summer,

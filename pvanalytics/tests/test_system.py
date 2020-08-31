@@ -291,6 +291,14 @@ def test_tracking_envelope_seasonal_split(winter_perturbed,
         seasonal_split=None,
         fit_median=False
     )
+    # empty seasons should give Tracker.UNKNOWN
+    with pytest.warns(UserWarning):
+        assert system.is_tracking_envelope(
+            albuquerque_clearsky['ghi'],
+            albuquerque_clearsky['ghi'] > 0,
+            pd.Series(False, index=albuquerque_clearsky.index),
+            seasonal_split={'winter': [], 'summer': []}
+        ) is system.Tracker.UNKNOWN
 
 
 @pytest.fixture(scope='module')
