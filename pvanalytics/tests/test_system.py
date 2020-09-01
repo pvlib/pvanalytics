@@ -112,23 +112,32 @@ def test_orientation_with_gaps(clearsky_year, solarposition_year):
     assert azimuth == 180
     assert tilt == 15
 
+
 @pytest.fixture(scope='module')
-def solar_noon(solarposition_year):
+def solar_noon(albuquerque):
     """Time series of solar noon in minutes on each day."""
-    daytime = solarposition_year['apparent_zenith'] < 87
-    minute = pd.Series(
-        daytime.index.hour * 60 + daytime.index.minute,
-        index=daytime.index
+    days = pd.date_range(
+        start='1/1/2020',
+        end='12/31/2020',
+        tz='MST',
+        freq='D'
     )
-    df = pd.DataFrame({'daytime': daytime, 'minute': minute})
-    solar_noon = df.groupby(df.index.date).apply(
-        lambda day: round(
-            (day.minute[day.daytime].max() + day.minute[day.daytime].min()) / 2
-        )
-    )
-    return solar_noon.reindex(pd.DatetimeIndex(solar_noon.index))
+    solar_noon = albuquerque.get_sun_rise_set_transit(
+        days, method='spa'
+    )['transit']
+    return solar_noon
 
 
 def test_longitude_solar_noon(solar_noon):
-    longitude = system.longitude_solar_noon(solar_noon, utc_offset=-7)
-    assert -110 < longitude < -100
+    """Can determine latitude within +/- 5 degrees"""
+    longitude = system.longitude_solar_noon(
+        solar_noon.dt.hour * 60 + solar_noon.dt.minute, utc_offset=-7
+    )
+    assert -111 < longitude < -101
+
+
+def test_parameters_haghdadi(albuquerque):
+    tilt, azimuth, latitude = system.infer_orientation_latitude_haghdadi(
+        power, clearsky, longitude
+    )
+    assert False
