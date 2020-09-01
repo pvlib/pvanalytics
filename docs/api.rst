@@ -214,6 +214,16 @@ identification.
 System
 ======
 
+This module contains functions and classes relating to PV system
+parameters such as nameplate power, tilt, azimuth, or whether the
+system is equipped with tracker.
+
+.. autosummary::
+   :toctree: generated/
+
+   system.Tracker
+   system.is_tracking_envelope
+
 The following function can be used to infer system orientation from
 power or plane of array irradiance measurements.
 

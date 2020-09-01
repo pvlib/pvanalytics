@@ -25,3 +25,21 @@ def by_day(data):
     return data.groupby(
         pd.to_datetime(data.index.date).tz_localize(data.index.tz)
     )
+
+
+def by_minute(data):
+    """Group data by minute since midnight.
+
+    Parameters
+    ----------
+    data : Series
+        DatetimeIndexed series.
+
+    Returns
+    -------
+    GroupBy
+        Data grouped by minute since midnight (an Int64Index with
+        values in the range 0 to 1440).
+
+    """
+    return data.groupby(data.index.minute + data.index.hour * 60)
