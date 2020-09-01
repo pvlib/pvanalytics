@@ -56,3 +56,22 @@ def test_timestamp_spacing_too_frequent(times):
         time.spacing(times, '30min'),
         pd.Series([True] + [False] * (len(times) - 1), index=times)
     )
+
+
+def test_shift_ruptures_no_shift(albuquerque):
+    solar_position = albuquerque.get_solarposition(
+        pd.date_range(start='1/1/2020', end='1/3/2020', freq='H', tz='MST')
+    )
+    midday = (solar_position['zenith'] < 87).groupby(
+        solar_position.index.date
+    ).transform(
+        lambda day: (day[day].index.max() - day[day].index.min()).seconds * 60
+    ) // 2
+    shifts = time.shifts_ruptures(
+        solar_position['zenith'] < 87,
+        midday
+    )
+    assert_series_equal(
+        shifts,
+        pd.Series(0, index=solar_position.index)
+    )
