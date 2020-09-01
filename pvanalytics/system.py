@@ -142,9 +142,9 @@ def longitude_solar_noon(solar_noon, utc_offset):
 
     References
     ----------
-    .. [1] Haghdadi, N., et al. (2017) A method to estimate the location and
-           orientation of distributed photovoltaic systems from their generation
-           output data.
+    .. [1] Haghdadi, N., et al. (2017) A method to estimate the location
+           and orientation of distributed photovoltaic systems from their
+           generation output data.
     """
     # 720 minutes is noon local time
     time_correction = solar_noon - 720
@@ -158,7 +158,9 @@ def infer_orientation_latitude_haghdadi(power, clearsky, longitude,
                                         latitude=None,
                                         tilt_min=0, tilt_max=360,
                                         azimuth_min=0, azimuth_max=360,
-                                        latitude_min=-90, latitude_max=90):
+                                        latitude_min=-90, latitude_max=90,
+                                        efficiency_min=0.6,
+                                        efficiency_max=1.3):
     """Infer the tilt, azimuth, and latitude of a PV system.
 
     Uses the method presented in [1]_.
@@ -203,4 +205,14 @@ def infer_orientation_latitude_haghdadi(power, clearsky, longitude,
        output data.
     """
     # TODO
+
+    # Evaluation Steps
+    #
+    # - calculate clearsky irradiance at candidate latitude (ASHRAE model
+    # - calculate POA at candidate tilt/azimuth
+    # - calculate power at candidate efficiency w/PVWatts(?)
+    #   + P = Pmp * eta
+    #     where eta = system efficiency
+    #           Pmp = POA / 1000 * Pmp0 * (1 + TemperatureCoefficient * (CellTemperature - 25))
+    #   + NEED: Pmp0, temperature coefficient and cell temperature (not clear where those come from).
     return 0, 0, 0
