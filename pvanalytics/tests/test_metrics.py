@@ -3,7 +3,7 @@ from pvanalytics import metrics
 import pytest
 
 
-def test_performance_ratio_nrel_inv_down():
+def test_performance_ratio_nrel():
     poa_global = np.array([921.75575, 916.11225, 914.8590833, 914.86375,
                            913.6426667, 889.6296667, 751.4611667])
     temp_air = np.array([28.89891667, 29.69258333, 30.21441667, 30.5815,
@@ -18,7 +18,7 @@ def test_performance_ratio_nrel_inv_down():
     deltaT = 3
     gamma_pdc = -0.0028
 
-    expected = 0.6873
+    expected = 0.6873059
     performance_ratio = metrics.performance_ratio_nrel(poa_global, temp_air,
                                                        wind_speed, pac, pdc0,
                                                        a, b, deltaT, gamma_pdc)
