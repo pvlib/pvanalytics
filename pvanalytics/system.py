@@ -154,13 +154,15 @@ def longitude_solar_noon(solar_noon, utc_offset):
     return ((time_correction / 4 - eot/4) + lstm).median()
 
 
-def infer_orientation_latitude_haghdadi(power, clearsky, longitude,
-                                        latitude=None,
-                                        tilt_min=0, tilt_max=360,
-                                        azimuth_min=0, azimuth_max=360,
-                                        latitude_min=-90, latitude_max=90,
-                                        efficiency_min=0.6,
-                                        efficiency_max=1.3):
+def infer_orientation_haghdadi(power, clearsky,
+                               clearsky_irradiance=None,
+                               longitude=None, latitude=None,
+                               clearsky_model='ineichen',
+                               tilt_min=0, tilt_max=360,
+                               azimuth_min=0, azimuth_max=360,
+                               latitude_min=-90, latitude_max=90,
+                               efficiency_min=0.6,
+                               efficiency_max=1.3):
     """Infer the tilt, azimuth, and latitude of a PV system.
 
     Uses the method presented in [1]_.
@@ -172,6 +174,9 @@ def infer_orientation_latitude_haghdadi(power, clearsky, longitude,
     clearsky : Series
         Boolean series with True for power measurements that occur
         during clear-sky conditions.
+    clearsky_irradiance : DataFrame
+        Columns 'ghi', 'dhi', and 'dni' used to calculate POA irradiance
+        at candidate orientations.
     longitude : float
         System longitude.
     latitude : float, optional

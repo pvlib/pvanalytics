@@ -1,8 +1,8 @@
-"""Tests for system paramter identification functions."""
+"""Tests for system parameter identification functions."""
 import pytest
 import pandas as pd
 import numpy as np
-from pvlib import irradiance
+from pvlib import irradiance, modelchain, pvsystem
 from pvanalytics import system
 
 
@@ -136,8 +136,57 @@ def test_longitude_solar_noon(solar_noon):
     assert -111 < longitude < -101
 
 
-def test_parameters_haghdadi(albuquerque):
-    tilt, azimuth, latitude = system.infer_orientation_latitude_haghdadi(
-        power, clearsky, longitude
+@pytest.fixture(scope='module')
+def clearsky_albuquerque(albuquerque):
+    return albuquerque.get_clearsky(
+        pd.date_range(
+            start='1/1/2020',
+            end='1/1/2021',
+            freq='15T',
+            closed='left',
+            tz='MST'
+        ),
+        model='simplified_solis'
     )
-    assert False
+
+
+@pytest.fixture(scope='module')
+def power_albuquerque(albuquerque, clearsky_albuquerque, system_parameters):
+    pv_system = pvsystem.PVSystem(**system_parameters)
+    # TODO parameterize fixture with different tilts
+    mc = modelchain.ModelChain(
+        pv_system,
+        albuquerque,
+    )
+    mc.run_model(clearsky_albuquerque)
+    return mc.ac
+
+
+def test_orientation_haghdadi_value_error(power_albuquerque,
+                                          clearsky_albuquerque):
+    """Passing invalid parameter combinations raises a ValueError."""
+    clearsky_conditions = power_albuquerque > 0
+    # Passing neither longitude nor clearsky raises a ValueError
+    with pytest.raises(ValueError,
+                       match="longitude or clearsky must be specified"):
+        system.infer_orientation_haghdadi(
+            power_albuquerque,
+            clearsky_conditions
+        )
+    # passing only latitude, but not longitude raises a ValueError
+    with pytest.raises(ValueError,
+                       match="longitude or clearsky must be specified"):
+        system.infer_orientation_haghdadi(
+            power_albuquerque,
+            clearsky_conditions,
+            latitude=35.5)
+    # passing both longitude and clearsky raises a ValueError
+    with pytest.raises(ValueError,
+                       match="longitude and clearsky cannot"
+                             " both be specified"):
+        system.infer_orientation_haghdadi(
+            power_albuquerque,
+            clearsky_conditions,
+            clearsky_irradiance=clearsky_albuquerque,
+            longitude=-106.5
+        )
