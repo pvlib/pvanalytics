@@ -57,21 +57,50 @@ def test_timestamp_spacing_too_frequent(times):
         pd.Series([True] + [False] * (len(times) - 1), index=times)
     )
 
-
-def test_shift_ruptures_no_shift(albuquerque):
+@pytest.fixture(scope='module', params=['H', '15T', 'T'])
+def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
-        pd.date_range(start='1/1/2020', end='1/3/2020', freq='H', tz='MST')
+        pd.date_range(
+            start='1/1/2020', end='3/1/2020', closed='left',
+            tz='MST', freq=request.param
+        )
     )
-    midday = (solar_position['zenith'] < 87).groupby(
+    mid_day = (solar_position['zenith'] < 87).groupby(
         solar_position.index.date
-    ).transform(
+    ).apply(
         lambda day: (day[day].index.max() - day[day].index.min()).seconds * 60
     ) // 2
+    mid_day.index = pd.DatetimeIndex(mid_day.index, tz='MST')
+    return {'daytime': solar_position['zenith'] < 87,
+            'clearsky_midday': mid_day}
+
+def test_shift_ruptures_no_shift(midday):
+    """Daytime mask with no time-shifts yields a series with 0s for
+    shift amounts."""
     shifts = time.shifts_ruptures(
-        solar_position['zenith'] < 87,
-        midday
+        midday['daytime'],
+        midday['clearsky_midday']
     )
     assert_series_equal(
         shifts,
-        pd.Series(0, index=solar_position.index)
+        pd.Series(0, index=midday['daytime'].index, dtype='float64'),
+        check_names=False
+    )
+
+def test_shift_ruptures_positive_shift(midday):
+    """Every day shifted 1 hour later yields a series with shift
+     of 60 for each day."""
+    shifted = midday['daytime'].tshift(1, 'H')
+    assert_series_equal(
+        time.shifts_ruptures(shifted, midday['clearsky_midday']),
+        pd.Series(60, index=shifted.index, dtype='float64'),
+        check_names=False
+    )
+
+def test_shift_ruptures_negative_shift(midday):
+    shifted = midday['daytime'].tshift(-1, 'H')
+    assert_series_equal(
+        time.shifts_ruptures(shifted, midday['clearsky_midday']),
+        pd.Series(-60, index=shifted.index, dtype='float64'),
+        check_names=False
     )
