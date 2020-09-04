@@ -231,3 +231,13 @@ power or plane of array irradiance measurements.
    :toctree: generated/
 
    system.infer_orientation_daily_peak
+
+Metrics
+=======
+
+The following functions can be used to calculate system performance metrics.
+
+.. autosummary::
+   :toctree: generated/
+
+   metrics.performance_ratio_nrel
