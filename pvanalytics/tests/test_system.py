@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from pvlib import irradiance, modelchain, pvsystem
+from pvlib import irradiance, modelchain, pvsystem, location
 from pvanalytics import system
 
 
@@ -152,8 +152,11 @@ def clearsky_albuquerque(albuquerque):
 
 @pytest.fixture(scope='module')
 def power_albuquerque(albuquerque, clearsky_albuquerque, system_parameters):
-    pv_system = pvsystem.PVSystem(**system_parameters)
-    # TODO parameterize fixture with different tilts
+    """One year of power output for a PV system in albuquerque NM.
+
+    The system is oriented with azimuth=180 and tilt=30.
+    """
+    pv_system = pvsystem.PVSystem(tilt=30, azimuth=180, **system_parameters)
     mc = modelchain.ModelChain(
         pv_system,
         albuquerque,
@@ -192,3 +195,103 @@ def test_orientation_haghdadi_value_error(power_albuquerque,
             clearsky_irradiance=clearsky_albuquerque,
             longitude=-106.5
         )
+
+
+def test_infer_orientation_haghdadi_clearsky_irradiance(power_albuquerque,
+                                                        clearsky_albuquerque):
+    """Test that orientation can be inferred using user-supplied
+    clearsky irradiance.
+
+    In this case, the returned latitude should be None.
+    """
+    tilt, azimuth, latitude = system.infer_orientation_haghdadi(
+        power_albuquerque,
+        power_albuquerque > 0,
+        clearsky_irradiance=clearsky_albuquerque
+    )
+    assert latitude is None
+    # TODO verify that the tolerance below is reasonable
+    assert tilt == pytest.approx(30, abs=5)
+    assert azimuth == pytest.approx(180, abs=5)
+
+
+def test_infer_orientation_haghdadi_fixed_latitude(albuquerque,
+                                                   power_albuquerque):
+    """If a specific latitude is passed as a parameter, that latitude
+    is returned."""
+    tilt, azimuth, latitude = system.infer_orientation_haghdadi(
+        power_albuquerque,
+        power_albuquerque > 0,
+        longitude=albuquerque.longitude,
+        latitude=albuquerque.latitude,
+        clearsky_model='simplified_solis'
+    )
+    assert latitude == albuquerque.latitude
+    # TODO verify that the tolerance below is reasonable
+    assert tilt == pytest.approx(30, abs=5)
+    assert azimuth == pytest.approx(180, abs=5)
+
+@pytest.fixture(scope='module')
+def naive_times():
+    """One year at 1-hour intervals"""
+    return pd.date_range(
+        start='2020',
+        end='2021',
+        freq='H'
+    )
+
+@pytest.fixture(scope='module',
+                params=[(0, 180), (30, 180), (30, 90), (30, 270), (30, 0)],
+                ids=['South-0', 'South-30', 'East-30', 'West-30', 'North-30'])
+def pv_system(request, system_parameters):
+    return pvsystem.PVSystem(
+        tilt=request.param[0],
+        azimuth=request.param[1],
+        **system_parameters
+    )
+
+
+@pytest.fixture(scope='module',
+                params=[(35, -106, 'Etc/GMT+7'),
+                        (50, 10, 'Etc/GMT-1'),
+                        (-37, 144, 'Etc/GMT-10')],
+                ids=['Albuquerque', 'Berlin', 'Melbourne'])
+def system_location(request):
+    """Location of the system."""
+    return location.Location(
+        request.param[0], request.param[1], tz=request.param[2]
+    )
+
+
+@pytest.fixture(scope='module')
+def system_power(pv_system, system_location, naive_times):
+    local_time = naive_times.tz_localize(system_location.tz)
+    mc = modelchain.ModelChain(
+        pv_system,
+        system_location
+    )
+    clearsky = system_location.get_clearsky(
+        local_time, model='simplified_solis'
+    )
+    mc.run_model(clearsky)
+    return {
+        'location': system_location,
+        'tilt': pv_system.surface_tilt,
+        'azimuth': pv_system.surface_azimuth,
+        'ac': mc.ac
+    }
+
+
+def test_infer_orientation_haghdadi(system_power):
+    tilt, azimuth, latitude = system.infer_orientation_haghdadi(
+        system_power['ac'],
+        system_power['ac'] > 0,
+        longitude=system_power['location'].longitude,
+        clearsky_model='simplified_solis'
+    )
+    assert tilt == pytest.approx(system_power['tilt'], abs=5)
+    assert azimuth == pytest.approx(system_power['tilt'], abs=5)
+    assert latitude == pytest.approx(
+        system_power['location'].latitude,
+        abs=5
+    )
