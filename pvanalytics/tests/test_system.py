@@ -168,22 +168,24 @@ def test_orientation_haghdadi_value_error(power_albuquerque,
     clearsky_conditions = power_albuquerque > 0
     # Passing neither longitude nor clearsky raises a ValueError
     with pytest.raises(ValueError,
-                       match="longitude or clearsky must be specified"):
+                       match="longitude or clearsky_irradiance"
+                             " must be specified"):
         system.infer_orientation_haghdadi(
             power_albuquerque,
             clearsky_conditions
         )
     # passing only latitude, but not longitude raises a ValueError
     with pytest.raises(ValueError,
-                       match="longitude or clearsky must be specified"):
+                       match="longitude or clearsky_irradiance"
+                             " must be specified"):
         system.infer_orientation_haghdadi(
             power_albuquerque,
             clearsky_conditions,
             latitude=35.5)
     # passing both longitude and clearsky raises a ValueError
     with pytest.raises(ValueError,
-                       match="longitude and clearsky cannot"
-                             " both be specified"):
+                       match="longitude and clearsky_irradiance"
+                             " cannot both be specified"):
         system.infer_orientation_haghdadi(
             power_albuquerque,
             clearsky_conditions,

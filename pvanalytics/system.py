@@ -158,6 +158,7 @@ def infer_orientation_haghdadi(power, clearsky,
                                clearsky_irradiance=None,
                                longitude=None, latitude=None,
                                clearsky_model='ineichen',
+                               temperature=25,
                                tilt_min=0, tilt_max=360,
                                azimuth_min=0, azimuth_max=360,
                                latitude_min=-90, latitude_max=90,
@@ -165,7 +166,10 @@ def infer_orientation_haghdadi(power, clearsky,
                                efficiency_max=1.3):
     """Infer the tilt, azimuth, and latitude of a PV system.
 
-    Uses the method presented in [1]_.
+    Based on the method presented in [1]_. Applies an optimization procedure
+    to search for the tilt, azimuth, and (optionally) latitude the yield a
+    simulated power output that best matches the data in `power`. Simulated
+    power is calculated using the PVWatts model.
 
     Parameters
     ----------
@@ -181,6 +185,17 @@ def infer_orientation_haghdadi(power, clearsky,
         System longitude.
     latitude : float, optional
         System latitude. If None, latitude will be inferred from `power`.
+    clearsky_model : str, default 'ineichen'
+        Clearsky model to use if `clearsky_irradiance` is None. Must be
+        one of ‘ineichen’, ‘haurwitz’, ‘simplified_solis’. (See
+        :py:method:`pvlib.location.Location.get_clearsky` for more
+        information.)
+    temperature : float or Series, default 25
+        Ambient temperature in Celsius used to calculate power output from
+        the PVWatts model. Can be passed as a Series or a float, if a float,
+        then a constant will be used. Better results can be achieved if
+        temperature data from a nearby (or co-located) weather station is
+        provided.
     tilt_min : float, 0
         Lower bound on acceptable tilt.
     tilt_max : float, 360
@@ -203,14 +218,24 @@ def infer_orientation_haghdadi(power, clearsky,
     latitude : float
         System latitude.
 
+    Raises
+    ------
+    ValueError
+        If exactly one of `longitude` or `clearsky_irradiance` is not
+        specified.
+
     References
     ----------
     .. [1] Haghdadi, N., et al. (2017) A method to estimate the location and
        orientation of distributed photovoltaic systems from their generation
        output data.
     """
-    # TODO
-
+    if longitude is not None and clearsky_irradiance is not None:
+        raise ValueError("longitude and clearsky_irradiance"
+                         " cannot both be specified")
+    elif longitude is None and clearsky_irradiance is None:
+        raise ValueError("longitude or clearsky_irradiance"
+                         " must be specified")
     # Evaluation Steps
     #
     # - calculate clearsky irradiance at candidate latitude (ASHRAE model
@@ -220,4 +245,9 @@ def infer_orientation_haghdadi(power, clearsky,
     #     where eta = system efficiency
     #           Pmp = POA / 1000 * Pmp0 * (1 + TemperatureCoefficient * (CellTemperature - 25))
     #   + NEED: Pmp0, temperature coefficient and cell temperature (not clear where those come from).
+
+    # TODO Estimate Pmp0 from the maximum in `power` should get us close
+    # alternatively, we could include the 'effective' system capacity
+    # as a free variable in the optimization procedure
+
     return 0, 0, 0
