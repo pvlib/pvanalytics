@@ -83,7 +83,7 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
 def _correct_edge_of_day_errors(night, minutes_per_value,
                                 daytime_difference_max,
                                 day_length_window, correction_window):
-    # identify night-time periods that are "too long" and replace
+    # identify day-time periods that are "too short" and replace
     # values with the `correction_window`-day rolling median value for
     # that minute.
     #
@@ -136,8 +136,7 @@ def power_or_irradiance(series, outliers=None,
                         day_length_window=14):
     """Return True for values that are during the day.
 
-    After removing outliers and normalizing the data, periods of
-    low-slope and low-value are identified as night. A time is
+    After removing outliers and normalizing the data, a time is
     classified as night when two of the following three criteria are
     satisfied:
 
@@ -146,13 +145,12 @@ def power_or_irradiance(series, outliers=None,
     - near-zero rolling median at the same time over the surrounding
       week (see `median_days`)
 
-    It is possible that mid-day times where power goes near zero or
-    stops changing can be incorrectly classified as night. To correct
-    these errors times where the total duration of periods marked
-    night or day is too long or too short are identified and values at
-    these times are compared to values at the same time for the
-    preceding two weeks and following two weeks. The day/night value
-    is adjusted to match the median value of these days.
+    Mid-day times where power goes near zero or
+    stops changing may be incorrectly classified as night. To correct
+    these errors, night or day periods with duration that is too long or
+    too short are identified, and times in these periods are re-classified
+    to have the majority value at the same time on preceding and
+    following days (as set by `correction_window`).
 
     Finally any values that are True in `clipping` are marked as day.
 
@@ -164,11 +162,11 @@ def power_or_irradiance(series, outliers=None,
         Boolean time series with True for values in `series` that are
         outliers.
     low_value_threshold : float, default 0.003
-        Maximum normalized value for a time to be considered night.
+        Maximum normalized power or irradiance value for a time to be considered night.
     low_median_threshold : float, default 0.0015
-        Maximum rolling median for a time to be considered night.
+        Maximum rolling median of power or irradiance for a time to be considered night.
     low_diff_threshold : float, default 0.0005
-        Maximum derivative for a time to be considered night.
+        Maximum derivative of normalized power or irradiance for a time to be considered night.
     median_days : int, default 7
         Number of days to use to calculate the rolling median at each
         minute.
@@ -180,13 +178,11 @@ def power_or_irradiance(series, outliers=None,
         day/night classification errors.
     hours_min : float, default 5
         Minimum number of hours in a contiguous period of day or
-        night. If a day/night period is shorter than this then it is
+        night. A day/night period shorter than `hours_min` is
         flagged for error correction.
     daytime_difference_max : float, default 30
-        When looking for day that end too early or start too late any
-        day where the hours of daylight is more then
-        `daytime_difference_max` minutes shorter than the median
-        length of surrounding days.
+        Days with length that is `daytime_difference_max` minutes less than the median
+        length of surrounding days are flagged for corrections.
     day_length_window : int, default 14
         The length of the rolling window used for calculating the
         median length of the day when correcting errors in the morning
