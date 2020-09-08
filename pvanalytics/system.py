@@ -2,7 +2,8 @@
 import pandas as pd
 import numpy as np
 import pvlib
-from pvlib import solarposition
+from pvlib import solarposition, temperature
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.util import _fit, _group
 
 
@@ -154,6 +155,39 @@ def longitude_solar_noon(solar_noon, utc_offset):
     return ((time_correction / 4 - eot/4) + lstm).median()
 
 
+def _power_residuals(clearsky_power, longitude, temperature,
+                     dc_capacity, clearsky_model,
+                     latitude, tilt, azimuth):
+    # Return the difference between `clearsky_power` and simulated power
+    # at the given latitude, longitude, tilt, temperature, and capacity
+    site = pvlib.location.Location(latitude, longitude)
+    clearsky = site.get_clearsky(clearsky_power.index, model=clearsky_model)
+    solarposition = site.get_solarposition(clearsky_power.index)
+    poa = pvlib.irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solarposition['apparent_zenith'], solarposition['azimuth'],
+        **clearsky
+    )
+    temp_cell = pvlib.temperature.sapm_cell(
+        poa['poa_global'],
+        temperature,
+        wind_speed=0,  # TODO should we let users pass wind speed too?
+        # TODO allow user to specify params
+        **TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    )
+    pdc = pvlib.pvsystem.pvwatts_dc(
+        poa['poa_global'],
+        temp_cell,
+        dc_capacity,
+        -0.002
+    )
+    # TODO decide on a better way to specify dc limit
+    #      For now just using the DC capacity and assuming the inverter
+    #      can handle it.
+    pac = pvlib.pvsystem.pvwatts_ac(pdc, dc_capacity)
+    return clearsky_power - pac
+
+
 def infer_orientation_haghdadi(power, clearsky,
                                clearsky_irradiance=None,
                                longitude=None, latitude=None,
@@ -181,7 +215,7 @@ def infer_orientation_haghdadi(power, clearsky,
     clearsky_irradiance : DataFrame
         Columns 'ghi', 'dhi', and 'dni' used to calculate POA irradiance
         at candidate orientations.
-    longitude : float
+    longitude : float, optional
         System longitude.
     latitude : float, optional
         System latitude. If None, latitude will be inferred from `power`.
@@ -236,9 +270,11 @@ def infer_orientation_haghdadi(power, clearsky,
     elif longitude is None and clearsky_irradiance is None:
         raise ValueError("longitude or clearsky_irradiance"
                          " must be specified")
+    power = power[clearsky]
+    approximate_capacity_ac = power.quantile(0.95)
     # Evaluation Steps
     #
-    # - calculate clearsky irradiance at candidate latitude (ASHRAE model
+    # - calculate clearsky irradiance at candidate latitude
     # - calculate POA at candidate tilt/azimuth
     # - calculate power at candidate efficiency w/PVWatts(?)
     #   + P = Pmp * eta
@@ -249,5 +285,8 @@ def infer_orientation_haghdadi(power, clearsky,
     # TODO Estimate Pmp0 from the maximum in `power` should get us close
     # alternatively, we could include the 'effective' system capacity
     # as a free variable in the optimization procedure
+
+    # TODO use scipy.optimize.least_squares() on a function that returns the
+    #      difference between `power` and power at candidate tilts.
 
     return 0, 0, 0
