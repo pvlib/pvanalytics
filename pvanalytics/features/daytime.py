@@ -63,7 +63,7 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
 
 
 def _correct_edge_of_day_errors(night, minutes_per_value,
-                                daytime_difference_max,
+                                day_length_difference_max,
                                 day_length_window, correction_window):
     # Identify day-time periods that are "too short" and replace
     # values with the majority truth-value for the same time in the
@@ -86,7 +86,7 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
         window=str(day_length_window) + 'D'
     ).median()
     # flag days that are more than 30 minutes shorter than the median
-    short_days = day_length < (day_length_median - daytime_difference_max)
+    short_days = day_length < (day_length_median - day_length_difference_max)
     invalid = short_days.groupby(short_days.index.date).transform(
         lambda day: any(day)
     )
@@ -114,7 +114,7 @@ def power_or_irradiance(series, outliers=None,
                         low_diff_threshold=0.0005, median_days=7,
                         clipping=None, freq=None,
                         correction_window=31, hours_min=5,
-                        daytime_difference_max=30,
+                        day_length_difference_max=30,
                         day_length_window=14):
     """Return True for values that are during the day.
 
@@ -168,8 +168,8 @@ def power_or_irradiance(series, outliers=None,
         Minimum number of hours in a contiguous period of day or
         night. A day/night period shorter than `hours_min` is
         flagged for error correction.
-    daytime_difference_max : float, default 30
-        Days with length that is `daytime_difference_max` minutes less
+    day_length_difference_max : float, default 30
+        Days with length that is `day_length_difference_max` minutes less
         than the median length of surrounding days are flagged for
         corrections.
     day_length_window : int, default 14
@@ -225,7 +225,7 @@ def power_or_irradiance(series, outliers=None,
     night_corrected_edges = _correct_edge_of_day_errors(
         night_corrected_clipping,
         minutes_per_value,
-        daytime_difference_max,
+        day_length_difference_max,
         day_length_window,
         correction_window
     )
