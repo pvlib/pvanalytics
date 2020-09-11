@@ -154,7 +154,7 @@ def power_or_irradiance(series, outliers=None,
         to be considered night.
     median_days : int, default 7
         Number of days to use to calculate the rolling median at each
-        minute.
+        minute. [days]
     clipping : Series, optional
         True when clipping indicated. Any values where clipping is
         indicated are automatically considered 'daytime'.
@@ -163,11 +163,11 @@ def power_or_irradiance(series, outliers=None,
         the series. If None, the frequency will be inferred from the index.
     correction_window : int, default 31
         Number of adjacent days to examine when correcting
-        day/night classification errors.
+        day/night classification errors. [days]
     hours_min : float, default 5
         Minimum number of hours in a contiguous period of day or
         night. A day/night period shorter than `hours_min` is
-        flagged for error correction.
+        flagged for error correction. [hours]
     day_length_difference_max : float, default 30
         Days with length that is `day_length_difference_max` minutes less
         than the median length of surrounding days are flagged for
@@ -175,7 +175,7 @@ def power_or_irradiance(series, outliers=None,
     day_length_window : int, default 14
         The length of the rolling window used for calculating the
         median length of the day when correcting errors in the morning
-        or afternoon.
+        or afternoon. [days]
 
     Returns
     -------
