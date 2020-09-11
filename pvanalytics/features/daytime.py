@@ -162,11 +162,14 @@ def power_or_irradiance(series, outliers=None,
         Boolean time series with True for values in `series` that are
         outliers.
     low_value_threshold : float, default 0.003
-        Maximum normalized power or irradiance value for a time to be considered night.
+        Maximum normalized power or irradiance value for a time to be
+        considered night.
     low_median_threshold : float, default 0.0015
-        Maximum rolling median of power or irradiance for a time to be considered night.
+        Maximum rolling median of power or irradiance for a time to be
+        considered night.
     low_diff_threshold : float, default 0.0005
-        Maximum derivative of normalized power or irradiance for a time to be considered night.
+        Maximum derivative of normalized power or irradiance for a time
+        to be considered night.
     median_days : int, default 7
         Number of days to use to calculate the rolling median at each
         minute.
@@ -181,8 +184,9 @@ def power_or_irradiance(series, outliers=None,
         night. A day/night period shorter than `hours_min` is
         flagged for error correction.
     daytime_difference_max : float, default 30
-        Days with length that is `daytime_difference_max` minutes less than the median
-        length of surrounding days are flagged for corrections.
+        Days with length that is `daytime_difference_max` minutes less
+        than the median length of surrounding days are flagged for
+        corrections.
     day_length_window : int, default 14
         The length of the rolling window used for calculating the
         median length of the day when correcting errors in the morning
