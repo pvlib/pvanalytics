@@ -41,35 +41,17 @@ def _run_lengths(series):
     return runs.groupby(runs).transform('count')
 
 
-def _to_numeric(series):
-    # Convert a Boolean series to a numeric series
-    #
-    # False -> 1, True -> 2, NA -> 3
-    numeric_series = pd.Series(index=series.index, dtype='float64')
-    numeric_series.loc[~series] = 1
-    numeric_series.loc[series] = 2
-    numeric_series.loc[series.isna()] = 3
-    return numeric_series
-
-
-def _from_numeric(series):
-    # Inverse of :py:func:`_to_numeric()`
-    boolean_series = series == 2
-    boolean_series.loc[series == 3] = np.nan
-    return boolean_series.astype('bool')
-
-
-def _smooth_if_invalid(series, invalid, correction_window):
-    # replace values in `series` marked as True in `invalid` with the
-    # `correction_window`-day rolling median at each minute.
-    smoothed = round(
-        _rolling_by_minute(
-            _to_numeric(series),
-            days=correction_window,
-            f=pd.core.window.RollingGroupby.median
-        )
+def _correct_if_invalid(series, invalid, correction_window):
+    # For every time marked `invalid` replace the truth value in `series`
+    # with the truth value at the same time in the majority of the
+    # surrounding days. The number of surrounding days to examine is indicated
+    # by `correction_window`.
+    rolling_majority = _rolling_by_minute(
+        series,
+        days=correction_window,
+        f=lambda x: x.sum() / x.count() > 0.5
     )
-    return (~invalid & series) | (invalid & _from_numeric(smoothed))
+    return (~invalid & series) | (invalid & rolling_majority)
 
 
 def _correct_midday_errors(night, minutes_per_value, hours_min,
@@ -77,15 +59,15 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    return _smooth_if_invalid(night, invalid, correction_window)
+    return _correct_if_invalid(night, invalid, correction_window)
 
 
 def _correct_edge_of_day_errors(night, minutes_per_value,
                                 daytime_difference_max,
                                 day_length_window, correction_window):
-    # identify day-time periods that are "too short" and replace
-    # values with the `correction_window`-day rolling median value for
-    # that minute.
+    # Identify day-time periods that are "too short" and replace
+    # values with the majority truth-value for the same time in the
+    # surrounding days.
     #
     # Because daylight savings shifts happen at night we cannot look
     # at night-length directly. Instead we look for too-short days and
@@ -108,7 +90,7 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     invalid = short_days.groupby(short_days.index.date).transform(
         lambda day: any(day)
     )
-    return _smooth_if_invalid(night, invalid, correction_window)
+    return _correct_if_invalid(night, invalid, correction_window)
 
 
 def _filter_and_normalize(series, outliers):
