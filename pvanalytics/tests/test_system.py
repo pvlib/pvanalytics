@@ -290,7 +290,7 @@ def test_infer_orientation_haghdadi(system_power):
         clearsky_model='simplified_solis'
     )
     assert tilt == pytest.approx(system_power['tilt'], abs=5)
-    assert azimuth == pytest.approx(system_power['tilt'], abs=5)
+    assert azimuth == pytest.approx(system_power['azimuth'], abs=5)
     assert latitude == pytest.approx(
         system_power['location'].latitude,
         abs=5
