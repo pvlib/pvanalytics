@@ -211,6 +211,16 @@ identification.
    features.orientation.fixed_nrel
    features.orientation.tracking_nrel
 
+Daytime
+-------
+
+Functions that return a Boolean mask indicating day and night.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.daytime.power_or_irradiance
+
 System
 ======
 

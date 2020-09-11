@@ -1,0 +1,3 @@
+[run]
+omit =
+     pvanalytics/tests/conftest.py

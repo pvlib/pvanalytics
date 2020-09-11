@@ -6,7 +6,6 @@ import numpy as np
 
 import pytest
 from pandas.util.testing import assert_series_equal
-from pvlib import location
 
 from pvanalytics.quality import irradiance
 
@@ -254,16 +253,6 @@ def test_clearsky_limits_csi_max(times):
     assert_series_equal(
         irradiance.clearsky_limits(measured, clearsky, csi_max=1.2),
         expected
-    )
-
-
-@pytest.fixture
-def albuquerque():
-    return location.Location(
-        35,
-        -106,
-        elevation=2000,
-        tz='MST'
     )
 
 
