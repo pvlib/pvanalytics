@@ -158,6 +158,9 @@ def power_or_irradiance(series, outliers=None,
     clipping : Series, optional
         True when clipping indicated. Any values where clipping is
         indicated are automatically considered 'daytime'.
+    freq : str, optional
+        A pandas freqstr specifying the expected timestamp spacing for
+        the series. If None, the frequency will be inferred from the index.
     correction_window : int, default 31
         Number of adjacent days to examine when correcting
         day/night classification errors.
