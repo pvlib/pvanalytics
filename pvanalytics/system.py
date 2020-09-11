@@ -1,6 +1,7 @@
 """Functions for identifying system characteristics."""
 import pandas as pd
 import numpy as np
+import scipy
 import pvlib
 from pvlib import solarposition, temperature
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
@@ -155,11 +156,13 @@ def longitude_solar_noon(solar_noon, utc_offset):
     return ((time_correction / 4 - eot/4) + lstm).median()
 
 
-def _power_residuals(clearsky_power, longitude, temperature,
-                     dc_capacity, clearsky_model,
-                     latitude, tilt, azimuth):
+def _power_residuals(parameters, clearsky_power, longitude, temperature,
+                     dc_capacity, clearsky_model):
     # Return the difference between `clearsky_power` and simulated power
     # at the given latitude, longitude, tilt, temperature, and capacity
+    tilt = parameters[0]
+    azimuth = parameters[1]
+    latitude = parameters[2]
     site = pvlib.location.Location(latitude, longitude)
     clearsky = site.get_clearsky(clearsky_power.index, model=clearsky_model)
     solarposition = site.get_solarposition(clearsky_power.index)
@@ -193,7 +196,7 @@ def infer_orientation_haghdadi(power, clearsky,
                                longitude=None, latitude=None,
                                clearsky_model='ineichen',
                                temperature=25,
-                               tilt_min=0, tilt_max=360,
+                               tilt_min=0, tilt_max=180,
                                azimuth_min=0, azimuth_max=360,
                                latitude_min=-90, latitude_max=90,
                                efficiency_min=0.6,
@@ -271,22 +274,17 @@ def infer_orientation_haghdadi(power, clearsky,
         raise ValueError("longitude or clearsky_irradiance"
                          " must be specified")
     power = power[clearsky]
-    approximate_capacity_ac = power.quantile(0.95)
-    # Evaluation Steps
-    #
-    # - calculate clearsky irradiance at candidate latitude
-    # - calculate POA at candidate tilt/azimuth
-    # - calculate power at candidate efficiency w/PVWatts(?)
-    #   + P = Pmp * eta
-    #     where eta = system efficiency
-    #           Pmp = POA / 1000 * Pmp0 * (1 + TemperatureCoefficient * (CellTemperature - 25))
-    #   + NEED: Pmp0, temperature coefficient and cell temperature (not clear where those come from).
-
-    # TODO Estimate Pmp0 from the maximum in `power` should get us close
-    # alternatively, we could include the 'effective' system capacity
-    # as a free variable in the optimization procedure
-
-    # TODO use scipy.optimize.least_squares() on a function that returns the
-    #      difference between `power` and power at candidate tilts.
-
-    return 0, 0, 0
+    best_orientation = scipy.optimize.least_squares(
+        _power_residuals,
+        [0, 0, 0],
+        bounds=([tilt_min, azimuth_min, latitude_min],
+                [tilt_max, azimuth_max, latitude_max]),
+        kwargs={
+            'clearsky_power': power,
+            'longitude': longitude,
+            'temperature': temperature,
+            'dc_capacity': power.max(),
+            'clearsky_model': clearsky_model
+        }
+    )
+    return best_orientation.x[0], best_orientation.x[1], best_orientation.x[2]
