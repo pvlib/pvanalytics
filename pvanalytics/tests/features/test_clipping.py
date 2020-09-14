@@ -270,13 +270,6 @@ def simple_clipped(request, albuquerque):
 
 
 def test_slope_simple_clipping(simple_clipped):
-    with pd.option_context('display.max_rows', None):
-        df = pd.DataFrame({
-            'data': simple_clipped['data'],
-            'expected': simple_clipped['expected'],
-            'got': clipping.slope(simple_clipped['data'])
-        })
-        print(df['7/20/2020'])
     assert_series_equal(
         clipping.slope(simple_clipped['data']),
         simple_clipped['expected'],
@@ -288,7 +281,7 @@ def test_slope_clipping_too_short(simple_clipped):
     clipped = clipping.slope(simple_clipped['data'], duration_min=5)
     assert_series_equal(
         clipped,
-        simple_clipped['expected'],
+        pd.Series(False, simple_clipped['expected'].index),
         check_names=False
     )
 

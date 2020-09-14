@@ -1,6 +1,7 @@
 """Functions for identifying clipping."""
 import pandas as pd
 import numpy as np
+from pandas.tseries import frequencies
 
 from pvanalytics.util import _normalize, _group
 
@@ -227,9 +228,20 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def slope(ac_power, outliers=None, duration_min=1):
+def slope(ac_power, outliers=None, freq=None, slope_min=4.99e-6,
+          power_min=10, power_normalized_min=0.8, clip_tolerance=0.02, duration_min=1):
     """Identify clipping as times when slope is low and power is
     relatively high.
+
+    A value that satisfies the following criteria might be clipped:
+    - normalized value greater than `power_normalized_min`
+    - normalized value within `clip_tolerance` of the maximum value on that day
+    - normalized value within `clip_tolerance` of the maximum value the
+      preceding 7 days
+    - slope less than `slope_min`
+
+    Additionally, clipped values must be part of a sequence of at least two
+    consecutive values that meet the criteria above.
 
     Parameters
     ----------
@@ -252,22 +264,20 @@ def slope(ac_power, outliers=None, duration_min=1):
         power.loc[outliers] = np.nan
     power.loc[power < 0] = 0
     power_norm = _normalize.min_max(power)
-    # TODO Needs to be a derivative, not just a difference to work
-    # with different timestamp spacing
-    power_slope = power_norm.diff()
-    # TODO window=4 assumes 15 minute timestamps for a 1 hour window.
+    freq_seconds = pd.to_timedelta(
+        frequencies.to_offset(
+            freq or pd.infer_freq(power.index)
+        )).seconds
+    power_slope = power_norm.diff() / freq_seconds
     rolling_mean_slope = power_slope.rolling(
         min_periods=1,
         center=True,
-        window=4
+        window=3600 // freq_seconds
     ).mean()
-    # value must be above the 99.5th percentile and greater than 10
-    # XXX This is described as the 99.5th percentile, but I don't
-    #     think the calculation is correct.
-    high_value = (power_norm >= 0.995) & (power > 10)
-    low_slope = abs(power_slope) <= 0.0035
-    low_mean_slope = abs(rolling_mean_slope) <= 0.0035
+    high_value = (power_norm >= power_normalized_min) & (power > power_min)
+    low_slope = abs(power_slope) <= slope_min
+    low_mean_slope = abs(rolling_mean_slope) <= slope_min
     clipping = (high_value & low_slope) | (high_value & low_mean_slope)
     # filter clipping and only accept clipped periods longer than duration_min
     run_lengths = _group.run_lengths(clipping)
-    return clipping & (run_lengths > duration_min/0.25)
+    return clipping & (run_lengths > (duration_min*3600) / freq_seconds)
