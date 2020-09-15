@@ -68,12 +68,14 @@ def shifts_ruptures(daytime, clearsky_midday):
 
     """
     midday = _group.by_day(daytime).apply(
-        lambda day: (day[day].index.max() - day[day].index.min()).seconds * 60 / 2
+        lambda day: (day[day].index.min()
+                     + ((day[day].index.max() - day[day].index.min()) / 2))
     )
-    midday_diff = midday - clearsky_midday
+    midday_minutes = midday.dt.hour * 60 + midday.dt.minute
+    midday_diff = midday_minutes - clearsky_midday
     break_points = ruptures.Pelt(model='rbf').fit_predict(
         signal=midday_diff.values,
-        pen=10  # TODO get the correct penalty from Matt
+        pen=15
     )
     break_points.insert(0, -1)
     break_points.append(len(midday_diff))
