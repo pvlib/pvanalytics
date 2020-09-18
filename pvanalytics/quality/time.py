@@ -94,7 +94,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2):
         min_size=period_min
     ).fit_predict(
         signal=midday_diff.values,
-        pen=15
+        pen=3
     )
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a

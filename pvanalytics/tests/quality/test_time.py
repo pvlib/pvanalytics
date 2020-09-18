@@ -177,3 +177,19 @@ def test_shift_ruptures_period_min(midday):
             midday['daytime'], midday['clearsky_midday'],
             period_min=10000
         )
+
+
+def test_shifts_ruptures_shift_at_end(midday):
+    shifted = _shift_between(
+        midday['daytime'], 60,
+        start='2020-02-01',
+        end='2020-02-29'
+    )
+    shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
+    shift_expected['2020-02-02':'2020-02-29'] = 60
+    shifts = time.shifts_ruptures(shifted, midday['clearsky_midday'])
+    assert_series_equal(
+        shifts,
+        shift_expected,
+        check_names=False
+    )
