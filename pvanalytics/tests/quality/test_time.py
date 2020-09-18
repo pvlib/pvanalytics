@@ -112,6 +112,7 @@ def test_shift_ruptures_negative_shift(midday):
         check_names=False
     )
 
+
 def test_shift_ruptures_partial_shift(midday):
     freq_minutes = pd.to_timedelta(
         frequencies.to_offset(pd.infer_freq(midday['daytime'].index))
