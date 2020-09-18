@@ -77,6 +77,10 @@ def shifts_ruptures(daytime, clearsky_midday):
         signal=midday_diff.values,
         pen=15
     )
+    # Make sure the entire series is covered by the intervals between
+    # the breakpoints that were identified above. This means adding a
+    # breakpoint at the beginning of the series (0) and at the end if
+    # one does not already exist.
     break_points.insert(0, 0)
     if break_points[-1] != len(midday_diff):
         break_points.append(len(midday_diff))
