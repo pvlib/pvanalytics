@@ -3,6 +3,7 @@ from datetime import datetime
 import pytz
 import pytest
 import pandas as pd
+from pandas.tseries import frequencies
 from pandas.util.testing import assert_series_equal
 from pvanalytics.quality import time
 
@@ -108,5 +109,20 @@ def test_shift_ruptures_negative_shift(midday):
     assert_series_equal(
         time.shifts_ruptures(shifted, midday['clearsky_midday']),
         pd.Series(-60, index=shifted.index, dtype='int64'),
+        check_names=False
+    )
+
+def test_shift_ruptures_partial_shift(midday):
+    freq_minutes = pd.to_timedelta(
+        frequencies.to_offset(pd.infer_freq(midday['daytime'].index))
+    ).seconds // 60
+    first_half = midday['daytime'][:'2020-2-1']
+    shifted = first_half.shift(60 // freq_minutes, fill_value=False)
+    daytime = shifted.append(midday['daytime']['2020-2-2':])
+    expected = pd.Series(60, index=midday['daytime'].index)
+    expected.loc['2020-2-2':] = 0
+    assert_series_equal(
+        time.shifts_ruptures(daytime, midday['clearsky_midday']),
+        expected,
         check_names=False
     )
