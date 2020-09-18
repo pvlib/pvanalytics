@@ -114,16 +114,66 @@ def test_shift_ruptures_negative_shift(midday):
 
 
 def test_shift_ruptures_partial_shift(midday):
-    freq_minutes = pd.to_timedelta(
-        frequencies.to_offset(pd.infer_freq(midday['daytime'].index))
-    ).seconds // 60
-    first_half = midday['daytime'][:'2020-2-1']
-    shifted = first_half.shift(60 // freq_minutes, fill_value=False)
-    daytime = shifted.append(midday['daytime']['2020-2-2':])
+    shifted = _shift_between(
+        midday['daytime'], 60,
+        start='2020-1-1', end='2020-2-1'
+    )
     expected = pd.Series(60, index=midday['daytime'].index)
     expected.loc['2020-2-2':] = 0
     assert_series_equal(
-        time.shifts_ruptures(daytime, midday['clearsky_midday']),
+        time.shifts_ruptures(shifted, midday['clearsky_midday']),
         expected,
         check_names=False
     )
+
+
+def _shift_between(series, shift, start, end):
+    freq_minutes = pd.to_timedelta(
+        frequencies.to_offset(pd.infer_freq(series.index))
+    ).seconds // 60
+    before = series[:start]
+    during = series[start:end]
+    after = series[end:]
+    during = during.shift(shift // freq_minutes, fill_value=False)
+    shifted = before.append(during).append(after)
+    return shifted[~shifted.index.duplicated()]
+
+
+def test_shift_ruptures_period_min(midday):
+    no_shifts = pd.Series(0, index=midday['daytime'].index, dtype='int64')
+    assert_series_equal(
+        time.shifts_ruptures(
+            midday['daytime'], midday['clearsky_midday'],
+            period_min=len(midday['clearsky_midday'])
+        ),
+        no_shifts,
+        check_names=False
+    )
+
+    shifted = _shift_between(
+        midday['daytime'], 60,
+        start='2020-01-01',
+        end='2020-01-20'
+    )
+    shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
+    shift_expected.loc['2020-01-01':'2020-01-20'] = 60
+    assert_series_equal(
+        time.shifts_ruptures(
+            shifted, midday['clearsky_midday'], period_min=30
+        ),
+        no_shifts,
+        check_names=False
+    )
+    assert_series_equal(
+        time.shifts_ruptures(
+            shifted, midday['clearsky_midday'], period_min=15
+        ),
+        shift_expected,
+        check_names=False
+    )
+
+    with pytest.raises(ValueError):
+        time.shifts_ruptures(
+            midday['daytime'], midday['clearsky_midday'],
+            period_min=10000
+        )

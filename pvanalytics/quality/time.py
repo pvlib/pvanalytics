@@ -46,7 +46,7 @@ def _round_fifteen(x):
     return quotient*15 + remainder
 
 
-def shifts_ruptures(daytime, clearsky_midday):
+def shifts_ruptures(daytime, clearsky_midday, period_min=2):
     """Identify time shifts using the ruptures library.
 
     Parameters
@@ -56,11 +56,24 @@ def shifts_ruptures(daytime, clearsky_midday):
     clearsky_midday : Series
         Time of midday in minutes for each day with no time shifts
         (i.e.based on solar position for with a fixed-offset time zone).
+    period_min : int, default 2
+        Minimum number of days between shifts. Must be less than or equal to
+        the number of days in `daytime`.
+
+        Increasing this parameter will make the result less sensitive to
+        transient shifts. For example if your intent is to find and correct
+        daylight savings time shifts passing `period_min=60` can give good
+        results while excluding shorter periods that appear shifted.
 
     Returns
     -------
     Series
         Time shift in minutes at each value in `daytime`.
+
+    Raises
+    ------
+    ValueError
+        If the number of days in `daytime` is less than `period_min`.
 
     Notes
     -----
@@ -71,9 +84,15 @@ def shifts_ruptures(daytime, clearsky_midday):
         lambda day: (day[day].index.min()
                      + ((day[day].index.max() - day[day].index.min()) / 2))
     )
+    if period_min > len(midday):
+        raise ValueError("period_min exceeds number of days in series")
     midday_minutes = midday.dt.hour * 60 + midday.dt.minute
     midday_diff = midday_minutes - clearsky_midday
-    break_points = ruptures.Pelt(model='rbf', jump=1).fit_predict(
+    break_points = ruptures.Pelt(
+        model='rbf',
+        jump=1,
+        min_size=period_min
+    ).fit_predict(
         signal=midday_diff.values,
         pen=15
     )
