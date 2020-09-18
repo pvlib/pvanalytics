@@ -209,3 +209,17 @@ def test_shifts_ruptures_shift_in_middle(midday):
         shift_expected,
         check_names=False
     )
+
+
+def test_rounding():
+    xs = pd.Series(
+        [-10, 10, -16, 16, -28, 28, -30, 30, -8, 8, -7, 7, -3, 3, 0]
+    )
+    assert_series_equal(
+        time._round_multiple(xs, 15),
+        pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, -15, 15, 0, 0, 0, 0, 0])
+    )
+    assert_series_equal(
+        time._round_multiple(xs, 15, up_from=9),
+        pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
+    )

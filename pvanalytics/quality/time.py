@@ -1,5 +1,6 @@
 """Quality tests related to time."""
 import pandas as pd
+import numpy as np
 import ruptures
 from scipy import stats
 from pvanalytics.util import _group
@@ -38,12 +39,23 @@ def spacing(times, freq):
     return delta == freq
 
 
-def _round_fifteen(x):
-    # Return `x` rounded to the nearest multiple of 15
-    quotient, remainder = divmod(x, 15)
-    remainder[remainder > 7] = 15
-    remainder[remainder <= 7] = 0
-    return quotient*15 + remainder
+def _round_multiple(x, to, up_from=None):
+    # Return `x` rounded to the nearest multiple of `to`
+    #
+    # Parameters
+    # ----------
+    # x : Series
+    # to : int
+    #     `x` is rounded to a multiple of `to`
+    # up_from : int, optional
+    #     If the remainder of `x` / `to` is greater than `up_from`
+    #     then `x` is rounded up, otherwise `x` is rounded down.
+    #     If not specified rounding will go up from `to` // 2.
+    up_from = up_from or to // 2
+    quotient, remainder = divmod(abs(x), to)
+    remainder[remainder > up_from] = to
+    remainder[remainder <= up_from] = 0
+    return np.sign(x) * (quotient*to + remainder)
 
 
 def shifts_ruptures(daytime, clearsky_midday, period_min=2):
@@ -94,7 +106,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2):
         min_size=period_min
     ).fit_predict(
         signal=midday_diff.values,
-        pen=3
+        pen=15
     )
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a
@@ -103,7 +115,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2):
     break_points.insert(0, 0)
     if break_points[-1] != len(midday_diff):
         break_points.append(len(midday_diff))
-    midday_diff = _round_fifteen(midday_diff)
+    midday_diff = _round_multiple(midday_diff, 15)
     shift_amount = midday_diff.groupby(
         pd.cut(
             midday_diff.reset_index().index,
