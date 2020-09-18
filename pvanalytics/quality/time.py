@@ -77,7 +77,7 @@ def shifts_ruptures(daytime, clearsky_midday):
         signal=midday_diff.values,
         pen=15
     )
-    break_points.insert(0, -1)
+    break_points.insert(0, 0)
     break_points.append(len(midday_diff))
     midday_diff = _round_fifteen(midday_diff)
     shift_amount = midday_diff.groupby(
