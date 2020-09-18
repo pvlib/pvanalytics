@@ -73,7 +73,7 @@ def shifts_ruptures(daytime, clearsky_midday):
     )
     midday_minutes = midday.dt.hour * 60 + midday.dt.minute
     midday_diff = midday_minutes - clearsky_midday
-    break_points = ruptures.Pelt(model='rbf').fit_predict(
+    break_points = ruptures.Pelt(model='rbf', jump=1).fit_predict(
         signal=midday_diff.values,
         pen=15
     )
@@ -82,7 +82,11 @@ def shifts_ruptures(daytime, clearsky_midday):
     midday_diff = _round_fifteen(midday_diff)
     shift_amount = midday_diff.groupby(
         pd.cut(
-            midday_diff.reset_index().index, break_points, duplicates='drop')
+            midday_diff.reset_index().index,
+            break_points,
+            include_lowest=True, right=False,
+            duplicates='drop'
+        )
     ).transform(
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
