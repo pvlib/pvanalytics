@@ -71,7 +71,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     midday times from `clearsky_midday`. For each period between change
     points the mode of the difference is rounded to a multiple of
     `shift_min` and returned as the time-shift for all values in that
-     period.
+    period.
 
     Parameters
     ----------
