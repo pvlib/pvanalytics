@@ -1,7 +1,6 @@
 """Quality tests related to time."""
 import pandas as pd
 import numpy as np
-import ruptures
 from scipy import stats
 from pvanalytics.util import _group
 
@@ -115,6 +114,11 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     Derived from the PVFleets QA project.
 
     """
+    try:
+        import ruptures
+    except ImportError:
+        raise ImportError("time.shifts_ruptures() requires ruptures.")
+
     midday = _group.by_day(daytime).apply(
         lambda day: (day[day].index.min()
                      + ((day[day].index.max() - day[day].index.min()) / 2))

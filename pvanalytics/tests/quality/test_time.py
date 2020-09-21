@@ -81,6 +81,18 @@ def midday(request, albuquerque):
             'clearsky_midday': mid_day}
 
 
+def requires_ruptures(test):
+    """Skip `test` if ruptures is not installed."""
+    try:
+        import ruptures  # noqa: F401
+        has_ruptures = True
+    except ImportError:
+        has_ruptures = False
+    return pytest.mark.skipif(
+        not has_ruptures, reason="requires ruptures")(test)
+
+
+@requires_ruptures
 def test_shift_ruptures_no_shift(midday):
     """Daytime mask with no time-shifts yields a series with 0s for
     shift amounts."""
@@ -95,6 +107,7 @@ def test_shift_ruptures_no_shift(midday):
     )
 
 
+@requires_ruptures
 def test_shift_ruptures_positive_shift(midday):
     """Every day shifted 1 hour later yields a series with shift
      of 60 for each day."""
@@ -110,6 +123,7 @@ def test_shift_ruptures_positive_shift(midday):
     )
 
 
+@requires_ruptures
 def test_shift_ruptures_negative_shift(midday):
     shifted = _shift_between(
         midday['daytime'], -60,
@@ -123,6 +137,7 @@ def test_shift_ruptures_negative_shift(midday):
     )
 
 
+@requires_ruptures
 def test_shift_ruptures_partial_shift(midday):
     shifted = _shift_between(
         midday['daytime'], 60,
@@ -149,6 +164,7 @@ def _shift_between(series, shift, start, end):
     return shifted[~shifted.index.duplicated()]
 
 
+@requires_ruptures
 def test_shift_ruptures_period_min(midday):
     no_shifts = pd.Series(0, index=midday['daytime'].index, dtype='int64')
     assert_series_equal(
@@ -189,6 +205,7 @@ def test_shift_ruptures_period_min(midday):
         )
 
 
+@requires_ruptures
 def test_shifts_ruptures_shift_at_end(midday):
     shifted = _shift_between(
         midday['daytime'], 60,
@@ -205,6 +222,7 @@ def test_shifts_ruptures_shift_at_end(midday):
     )
 
 
+@requires_ruptures
 def test_shifts_ruptures_shift_in_middle(midday):
     shifted = _shift_between(
         midday['daytime'], 60,
@@ -221,6 +239,7 @@ def test_shifts_ruptures_shift_in_middle(midday):
     )
 
 
+@requires_ruptures
 def test_shift_ruptures_shift_min(midday):
     shifted = _shift_between(
         midday['daytime'], 30,
