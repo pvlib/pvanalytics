@@ -98,7 +98,11 @@ def test_shift_ruptures_no_shift(midday):
 def test_shift_ruptures_positive_shift(midday):
     """Every day shifted 1 hour later yields a series with shift
      of 60 for each day."""
-    shifted = midday['daytime'].tshift(1, 'H')['2020-01-01':'2020-02-29']
+    shifted = _shift_between(
+        midday['daytime'], 60,
+        start='2020-01-01',
+        end='2020-02-29'
+    )
     assert_series_equal(
         time.shifts_ruptures(shifted, midday['clearsky_midday']),
         pd.Series(60, index=shifted.index, dtype='int64'),
@@ -107,7 +111,11 @@ def test_shift_ruptures_positive_shift(midday):
 
 
 def test_shift_ruptures_negative_shift(midday):
-    shifted = midday['daytime'].tshift(-1, 'H')['2020-01-01':'2020-02-29']
+    shifted = _shift_between(
+        midday['daytime'], -60,
+        start='2020-01-01',
+        end='2020-02-29'
+    )
     assert_series_equal(
         time.shifts_ruptures(shifted, midday['clearsky_midday']),
         pd.Series(-60, index=shifted.index, dtype='int64'),
