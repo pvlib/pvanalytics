@@ -75,7 +75,9 @@ def midday(request, albuquerque):
     )
     mid_day = mid_day.dt.hour * 60 + mid_day.dt.minute
     mid_day.index = pd.DatetimeIndex(mid_day.index, tz='MST')
-    return {'daytime': solar_position['zenith'] < 87,
+    daytime = solar_position['zenith'] < 87
+    daytime.index.freq = None
+    return {'daytime': daytime,
             'clearsky_midday': mid_day}
 
 
