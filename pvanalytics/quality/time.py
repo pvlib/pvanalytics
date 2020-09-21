@@ -62,6 +62,18 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
                     shift_min=15, round_up_from=None):
     """Identify time shifts using the ruptures library.
 
+    Compares the solar-transit time from `clearsky_midday` with the
+    mid-point between sunrise and sunset time derived from the `daytime`
+    mask. These times are the times of the first and last True value on
+    each day.
+
+    The Pelt changepoint detection method is applied to the difference
+    in midday times derived from the `daytime` series and the expected
+    midday times from `clearsky_midday`. For each period between change
+    points the mode of the difference is rounded to a multiple of
+    `shift_min` and returned as the time-shift for all values in that
+     period.
+
     Parameters
     ----------
     daytime : Series
@@ -91,7 +103,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     Returns
     -------
     Series
-        Time shift in minutes at each value in `daytime`.
+        Time shift in minutes at each timestamp in `daytime`.
 
     Raises
     ------
