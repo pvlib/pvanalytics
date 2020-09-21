@@ -211,6 +211,33 @@ def test_shifts_ruptures_shift_in_middle(midday):
     )
 
 
+def test_shift_ruptures_shift_min(midday):
+    shifted = _shift_between(
+        midday['daytime'], 30,
+        start='2020-01-01',
+        end='2020-01-25',
+    )
+    shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
+    shift_expected.loc['2020-01-01':'2020-01-25'] = 30
+    no_shift = pd.Series(0, index=shifted.index, dtype='int64')
+    assert_series_equal(
+        time.shifts_ruptures(
+            shifted, midday['clearsky_midday'],
+            shift_min=60, round_up_from=40
+        ),
+        no_shift,
+        check_names=False
+    )
+    assert_series_equal(
+        time.shifts_ruptures(
+            shifted, midday['clearsky_midday'],
+            shift_min=30
+        ),
+        shift_expected if pd.infer_freq(shifted.index) != 'H' else no_shift,
+        check_names=False
+    )
+
+
 def test_rounding():
     xs = pd.Series(
         [-10, 10, -16, 16, -28, 28, -30, 30, -8, 8, -7, 7, -3, 3, 0]

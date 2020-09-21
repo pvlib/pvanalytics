@@ -58,7 +58,8 @@ def _round_multiple(x, to, up_from=None):
     return np.sign(x) * (quotient*to + remainder)
 
 
-def shifts_ruptures(daytime, clearsky_midday, period_min=2):
+def shifts_ruptures(daytime, clearsky_midday, period_min=2,
+                    shift_min=15, round_up_from=None):
     """Identify time shifts using the ruptures library.
 
     Parameters
@@ -76,6 +77,16 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2):
         transient shifts. For example if your intent is to find and correct
         daylight savings time shifts passing `period_min=60` can give good
         results while excluding shorter periods that appear shifted.
+    shift_min : int, default 15
+        Minimum shift amount in minutes. All shifts are rounded to a multiple
+        of `shift_min`. [minutes]
+    round_up_from : int, optional
+        The number of minutes greater than a multiple of `shift_min` for a
+        shift to be rounded up. If a shift is less than `round_up_from` then
+        it will be rounded towards 0. If not specified then the shift will
+        be rounded up from `shift_min // 2`. Using a larger value will
+        effectively make the shift detection more conservative as small
+        variations will tend to be rounded to zero.
 
     Returns
     -------
@@ -115,7 +126,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2):
     break_points.insert(0, 0)
     if break_points[-1] != len(midday_diff):
         break_points.append(len(midday_diff))
-    midday_diff = _round_multiple(midday_diff, 15)
+    midday_diff = _round_multiple(midday_diff, shift_min, round_up_from)
     shift_amount = midday_diff.groupby(
         pd.cut(
             midday_diff.reset_index().index,
