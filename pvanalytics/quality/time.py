@@ -58,7 +58,8 @@ def _round_multiple(x, to, up_from=None):
 
 
 def shifts_ruptures(daytime, clearsky_midday, period_min=2,
-                    shift_min=15, round_up_from=None):
+                    shift_min=15, round_up_from=None,
+                    prediction_penalty=13):
     """Identify time shifts using the ruptures library.
 
     Compares the solar-transit time from `clearsky_midday` with the
@@ -98,6 +99,9 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         be rounded up from `shift_min // 2`. Using a larger value will
         effectively make the shift detection more conservative as small
         variations will tend to be rounded to zero.
+    prediction_penalty : int, default 13
+        Penalty used in assessing change points.
+        See :py:method:`ruptures.detection.Pelt.predict` for more information.
 
     Returns
     -------
@@ -133,7 +137,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         min_size=period_min
     ).fit_predict(
         signal=midday_diff.values,
-        pen=13
+        pen=prediction_penalty
     )
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a
