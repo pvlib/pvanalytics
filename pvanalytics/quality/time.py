@@ -80,7 +80,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         Boolean time-series with True for day and False for night.
     clearsky_midday : Series
         Time of midday in minutes for each day with no time shifts
-        (i.e.based on solar position for with a fixed-offset time zone).
+        (i.e.based on solar position with a fixed-offset time zone).
     period_min : int, default 2
         Minimum number of days between shifts. Must be less than or equal to
         the number of days in `daytime`.
@@ -131,7 +131,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         raise ValueError("period_min exceeds number of days in series")
     midday_minutes = midday.dt.hour * 60 + midday.dt.minute
     # Drop timezone information. At this point there is one value per day
-    # so it is no longer needed.
+    # so the timezone is irrelevant.
     midday_diff = \
         midday_minutes.tz_localize(None) - clearsky_midday.tz_localize(None)
     break_points = ruptures.Pelt(
@@ -160,6 +160,6 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     ).transform(
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
-    # localize the shit amount series to the timezone of the input
+    # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(daytime.index.tz)
     return shift_amount.reindex(daytime.index, method='pad')
