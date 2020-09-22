@@ -130,7 +130,10 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     if period_min > len(midday):
         raise ValueError("period_min exceeds number of days in series")
     midday_minutes = midday.dt.hour * 60 + midday.dt.minute
-    midday_diff = midday_minutes - clearsky_midday
+    # Drop timezone information. At this point there is one value per day
+    # so it is no longer needed.
+    midday_diff = \
+        midday_minutes.tz_localize(None) - clearsky_midday.tz_localize(None)
     break_points = ruptures.Pelt(
         model='rbf',
         jump=1,
@@ -157,4 +160,6 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     ).transform(
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
+    # localize the shit amount series to the timezone of the input
+    shift_amount = shift_amount.tz_localize(daytime.index.tz)
     return shift_amount.reindex(daytime.index, method='pad')

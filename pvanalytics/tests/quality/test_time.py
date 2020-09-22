@@ -267,6 +267,39 @@ def test_shift_ruptures_shift_min(midday):
     )
 
 
+def test_shifts_ruptures_tz_localized(midday):
+    assert_series_equal(
+        time.shifts_ruptures(
+            midday['daytime'].tz_localize(None),
+            midday['clearsky_midday']
+        ),
+        pd.Series(
+            0, index=midday['daytime'].index.tz_localize(None), dtype='int64'
+        ),
+        check_names=False
+    )
+    assert_series_equal(
+        time.shifts_ruptures(
+            midday['daytime'],
+            midday['clearsky_midday'].tz_localize(None)
+        ),
+        pd.Series(
+            0, index=midday['daytime'].index, dtype='int64'
+        ),
+        check_names=False
+    )
+    assert_series_equal(
+        time.shifts_ruptures(
+            midday['daytime'].tz_localize(None),
+            midday['clearsky_midday'].tz_localize(None)
+        ),
+        pd.Series(
+            0, index=midday['daytime'].index.tz_localize(None), dtype='int64'
+        ),
+        check_names=False
+    )
+
+
 def test_rounding():
     xs = pd.Series(
         [-10, 10, -16, 16, -28, 28, -30, 30, -8, 8, -7, 7, -3, 3, 0]
