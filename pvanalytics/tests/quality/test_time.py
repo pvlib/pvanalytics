@@ -305,13 +305,13 @@ def sunrise_sunset_transit_mst(albuquerque):
     )
 
 
-@pytest.fixture(scope='module')
-def daytime_denver(albuquerque):
+@pytest.fixture(scope='module', params=['30T', '15T'])
+def daytime_denver(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
         pd.date_range(
             start='2020-02-01',
             end='2020-05-01',
-            freq='15T',
+            freq=request.param,
             closed='left',
             tz='America/Denver'
         )
