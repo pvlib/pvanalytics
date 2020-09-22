@@ -287,3 +287,46 @@ def test_rounding():
         time._round_multiple(xs, 30),
         pd.Series([0, 0, -30, 30, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
     )
+
+
+@pytest.fixture(scope='module')
+def sunrise_sunset_transit_mst(albuquerque):
+    """Get the sunrise, sunset, and solar transit times in albuquerque in
+    Mountain Standard Time"""
+    return albuquerque.get_sun_rise_set_transit(
+        pd.date_range(
+            start='2020-02-01',
+            end='2020-05-01',
+            freq='15T',
+            closed='left',
+            tz='MST'
+        ),
+        method='spa'
+    )
+
+
+@pytest.fixture(scope='module')
+def daytime_denver(albuquerque):
+    solar_position = albuquerque.get_solarposition(
+        pd.date_range(
+            start='2020-02-01',
+            end='2020-05-01',
+            freq='15T',
+            closed='left',
+            tz='America/Denver'
+        )
+    )
+    return (solar_position['apparent_zenith'] < 87).tz_localize(None)
+
+
+def test_shifts_offset_dst_spring(sunrise_sunset_transit_mst, daytime_denver):
+    expected = pd.Series(0, daytime_denver.index, dtype='int64')
+    expected.loc['2020-03-08':] = 60
+    assert_series_equal(
+        time.shifts_offset(
+            daytime_denver,
+            sunrise_sunset_transit_mst['sunrise']
+        ),
+        expected,
+        check_names=False
+    )

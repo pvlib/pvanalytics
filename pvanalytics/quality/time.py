@@ -158,3 +158,38 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
     return shift_amount.reindex(daytime.index, method='pad')
+
+
+def _sunrise_from_mask(daytime_mask):
+    sr_time = _group.by_day(daytime_mask).apply(
+        lambda day: day[day].index.min()
+    )
+    return sr_time.dt.hour * 60 + sr_time.dt.minute
+
+
+def shifts_offset(daytime, sunrise_fixed):
+    """Identify time shifts by comparing sunrise in `daytime` to sunrise
+    in a series with a fixed offset time-zone.
+
+    Parameters
+    ----------
+    daytime : Series
+        Boolean series with True for values during the day and False at night.
+    sunrise_fixed : Series
+        Series of timestamps giving the sunrise time on each day. Must cover
+        the same days as `daytime`.
+
+    Returns
+    -------
+    Series
+        Integers giving the number of minutes by which the timestamps appear
+        to be shifted. Has the same index as `daytime`.
+    """
+    sunrise = _sunrise_from_mask(daytime)
+    sunrise_fixed = sunrise_fixed.resample('D').first()
+    sunrise_fixed = sunrise_fixed.tz_localize(None)
+    sunrise_fixed = sunrise_fixed.dt.hour * 60 + sunrise_fixed.dt.minute
+    sunrise_difference = sunrise - sunrise_fixed
+    return _round_multiple(sunrise_difference, to=60, up_from=40).reindex(
+        daytime.index, method='pad'
+    )
