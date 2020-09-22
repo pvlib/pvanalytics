@@ -42,6 +42,7 @@ DOCS_REQUIRE = [
 ]
 
 EXTRAS_REQUIRE = {
+    'optional': ['ruptures'],
     'test': TESTS_REQUIRE,
     'doc': DOCS_REQUIRE
 }
