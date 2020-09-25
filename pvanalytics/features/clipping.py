@@ -293,10 +293,10 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     # - greater than or equal to `clip_min`
     # - has a derivative less than `derivative_max`
     # - is at least `daily_min_fraction` of the daily maximum
-    candidate_clipping = (power_normalized >= clip_min
-                          & (forward_diff <= derivative_max
-                             | backward_diff <= derivative_max)
-                          & fraction_of_max >= daily_fraction_min)
+    candidate_clipping = ((power_normalized >= clip_min)
+                          & ((forward_diff <= derivative_max)
+                             | (backward_diff <= derivative_max))
+                          & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
     # at least as long as `length_min`
     valid_sequence = _group.run_lengths(candidate_clipping) >= length_min
