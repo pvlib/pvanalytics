@@ -228,56 +228,90 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def slope(ac_power, outliers=None, freq=None, slope_min=4.99e-6,
-          power_min=10, power_normalized_min=0.8, clip_tolerance=0.02, duration_min=1):
-    """Identify clipping as times when slope is low and power is
-    relatively high.
+def _estimate_freq_minutes(index):
+    # Estimate the timestamp frequency in minutes.
+    #
+    # Patameters
+    # ----------
+    # index : DatetimeIndex
+    #
+    # Returns
+    # -------
+    # float
+    #     Timestamp spacing in minutes.
+    freq = pd.infer_freq(index)
+    if freq:
+        return pd.to_timedelta(frequencies.to_offset(freq)).seconds / 60
+    return index.to_series().diff().astype('timedelta64[m]').mode()[0]
 
-    A value that satisfies the following criteria might be clipped:
-    - normalized value greater than `power_normalized_min`
-    - normalized value within `clip_tolerance` of the maximum value on that day
-    - normalized value within `clip_tolerance` of the maximum value the
-      preceding 7 days
-    - slope less than `slope_min`
 
-    Additionally, clipped values must be part of a sequence of at least two
-    consecutive values that meet the criteria above.
+def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
+              length_min=2, freq_minutes=None, derivative_max=None):
+    """Identify inverter clipping from the shape of the AC power output.
 
     Parameters
     ----------
-    ac_power : Series
-    outliers : Series, optional
-        True for values that are outliers.
+    power_ac : Series
+        AC Power.
+    clip_min : float, default 0.8
+        After normalization a clipped value must be greater than `clip_min`
+    daily_fraction_min : float, default 0.9
+        A clipped value must be greater than `daily_fraction_min` times the
+        maximum value on the same day.
+    length_min : int, default 2
+        Minimum number of sequential values that satisfy clipping criteria.
+    freq_minutes : float, optional
+        Timestamp spacing in minutes. If not specified timestamp spacing
+        will be inferred from the index of `power_ac`.
+    derivative_max : float, optional
+        Values with a derivative less than `derivative_max` are
+        potentially clipped. If not specified the value is based on
+        the timestamp spacing in `power_ac` according to the following
+        formula:
 
-    Returns
-    -------
-    Series
-        True when clipping is indicated.
+        .. math::
 
-    Notes
-    -----
-    Derived from PVFleets QA project.
+           0.00005 * f_m + 0.0009
 
+        where :math:`f_m` is the timestamp spacing in minutes.
     """
-    power = ac_power.copy()
-    if outliers is not None:
-        power.loc[outliers] = np.nan
-    power.loc[power < 0] = 0
-    power_norm = _normalize.min_max(power)
-    freq_seconds = pd.to_timedelta(
-        frequencies.to_offset(
-            freq or pd.infer_freq(power.index)
-        )).seconds
-    power_slope = power_norm.diff() / freq_seconds
-    rolling_mean_slope = power_slope.rolling(
-        min_periods=1,
-        center=True,
-        window=3600 // freq_seconds
-    ).mean()
-    high_value = (power_norm >= power_normalized_min) & (power > power_min)
-    low_slope = abs(power_slope) <= slope_min
-    low_mean_slope = abs(rolling_mean_slope) <= slope_min
-    clipping = (high_value & low_slope) | (high_value & low_mean_slope)
-    # filter clipping and only accept clipped periods longer than duration_min
-    run_lengths = _group.run_lengths(clipping)
-    return clipping & (run_lengths > (duration_min*3600) / freq_seconds)
+    if freq_minutes is None:
+        # NOTE: fleets code uses the mode of the difference between timestamps
+        freq_minutes = _estimate_freq_minutes(power_ac.index)
+    if derivative_max is None:
+        # Experimentally derived formula from the PVFleets project
+        derivative_max = (0.00005 * freq_minutes) + 0.0009
+    power_ac = power_ac.copy()
+    power_ac.loc[power_ac < 0] = 0
+    power_normalized = _normalize.min_max(power_ac)
+    forward_diff = abs(power_normalized - power_normalized.shift(-1))
+    backward_diff = abs(power_normalized - power_normalized.shift(1))
+    daily_max = _group.by_day(power_normalized).transform('max')
+    fraction_of_max = power_normalized / daily_max
+    # Identify values that might be clipped
+    # A value is clipped if it is
+    # - greater than or equal to `clip_min`
+    # - has a derivative less than `derivative_max`
+    # - is at least `daily_min_fraction` of the daily maximum
+    candidate_clipping = (power_normalized >= clip_min
+                          & (forward_diff <= derivative_max
+                             | backward_diff <= derivative_max)
+                          & fraction_of_max >= daily_fraction_min)
+    # clipped values must be part of a sequence of clipped values
+    # at least as long as `length_min`
+    valid_sequence = _group.run_lengths(candidate_clipping) >= length_min
+    clipping = candidate_clipping & valid_sequence
+    # Establish a clipping threshold for each day. The threshold is the
+    # minimum value that was flagged as clipping according to the criteria
+    # above.
+    daily_clipping_threshold = _group.by_day(
+        clipping
+    ).transform(
+        # TODO try to find a less convoluted way to do this
+        lambda day: power_normalized[day.index][day].min()
+    )
+    # For days with clipping (according to the criteria above), any value
+    # greater than the daily clipping threshold is flagged as clipped.
+    # (Days without clipping are implicitly flagged False here because
+    # the clipping threshold on those days is NaN.)
+    return (daily_clipping_threshold - power_normalized) <= 0.01
