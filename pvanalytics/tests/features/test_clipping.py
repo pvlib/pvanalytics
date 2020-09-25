@@ -234,7 +234,7 @@ def test_threshold_no_clipping_four_days(quadratic):
     assert not clipped.any()
 
 
-def test_slope_no_clipping(albuquerque):
+def test_geometric_no_clipping(albuquerque):
     clearsky = albuquerque.get_clearsky(
         pd.date_range(
             start='7/1/2020',
@@ -243,7 +243,7 @@ def test_slope_no_clipping(albuquerque):
         ),
         model='simplified_solis'
     )
-    clipped = clipping.slope(clearsky['ghi'])
+    clipped = clipping.geometric(clearsky['ghi'])
     assert not clipped.any()
 
 
@@ -269,37 +269,15 @@ def simple_clipped(request, albuquerque):
     }
 
 
-def test_slope_simple_clipping(simple_clipped):
+def test_geometric_simple_clipping(simple_clipped):
     assert_series_equal(
-        clipping.slope(simple_clipped['data']),
+        clipping.geometric(simple_clipped['data']),
         simple_clipped['expected'],
         check_names=False
     )
 
 
-def test_slope_clipping_too_short(simple_clipped):
-    clipped = clipping.slope(simple_clipped['data'], duration_min=5)
-    assert_series_equal(
-        clipped,
-        pd.Series(False, simple_clipped['expected'].index),
-        check_names=False
-    )
-
-
-def test_slope_outliers(simple_clipped):
-    clipped = clipping.slope(
-        simple_clipped['data'],
-        outliers=simple_clipped['expected']
-    )
-    expected = pd.Series(False, index=simple_clipped['expected'].index)
-    assert_series_equal(
-        clipped,
-        expected,
-        check_names=False
-    )
-
-
-def test_slope_uneven_timestamps(simple_clipped):
+def test_geometric_uneven_timestamps(simple_clipped):
     data = simple_clipped['data'].copy()
     data.loc['7/3/2020 10:00':'7/3/2020 12:00'] = np.nan
     data.loc['7/10/2020 01:00':'7/10/2020 03:00'] = np.nan
@@ -308,7 +286,7 @@ def test_slope_uneven_timestamps(simple_clipped):
         data.loc['7/10/2020 13:00':'7/3/2020 13:30'] = np.nan
     data.dropna(inplace=True)
     assert_series_equal(
-        clipping.slope(data),
+        clipping.geometric(data),
         simple_clipped['expected'][data.index],
         check_names=False
     )
