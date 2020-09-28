@@ -250,6 +250,25 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
               freq_minutes=None, derivative_max=None):
     """Identify inverter clipping from the shape of the AC power output.
 
+    `power_ac` is normalized, then for each day in `power_ac` values that
+    look like they might by clipped are identified according to the following
+    criteria:
+
+    - the normalized value is greater than `clip_min`
+    - the forward or backward difference is less than `derivative_max`
+    - the value is at least `daily_fraction_min` of the maximum value
+      on the same day
+
+    A value that meets the three criteria above must also be part of a
+    sequence of more than `length_min` consecutive values that also meet
+    the clipping criteria.
+
+    On each day, the values that are flagged as clipped according the
+    these criteria are used to identify a daily clipping threshold. The
+    daily threshold is the minimum of the clipped values minus `margin`.
+    Any value on that day that is greater than or equal to the threshold
+    is flagged as clipped and the resulting mask is returned.
+
     Parameters
     ----------
     power_ac : Series
@@ -278,9 +297,13 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
            0.00005 * f_m + 0.0009
 
         where :math:`f_m` is the timestamp spacing in minutes.
+
+    Returns
+    -------
+    Series
+        Boolean series with True for values that appear to be clipped.
     """
     if freq_minutes is None:
-        # NOTE: fleets code uses the mode of the difference between timestamps
         freq_minutes = _estimate_freq_minutes(power_ac.index)
     if derivative_max is None:
         # Experimentally derived formula from the PVFleets project
@@ -292,27 +315,21 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     backward_diff = abs(power_normalized - power_normalized.shift(1))
     daily_max = _group.by_day(power_normalized).transform('max')
     fraction_of_max = power_normalized / daily_max
-    # Identify values that might be clipped
-    # A value is clipped if it is
-    # - greater than or equal to `clip_min`
-    # - has a derivative less than `derivative_max`
-    # - is at least `daily_min_fraction` of the daily maximum
     candidate_clipping = ((power_normalized >= clip_min)
                           & ((forward_diff <= derivative_max)
                              | (backward_diff <= derivative_max))
                           & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
-    # at least as long as `length_min`
+    # that is longer than `length_min`
     valid_sequence = _group.run_lengths(candidate_clipping) > length_min
     clipping = candidate_clipping & valid_sequence
     # Establish a clipping threshold for each day. The threshold is the
-    # minimum value that was flagged as clipping according to the criteria
-    # above (or NaN on days with no clipping).
+    # minimum candidate clipping value on that day (or NaN on days with
+    # no clipping).
     daily_clipping_threshold = _group.by_day(
         power_normalized[clipping].reindex_like(power_normalized)
     ).transform('min')
-    # For days with clipping (according to the criteria above), any value
-    # greater than the daily clipping threshold is flagged as clipped.
-    # (Days without clipping are implicitly flagged False here because
-    # the clipping threshold on those days is NaN.)
+    # For days with clipping, any value greater than the daily clipping
+    # threshold is flagged as clipped. (Days without clipping are implicitly
+    # flagged False here because the clipping threshold on those days is NaN.)
     return (daily_clipping_threshold - power_normalized) <= margin
