@@ -303,13 +303,10 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     clipping = candidate_clipping & valid_sequence
     # Establish a clipping threshold for each day. The threshold is the
     # minimum value that was flagged as clipping according to the criteria
-    # above.
+    # above (or NaN on days with no clipping).
     daily_clipping_threshold = _group.by_day(
-        clipping
-    ).transform(
-        # TODO try to find a less convoluted way to do this
-        lambda day: power_normalized[day.index][day].min()
-    )
+        power_normalized[clipping].reindex_like(power_normalized)
+    ).transform('min')
     # For days with clipping (according to the criteria above), any value
     # greater than the daily clipping threshold is flagged as clipped.
     # (Days without clipping are implicitly flagged False here because
