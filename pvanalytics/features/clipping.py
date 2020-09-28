@@ -299,7 +299,7 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
                           & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
     # at least as long as `length_min`
-    valid_sequence = _group.run_lengths(candidate_clipping) >= length_min
+    valid_sequence = _group.run_lengths(candidate_clipping) > length_min
     clipping = candidate_clipping & valid_sequence
     # Establish a clipping threshold for each day. The threshold is the
     # minimum value that was flagged as clipping according to the criteria
