@@ -6,7 +6,8 @@ def min_max(data):
 
     The following formula is used for normalization
 
-    ..math::
+    .. math::
+
       (x - min(data)) / (max(data) - min(data))
 
     Parameters
@@ -18,7 +19,7 @@ def min_max(data):
     -------
     Series
 
-        `data` normalized to the range [0, 1] accoring to the formula
+        `data` normalized to the range [0, 1] according to the formula
         above.
 
     """

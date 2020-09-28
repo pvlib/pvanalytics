@@ -231,7 +231,7 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
 def _estimate_freq_minutes(index):
     # Estimate the timestamp frequency in minutes.
     #
-    # Patameters
+    # Parameters
     # ----------
     # index : DatetimeIndex
     #
