@@ -248,18 +248,20 @@ def test_geometric_no_clipping(albuquerque):
 
 
 @pytest.fixture(scope='module',
-                params=['H', '15T', '30T', pytest.param('T', marks=pytest.mark.slow)])
+                params=['H', '15T', '30T',
+                        pytest.param('T', marks=pytest.mark.slow)])
 def simple_clipped(request, albuquerque):
     clearsky = albuquerque.get_clearsky(
         pd.date_range(
             start='7/1/2020',
             end='8/1/2020',
+            closed='left',
             freq=request.param
         ),
         model='simplified_solis'
     )
     ghi = clearsky['ghi'].copy()
-    level = ghi['7/10/2020'].quantile(0.90)
+    level = ghi.quantile(0.5)
     ghi.loc[ghi > level] = level
     expected = ghi == level
     return {
@@ -271,7 +273,7 @@ def simple_clipped(request, albuquerque):
 
 def test_geometric_simple_clipping(simple_clipped):
     assert_series_equal(
-        clipping.geometric(simple_clipped['data']),
+        clipping.geometric(simple_clipped['data'], margin=0),
         simple_clipped['expected'],
         check_names=False
     )
@@ -286,7 +288,7 @@ def test_geometric_uneven_timestamps(simple_clipped):
         data.loc['7/10/2020 13:00':'7/3/2020 13:30'] = np.nan
     data.dropna(inplace=True)
     assert_series_equal(
-        clipping.geometric(data),
+        clipping.geometric(data, margin=0),
         simple_clipped['expected'][data.index],
         check_names=False
     )
