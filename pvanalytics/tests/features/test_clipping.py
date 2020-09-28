@@ -248,8 +248,7 @@ def test_geometric_no_clipping(albuquerque):
 
 
 @pytest.fixture(scope='module',
-                params=['H', '15T', '30T',
-                        pytest.param('T', marks=pytest.mark.slow)])
+                params=['H', '15T', '30T'])
 def simple_clipped(request, albuquerque):
     clearsky = albuquerque.get_clearsky(
         pd.date_range(
@@ -263,7 +262,7 @@ def simple_clipped(request, albuquerque):
     ghi = clearsky['ghi'].copy()
     level = ghi.quantile(0.5)
     ghi.loc[ghi > level] = level
-    expected = ghi == level
+    expected = ghi >= level - 0.25
     return {
         'data': ghi,
         'expected': expected,
