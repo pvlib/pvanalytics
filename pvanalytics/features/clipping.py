@@ -228,23 +228,6 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def _estimate_freq_minutes(index):
-    # Estimate the timestamp frequency in minutes.
-    #
-    # Parameters
-    # ----------
-    # index : DatetimeIndex
-    #
-    # Returns
-    # -------
-    # float
-    #     Timestamp spacing in minutes.
-    freq = pd.infer_freq(index)
-    if freq:
-        return pd.to_timedelta(frequencies.to_offset(freq)).seconds / 60
-    return index.to_series().diff().astype('timedelta64[m]').mode()[0]
-
-
 def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
               length_min=3, margin=0.01,
               freq_minutes=None, slope_max=None):
@@ -302,7 +285,15 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
         Boolean series with True for values that appear to be clipped.
     """
     if freq_minutes is None:
-        freq_minutes = _estimate_freq_minutes(power_ac.index)
+        freq = pd.infer_freq(power_ac.index)
+        if freq is None:
+            raise ValueError(
+                "freq_minutes must be specified if power_ac"
+                " does not have a regular frequency"
+            )
+        freq_minutes = pd.to_timedelta(
+            frequencies.to_offset(freq)
+        ).seconds / 60
     if slope_max is None:
         # Experimentally derived formula from the PVFleets project
         slope_max = (0.00005 * freq_minutes) + 0.0009

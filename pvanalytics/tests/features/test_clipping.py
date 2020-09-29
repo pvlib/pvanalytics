@@ -283,11 +283,16 @@ def test_geometric_uneven_timestamps(simple_clipped):
     data.loc['7/3/2020 10:00':'7/3/2020 12:00'] = np.nan
     data.loc['7/10/2020 01:00':'7/10/2020 03:00'] = np.nan
     freq = pd.infer_freq(data.index)
+    freq_minutes = pd.to_timedelta(
+        pd.tseries.frequencies.to_offset(freq)
+    ).seconds / 60
     if freq != 'H':
         data.loc['7/10/2020 13:00':'7/3/2020 13:30'] = np.nan
     data.dropna(inplace=True)
     assert_series_equal(
-        clipping.geometric(data, margin=0),
+        clipping.geometric(data, margin=0, freq_minutes=freq_minutes),
         simple_clipped['expected'][data.index],
         check_names=False
     )
+    with pytest.raises(ValueError):
+        clipping.geometric(data)
