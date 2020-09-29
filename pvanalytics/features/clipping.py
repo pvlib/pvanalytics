@@ -246,7 +246,7 @@ def _estimate_freq_minutes(index):
 
 
 def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
-              length_min=2, margin=0.01,
+              length_min=3, margin=0.01,
               freq_minutes=None, derivative_max=None):
     """Identify inverter clipping from the shape of the AC power output.
 
@@ -275,7 +275,7 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     daily_fraction_min : float, default 0.9
         A clipped value must be greater than `daily_fraction_min` times the
         maximum value on the same day.
-    length_min : int, default 2
+    length_min : int, default 3
         Minimum number of sequential values that satisfy clipping criteria.
     margin : float, default 0.01
         Values within +/- `margin` of the daily clipping threshold are flagged
@@ -318,7 +318,7 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
                           & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
     # that is longer than `length_min`
-    valid_sequence = _group.run_lengths(candidate_clipping) > length_min
+    valid_sequence = _group.run_lengths(candidate_clipping) >= length_min
     clipping = candidate_clipping & valid_sequence
     # Establish a clipping threshold for each day. The threshold is the
     # minimum candidate clipping value on that day (or NaN on days with
