@@ -300,6 +300,8 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     power_ac = power_ac.copy()
     power_ac.loc[power_ac < 0] = 0
     power_normalized = _normalize.min_max(power_ac)
+    # Using both forward and backward difference ensures that values
+    # at both ends of an interval are flagged.
     forward_diff = abs(power_normalized - power_normalized.shift(-1))
     backward_diff = abs(power_normalized - power_normalized.shift(1))
     daily_max = _group.by_day(power_normalized).transform('max')
