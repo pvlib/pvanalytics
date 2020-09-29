@@ -313,19 +313,19 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     backward_diff = abs(power_normalized - power_normalized.shift(1))
     daily_max = _group.by_day(power_normalized).transform('max')
     fraction_of_max = power_normalized / daily_max
-    candidate_clipping = ((power_normalized >= clip_min)
-                          & ((forward_diff <= slope_max)
-                             | (backward_diff <= slope_max))
-                          & (fraction_of_max >= daily_fraction_min))
+    apparent_clipping = ((power_normalized >= clip_min)
+                         & ((forward_diff <= slope_max)
+                            | (backward_diff <= slope_max))
+                         & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
     # that is longer than `length_min`
-    valid_sequence = _group.run_lengths(candidate_clipping) >= length_min
-    clipping = candidate_clipping & valid_sequence
+    valid_sequence = _group.run_lengths(apparent_clipping) >= length_min
+    candidate_clipping = apparent_clipping & valid_sequence
     # Establish a clipping threshold for each day. The threshold is the
     # minimum candidate clipping value on that day (or NaN on days with
     # no clipping).
     daily_clipping_threshold = _group.by_day(
-        power_normalized[clipping].reindex_like(power_normalized)
+        power_normalized[candidate_clipping].reindex_like(power_normalized)
     ).transform('min')
     # For days with clipping, any value greater than the daily clipping
     # threshold is flagged as clipped. (Days without clipping are implicitly
