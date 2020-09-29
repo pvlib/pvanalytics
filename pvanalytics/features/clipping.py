@@ -247,7 +247,7 @@ def _estimate_freq_minutes(index):
 
 def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
               length_min=3, margin=0.01,
-              freq_minutes=None, derivative_max=None):
+              freq_minutes=None, slope_max=None):
     """Identify inverter clipping from the shape of the AC power output.
 
     `power_ac` is normalized, then on each day, `power_ac` values which
@@ -284,7 +284,7 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     freq_minutes : float, optional
         Timestamp spacing in minutes. If not specified timestamp spacing
         will be inferred from the index of `power_ac`.
-    derivative_max : float, optional
+    slope_max : float, optional
         Values with a derivative less than `derivative_max` are
         potentially clipped. If not specified the value is based on
         the timestamp spacing in `power_ac` according to the following
@@ -303,9 +303,9 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     """
     if freq_minutes is None:
         freq_minutes = _estimate_freq_minutes(power_ac.index)
-    if derivative_max is None:
+    if slope_max is None:
         # Experimentally derived formula from the PVFleets project
-        derivative_max = (0.00005 * freq_minutes) + 0.0009
+        slope_max = (0.00005 * freq_minutes) + 0.0009
     power_ac = power_ac.copy()
     power_ac.loc[power_ac < 0] = 0
     power_normalized = _normalize.min_max(power_ac)
@@ -314,8 +314,8 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     daily_max = _group.by_day(power_normalized).transform('max')
     fraction_of_max = power_normalized / daily_max
     candidate_clipping = ((power_normalized >= clip_min)
-                          & ((forward_diff <= derivative_max)
-                             | (backward_diff <= derivative_max))
+                          & ((forward_diff <= slope_max)
+                             | (backward_diff <= slope_max))
                           & (fraction_of_max >= daily_fraction_min))
     # clipped values must be part of a sequence of clipped values
     # that is longer than `length_min`
