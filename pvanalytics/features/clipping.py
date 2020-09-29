@@ -250,8 +250,9 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
               freq_minutes=None, derivative_max=None):
     """Identify inverter clipping from the shape of the AC power output.
 
-    `power_ac` is normalized, then on each day, `power_ac` values which appear to be
-     clipped are identified according to the following criteria:
+    `power_ac` is normalized, then on each day, `power_ac` values which
+    appear to be clipped are identified according to the following
+    criteria:
 
     - the normalized value is greater than `clip_min`
     - the forward or backward difference is less than `derivative_max`
@@ -260,10 +261,10 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
     - the value is part of a  sequence of `length_min` consecutive values
       which meet the above criteria
 
-    On each day, the values that meet these criteria are flagged and 
+    On each day, the values that meet these criteria are flagged and
     are used to identify a daily threshold. The daily threshold is the
     minimum of the flagged values minus `margin`. Any flagged value
-    on that day that is greater than or equal to the threshold is 
+    on that day that is greater than or equal to the threshold is
     considered clipped and the resulting mask is returned.
 
     Parameters
