@@ -250,29 +250,26 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
               freq_minutes=None, derivative_max=None):
     """Identify inverter clipping from the shape of the AC power output.
 
-    `power_ac` is normalized, then for each day in `power_ac` values that
-    look like they might by clipped are identified according to the following
-    criteria:
+    `power_ac` is normalized, then on each day, `power_ac` values which appear to be
+     clipped are identified according to the following criteria:
 
     - the normalized value is greater than `clip_min`
     - the forward or backward difference is less than `derivative_max`
     - the value is at least `daily_fraction_min` of the maximum value
       on the same day
+    - the value is part of a  sequence of `length_min` consecutive values
+      which meet the above criteria
 
-    A value that meets the three criteria above must also be part of a
-    sequence of more than `length_min` consecutive values that also meet
-    the clipping criteria.
-
-    On each day, the values that are flagged as clipped according the
-    these criteria are used to identify a daily clipping threshold. The
-    daily threshold is the minimum of the clipped values minus `margin`.
-    Any value on that day that is greater than or equal to the threshold
-    is flagged as clipped and the resulting mask is returned.
+    On each day, the values that meet these criteria are flagged and 
+    are used to identify a daily threshold. The daily threshold is the
+    minimum of the flagged values minus `margin`. Any flagged value
+    on that day that is greater than or equal to the threshold is 
+    considered clipped and the resulting mask is returned.
 
     Parameters
     ----------
     power_ac : Series
-        AC Power.
+        AC power.
     clip_min : float, default 0.8
         After normalization a clipped value must be greater than `clip_min`
     daily_fraction_min : float, default 0.9
@@ -294,7 +291,7 @@ def geometric(power_ac, clip_min=0.8, daily_fraction_min=0.9,
 
         .. math::
 
-           0.00005 * f_m + 0.0009
+           0.00005 f_m + 0.0009
 
         where :math:`f_m` is the timestamp spacing in minutes.
 
