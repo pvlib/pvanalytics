@@ -224,7 +224,9 @@ def test_infer_orientation_haghdadi_fixed_latitude(albuquerque,
         power_albuquerque > 0,
         longitude=albuquerque.longitude,
         latitude=albuquerque.latitude,
-        clearsky_model='simplified_solis'
+        clearsky_model='simplified_solis',
+        tilt_estimate=45,
+        azimuth_estimate=100
     )
     assert latitude == albuquerque.latitude
     # TODO verify that the tolerance below is reasonable

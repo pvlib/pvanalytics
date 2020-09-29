@@ -156,44 +156,67 @@ def longitude_solar_noon(solar_noon, utc_offset):
     return ((time_correction / 4 - eot/4) + lstm).median()
 
 
-def _power_residuals(parameters, clearsky_power, longitude, temperature,
-                     dc_capacity, clearsky_model):
-    # Return the difference between `clearsky_power` and simulated power
-    # at the given latitude, longitude, tilt, temperature, and capacity
-    tilt = parameters[0]
-    azimuth = parameters[1]
-    latitude = parameters[2]
-    site = pvlib.location.Location(latitude, longitude)
-    clearsky = site.get_clearsky(clearsky_power.index, model=clearsky_model)
-    solarposition = site.get_solarposition(clearsky_power.index)
+def _get_poa_at(times, site, surface_tilt, surface_azimuth, clearsky_model):
+    # Get the POA irradiance at the given location in the given plane.
+    solar_position = site.get_solarposition(times)
+    clearsky = site.get_clearsky(
+        times,
+        solar_position=solar_position,
+        model=clearsky_model
+    )
     poa = pvlib.irradiance.get_total_irradiance(
-        tilt, azimuth,
-        solarposition['apparent_zenith'], solarposition['azimuth'],
+        surface_tilt,
+        surface_azimuth,
+        solar_position['zenith'],
+        solar_position['azimuth'],
         **clearsky
     )
+    return poa['poa_global']
+
+
+def _modeled_power_ac(tilt, azimuth, latitude, longitude, times,
+                      temperature, dc_capacity, dc_input_limit,
+                      clearsky_model, temperature_model_params):
+    site = pvlib.location.Location(latitude, longitude)
+    poa = _get_poa_at(times, site, tilt, azimuth, clearsky_model)
     temp_cell = pvlib.temperature.sapm_cell(
-        poa['poa_global'],
+        poa,
         temperature,
-        wind_speed=0,  # TODO should we let users pass wind speed too?
-        # TODO allow user to specify params
-        **TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+        wind_speed=0,
+        **temperature_model_params
     )
     pdc = pvlib.pvsystem.pvwatts_dc(
-        poa['poa_global'],
+        poa,
         temp_cell,
         dc_capacity,
         -0.002
     )
-    # TODO decide on a better way to specify dc limit
-    #      For now just using the DC capacity and assuming the inverter
-    #      can handle it.
-    pac = pvlib.pvsystem.pvwatts_ac(pdc, dc_capacity)
+    return pvlib.inverter.pvwatts(pdc, dc_input_limit)
+
+
+def _power_residuals(system_parameters, clearsky_power, longitude,
+                     temperature, dc_capacity, dc_input_limit, clearsky_model,
+                     temperature_model_params, latitude=None):
+    # Return the difference between `clearsky_power` and simulated power
+    # at the given latitude, longitude, tilt, temperature, and capacity
+    if len(system_parameters) == 3:
+        pac = _modeled_power_ac(*system_parameters, longitude,
+                                clearsky_power.index,
+                                temperature, dc_capacity, dc_input_limit,
+                                clearsky_model, temperature_model_params)
+    else:
+        pac = _modeled_power_ac(*system_parameters, latitude, longitude,
+                                clearsky_power.index,
+                                temperature, dc_capacity, dc_input_limit,
+                                clearsky_model, temperature_model_params)
     return clearsky_power - pac
 
 
 def infer_orientation_haghdadi(power, clearsky,
                                clearsky_irradiance=None,
                                longitude=None, latitude=None,
+                               tilt_estimate=0, azimuth_estimate=0,
+                               latitude_estimate=0,
                                clearsky_model='ineichen',
                                temperature=25,
                                tilt_min=0, tilt_max=180,
@@ -273,18 +296,45 @@ def infer_orientation_haghdadi(power, clearsky,
     elif longitude is None and clearsky_irradiance is None:
         raise ValueError("longitude or clearsky_irradiance"
                          " must be specified")
+
     power = power[clearsky]
+    # TODO find a better way to estimate these values or pass them as params
+    dc_capacity = power.max() * 1.5
+    dc_input_limit = dc_capacity * 1.5
+    params = {
+        'clearsky_power': power[clearsky],
+        'longitude': longitude,
+        'temperature': temperature,
+        'dc_capacity': dc_capacity,
+        'dc_input_limit': dc_input_limit,
+        'clearsky_model': clearsky_model,
+        'temperature_model_params':
+            TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    }
+    initial_estimate = [tilt_estimate, azimuth_estimate, latitude_estimate]
+    if latitude is not None:
+        latitude_estimate = latitude
+        latitude_min = latitude
+        latitude_max = latitude
+        initial_estimate = [tilt_estimate, azimuth_estimate]
+        params['latitude'] = latitude
+
+    lower_bounds = [tilt_min, azimuth_min]
+    upper_bounds = [tilt_max, azimuth_max]
+
+    if len(initial_estimate) == 3:
+        lower_bounds.append(latitude_min)
+        upper_bounds.append(latitude_max)
+
     best_orientation = scipy.optimize.least_squares(
         _power_residuals,
-        [0, 0, 0],
-        bounds=([tilt_min, azimuth_min, latitude_min],
-                [tilt_max, azimuth_max, latitude_max]),
-        kwargs={
-            'clearsky_power': power,
-            'longitude': longitude,
-            'temperature': temperature,
-            'dc_capacity': power.max(),
-            'clearsky_model': clearsky_model
-        }
+        initial_estimate,
+        bounds=(lower_bounds, upper_bounds),
+        kwargs=params
     )
-    return best_orientation.x[0], best_orientation.x[1], best_orientation.x[2]
+
+    tilt = best_orientation.x[0]
+    azimuth = best_orientation.x[1]
+    latitude = latitude if len(best_orientation.x) == 2 else best_orientation.x[2]
+    print(f"{best_orientation}")
+    return tilt, azimuth, latitude
