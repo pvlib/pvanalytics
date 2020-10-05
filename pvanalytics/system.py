@@ -490,6 +490,7 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     Uses non-linear least squares to optimize over four free variables
     to find the values that result in the best fit between power modeled
     using PVWatts and `power_ac`. The four free variables are
+
     - surface tilt
     - surface azimuth
     - the DC capacity of the system
@@ -500,11 +501,11 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     power_ac : Series
         AC power from the system in clear sky conditions.
     ghi : Series
-        Clear sky GHI at the same times as `power_ac`
+        Clear sky GHI with same index as `power_ac`.
     dhi : Series
-        Clear sky DHI.
+        Clear sky DHI with same index as `power_ac`.
     dni : Series
-        Clear sky DNI.
+        Clear sky DNI with same index as `power_ac`.
     solar_zenith : Series
         Solar zenith. [degrees]
     solar_azimuth : Series
@@ -519,8 +520,8 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     temperature_model_parameters : dict, optional
         Parameters fot the cell temperature model. If not specified
         ``pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][
-        'open_rack_glass_glass'] is used. See
-        :py:func`pvlib.temperature.sapm_cell` for more information.
+        'open_rack_glass_glass']`` is used. See
+        :py:func:`pvlib.temperature.sapm_cell` for more information.
 
     Returns
     -------
