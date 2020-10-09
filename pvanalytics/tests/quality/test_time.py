@@ -3,7 +3,6 @@ from datetime import datetime
 import pytz
 import pytest
 import pandas as pd
-from pandas.tseries import frequencies
 from pandas.util.testing import assert_series_equal
 from pvanalytics.quality import time
 
@@ -75,10 +74,7 @@ def midday(request, albuquerque):
     )
     mid_day = mid_day.dt.hour * 60 + mid_day.dt.minute
     mid_day.index = pd.DatetimeIndex(mid_day.index, tz='MST')
-    daytime = solar_position['zenith'] < 87
-    daytime.index.freq = None
-    return {'daytime': daytime,
-            'clearsky_midday': mid_day}
+    return mid_day
 
 
 def requires_ruptures(test):
@@ -97,12 +93,11 @@ def test_shift_ruptures_no_shift(midday):
     """Daytime mask with no time-shifts yields a series with 0s for
     shift amounts."""
     shifts = time.shifts_ruptures(
-        midday['daytime'],
-        midday['clearsky_midday']
+        midday, midday
     )
     assert_series_equal(
         shifts,
-        pd.Series(0, index=midday['daytime'].index, dtype='int64'),
+        pd.Series(0, index=midday.index, dtype='int64'),
         check_names=False
     )
 
@@ -112,12 +107,12 @@ def test_shift_ruptures_positive_shift(midday):
     """Every day shifted 1 hour later yields a series with shift
      of 60 for each day."""
     shifted = _shift_between(
-        midday['daytime'], 60,
+        midday, 60,
         start='2020-01-01',
         end='2020-02-29'
     )
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday['clearsky_midday']),
+        time.shifts_ruptures(shifted, midday),
         pd.Series(60, index=shifted.index, dtype='int64'),
         check_names=False
     )
@@ -126,12 +121,12 @@ def test_shift_ruptures_positive_shift(midday):
 @requires_ruptures
 def test_shift_ruptures_negative_shift(midday):
     shifted = _shift_between(
-        midday['daytime'], -60,
+        midday, -60,
         start='2020-01-01',
         end='2020-02-29'
     )
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday['clearsky_midday']),
+        time.shifts_ruptures(shifted, midday),
         pd.Series(-60, index=shifted.index, dtype='int64'),
         check_names=False
     )
@@ -140,44 +135,41 @@ def test_shift_ruptures_negative_shift(midday):
 @requires_ruptures
 def test_shift_ruptures_partial_shift(midday):
     shifted = _shift_between(
-        midday['daytime'], 60,
+        midday, 60,
         start='2020-1-1', end='2020-2-1'
     )
-    expected = pd.Series(60, index=midday['daytime'].index)
+    expected = pd.Series(60, index=midday.index)
     expected.loc['2020-2-2':] = 0
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday['clearsky_midday']),
+        time.shifts_ruptures(shifted, midday),
         expected,
         check_names=False
     )
 
 
 def _shift_between(series, shift, start, end):
-    freq_minutes = pd.to_timedelta(
-        frequencies.to_offset(pd.infer_freq(series.index))
-    ).seconds // 60
     before = series[:start]
     during = series[start:end]
     after = series[end:]
-    during = during.shift(shift // freq_minutes, fill_value=False)
+    during = during + shift
     shifted = before.append(during).append(after)
     return shifted[~shifted.index.duplicated()]
 
 
 @requires_ruptures
 def test_shift_ruptures_period_min(midday):
-    no_shifts = pd.Series(0, index=midday['daytime'].index, dtype='int64')
+    no_shifts = pd.Series(0, index=midday.index, dtype='int64')
     assert_series_equal(
         time.shifts_ruptures(
-            midday['daytime'], midday['clearsky_midday'],
-            period_min=len(midday['clearsky_midday'])
+            midday, midday,
+            period_min=len(midday)
         ),
         no_shifts,
         check_names=False
     )
 
     shifted = _shift_between(
-        midday['daytime'], 60,
+        midday, 60,
         start='2020-01-01',
         end='2020-01-20'
     )
@@ -185,14 +177,14 @@ def test_shift_ruptures_period_min(midday):
     shift_expected.loc['2020-01-01':'2020-01-20'] = 60
     assert_series_equal(
         time.shifts_ruptures(
-            shifted, midday['clearsky_midday'], period_min=30
+            shifted, midday, period_min=30
         ),
         no_shifts,
         check_names=False
     )
     assert_series_equal(
         time.shifts_ruptures(
-            shifted, midday['clearsky_midday'], period_min=15
+            shifted, midday, period_min=15
         ),
         shift_expected,
         check_names=False
@@ -200,7 +192,7 @@ def test_shift_ruptures_period_min(midday):
 
     with pytest.raises(ValueError):
         time.shifts_ruptures(
-            midday['daytime'], midday['clearsky_midday'],
+            midday, midday,
             period_min=10000
         )
 
@@ -208,13 +200,13 @@ def test_shift_ruptures_period_min(midday):
 @requires_ruptures
 def test_shifts_ruptures_shift_at_end(midday):
     shifted = _shift_between(
-        midday['daytime'], 60,
+        midday, 60,
         start='2020-02-01',
         end='2020-02-29'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected['2020-02-02':'2020-02-29'] = 60
-    shifts = time.shifts_ruptures(shifted, midday['clearsky_midday'])
+    shifts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(
         shifts,
         shift_expected,
@@ -225,13 +217,13 @@ def test_shifts_ruptures_shift_at_end(midday):
 @requires_ruptures
 def test_shifts_ruptures_shift_in_middle(midday):
     shifted = _shift_between(
-        midday['daytime'], 60,
+        midday, 60,
         start='2020-01-25',
         end='2020-02-15'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected['2020-01-26':'2020-02-15'] = 60
-    shifts = time.shifts_ruptures(shifted, midday['clearsky_midday'])
+    shifts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(
         shifts,
         shift_expected,
@@ -242,7 +234,7 @@ def test_shifts_ruptures_shift_in_middle(midday):
 @requires_ruptures
 def test_shift_ruptures_shift_min(midday):
     shifted = _shift_between(
-        midday['daytime'], 30,
+        midday, 30,
         start='2020-01-01',
         end='2020-01-25',
     )
@@ -251,7 +243,7 @@ def test_shift_ruptures_shift_min(midday):
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
     assert_series_equal(
         time.shifts_ruptures(
-            shifted, midday['clearsky_midday'],
+            shifted, midday,
             shift_min=60, round_up_from=40
         ),
         no_shift,
@@ -259,7 +251,7 @@ def test_shift_ruptures_shift_min(midday):
     )
     assert_series_equal(
         time.shifts_ruptures(
-            shifted, midday['clearsky_midday'],
+            shifted, midday,
             shift_min=30
         ),
         shift_expected if pd.infer_freq(shifted.index) != 'H' else no_shift,
@@ -270,31 +262,31 @@ def test_shift_ruptures_shift_min(midday):
 def test_shifts_ruptures_tz_localized(midday):
     assert_series_equal(
         time.shifts_ruptures(
-            midday['daytime'].tz_localize(None),
-            midday['clearsky_midday']
+            midday.tz_localize(None),
+            midday
         ),
         pd.Series(
-            0, index=midday['daytime'].index.tz_localize(None), dtype='int64'
+            0, index=midday.index.tz_localize(None), dtype='int64'
         ),
         check_names=False
     )
     assert_series_equal(
         time.shifts_ruptures(
-            midday['daytime'],
-            midday['clearsky_midday'].tz_localize(None)
+            midday,
+            midday.tz_localize(None)
         ),
         pd.Series(
-            0, index=midday['daytime'].index, dtype='int64'
+            0, index=midday.index, dtype='int64'
         ),
         check_names=False
     )
     assert_series_equal(
         time.shifts_ruptures(
-            midday['daytime'].tz_localize(None),
-            midday['clearsky_midday'].tz_localize(None)
+            midday.tz_localize(None),
+            midday.tz_localize(None)
         ),
         pd.Series(
-            0, index=midday['daytime'].index.tz_localize(None), dtype='int64'
+            0, index=midday.index.tz_localize(None), dtype='int64'
         ),
         check_names=False
     )

@@ -2,7 +2,6 @@
 import pandas as pd
 import numpy as np
 from scipy import stats
-from pvanalytics.util import _group
 
 
 def spacing(times, freq):
@@ -57,33 +56,31 @@ def _round_multiple(x, to, up_from=None):
     return np.sign(x) * (quotient*to + remainder)
 
 
-def shifts_ruptures(daytime, transit, period_min=2,
+def shifts_ruptures(midday, transit, period_min=2,
                     shift_min=15, round_up_from=None,
                     prediction_penalty=13):
     """Identify time shifts using the ruptures library.
 
-    Compares the solar-transit time in the expected time zone from
-    `transit` with the mid-point between sunrise and sunset time
-    derived from the `daytime` mask. These times are the times of
-    the first and last True value on each day.
+    Compares the solar-transit time in the expected time zone (`transit`)
+    with the midday time in `midday`.
 
     The Pelt changepoint detection method is applied to the difference
-    in midday times derived from the `daytime` series and the expected
-    midday times from `transit`. For each period between change
+    between `midday` and `transit`. For each period between change
     points the mode of the difference is rounded to a multiple of
-    `shift_min` and returned as the time-shift for all values in that
+    `shift_min` and returned as the time-shift for all days in that
     period.
 
     Parameters
     ----------
-    daytime : Series
-        Boolean time-series with True for day and False for night.
+    midday : Series
+        Time of mid-day in minutes since midnight. Should be a time series
+        of integers with a single value per day.
     transit : Series
         Time of midday in minutes for each day with no time shifts
-        (i.e.based on solar position with a fixed-offset time zone).
+        (i.e. based on solar position with a fixed-offset time zone).
     period_min : int, default 2
         Minimum number of days between shifts. Must be less than or equal to
-        the number of days in `daytime`. [days]
+        the number of days in `midday`. [days]
 
         Increasing this parameter will make the result less sensitive to
         transient shifts. For example if your intent is to find and correct
@@ -106,12 +103,12 @@ def shifts_ruptures(daytime, transit, period_min=2,
     Returns
     -------
     Series
-        Time shift in minutes at each timestamp in `daytime`.
+        Time shift in minutes for each day in `midday`.
 
     Raises
     ------
     ValueError
-        If the number of days in `daytime` is less than `period_min`.
+        If the number of days in `midday` is less than `period_min`.
 
     Notes
     -----
@@ -123,17 +120,11 @@ def shifts_ruptures(daytime, transit, period_min=2,
     except ImportError:
         raise ImportError("time.shifts_ruptures() requires ruptures.")
 
-    midday = _group.by_day(daytime).apply(
-        lambda day: (day[day].index.min()
-                     + ((day[day].index.max() - day[day].index.min()) / 2))
-    )
     if period_min > len(midday):
         raise ValueError("period_min exceeds number of days in series")
-    midday_minutes = midday.dt.hour * 60 + midday.dt.minute
     # Drop timezone information. At this point there is one value per day
     # so the timezone is irrelevant.
-    midday_diff = \
-        midday_minutes.tz_localize(None) - transit.tz_localize(None)
+    midday_diff = midday.tz_localize(None) - transit.tz_localize(None)
     break_points = ruptures.Pelt(
         model='rbf',
         jump=1,
@@ -161,5 +152,5 @@ def shifts_ruptures(daytime, transit, period_min=2,
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
     # localize the shift_amount series to the timezone of the input
-    shift_amount = shift_amount.tz_localize(daytime.index.tz)
-    return shift_amount.reindex(daytime.index, method='pad')
+    shift_amount = shift_amount.tz_localize(midday.index.tz)
+    return shift_amount.reindex(midday.index, method='pad')
