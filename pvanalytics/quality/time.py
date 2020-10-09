@@ -57,19 +57,19 @@ def _round_multiple(x, to, up_from=None):
     return np.sign(x) * (quotient*to + remainder)
 
 
-def shifts_ruptures(daytime, clearsky_midday, period_min=2,
+def shifts_ruptures(daytime, transit, period_min=2,
                     shift_min=15, round_up_from=None,
                     prediction_penalty=13):
     """Identify time shifts using the ruptures library.
 
-    Compares the solar-transit time from `clearsky_midday` with the
-    mid-point between sunrise and sunset time derived from the `daytime`
-    mask. These times are the times of the first and last True value on
-    each day.
+    Compares the solar-transit time in the expected time zone from
+    `transit` with the mid-point between sunrise and sunset time
+    derived from the `daytime` mask. These times are the times of
+    the first and last True value on each day.
 
     The Pelt changepoint detection method is applied to the difference
     in midday times derived from the `daytime` series and the expected
-    midday times from `clearsky_midday`. For each period between change
+    midday times from `transit`. For each period between change
     points the mode of the difference is rounded to a multiple of
     `shift_min` and returned as the time-shift for all values in that
     period.
@@ -78,7 +78,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     ----------
     daytime : Series
         Boolean time-series with True for day and False for night.
-    clearsky_midday : Series
+    transit : Series
         Time of midday in minutes for each day with no time shifts
         (i.e.based on solar position with a fixed-offset time zone).
     period_min : int, default 2
@@ -133,7 +133,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
     # Drop timezone information. At this point there is one value per day
     # so the timezone is irrelevant.
     midday_diff = \
-        midday_minutes.tz_localize(None) - clearsky_midday.tz_localize(None)
+        midday_minutes.tz_localize(None) - transit.tz_localize(None)
     break_points = ruptures.Pelt(
         model='rbf',
         jump=1,
