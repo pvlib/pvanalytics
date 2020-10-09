@@ -56,31 +56,34 @@ def _round_multiple(x, to, up_from=None):
     return np.sign(x) * (quotient*to + remainder)
 
 
-def shifts_ruptures(midday, transit, period_min=2,
+def shifts_ruptures(event_times, reference_times, period_min=2,
                     shift_min=15, round_up_from=None,
                     prediction_penalty=13):
     """Identify time shifts using the ruptures library.
 
-    Compares the solar-transit time in the expected time zone (`transit`)
-    with the midday time in `midday`.
+    Compares the event time in the expected time zone (`reference_times`)
+    with the actual event time in `event_times`.
 
     The Pelt changepoint detection method is applied to the difference
-    between `midday` and `transit`. For each period between change
-    points the mode of the difference is rounded to a multiple of
+    between `event_times` and `reference_times`. For each period between
+    change points the mode of the difference is rounded to a multiple of
     `shift_min` and returned as the time-shift for all days in that
     period.
 
     Parameters
     ----------
-    midday : Series
-        Time of mid-day in minutes since midnight. Should be a time series
-        of integers with a single value per day.
-    transit : Series
-        Time of midday in minutes for each day with no time shifts
-        (i.e. based on solar position with a fixed-offset time zone).
+    event_times : Series
+        Time of an event in minutes since midnight. Should be a time series
+        of integers with a single value per day. Typically the time mid-way
+        between sunrise and sunset.
+    reference_times : Series
+        Time of event in minutes since midnight for each day in the expected
+        timezone. For example, passing solar transit time in a fixed offset
+        time zone can be used to detect daylight savings shifts when it is
+        unknown whether or not `event_times` is in a fixed offset time zone.
     period_min : int, default 2
         Minimum number of days between shifts. Must be less than or equal to
-        the number of days in `midday`. [days]
+        the number of days in `event_times`. [days]
 
         Increasing this parameter will make the result less sensitive to
         transient shifts. For example if your intent is to find and correct
@@ -103,12 +106,12 @@ def shifts_ruptures(midday, transit, period_min=2,
     Returns
     -------
     Series
-        Time shift in minutes for each day in `midday`.
+        Time shift in minutes for each day in `event_times`.
 
     Raises
     ------
     ValueError
-        If the number of days in `midday` is less than `period_min`.
+        If the number of days in `event_times` is less than `period_min`.
 
     Notes
     -----
@@ -120,17 +123,18 @@ def shifts_ruptures(midday, transit, period_min=2,
     except ImportError:
         raise ImportError("time.shifts_ruptures() requires ruptures.")
 
-    if period_min > len(midday):
-        raise ValueError("period_min exceeds number of days in series")
+    if period_min > len(event_times):
+        raise ValueError("period_min exceeds number of days in event_times")
     # Drop timezone information. At this point there is one value per day
     # so the timezone is irrelevant.
-    midday_diff = midday.tz_localize(None) - transit.tz_localize(None)
+    time_diff = \
+        event_times.tz_localize(None) - reference_times.tz_localize(None)
     break_points = ruptures.Pelt(
         model='rbf',
         jump=1,
         min_size=period_min
     ).fit_predict(
-        signal=midday_diff.values,
+        signal=time_diff.values,
         pen=prediction_penalty
     )
     # Make sure the entire series is covered by the intervals between
@@ -138,12 +142,12 @@ def shifts_ruptures(midday, transit, period_min=2,
     # breakpoint at the beginning of the series (0) and at the end if
     # one does not already exist.
     break_points.insert(0, 0)
-    if break_points[-1] != len(midday_diff):
-        break_points.append(len(midday_diff))
-    midday_diff = _round_multiple(midday_diff, shift_min, round_up_from)
-    shift_amount = midday_diff.groupby(
+    if break_points[-1] != len(time_diff):
+        break_points.append(len(time_diff))
+    time_diff = _round_multiple(time_diff, shift_min, round_up_from)
+    shift_amount = time_diff.groupby(
         pd.cut(
-            midday_diff.reset_index().index,
+            time_diff.reset_index().index,
             break_points,
             include_lowest=True, right=False,
             duplicates='drop'
@@ -152,5 +156,5 @@ def shifts_ruptures(midday, transit, period_min=2,
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
     # localize the shift_amount series to the timezone of the input
-    shift_amount = shift_amount.tz_localize(midday.index.tz)
-    return shift_amount.reindex(midday.index, method='pad')
+    shift_amount = shift_amount.tz_localize(event_times.index.tz)
+    return shift_amount.reindex(event_times.index)
