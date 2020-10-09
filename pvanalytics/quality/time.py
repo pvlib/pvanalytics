@@ -83,7 +83,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         (i.e.based on solar position with a fixed-offset time zone).
     period_min : int, default 2
         Minimum number of days between shifts. Must be less than or equal to
-        the number of days in `daytime`.
+        the number of days in `daytime`. [days]
 
         Increasing this parameter will make the result less sensitive to
         transient shifts. For example if your intent is to find and correct
@@ -98,7 +98,7 @@ def shifts_ruptures(daytime, clearsky_midday, period_min=2,
         it will be rounded towards 0. If not specified then the shift will
         be rounded up from `shift_min // 2`. Using a larger value will
         effectively make the shift detection more conservative as small
-        variations will tend to be rounded to zero.
+        variations will tend to be rounded to zero. [minutes]
     prediction_penalty : int, default 13
         Penalty used in assessing change points.
         See :py:method:`ruptures.detection.Pelt.predict` for more information.
