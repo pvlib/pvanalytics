@@ -105,8 +105,13 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
 
     Returns
     -------
-    Series
-        Time shift in minutes for each day in `event_times`.
+    shifted : Series
+        Boolean series indicating whether there appears to be a time
+        shift on that day.
+    shift_amount : Series
+        Time shift in minutes for each day in `event_times`. These times
+        can be used to shift the data into the same time zone as
+        `reference_times`.
 
     Raises
     ------
@@ -156,4 +161,5 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
         lambda shifted_period: stats.mode(shifted_period).mode[0]
     )
     # localize the shift_amount series to the timezone of the input
-    return shift_amount.tz_localize(event_times.index.tz)
+    shift_amount = shift_amount.tz_localize(event_times.index.tz)
+    return shift_amount != 0, shift_amount

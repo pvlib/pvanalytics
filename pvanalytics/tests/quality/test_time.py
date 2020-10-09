@@ -92,11 +92,12 @@ def requires_ruptures(test):
 def test_shift_ruptures_no_shift(midday):
     """Daytime mask with no time-shifts yields a series with 0s for
     shift amounts."""
-    shifts = time.shifts_ruptures(
+    shift_mask, shift_amounts = time.shifts_ruptures(
         midday, midday
     )
+    assert not shift_mask.any()
     assert_series_equal(
-        shifts,
+        shift_amounts,
         pd.Series(0, index=midday.index, dtype='int64'),
         check_names=False
     )
@@ -111,8 +112,12 @@ def test_shift_ruptures_positive_shift(midday):
         start='2020-01-01',
         end='2020-02-29'
     )
+    expected_shift_mask = pd.Series(False, index=midday.index)
+    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
+    assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday),
+        shift_amounts,
         pd.Series(60, index=shifted.index, dtype='int64'),
         check_names=False
     )
@@ -125,8 +130,12 @@ def test_shift_ruptures_negative_shift(midday):
         start='2020-01-01',
         end='2020-02-29'
     )
+    expected_shift_mask = pd.Series(False, index=midday.index)
+    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
+    assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday),
+        shift_amounts,
         pd.Series(-60, index=shifted.index, dtype='int64'),
         check_names=False
     )
@@ -140,8 +149,11 @@ def test_shift_ruptures_partial_shift(midday):
     )
     expected = pd.Series(60, index=midday.index)
     expected.loc['2020-2-2':] = 0
+    expected_mask = expected != 0
+    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
+    assert_series_equal(shift_mask, expected_mask, check_names=False)
     assert_series_equal(
-        time.shifts_ruptures(shifted, midday),
+        shift_amount,
         expected,
         check_names=False
     )
@@ -159,11 +171,13 @@ def _shift_between(series, shift, start, end):
 @requires_ruptures
 def test_shift_ruptures_period_min(midday):
     no_shifts = pd.Series(0, index=midday.index, dtype='int64')
+    shift_mask, shift_amount = time.shifts_ruptures(
+        midday, midday,
+        period_min=len(midday)
+    )
+    assert not shift_mask.any()
     assert_series_equal(
-        time.shifts_ruptures(
-            midday, midday,
-            period_min=len(midday)
-        ),
+        shift_amount,
         no_shifts,
         check_names=False
     )
@@ -175,17 +189,22 @@ def test_shift_ruptures_period_min(midday):
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected.loc['2020-01-01':'2020-01-20'] = 60
+    expected_mask = shift_expected != 0
+    shift_mask, shift_amount = time.shifts_ruptures(
+        midday, midday, period_min=30
+    )
+    assert not shift_mask.any()
     assert_series_equal(
-        time.shifts_ruptures(
-            shifted, midday, period_min=30
-        ),
+        shift_amount,
         no_shifts,
         check_names=False
     )
+    shift_mask, shift_amount = time.shifts_ruptures(
+        shifted, midday, period_min=15
+    )
+    assert_series_equal(shift_mask, expected_mask, check_names=False)
     assert_series_equal(
-        time.shifts_ruptures(
-            shifted, midday, period_min=15
-        ),
+        shift_amount,
         shift_expected,
         check_names=False
     )
@@ -206,9 +225,10 @@ def test_shifts_ruptures_shift_at_end(midday):
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected['2020-02-02':'2020-02-29'] = 60
-    shifts = time.shifts_ruptures(shifted, midday)
+    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
+    assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
     assert_series_equal(
-        shifts,
+        shift_amount,
         shift_expected,
         check_names=False
     )
@@ -223,9 +243,14 @@ def test_shifts_ruptures_shift_in_middle(midday):
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected['2020-01-26':'2020-02-15'] = 60
-    shifts = time.shifts_ruptures(shifted, midday)
+    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
     assert_series_equal(
-        shifts,
+        shift_mask,
+        shift_expected != 0,
+        check_names=False
+    )
+    assert_series_equal(
+        shift_amount,
         shift_expected,
         check_names=False
     )
@@ -241,50 +266,67 @@ def test_shift_ruptures_shift_min(midday):
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected.loc['2020-01-01':'2020-01-25'] = 30
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
+    shift_mask, shift_amount = time.shifts_ruptures(
+        shifted, midday,
+        shift_min=60, round_up_from=40
+    )
+    assert not shift_mask.any()
     assert_series_equal(
-        time.shifts_ruptures(
-            shifted, midday,
-            shift_min=60, round_up_from=40
-        ),
+        shift_amount,
         no_shift,
         check_names=False
     )
+    shift_mask, shift_amount = time.shifts_ruptures(
+        shifted, midday,
+        shift_min=30
+    )
     assert_series_equal(
-        time.shifts_ruptures(
-            shifted, midday,
-            shift_min=30
-        ),
+        shift_mask,
+        shift_expected != 0 if pd.infer_freq(shifted.index) != 'H' else False,
+        check_names=False
+    )
+    assert_series_equal(
+        shift_amount,
         shift_expected if pd.infer_freq(shifted.index) != 'H' else no_shift,
         check_names=False
     )
 
 
 def test_shifts_ruptures_tz_localized(midday):
+    shift_mask, shift_amount = time.shifts_ruptures(
+        midday.tz_localize(None),
+        midday
+    )
+    assert not shift_mask.any()
+    assert shift_mask.index.tz is None
     assert_series_equal(
-        time.shifts_ruptures(
-            midday.tz_localize(None),
-            midday
-        ),
+        shift_amount,
         pd.Series(
             0, index=midday.index.tz_localize(None), dtype='int64'
         ),
         check_names=False
     )
+    shift_mask, shift_amount = time.shifts_ruptures(
+        midday,
+        midday.tz_localize(None)
+    )
+    assert not shift_mask.any()
+    assert shift_mask.index.tz == midday.index.tz
     assert_series_equal(
-        time.shifts_ruptures(
-            midday,
-            midday.tz_localize(None)
-        ),
+        shift_amount,
         pd.Series(
             0, index=midday.index, dtype='int64'
         ),
         check_names=False
     )
+    shift_mask, shift_amount = time.shifts_ruptures(
+        midday.tz_localize(None),
+        midday.tz_localize(None)
+    )
+    assert not shift_mask.any()
+    assert shift_mask.index.tz is None
     assert_series_equal(
-        time.shifts_ruptures(
-            midday.tz_localize(None),
-            midday.tz_localize(None)
-        ),
+        shift_amount,
         pd.Series(
             0, index=midday.index.tz_localize(None), dtype='int64'
         ),
