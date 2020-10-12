@@ -120,6 +120,27 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
 
     Notes
     -----
+    Timestamped data from monitored PV systems may not always be localized
+    to a consistent timezone. In some cases, data is timestamped with
+    local time that may or may not be adjusted for daylight savings time
+    transitions. This function helps detect issues of this sort, by
+    detecting points where the time of some daily event (e.g. solar noon)
+    changes significantly with respect to a reference time for the event.
+    If the data's timestamps have not been adjusted for daylight savings
+    transitions, the time of day at solar noon will change by roughly 60
+    minutes in the days before and after the transition.
+
+    To use this changepoint detection method to determine if your data's
+    timestamps involve daylight savings transitions, first reduce your PV
+    system data (irradiance or power) to a daily time series, with each
+    point being the observed midday time in minutes. For example, if
+    sunrise and sunset are inferred from the PV system data, the midday
+    time can be inferred as the average of each day's sunrise and sunset
+    time of day. To establish the expected midday time, calculate solar
+    transit time in time of day. This function detects shifts in the
+    difference between the observed and expected midday times, and
+    returns (here I'm unclear what is being returned)
+
     Derived from the PVFleets QA project.
 
     """
