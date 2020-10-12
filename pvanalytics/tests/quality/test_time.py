@@ -56,3 +56,20 @@ def test_timestamp_spacing_too_frequent(times):
         time.spacing(times, '30min'),
         pd.Series([True] + [False] * (len(times) - 1), index=times)
     )
+
+
+@pytest.mark.parametrize("tz", ['MST', 'America/Denver'])
+def test_has_dst(tz, albuquerque):
+    days = pd.date_range(
+        start='1/1/2020',
+        end='1/1/2021',
+        freq='D',
+        tz=tz
+    )
+    sunrise = albuquerque.get_sun_rise_set_transit(
+        days, method='spa')['sunrise']
+    dst = time.has_dst(sunrise, ['3/8/2020', '11/1/2020'])
+    if tz == 'America/Denver':
+        assert dst == [True, True]
+    else:
+        assert dst == [False, False]
