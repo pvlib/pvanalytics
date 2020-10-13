@@ -58,18 +58,38 @@ def test_timestamp_spacing_too_frequent(times):
     )
 
 
-@pytest.mark.parametrize("tz", ['MST', 'America/Denver'])
-def test_has_dst(tz, albuquerque):
+def _get_sunrise(location, tz):
+    # Get sunrise times for 2020
     days = pd.date_range(
         start='1/1/2020',
         end='1/1/2021',
         freq='D',
         tz=tz
     )
-    sunrise = albuquerque.get_sun_rise_set_transit(
-        days, method='spa')['sunrise']
+    return location.get_sun_rise_set_transit(
+        days, method='spa'
+    ).sunrise
+
+
+@pytest.mark.parametrize("tz, expected", [('MST', False),
+                                          ('America/Denver', True)])
+def test_has_dst(tz, expected, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
     dst = time.has_dst(sunrise, ['3/8/2020', '11/1/2020'])
-    if tz == 'America/Denver':
-        assert dst == [True, True]
-    else:
-        assert dst == [False, False]
+    assert dst == [expected, expected]
+
+
+@pytest.mark.parametrize("tz, expected", [('MST', False),
+                                          ('America/Denver', True)])
+@pytest.mark.parametrize("freq", ['15T', '30T', 'H'])
+def test_has_dst_rounded(tz, freq, expected, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
+    # With rounding to 1-hour timestamps we need to reduce how many
+    # days we look at.
+    window = 7 if freq != 'H' else 1
+    dst = time.has_dst(
+        sunrise.dt.round(freq),
+        ['3/8/2020', '11/1/2020'],
+        window=window
+    )
+    assert dst == [expected, expected]
