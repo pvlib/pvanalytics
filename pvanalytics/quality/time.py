@@ -45,17 +45,33 @@ def _has_dst(event_times, date, window, min_difference):
 
 def has_dst(event_times, shift_dates, window=7, min_difference=45):
     """Return true if `daynight_mask` appears to have daylight-savings shifts
-    at or near the dates in `shift_dates`.
+    at the dates in `shift_dates`.
+
+    Compares the mean event time in minutes since midnight over the
+    `window` days before and after each date in `shift_dates`. If the
+    difference is greater than `min_difference` then a shift has occurred
+    on that date.
 
     Parameters
     ----------
     event_times : Series
-        Series with one timestamp for each day.
+        Series with one timestamp for each day. The timestamp should
+        correspond to an event that occurs at roughly the same time on
+        each day, and shifts with daylight savings transitions. For example,
+        you may pass sunrise, sunset, or solar transit time.
     shift_dates : list of datetime-like
-        Dates of expected daylight savings time shifts. String should be in
-        a format that can be parsed by :py:func:`pandas.to_datetime`.
-    window : int
-        Number of days before and after the shift date to consider.
+        Dates of expected daylight savings time shifts. Can be any type
+        that can be converted to a ``pandas.Timestamp`` by
+        :py:func:`pandas.to_datetime`.
+    window : int, default 7
+        Number of days before and after the shift date to consider. When
+        passing rounded timestamps in `event_times` it may be necessary to
+        use a smaller window. [days]
+    min_difference : int, default 45
+        Minimum difference between the mean event time before the shift
+        date and the mean event time after the event time. If the difference
+        is greater than `min_difference` a shift has occurred on that date.
+        [minutes]
 
     Returns
     -------
