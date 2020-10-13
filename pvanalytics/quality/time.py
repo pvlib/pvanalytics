@@ -189,6 +189,8 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
 def _has_dst(event_times, date, window, min_difference):
     before = event_times[date - window:date - pd.Timedelta(days=1)]
     after = event_times[date:date + window]
+    if len(before) == 0 or len(after) == 0:
+        raise ValueError(f"Insufficient data at {date}.")
     before = before.dt.hour * 60 + before.dt.minute
     after = after.dt.hour * 60 + after.dt.minute
     return abs(before.mean() - after.mean()) > min_difference
@@ -229,8 +231,16 @@ def has_dst(event_times, shift_dates, window=7, min_difference=45):
     list of bool
         Boolean indicating whether a DST shift was found at each date in
         `shift_dates`.
+
+    Raises
+    ------
+    ValueError
+        If there is no data before or after a shift date a ``ValueError`` is
+        raised.
     """
-    shift_dates = [pd.to_datetime(date) for date in shift_dates]
+    shift_dates = [pd.to_datetime(date).tz_localize(event_times.index.tz)
+                   for date in shift_dates]
     window = pd.Timedelta(days=window)
+    event_times = event_times.dropna()
     return [_has_dst(event_times, date, window, min_difference)
             for date in shift_dates]

@@ -95,6 +95,17 @@ def test_has_dst_rounded(tz, freq, expected, albuquerque):
     assert dst == [expected, expected]
 
 
+def test_has_dst_missing_data(albuquerque):
+    sunrise = _get_sunrise(albuquerque, 'MST')
+    sunrise.loc['1/1/2020':'1/10/2020'] = pd.NaT
+    sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
+    # Doesn't raise since both sides still have some data
+    _ = time.has_dst(sunrise, ['3/8/2020', '11/1/2020']) == [True, True]
+    sunrise.loc['3/1/2020':'3/5/2020'] = pd.NaT
+    with pytest.raises(ValueError, match=r'Insufficient data at .*'):
+        _ = time.has_dst(sunrise, ['3/8/2020'])
+
+
 @pytest.fixture(scope='module', params=['H', '15T', 'T'])
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
