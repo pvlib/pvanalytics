@@ -496,7 +496,9 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     - the DC capacity of the system
     - the DC input limit of the inverter.
 
-    All parameters passed as a Series must have the same index.
+    All parameters passed as a Series must have the same index and must not
+    contain any undefined values (i.e. NaNs). If any input contains NaNs a
+    ValueError is raised.
 
     Parameters
     ----------
@@ -534,17 +536,19 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     r_squared : float
         :math:`r^2` value for the fit at the returned orientation.
 
+    Raises
+    ------
+    ValueError
+        If any input passed as a Series contains undefined values (i.e. NaNs).
     """
-    power_ac = power_ac.dropna()
-    ghi = ghi.dropna()
-    dhi = dhi.dropna()
-    dni = dni.dropna()
-    solar_azimuth = solar_azimuth.dropna()
-    solar_zenith = solar_zenith.dropna()
-    if isinstance(temperature, pd.Series):
-        temperature = temperature.dropna()
-    if isinstance(wind_speed, pd.Series):
-        wind_speed = wind_speed.dropna()
+    if power_ac.hasnans:
+        raise ValueError("power_ac must not contain undefined values")
+    if ghi.hasnans or dhi.hasnans or dni.hasnans:
+        raise ValueError("ghi, dhi, and dni must not contain undefined values")
+    if isinstance(temperature, pd.Series) and temperature.hasnans:
+        raise ValueError("temperature must not contain undefined values")
+    if isinstance(wind_speed, pd.Series) and wind_speed.hasnans:
+        raise ValueError("wind_speed must not contain undefined values")
     if temperature_model_parameters is None:
         temperature_model_parameters = \
             TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
