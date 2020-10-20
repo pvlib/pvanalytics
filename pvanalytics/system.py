@@ -451,7 +451,7 @@ def _power_residuals_from_clearsky(system_params,
     tilt = system_params[0]
     azimuth = system_params[1]
     dc_capacity = system_params[2]
-    dc_limit = system_params[3]
+    dc_inverter_limit = system_params[3]
     poa = pvlib.irradiance.get_total_irradiance(
         tilt, azimuth,
         solar_zenith,
@@ -470,7 +470,7 @@ def _power_residuals_from_clearsky(system_params,
         dc_capacity,
         temperature_coefficient
     )
-    return power_ac - pvlib.inverter.pvwatts(pdc, dc_limit)
+    return power_ac - pvlib.inverter.pvwatts(pdc, dc_inverter_limit)
 
 
 def _rsquared(data, residuals):
