@@ -412,41 +412,42 @@ def _power_residuals_from_clearsky(system_params,
                                    wind_speed,
                                    temperature_coefficient,
                                    temperature_model_parameters):
-    # Return the residuals between a system with parameters given in `params`
-    # and the data in `power_ac`.
-    #
-    # Parameters
-    # ----------
-    # system_params : array-like
-    #     array of four floats: tilt, azimuth, DC capacity, and inverter
-    #     DC input limit.
-    # ghi : Series
-    #     Clear sky GHI
-    # dhi : Series
-    #     Clear sky DHI
-    # dni : Series
-    #     Clear sky DNI
-    # solar_zenith : Series
-    #     Solar zenith at the same times as data in `power_ac`
-    # solar_azimuth : Series
-    #     Solar azimuth at the same times as data in `power_ac`
-    # power_ac : Series
-    #     Measured AC power under clear sky conditions.
-    # temperature : float or Series
-    #     Air temperature at which to model the hypothetical system. If a
-    #     float then a constant temperature is used. If a Series, must have
-    #     the same index as `power_ac`. [C]
-    # wind_speed : float or Series
-    #     Wind speed. If a float then a constant wind speed is used. If a
-    #     Series, must have the same index as `power_ac`. [m/s]
-    # temperature_model_parameters : dict
-    #     Parameters fot the cell temperature model.
-    #
-    # Returns
-    # -------
-    # Series
-    #     Difference between `power_ac` and the PVWatts output with the
-    #     given parameters.
+    """Return the residuals between a system with parameters given in `params`
+    and the data in `power_ac`.
+
+    Parameters
+    ----------
+    system_params : array-like
+        array of four floats: tilt, azimuth, DC capacity, and inverter
+        DC input limit.
+    ghi : Series
+        Clear sky GHI
+    dhi : Series
+        Clear sky DHI
+    dni : Series
+        Clear sky DNI
+    solar_zenith : Series
+        Solar zenith at the same times as data in `power_ac`
+    solar_azimuth : Series
+        Solar azimuth at the same times as data in `power_ac`
+    power_ac : Series
+        Measured AC power under clear sky conditions.
+    temperature : float or Series
+        Air temperature at which to model the hypothetical system. If a
+        float then a constant temperature is used. If a Series, must have
+        the same index as `power_ac`. [C]
+    wind_speed : float or Series
+        Wind speed. If a float then a constant wind speed is used. If a
+        Series, must have the same index as `power_ac`. [m/s]
+    temperature_model_parameters : dict
+        Parameters fot the cell temperature model.
+
+    Returns
+    -------
+    Series
+        Difference between `power_ac` and the PVWatts output with the
+        given parameters.
+    """
     tilt = system_params[0]
     azimuth = system_params[1]
     dc_capacity = system_params[2]
