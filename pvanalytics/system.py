@@ -496,6 +496,8 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     - the DC capacity of the system
     - the DC input limit of the inverter.
 
+    All parameters passed as a Series must have the same index.
+
     Parameters
     ----------
     power_ac : Series
@@ -533,6 +535,16 @@ def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
         :math:`r^2` value for the fit at the returned orientation.
 
     """
+    power_ac = power_ac.dropna()
+    ghi = ghi.dropna()
+    dhi = dhi.dropna()
+    dni = dni.dropna()
+    solar_azimuth = solar_azimuth.dropna()
+    solar_zenith = solar_zenith.dropna()
+    if isinstance(temperature, pd.Series):
+        temperature = temperature.dropna()
+    if isinstance(wind_speed, pd.Series):
+        wind_speed = wind_speed.dropna()
     if temperature_model_parameters is None:
         temperature_model_parameters = \
             TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']

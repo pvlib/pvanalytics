@@ -489,3 +489,90 @@ def test_orientation_fit_pvwatts(system_power):
                 or azimuth == pytest.approx(360, abs=10))
     else:
         assert azimuth == pytest.approx(system_power['azimuth'], abs=10)
+
+
+def test_orientation_fit_pvwatts_missing_data(naive_times):
+    tilt = 30
+    azimuth = 100
+    system_location = location.Location(35, -106)
+    local_time = naive_times.tz_localize('MST')
+    clearsky = system_location.get_clearsky(
+        local_time, model='simplified_solis'
+    )
+    clearsky.loc['3/1/2020':'3/15/2020'] = np.nan
+    solar_position = system_location.get_solarposition(clearsky.index)
+    solar_position.loc['3/1/2020':'3/15/2020'] = np.nan
+    poa = irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solar_position['zenith'],
+        solar_position['azimuth'],
+        **clearsky
+    )
+    temp_cell = pvlib.temperature.sapm_cell(
+        poa['poa_global'],
+        25, 0,
+        **pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS[
+            'sapm'
+        ][
+            'open_rack_glass_glass'
+        ]
+    )
+    pdc = pvsystem.pvwatts_dc(poa['poa_global'], temp_cell, 100, -0.002)
+    pac = pvsystem.inverter.pvwatts(pdc, 120)
+    tilt_out, azimuth_out, rsquared = system.orientation_fit_pvwatts(
+        pac, **clearsky,
+        solar_zenith=solar_position['zenith'],
+        solar_azimuth=solar_position['azimuth']
+    )
+    assert rsquared > 0.9
+    assert tilt_out == pytest.approx(tilt, abs=10)
+    assert azimuth_out == pytest.approx(azimuth, abs=10)
+    clearsky.dropna(inplace=True)
+    pac.dropna(inplace=True)
+    solar_position.dropna(inplace=True)
+    tilt_out, azimuth_out, rsquared = system.orientation_fit_pvwatts(
+        pac, **clearsky,
+        solar_zenith=solar_position['zenith'],
+        solar_azimuth=solar_position['azimuth']
+    )
+    assert rsquared > 0.9
+    assert tilt_out == pytest.approx(tilt, abs=10)
+    assert azimuth_out == pytest.approx(azimuth, abs=10)
+
+
+def test_orientation_fit_pvwatts_temp_wind_as_series(naive_times):
+    tilt = 30
+    azimuth = 100
+    system_location = location.Location(35, -106)
+    local_time = naive_times.tz_localize('MST')
+    clearsky = system_location.get_clearsky(
+        local_time, model='simplified_solis'
+    )
+    solar_position = system_location.get_solarposition(clearsky.index)
+    poa = irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solar_position['zenith'],
+        solar_position['azimuth'],
+        **clearsky
+    )
+    temp_cell = pvlib.temperature.sapm_cell(
+        poa['poa_global'],
+        25, 1,
+        **pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS[
+            'sapm'
+        ][
+            'open_rack_glass_glass'
+        ]
+    )
+    pdc = pvsystem.pvwatts_dc(poa['poa_global'], temp_cell, 100, -0.002)
+    pac = pvsystem.inverter.pvwatts(pdc, 120)
+    tilt_out, azimuth_out, rsquared = system.orientation_fit_pvwatts(
+        pac, **clearsky,
+        solar_zenith=solar_position['zenith'],
+        solar_azimuth=solar_position['azimuth'],
+        temperature=pd.Series(25, index=clearsky.index),
+        wind_speed=pd.Series(1, index=clearsky.index)
+    )
+    assert rsquared > 0.9
+    assert tilt_out == pytest.approx(tilt, abs=10)
+    assert azimuth_out == pytest.approx(azimuth, abs=10)
