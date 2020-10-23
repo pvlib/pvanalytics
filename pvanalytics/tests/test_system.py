@@ -472,12 +472,11 @@ def system_power(request, system_location, naive_times):
 @pytest.mark.slow
 def test_orientation_fit_pvwatts(system_power):
     day_mask = system_power['ac'] > 0
-    tilt, azimuth, rsquared = system.orientation_fit_pvwatts(
+    tilt, azimuth, rsquared = system.infer_orientation_fit_pvwatts(
         system_power['ac'][day_mask],
         solar_zenith=system_power['solar_position']['zenith'][day_mask],
         solar_azimuth=system_power['solar_position']['azimuth'][day_mask],
-        **system_power['clearsky'][day_mask]
-    )
+        **system_power['clearsky'][day_mask])
     assert rsquared > 0.9
     assert tilt == pytest.approx(system_power['tilt'], abs=10)
     if system_power['tilt'] == 0:
@@ -522,24 +521,27 @@ def test_orientation_fit_pvwatts_missing_data(naive_times):
     solar_position.dropna(inplace=True)
     with pytest.raises(ValueError,
                        match=".* must not contain undefined values"):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
-            solar_azimuth=solar_position['azimuth']
+            solar_azimuth=solar_position['azimuth'],
+            **clearsky
         )
     pac.dropna(inplace=True)
     with pytest.raises(ValueError,
                        match=".* must not contain undefined values"):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
-            solar_azimuth=solar_position['azimuth']
+            solar_azimuth=solar_position['azimuth'],
+            **clearsky
         )
     clearsky.dropna(inplace=True)
-    tilt_out, azimuth_out, rsquared = system.orientation_fit_pvwatts(
-        pac, **clearsky,
+    tilt_out, azimuth_out, rsquared = system.infer_orientation_fit_pvwatts(
+        pac,
         solar_zenith=solar_position['zenith'],
-        solar_azimuth=solar_position['azimuth']
+        solar_azimuth=solar_position['azimuth'],
+        **clearsky
     )
     assert rsquared > 0.9
     assert tilt_out == pytest.approx(tilt, abs=10)
@@ -580,44 +582,49 @@ def test_orientation_fit_pvwatts_temp_wind_as_series(naive_times):
     pac = pvsystem.inverter.pvwatts(pdc, 120)
     with pytest.raises(ValueError,
                        match=".* must not contain undefined values"):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
             solar_azimuth=solar_position['azimuth'],
             temperature=temperature_missing,
-            wind_speed=wind_speed_missing
+            wind_speed=wind_speed_missing,
+            **clearsky
         )
     with pytest.raises(ValueError,
                        match="temperature must not contain undefined values"):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
             solar_azimuth=solar_position['azimuth'],
             temperature=temperature_missing,
-            wind_speed=wind_speed
+            wind_speed=wind_speed,
+            **clearsky
         )
     with pytest.raises(ValueError,
                        match="wind_speed must not contain undefined values"):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
             solar_azimuth=solar_position['azimuth'],
             temperature=temperature,
-            wind_speed=wind_speed_missing
+            wind_speed=wind_speed_missing,
+            **clearsky
         )
     # ValueError if indices don't match
     with pytest.raises(ValueError):
-        system.orientation_fit_pvwatts(
-            pac, **clearsky,
+        system.infer_orientation_fit_pvwatts(
+            pac,
             solar_zenith=solar_position['zenith'],
             solar_azimuth=solar_position['azimuth'],
             temperature=temperature_missing.dropna(),
-            wind_speed=wind_speed_missing.dropna()
+            wind_speed=wind_speed_missing.dropna(),
+            **clearsky
         )
-    tilt_out, azimuth_out, rsquared = system.orientation_fit_pvwatts(
-        pac, **clearsky,
+    tilt_out, azimuth_out, rsquared = system.infer_orientation_fit_pvwatts(
+        pac,
+        solar_zenith=solar_position['zenith'],
         solar_azimuth=solar_position['azimuth'],
-        solar_zenith=solar_position['zenith']
+        **clearsky
     )
     assert rsquared > 0.9
     assert tilt_out == pytest.approx(tilt, abs=10)

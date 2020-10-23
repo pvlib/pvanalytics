@@ -480,11 +480,11 @@ def _rsquared(data, residuals):
     return r*r
 
 
-def orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
-                            solar_zenith, solar_azimuth,
-                            temperature=25, wind_speed=0,
-                            temperature_coefficient=-0.004,
-                            temperature_model_parameters=None):
+def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
+                                  solar_zenith, solar_azimuth,
+                                  temperature=25, wind_speed=0,
+                                  temperature_coefficient=-0.004,
+                                  temperature_model_parameters=None):
     """Get the tilt and azimuth that give pvwatts output that most closely
     fits the data in `power_ac`.
 
