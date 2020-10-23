@@ -412,7 +412,7 @@ def _power_residuals_from_clearsky(system_params,
                                    wind_speed,
                                    temperature_coefficient,
                                    temperature_model_parameters):
-    """Return the residuals between a system with parameters given in `params`
+    """Return the residuals between a system with parameters given in `system_params`
     and the data in `power_ac`.
 
     Parameters
@@ -439,14 +439,22 @@ def _power_residuals_from_clearsky(system_params,
     wind_speed : float or Series
         Wind speed. If a float then a constant wind speed is used. If a
         Series, must have the same index as `power_ac`. [m/s]
+    temperature_coefficient : float
+        Temperature coefficient of DC power. [1/C]
     temperature_model_parameters : dict
-        Parameters fot the cell temperature model.
+        Parameters for the cell temperature model.
 
     Returns
     -------
     Series
         Difference between `power_ac` and the PVWatts output with the
         given parameters.
+    
+    Notes
+    ------
+    Uses the defaults in `pvlib.irradiance.get_total_irradiance` to calculated plane-of-array
+    irradiance, i.e., the isotropic model for sky diffuse irradiance, and the Perez irradiance
+    transposition model.
     """
     tilt = system_params[0]
     azimuth = system_params[1]
@@ -485,9 +493,12 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
                                   temperature=25, wind_speed=0,
                                   temperature_coefficient=-0.004,
                                   temperature_model_parameters=None):
-    """Get the tilt and azimuth that give pvwatts output that most closely
+    """Get the tilt and azimuth that give PVWatts output that most closely
     fits the data in `power_ac`.
 
+    Input data `power_ac`, `ghi`, `dhi`, `dni` should reflect clear-sky
+    conditions.
+    
     Uses non-linear least squares to optimize over four free variables
     to find the values that result in the best fit between power modeled
     using PVWatts and `power_ac`. The four free variables are
@@ -506,11 +517,11 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     power_ac : Series
         AC power from the system in clear sky conditions.
     ghi : Series
-        Clear sky GHI with same index as `power_ac`.
+        Clear sky GHI with same index as `power_ac`. [W/m^2]
     dhi : Series
-        Clear sky DHI with same index as `power_ac`.
+        Clear sky DHI with same index as `power_ac`. [W/m^2]
     dni : Series
-        Clear sky DNI with same index as `power_ac`.
+        Clear sky DNI with same index as `power_ac`. [W/m^2]
     solar_zenith : Series
         Solar zenith. [degrees]
     solar_azimuth : Series
