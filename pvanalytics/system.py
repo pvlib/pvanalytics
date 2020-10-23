@@ -413,8 +413,8 @@ def _power_residuals_from_clearsky(system_params,
                                    wind_speed,
                                    temperature_coefficient,
                                    temperature_model_parameters):
-    """Return the residuals between a system with parameters given in `system_params`
-    and the data in `power_ac`.
+    """Return the residuals between a system with parameters given in
+    `system_params` and the data in `power_ac`.
 
     Parameters
     ----------
@@ -450,12 +450,12 @@ def _power_residuals_from_clearsky(system_params,
     Series
         Difference between `power_ac` and the PVWatts output with the
         given parameters.
-    
+
     Notes
     ------
-    Uses the defaults in `pvlib.irradiance.get_total_irradiance` to calculated plane-of-array
-    irradiance, i.e., the isotropic model for sky diffuse irradiance, and the Perez irradiance
-    transposition model.
+    Uses the defaults in :py:func:`pvlib.irradiance.get_total_irradiance` to
+    calculated plane-of-array irradiance, i.e., the isotropic model for sky
+    diffuse irradiance, and the Perez irradiance transposition model.
     """
     tilt = system_params[0]
     azimuth = system_params[1]
@@ -499,7 +499,7 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
 
     Input data `power_ac`, `ghi`, `dhi`, `dni` should reflect clear-sky
     conditions.
-    
+
     Uses non-linear least squares to optimize over four free variables
     to find the values that result in the best fit between power modeled
     using PVWatts and `power_ac`. The four free variables are
