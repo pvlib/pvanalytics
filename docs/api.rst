@@ -249,6 +249,7 @@ power or plane of array irradiance measurements.
    :toctree: generated/
 
    system.infer_orientation_daily_peak
+   system.infer_orientation_fit_pvwatts
 
 Metrics
 =======

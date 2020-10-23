@@ -2,8 +2,10 @@
 import enum
 import warnings
 import numpy as np
+import scipy
 import pandas as pd
 import pvlib
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.util import _fit, _group
 
 
@@ -401,3 +403,195 @@ def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
                 best_azimuth = azimuth
                 best_tilt = tilt
     return best_azimuth, best_tilt
+
+
+def _power_residuals_from_clearsky(system_params,
+                                   ghi, dhi, dni,
+                                   power_ac,
+                                   solar_zenith, solar_azimuth,
+                                   temperature,
+                                   wind_speed,
+                                   temperature_coefficient,
+                                   temperature_model_parameters):
+    """Return the residuals between a system with parameters given in
+    `system_params` and the data in `power_ac`.
+
+    Parameters
+    ----------
+    system_params : array-like
+        array of four floats: tilt, azimuth, DC capacity, and inverter
+        DC input limit.
+    ghi : Series
+        Clear sky GHI
+    dhi : Series
+        Clear sky DHI
+    dni : Series
+        Clear sky DNI
+    power_ac : Series
+        Measured AC power under clear sky conditions.
+    solar_zenith : Series
+        Solar zenith at the same times as data in `power_ac`
+    solar_azimuth : Series
+        Solar azimuth at the same times as data in `power_ac`
+    temperature : float or Series
+        Air temperature at which to model the hypothetical system. If a
+        float then a constant temperature is used. If a Series, must have
+        the same index as `power_ac`. [C]
+    wind_speed : float or Series
+        Wind speed. If a float then a constant wind speed is used. If a
+        Series, must have the same index as `power_ac`. [m/s]
+    temperature_coefficient : float
+        Temperature coefficient of DC power. [1/C]
+    temperature_model_parameters : dict
+        Parameters for the cell temperature model.
+
+    Returns
+    -------
+    Series
+        Difference between `power_ac` and the PVWatts output with the
+        given parameters.
+
+    Notes
+    ------
+    Uses the defaults in :py:func:`pvlib.irradiance.get_total_irradiance` to
+    calculated plane-of-array irradiance, i.e., the isotropic model for sky
+    diffuse irradiance, and the Perez irradiance transposition model.
+    """
+    tilt = system_params[0]
+    azimuth = system_params[1]
+    dc_capacity = system_params[2]
+    dc_inverter_limit = system_params[3]
+    poa = pvlib.irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solar_zenith,
+        solar_azimuth,
+        dni, ghi, dhi
+    )
+    temp_cell = pvlib.temperature.sapm_cell(
+        poa['poa_global'],
+        temperature,
+        wind_speed,
+        **temperature_model_parameters
+    )
+    pdc = pvlib.pvsystem.pvwatts_dc(
+        poa['poa_global'],
+        temp_cell,
+        dc_capacity,
+        temperature_coefficient
+    )
+    return power_ac - pvlib.inverter.pvwatts(pdc, dc_inverter_limit)
+
+
+def _rsquared(data, residuals):
+    # Calculate the coefficient of determination from `residuals`
+    model = data + residuals
+    _, _, r, _, _ = scipy.stats.linregress(model, data)
+    return r*r
+
+
+def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
+                                  solar_zenith, solar_azimuth,
+                                  temperature=25, wind_speed=0,
+                                  temperature_coefficient=-0.004,
+                                  temperature_model_parameters=None):
+    """Get the tilt and azimuth that give PVWatts output that most closely
+    fits the data in `power_ac`.
+
+    Input data `power_ac`, `ghi`, `dhi`, `dni` should reflect clear-sky
+    conditions.
+
+    Uses non-linear least squares to optimize over four free variables
+    to find the values that result in the best fit between power modeled
+    using PVWatts and `power_ac`. The four free variables are
+
+    - surface tilt
+    - surface azimuth
+    - the DC capacity of the system
+    - the DC input limit of the inverter.
+
+    Of these four parameters, only tilt and azimuth are returned. While, DC
+    capacity and the DC input limit are calculated, their values may not be
+    accurate. While its value is not returned, because the DC input limit is
+    used as a free variable for the optimization process, this function
+    can operate on `power_ac` data that includes inverter clipping.
+
+    All parameters passed as a Series must have the same index and must not
+    contain any undefined values (i.e. NaNs). If any input contains NaNs a
+    ValueError is raised.
+
+    Parameters
+    ----------
+    power_ac : Series
+        AC power from the system in clear sky conditions.
+    ghi : Series
+        Clear sky GHI with same index as `power_ac`. [W/m^2]
+    dhi : Series
+        Clear sky DHI with same index as `power_ac`. [W/m^2]
+    dni : Series
+        Clear sky DNI with same index as `power_ac`. [W/m^2]
+    solar_zenith : Series
+        Solar zenith. [degrees]
+    solar_azimuth : Series
+        Solar azimuth. [degrees]
+    temperature : float or Series, default 25
+        Air temperature at which to model the hypothetical system. If a
+        float then a constant temperature is used. If a Series, must have
+        the same index as `power_ac`. [C]
+    wind_speed : float or Series, default 0
+        Wind speed. If a float then a constant wind speed is used. If a
+        Series, must have the same index as `power_ac`. [m/s]
+    temperature_model_parameters : dict, optional
+        Parameters fot the cell temperature model. If not specified
+        ``pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][
+        'open_rack_glass_glass']`` is used. See
+        :py:func:`pvlib.temperature.sapm_cell` for more information.
+
+    Returns
+    -------
+    surface_tilt : float
+        Tilt of the array. [degrees]
+    surface_azimuth : float
+        Azimuth of the array. [degrees]
+    r_squared : float
+        :math:`r^2` value for the fit at the returned orientation.
+
+    Raises
+    ------
+    ValueError
+        If any input passed as a Series contains undefined values (i.e. NaNs).
+    """
+    if power_ac.hasnans:
+        raise ValueError("power_ac must not contain undefined values")
+    if ghi.hasnans or dhi.hasnans or dni.hasnans:
+        raise ValueError("ghi, dhi, and dni must not contain undefined values")
+    if isinstance(temperature, pd.Series) and temperature.hasnans:
+        raise ValueError("temperature must not contain undefined values")
+    if isinstance(wind_speed, pd.Series) and wind_speed.hasnans:
+        raise ValueError("wind_speed must not contain undefined values")
+    if temperature_model_parameters is None:
+        temperature_model_parameters = \
+            TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    initial_tilt = 45
+    initial_azimuth = 180
+    initial_dc_capacity = power_ac.max()
+    initial_dc_limit = power_ac.max() * 1.5
+    fit_result = scipy.optimize.least_squares(
+        _power_residuals_from_clearsky,
+        [initial_tilt, initial_azimuth, initial_dc_capacity, initial_dc_limit],
+        bounds=([0, 0, power_ac.max()*0.5, power_ac.max()*0.5],
+                [90, 360, power_ac.max()*2, power_ac.max()*3]),
+        kwargs={
+            'ghi': ghi,
+            'dhi': dhi,
+            'dni': dni,
+            'solar_zenith': solar_zenith,
+            'solar_azimuth': solar_azimuth,
+            'power_ac': power_ac,
+            'temperature': temperature,
+            'temperature_coefficient': temperature_coefficient,
+            'wind_speed': wind_speed,
+            'temperature_model_parameters': temperature_model_parameters
+        }
+    )
+    r_squared = _rsquared(power_ac, fit_result.fun)
+    return fit_result.x[0], fit_result.x[1], r_squared
