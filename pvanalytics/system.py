@@ -508,6 +508,12 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     - the DC capacity of the system
     - the DC input limit of the inverter.
 
+    Of these four parameters, only tilt and azimuth are returned. While, DC
+    capacity and the DC input limit are calculated, their values may not be
+    accurate. While its value is not returned, because the DC input limit is
+    used as a free variable for the optimization process, this function
+    can operate on `power_ac` data that includes inverter clipping.
+
     All parameters passed as a Series must have the same index and must not
     contain any undefined values (i.e. NaNs). If any input contains NaNs a
     ValueError is raised.
