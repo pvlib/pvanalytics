@@ -407,8 +407,9 @@ def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
 
 def _power_residuals_from_clearsky(system_params,
                                    ghi, dhi, dni,
+                                   power_ac,
                                    solar_zenith, solar_azimuth,
-                                   power_ac, temperature,
+                                   temperature,
                                    wind_speed,
                                    temperature_coefficient,
                                    temperature_model_parameters):
@@ -426,12 +427,12 @@ def _power_residuals_from_clearsky(system_params,
         Clear sky DHI
     dni : Series
         Clear sky DNI
+    power_ac : Series
+        Measured AC power under clear sky conditions.
     solar_zenith : Series
         Solar zenith at the same times as data in `power_ac`
     solar_azimuth : Series
         Solar azimuth at the same times as data in `power_ac`
-    power_ac : Series
-        Measured AC power under clear sky conditions.
     temperature : float or Series
         Air temperature at which to model the hypothetical system. If a
         float then a constant temperature is used. If a Series, must have
