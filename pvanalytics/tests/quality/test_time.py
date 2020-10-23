@@ -75,8 +75,33 @@ def _get_sunrise(location, tz):
                                           ('America/Denver', True)])
 def test_has_dst(tz, expected, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
-    dst = time.has_dst(sunrise, ['3/8/2020', '11/1/2020'])
-    assert dst == [expected, expected]
+    dst = time.has_dst(sunrise, 'America/Denver')
+    expected = pd.Series(
+        [expected, expected],
+        index=pd.DatetimeIndex(
+            ['2020-03-08 00:00', '2020-11-01 00:00']).tz_localize(tz)
+    )
+    assert_series_equal(
+        expected,
+        dst,
+        check_names=False
+    )
+
+
+@pytest.mark.parametrize("tz, expected", [('MST', False),
+                                          ('America/Denver', True)])
+def test_has_dst_input_serise_not_localized(tz, expected, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
+    sunrise = sunrise.tz_localize(None)
+    expected = pd.Series(
+        [expected, expected],
+        index=pd.DatetimeIndex(['2020-03-08 00:00', '2020-11-01 00:00'])
+    )
+    dst = time.has_dst(sunrise, 'America/Denver')
+    assert_series_equal(
+        expected,
+        dst
+    )
 
 
 @pytest.mark.parametrize("tz, expected", [('MST', False),
@@ -87,12 +112,18 @@ def test_has_dst_rounded(tz, freq, expected, albuquerque):
     # With rounding to 1-hour timestamps we need to reduce how many
     # days we look at.
     window = 7 if freq != 'H' else 1
+    expected = pd.Series(
+        [expected, expected],
+        index=pd.DatetimeIndex(
+            ['2020-03-08 00:00', '2020-11-01 00:00']
+        ).tz_localize(tz)
+    )
     dst = time.has_dst(
         sunrise.dt.round(freq),
-        ['3/8/2020', '11/1/2020'],
+        'America/Denver',
         window=window
     )
-    assert dst == [expected, expected]
+    assert_series_equal(expected, dst, check_names=False)
 
 
 def test_has_dst_missing_data(albuquerque):
@@ -100,10 +131,18 @@ def test_has_dst_missing_data(albuquerque):
     sunrise.loc['1/1/2020':'1/10/2020'] = pd.NaT
     sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
     # Doesn't raise since both sides still have some data
-    _ = time.has_dst(sunrise, ['3/8/2020', '11/1/2020']) == [True, True]
+    _ = time.has_dst(sunrise, 'America/Denver')
     sunrise.loc['3/1/2020':'3/5/2020'] = pd.NaT
-    with pytest.raises(ValueError, match=r'Insufficient data at .*'):
-        _ = time.has_dst(sunrise, ['3/8/2020'])
+    with pytest.raises(ValueError, match='Insufficient data at .*'):
+        _ = time.has_dst(sunrise, 'America/Denver')
+
+
+def test_has_dst_no_dst_in_date_range(albuquerque):
+    sunrise = _get_sunrise(albuquerque, 'America/Denver')
+    with pytest.raises(ValueError,
+                       match='No daylight savings shifts in expected timezone '
+                             r'\(MST\) on dates in input'):
+        time.has_dst(sunrise, 'MST')
 
 
 @pytest.fixture(scope='module', params=['H', '15T', 'T'])
