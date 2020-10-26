@@ -1,7 +1,7 @@
 """Functions for identifying daytime"""
 import numpy as np
 import pandas as pd
-from pandas.tseries import frequencies
+from pvanalytics import util
 
 
 def _rolling_by_minute(data, days, f):
@@ -103,9 +103,7 @@ def _filter_and_normalize(series, outliers):
 
 
 def _freqstr_to_minutes(freqstr):
-    return pd.to_timedelta(
-        frequencies.to_offset(freqstr)
-    ).seconds / 60
+    return util.freq_to_timedelta(freqstr).seconds / 60
 
 
 def power_or_irradiance(series, outliers=None,
