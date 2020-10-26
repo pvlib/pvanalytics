@@ -6,7 +6,8 @@ from scipy import integrate
 from pvlib.tools import cosd
 import pvlib
 
-from pvanalytics.quality import util
+from pvanalytics import quality
+from pvanalytics import util
 
 
 QCRAD_LIMITS = {'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
@@ -82,7 +83,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
         limits = QCRAD_LIMITS
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
-    ghi_limit_flag = util.check_limits(ghi, limits['ghi_lb'], ghi_ub)
+    ghi_limit_flag = quality.util.check_limits(ghi, limits['ghi_lb'], ghi_ub)
 
     return ghi_limit_flag
 
@@ -129,7 +130,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
 
     dhi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dhi_ub'])
 
-    dhi_limit_flag = util.check_limits(dhi, limits['dhi_lb'], dhi_ub)
+    dhi_limit_flag = quality.util.check_limits(dhi, limits['dhi_lb'], dhi_ub)
 
     return dhi_limit_flag
 
@@ -176,7 +177,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
     dni_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dni_ub'])
 
-    dni_limit_flag = util.check_limits(dni, limits['dni_lb'], dni_ub)
+    dni_limit_flag = quality.util.check_limits(dni, limits['dni_lb'], dni_ub)
 
     return dni_limit_flag
 
@@ -272,10 +273,12 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
     # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
     return (
-        util.check_limits(sza, lower_bound=sza_lb,
-                          upper_bound=sza_ub, inclusive_lower=True)
-        & util.check_limits(ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
-        & util.check_limits(ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+        quality.util.check_limits(
+            sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
+        & quality.util.check_limits(
+            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
+        & quality.util.check_limits(
+            ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
     )
 
 
@@ -391,13 +394,13 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
         clearsky,
         max_clearsky_index=np.Inf
     )
-    return util.check_limits(csi, upper_bound=csi_max, inclusive_upper=True)
+    return quality.util.check_limits(
+        csi, upper_bound=csi_max, inclusive_upper=True
+    )
 
 
 def _to_hours(freqstr):
-    if freqstr[0].isalpha():
-        freqstr = '1' + freqstr
-    return pd.to_timedelta(freqstr).seconds / 3600
+    return util.freq_to_timedelta(freqstr).seconds / 3600
 
 
 def _daily_total(series):
@@ -462,7 +465,7 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     """
     daily_irradiance = _daily_total(irrad)
     daily_clearsky = _daily_total(clearsky)
-    good_days = util.check_limits(
+    good_days = quality.util.check_limits(
         daily_irradiance/daily_clearsky,
         upper_bound=daily_max,
         lower_bound=daily_min

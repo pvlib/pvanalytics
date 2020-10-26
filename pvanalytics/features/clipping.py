@@ -1,6 +1,7 @@
 """Functions for identifying clipping."""
 import pandas as pd
 import numpy as np
+from pvanalytics import util
 
 
 def _detect_levels(x, count=3, num_bins=100):
@@ -130,9 +131,10 @@ def _clipping_power(ac_power, slope_max, power_min,
     #
     # Based on the PVFleets QA Analysis project
     if not freq:
-        freq = pd.Timedelta(pd.infer_freq(ac_power.index)).seconds / 60
+        freq = util.freq_to_timedelta(
+            pd.infer_freq(ac_power.index)).seconds / 60
     elif isinstance(freq, str):
-        freq = pd.Timedelta(freq).seconds / 60
+        freq = util.freq_to_timedelta(freq).seconds / 60
 
     # Use the slope of the 99.5% quantile of daytime power at
     # each minute to identify clipping.

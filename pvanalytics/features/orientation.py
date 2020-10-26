@@ -1,6 +1,6 @@
 """Functions for identifying system orientation."""
 import pandas as pd
-from pandas.tseries import frequencies
+from pvanalytics import util
 from pvanalytics.util import _fit, _group
 
 
@@ -56,7 +56,7 @@ def _conditional_fit(day, minutes, fitfunc, freq, default=0.0, min_hours=0.0,
 
 def _freqstr_to_hours(freq):
     # Convert pandas freqstr to hours (as a float)
-    return pd.to_timedelta(frequencies.to_offset(freq)).seconds / 3600
+    return util.freq_to_timedelta(freq).seconds / 3600
 
 
 def _hours(data, freq):
