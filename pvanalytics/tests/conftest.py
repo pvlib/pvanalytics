@@ -68,7 +68,7 @@ def albuquerque():
         -106.6504,
         name='Albuquerque',
         altitude=1500,
-        tx='Etc/GMT+7'
+        tz='Etc/GMT+7'
     )
 
 
