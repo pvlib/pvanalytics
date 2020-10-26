@@ -128,12 +128,21 @@ def test_hampel_max_deviation():
 
     expected.iloc[60] = False
     assert_series_equal(
-        data[outliers.hampel(data, window=11, max_deviation=10)],
+        data[outliers.hampel(data, window=11, max_deviation=15)],
         data[expected]
     )
 
     expected.iloc[40] = False
     assert_series_equal(
-        data[outliers.hampel(data, window=11, max_deviation=12)],
+        data[outliers.hampel(data, window=11, max_deviation=16)],
         data[expected]
     )
+
+
+def test_hampel_scale():
+    np.random.seed(1000)
+    data = pd.Series(np.random.uniform(-1, 1, size=100))
+    data.iloc[20] = -25
+    data.iloc[40] = 15
+    data.iloc[60] = 5
+    assert not all(outliers.hampel(data) == outliers.hampel(data, scale=0.1))

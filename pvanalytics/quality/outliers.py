@@ -1,6 +1,7 @@
 """Functions for identifying and labeling outliers."""
 import pandas as pd
 from scipy import stats
+from statsmodels import robust
 
 
 def tukey(data, k=1.5):
@@ -59,7 +60,7 @@ def zscore(data, zmax=1.5):
     return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
 
 
-def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
+def hampel(data, window=5, max_deviation=3.0, scale=None):
     r"""Identify outliers by the Hampel identifier.
 
     The Hampel identifier is computed according to [1]_.
@@ -74,10 +75,12 @@ def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
     max_deviation : float, default 3.0
         Any value with a Hampel identifier > `max_deviation` standard
         deviations from the median is considered an outlier.
-    scale : float, default 1.4826
-        MAD scale estimate. The standard deviation is calculated as
-        :math:`scale * MAD`. The default gives an estimate for the
-        standard deviation of Gaussian distributed data.
+    scale : float, optional
+        Scale factor used to estimate the standard deviation as
+        :math:`MAD / scale`. If `scale=None` (default), then the scale
+        factor is taken to be ``scipy.stats.norm.ppf(3/4.)`` (approx. 0.6745),
+        and :math:`MAD / scale` approximates the standard deviation
+        of Gaussian distributed data.
 
     Returns
     -------
@@ -94,7 +97,11 @@ def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
     """
     median = data.rolling(window=window, center=True).median()
     deviation = abs(data - median)
+    kwargs = {}
+    if scale is not None:
+        kwargs = {'c': scale}
     mad = data.rolling(window=window, center=True).apply(
-        stats.median_absolute_deviation
+        robust.scale.mad,
+        kwargs=kwargs
     )
-    return deviation > max_deviation * scale * mad
+    return deviation > max_deviation * mad
