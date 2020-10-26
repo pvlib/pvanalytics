@@ -186,9 +186,9 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     return shift_amount != 0, shift_amount
 
 
-def _has_dst(event_times, date, window, min_difference):
-    before = event_times[date - window:date - pd.Timedelta(days=1)]
-    after = event_times[date:date + window]
+def _has_dst(events, date, window, min_difference):
+    before = events[date - window:date - pd.Timedelta(days=1)]
+    after = events[date:date + window]
     if len(before) == 0 or len(after) == 0:
         raise ValueError(f"Insufficient data at {date}.")
     before = before.dt.hour * 60 + before.dt.minute
@@ -196,8 +196,8 @@ def _has_dst(event_times, date, window, min_difference):
     return abs(before.mean() - after.mean()) > min_difference
 
 
-def has_dst(event_times, tz, shift_dates=None, window=7, min_difference=45):
-    """Return true if `daynight_mask` appears to have daylight-savings shifts
+def has_dst(events, tz, window=7, min_difference=45):
+    """Return true if `events` appears to have daylight-savings shifts
     at the dates in `shift_dates`.
 
     Compares the mean event time in minutes since midnight over the
@@ -207,17 +207,17 @@ def has_dst(event_times, tz, shift_dates=None, window=7, min_difference=45):
 
     Parameters
     ----------
-    event_times : Series
+    events : Series
         Series with one timestamp for each day. The timestamp should
         correspond to an event that occurs at roughly the same time on
         each day, and shifts with daylight savings transitions. For example,
         you may pass sunrise, sunset, or solar transit time.
     tz : str
         Name of a timezone that observes daylight savings and has the same
-        or similar UTC offset as the expected time zone for `event_times`.
+        or similar UTC offset as the expected time zone for `events`.
     window : int, default 7
         Number of days before and after the shift date to consider. When
-        passing rounded timestamps in `event_times` it may be necessary to
+        passing rounded timestamps in `events` it may be necessary to
         use a smaller window. [days]
     min_difference : int, default 45
         Minimum difference between the mean event time before the shift
@@ -227,21 +227,23 @@ def has_dst(event_times, tz, shift_dates=None, window=7, min_difference=45):
 
     Returns
     -------
-    list of bool
-        Boolean indicating whether a DST shift was found at each date in
-        `shift_dates`.
+    Series
+        Boolean Series indexed by dates on which Daylight Savings transitions
+        are expected to occur in `tz` and True if a shift was found on that
+        date in `events`
 
     Raises
     ------
     ValueError
         If there is no data before or after a shift date or there are no
         daylight-savings shifts in `tz` for the dates covered by
-        `event_times`.
+        `events`.
     """
     # Build a timestamp at noon on each day in the data
-    s = pd.Series(pd.DatetimeIndex(
-        event_times.index.tz_localize(None).date),
-        index=event_times.index)
+    s = pd.Series(
+        pd.DatetimeIndex(events.index.tz_localize(None).date),
+        index=events.index
+    )
     s = s + pd.Timedelta(hours=12)
     s = s.dt.tz_localize(tz)
     dst_shift = s.apply(lambda t: t.tzinfo.dst(t).total_seconds() / 3600)
@@ -250,11 +252,11 @@ def has_dst(event_times, tz, shift_dates=None, window=7, min_difference=45):
         raise ValueError("No daylight savings shifts in expected "
                          f"timezone ({tz}) on dates in input")
     window = pd.Timedelta(days=window)
-    event_times = event_times.dropna()
+    events = events.dropna()
     return shift_dates.apply(
         lambda t: _has_dst(
-            event_times,
-            pd.Timestamp(t.date(), tz=event_times.index.tz),
+            events,
+            pd.Timestamp(t.date(), tz=events.index.tz),
             window,
             min_difference
         )
