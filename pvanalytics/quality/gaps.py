@@ -7,6 +7,8 @@ values (i.e. 999).
 import numpy as np
 import pandas as pd
 
+from pvanalytics import util
+
 
 def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     """Test if all values in x are close to x[0].
@@ -247,9 +249,7 @@ def interpolation_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
 
 
 def _freq_to_seconds(freq):
-    if freq.isalpha():
-        freq = '1' + freq
-    delta = pd.to_timedelta(freq)
+    delta = util.freq_to_timedelta(freq)
     return delta.days * (1440 * 60) + delta.seconds
 
 
