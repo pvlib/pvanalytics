@@ -187,6 +187,29 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
 
 
 def _has_dst(events, date, window, min_difference):
+    """Return True if `events` appears to have a daylight savings shift
+    on `date`.
+
+    Parameters
+    ----------
+    events : Series
+        Series of timestamps, one per day.
+    date : Timestamp
+        Timestamp corresponding to midnight on the day to check for daylight
+        savings shifts.
+    window : int
+        Number of days before and after `date` to use when checking for
+        for shifts in `events`
+    min_different : int
+        Minimum difference between mean event time before `date` and mean
+        event time after `date` for a shift tom be detected.
+
+    Returns
+    -------
+    bool
+        Whether or not a shift of at least `min_difference` minutes was
+        detected in the the event times on `date`.
+    """
     before = events[date - window:date - pd.Timedelta(days=1)]
     after = events[date:date + window]
     if len(before) == 0 or len(after) == 0:
