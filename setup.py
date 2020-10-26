@@ -34,7 +34,8 @@ INSTALL_REQUIRES = [
     'numpy >= 1.16.0',
     'pandas >= 0.25.1',
     'pvlib >= 0.8.0',
-    'scipy >= 1.3.0'
+    'scipy >= 1.3.0',
+    'statsmodels >= 0.9.0'
 ]
 
 DOCS_REQUIRE = [

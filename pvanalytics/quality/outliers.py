@@ -1,6 +1,7 @@
 """Functions for identifying and labeling outliers."""
 import pandas as pd
 from scipy import stats
+from statsmodels import robust
 
 
 def tukey(data, k=1.5):
@@ -95,6 +96,6 @@ def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
     median = data.rolling(window=window, center=True).median()
     deviation = abs(data - median)
     mad = data.rolling(window=window, center=True).apply(
-        stats.median_absolute_deviation
+        robust.scale.mad
     )
     return deviation > max_deviation * scale * mad
