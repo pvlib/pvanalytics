@@ -96,6 +96,7 @@ def hampel(data, window=5, max_deviation=3.0, scale=1.4826):
     median = data.rolling(window=window, center=True).median()
     deviation = abs(data - median)
     mad = data.rolling(window=window, center=True).apply(
-        robust.scale.mad
+        robust.scale.mad,
+        kwargs={'c': 1.0/scale}
     )
-    return deviation > max_deviation * scale * mad
+    return deviation > max_deviation * mad

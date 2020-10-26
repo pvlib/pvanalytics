@@ -128,12 +128,12 @@ def test_hampel_max_deviation():
 
     expected.iloc[60] = False
     assert_series_equal(
-        data[outliers.hampel(data, window=11, max_deviation=10)],
+        data[outliers.hampel(data, window=11, max_deviation=15)],
         data[expected]
     )
 
     expected.iloc[40] = False
     assert_series_equal(
-        data[outliers.hampel(data, window=11, max_deviation=12)],
+        data[outliers.hampel(data, window=11, max_deviation=16)],
         data[expected]
     )
