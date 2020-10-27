@@ -71,16 +71,13 @@ def _get_sunrise(location, tz):
     ).sunrise
 
 
-@pytest.mark.parametrize("tz, expected", [('MST', False),
-                                          ('America/Denver', True)])
-def test_has_dst(tz, expected, albuquerque):
+@pytest.mark.parametrize("tz, observes_dst", [#('MST', False),
+                                              ('America/Denver', True)])
+def test_has_dst(tz, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     dst = time.has_dst(sunrise, 'America/Denver')
-    expected = pd.Series(
-        [expected, expected],
-        index=pd.DatetimeIndex(
-            ['2020-03-08 00:00', '2020-11-01 00:00']).tz_localize(tz)
-    )
+    expected = pd.Series(False, index=sunrise.index)
+    expected.loc[['2020-03-08', '2020-11-01']] = observes_dst
     assert_series_equal(
         expected,
         dst,
@@ -88,15 +85,13 @@ def test_has_dst(tz, expected, albuquerque):
     )
 
 
-@pytest.mark.parametrize("tz, expected", [('MST', False),
-                                          ('America/Denver', True)])
-def test_has_dst_input_serise_not_localized(tz, expected, albuquerque):
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
+                                              ('America/Denver', True)])
+def test_has_dst_input_series_not_localized(tz, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     sunrise = sunrise.tz_localize(None)
-    expected = pd.Series(
-        [expected, expected],
-        index=pd.DatetimeIndex(['2020-03-08 00:00', '2020-11-01 00:00'])
-    )
+    expected = pd.Series(False, index=sunrise.index)
+    expected.loc[['2020-03-08 00:00', '2020-11-01 00:00']] = observes_dst
     dst = time.has_dst(sunrise, 'America/Denver')
     assert_series_equal(
         expected,
@@ -104,20 +99,16 @@ def test_has_dst_input_serise_not_localized(tz, expected, albuquerque):
     )
 
 
-@pytest.mark.parametrize("tz, expected", [('MST', False),
-                                          ('America/Denver', True)])
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
+                                              ('America/Denver', True)])
 @pytest.mark.parametrize("freq", ['15T', '30T', 'H'])
-def test_has_dst_rounded(tz, freq, expected, albuquerque):
+def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     # With rounding to 1-hour timestamps we need to reduce how many
     # days we look at.
     window = 7 if freq != 'H' else 1
-    expected = pd.Series(
-        [expected, expected],
-        index=pd.DatetimeIndex(
-            ['2020-03-08 00:00', '2020-11-01 00:00']
-        ).tz_localize(tz)
-    )
+    expected = pd.Series(False, index=sunrise.index.tz_localize(tz))
+    expected.loc[['2020-03-08 00:00', '2020-11-01 00:00']] = observes_dst
     dst = time.has_dst(
         sunrise.dt.round(freq),
         'America/Denver',
@@ -152,10 +143,18 @@ def test_has_dst_missing_data(albuquerque):
 
 def test_has_dst_no_dst_in_date_range(albuquerque):
     sunrise = _get_sunrise(albuquerque, 'America/Denver')
-    with pytest.raises(ValueError,
-                       match='No daylight savings shifts in expected timezone '
-                             r'\(MST\) on dates in input'):
-        time.has_dst(sunrise, 'MST')
+    july = sunrise['2020-07']
+    march = sunrise['2020-03']
+    expected_july = pd.Series(False, index=july.index)
+    expected_march = pd.Series(False, index=march.index)
+    assert_series_equal(
+        expected_july,
+        time.has_dst(july, 'America/Denver')
+    )
+    assert_series_equal(
+        expected_march,
+        time.has_dst(march, 'MST')
+    )
 
 
 @pytest.fixture(scope='module', params=['H', '15T', 'T'])
