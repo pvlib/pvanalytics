@@ -132,9 +132,22 @@ def test_has_dst_missing_data(albuquerque):
     sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
     # Doesn't raise since both sides still have some data
     _ = time.has_dst(sunrise, 'America/Denver')
-    sunrise.loc['3/1/2020':'3/5/2020'] = pd.NaT
-    with pytest.raises(ValueError, match='Insufficient data at .*'):
-        _ = time.has_dst(sunrise, 'America/Denver')
+    missing_all_before = sunrise.copy()
+    missing_all_after = sunrise.copy()
+    missing_all_before.loc['3/1/2020':'3/5/2020'] = pd.NaT
+    missing_all_after.loc['3/8/2020':'3/14/2020'] = pd.NaT
+    missing_data_message = r'No data at .*\. ' \
+                           r'Consider passing a larger `window`.'
+    # Raises for missing data before transition date
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(missing_all_before, 'America/Denver')
+    # Raises for missing data after transition date
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(missing_all_after, 'America/Denver')
+    # Raises for missing data before and after the shift date
+    sunrise.loc['3/1/2020':'3/14/2020'] = pd.NaT
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(sunrise, 'America/Denver')
 
 
 def test_has_dst_no_dst_in_date_range(albuquerque):

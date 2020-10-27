@@ -211,9 +211,10 @@ def _has_dst(events, date, window, min_difference):
         detected in the the event times on `date`.
     """
     before = events[date - window:date - pd.Timedelta(days=1)]
-    after = events[date:date + window]
+    after = events[date:date + window - pd.Timedelta(days=1)]
     if len(before) == 0 or len(after) == 0:
-        raise ValueError(f"Insufficient data at {date}.")
+        raise ValueError(f"No data at {date}. "
+                         "Consider passing a larger `window`.")
     before = before.dt.hour * 60 + before.dt.minute
     after = after.dt.hour * 60 + after.dt.minute
     return abs(before.mean() - after.mean()) > min_difference
