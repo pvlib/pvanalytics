@@ -292,14 +292,8 @@ def has_dst(events, tz, window=7, min_difference=45):
         `events`.
     """
     # Build a timestamp at noon on each day in the data
-    s = pd.Series(
-        pd.DatetimeIndex(events.index.tz_localize(None).date),
-        index=events.index
-    )
-    s = s + pd.Timedelta(hours=12)
-    s = s.dt.tz_localize(tz)
-    dst_shift = s.apply(lambda t: t.tzinfo.dst(t).total_seconds() / 3600)
-    shift_dates = s[dst_shift.diff().fillna(0) != 0]
+    shift_dates = dst_dates(events.index, tz)
+    shift_dates = shift_dates[shift_dates]  # keep only the transition dates
     if len(shift_dates) == 0:
         raise ValueError("No daylight savings shifts in expected "
                          f"timezone ({tz}) on dates in input")
@@ -312,4 +306,4 @@ def has_dst(events, tz, window=7, min_difference=45):
             window,
             min_difference
         )
-    ).astype('bool')
+    ).astype('bool').reindex(events.index, fill_value=False)
