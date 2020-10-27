@@ -186,6 +186,34 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     return shift_amount != 0, shift_amount
 
 
+def dst_dates(dates, tz):
+    """
+    Get the dates on which daylight savings transitions occur in
+    the timezone `tz`.
+
+    Parameters
+    ----------
+    dates : DatetimeIndex
+        A datetime index with one timestamp per day.
+    tz : str
+        A timezone string (e.g. 'America/Denver' or 'CET')
+
+    Returns
+    -------
+    Series
+        Boolean Series with True on days where daylight savins transitions
+        occur.
+    """
+    midnight = pd.Series(
+        pd.DatetimeIndex(dates.tz_localize(None).date),
+        index=dates
+    )
+    noon = midnight + pd.Timedelta(hours=12)
+    noon = noon.dt.tz_localize(tz)
+    dst_shift = noon.apply(lambda t: t.tzinfo.dst(t).total_seconds() / 3600)
+    return dst_shift.diff().fillna(0) != 0
+
+
 def _has_dst(events, date, window, min_difference):
     """Return True if `events` appears to have a daylight savings shift
     on `date`.

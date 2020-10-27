@@ -71,7 +71,7 @@ def _get_sunrise(location, tz):
     ).sunrise
 
 
-@pytest.mark.parametrize("tz, observes_dst", [#('MST', False),
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
                                               ('America/Denver', True)])
 def test_has_dst(tz, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
@@ -430,6 +430,31 @@ def test_shifts_ruptures_tz_localized(midday):
             0, index=midday.index.tz_localize(None), dtype='int64'
         ),
         check_names=False
+    )
+
+
+@pytest.mark.parametrize("timezone, expected_dates",
+                         [('America/Denver', ('2020-03-08', '2020-11-01')),
+                          ('CET', ('2020-03-29', '2020-10-25')),
+                          ('MST', tuple())])
+def test_dst_dates(timezone, expected_dates):
+    index = pd.date_range(
+        start='2020-01-01',
+        end='2020-12-31',
+        freq='D',
+        tz='America/Chicago'
+    )
+    dates = time.dst_dates(
+        index,
+        timezone
+    )
+    expected = pd.Series(False, index=index)
+    expected[expected_dates] = True
+    assert_series_equal(dates, expected)
+    # Test without timezone information.
+    assert_series_equal(
+        time.dst_dates(index.tz_localize(None), timezone),
+        expected.tz_localize(None)
     )
 
 
