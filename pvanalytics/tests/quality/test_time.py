@@ -107,7 +107,7 @@ def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
     # With rounding to 1-hour timestamps we need to reduce how many
     # days we look at.
     window = 7 if freq != 'H' else 1
-    expected = pd.Series(False, index=sunrise.index.tz_localize(tz))
+    expected = pd.Series(False, index=sunrise.index)
     expected.loc[['2020-03-08 00:00', '2020-11-01 00:00']] = observes_dst
     dst = time.has_dst(
         sunrise.dt.round(freq),

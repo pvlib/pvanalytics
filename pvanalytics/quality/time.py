@@ -249,8 +249,9 @@ def _has_dst(events, date, window, min_difference):
 
 
 def has_dst(events, tz, window=7, min_difference=45):
-    """Return true if `events` appears to have daylight-savings shifts
-    at the dates in `shift_dates`.
+    """Return True if `events` appears to have daylight savings shifts
+    at the dates on which `tz` transitions to or from daylight savings
+    time.
 
     Compares the mean event time in minutes since midnight over the
     `window` days before and after each date in `shift_dates`. If the
@@ -280,23 +281,19 @@ def has_dst(events, tz, window=7, min_difference=45):
     Returns
     -------
     Series
-        Boolean Series indexed by dates on which Daylight Savings transitions
-        are expected to occur in `tz` and True if a shift was found on that
-        date in `events`
+        Boolean Series with the same index as `events` True for dates that
+        appear to have daylight savings transitions.
 
     Raises
     ------
     ValueError
-        If there is no data before or after a shift date or there are no
-        daylight-savings shifts in `tz` for the dates covered by
-        `events`.
+        If there is no data in the `window` days before or after a shift
+        date in `events`.
     """
-    # Build a timestamp at noon on each day in the data
     shift_dates = dst_dates(events.index, tz)
-    shift_dates = shift_dates[shift_dates]  # keep only the transition dates
-    if len(shift_dates) == 0:
-        raise ValueError("No daylight savings shifts in expected "
-                         f"timezone ({tz}) on dates in input")
+    # Build a series of transition dates
+    shift_dates = shift_dates[shift_dates]
+    shift_dates = shift_dates.index.to_series(index=shift_dates.index)
     window = pd.Timedelta(days=window)
     events = events.dropna()
     return shift_dates.apply(
