@@ -8,6 +8,9 @@ systems. It provides functions for quality control, filtering, and
 feature labeling and other tools supporting the analysis of PV
 system-level data.
 
+Documentation is available at 
+[pvanalytics.readthedocs.io](https://pvanalytics.readthedocs.io).
+
 ## Library Overview
 
 The functions provided by PVAnalytics are organized in modules based
