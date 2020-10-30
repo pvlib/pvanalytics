@@ -76,6 +76,7 @@ It supports:
   and at minimum the two latest minor versions.
 - All minor versions of numpy released in the 24 months prior to the project,
   and at minimum the last three minor versions
+- The latest release of `PVLib <https://pvlib-python.readthedocs.io>`_.
 
 PVAnalytics depends on the following packages:
 
