@@ -304,7 +304,7 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
         If there is no data in the `window` days before or after a shift
         date in `events`.
     """
-    shift_dates = dst_dates(events.index, tz)
+    shift_dates = dst_dates(events.asfreq('D', fill_value=pd.NaT).index, tz)
     # Build a series of transition dates
     shift_dates = shift_dates[shift_dates]
     shift_dates = shift_dates.index.to_series(index=shift_dates.index)
