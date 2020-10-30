@@ -1,4 +1,5 @@
 """Quality tests related to time."""
+import warnings
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -214,7 +215,7 @@ def dst_dates(dates, tz):
     return dst_shift.diff().fillna(0) != 0
 
 
-def _has_dst(events, date, window, min_difference):
+def _has_dst(events, date, window, min_difference, missing):
     """Return True if `events` appears to have a daylight savings shift
     on `date`.
 
@@ -231,6 +232,10 @@ def _has_dst(events, date, window, min_difference):
     min_difference : int
         Minimum difference between mean event time before `date` and mean
         event time after `date` for a shift tom be detected.
+    missing : str
+        Can be 'raise' or 'warn'. Whether to raise an exception or issue
+        a warning if there is no data int the window on either side of
+        `date`. If 'warn' and there is missing data the False is returned.
 
     Returns
     -------
@@ -238,17 +243,19 @@ def _has_dst(events, date, window, min_difference):
         Whether or not a shift of at least `min_difference` minutes was
         detected in the the event times on `date`.
     """
-    before = events[date - window:date - pd.Timedelta(days=1)]
-    after = events[date:date + window - pd.Timedelta(days=1)]
+    before = events[date - window:date - pd.Timedelta(days=1)].dropna()
+    after = events[date:date + window - pd.Timedelta(days=1)].dropna()
     if len(before) == 0 or len(after) == 0:
-        raise ValueError(f"No data at {date}. "
-                         "Consider passing a larger `window`.")
+        message = f"No data at {date}. Consider passing a larger `window`."
+        if missing == 'raise':
+            raise ValueError(message)
+        warnings.warn(message)
     before = before.dt.hour * 60 + before.dt.minute
     after = after.dt.hour * 60 + after.dt.minute
     return abs(before.mean() - after.mean()) > min_difference
 
 
-def has_dst(events, tz, window=7, min_difference=45):
+def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
     """Return True if `events` appears to have daylight savings shifts
     at the dates on which `tz` transitions to or from daylight savings
     time.
@@ -279,6 +286,11 @@ def has_dst(events, tz, window=7, min_difference=45):
         date and the mean event time after the event time. If the difference
         is greater than `min_difference` a shift has occurred on that date.
         [minutes]
+    missing : str, default 'raise'
+        Whether to raise an exception or issue a warning when there is
+        no data at a transition date. Can be 'raise' or 'warn'. If 'warn'
+        and there is no data adjacent to a transition date, False is
+        returned for that date.
 
     Returns
     -------
@@ -297,12 +309,12 @@ def has_dst(events, tz, window=7, min_difference=45):
     shift_dates = shift_dates[shift_dates]
     shift_dates = shift_dates.index.to_series(index=shift_dates.index)
     window = pd.Timedelta(days=window)
-    events = events.dropna()
     return shift_dates.apply(
         lambda t: _has_dst(
             events,
             pd.Timestamp(t.date(), tz=events.index.tz),
             window,
-            min_difference
+            min_difference,
+            missing
         )
     ).astype('bool').reindex(events.index, fill_value=False)

@@ -121,11 +121,17 @@ def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
 
 
 def test_has_dst_missing_data(albuquerque):
-    sunrise = _get_sunrise(albuquerque, 'MST')
-    sunrise.loc['1/1/2020':'1/10/2020'] = pd.NaT
+    sunrise = _get_sunrise(albuquerque, 'America/Denver')
     sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
+    sunrise.loc['7/1/2020':'7/20/2020'] = pd.NaT
     # Doesn't raise since both sides still have some data
-    _ = time.has_dst(sunrise, 'America/Denver')
+    expected = pd.Series(False, index=sunrise.index)
+    expected['3/8/2020'] = True
+    expected['11/1/2020'] = True
+    assert_series_equal(
+        time.has_dst(sunrise, 'America/Denver'),
+        expected
+    )
     missing_all_before = sunrise.copy()
     missing_all_after = sunrise.copy()
     missing_all_before.loc['3/1/2020':'3/5/2020'] = pd.NaT
@@ -139,7 +145,18 @@ def test_has_dst_missing_data(albuquerque):
     with pytest.raises(ValueError, match=missing_data_message):
         time.has_dst(missing_all_after, 'America/Denver')
     # Raises for missing data before and after the shift date
+    sunrise.loc['3/1/2020':'3/7/2020'] = pd.NaT
+    sunrise.loc['3/9/2020':'3/14/2020'] = pd.NaT
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(sunrise, 'America/Denver')
+    with pytest.warns(UserWarning):
+        result = time.has_dst(sunrise, 'America/Denver', missing='warn')
+    expected.loc['3/8/2020'] = False
+    assert_series_equal(expected, result)
     sunrise.loc['3/1/2020':'3/14/2020'] = pd.NaT
+    with pytest.warns(UserWarning):
+        result = time.has_dst(sunrise, 'America/Denver', missing='warn')
+    assert_series_equal(expected, result)
     with pytest.raises(ValueError, match=missing_data_message):
         time.has_dst(sunrise, 'America/Denver')
 
