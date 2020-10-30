@@ -253,10 +253,11 @@ def has_dst(events, tz, window=7, min_difference=45):
     at the dates on which `tz` transitions to or from daylight savings
     time.
 
-    Compares the mean event time in minutes since midnight over the
-    `window` days before and after each date in `shift_dates`. If the
-    difference is greater than `min_difference` then a shift has occurred
-    on that date.
+    The mean event time in minutes since midnight is calculated
+    over the `window` days before and after the date of each daylight
+    savings transition in `tz`. For each date, the two mean event times
+    (before and after) are compared, and if the difference is greater
+    than `min_difference` then a shift has occurred on that date.
 
     Parameters
     ----------
