@@ -14,6 +14,20 @@ system-level data.
 The source code for PVAnalytics is hosted on `github
 <https://github.com/pvlib/pvanalytics>`_.
 
+Dependencies
+------------
+
+This project follows the guidelines laid out in NEP-29. It supports:
+
+- All minor versions of Python released 42 months prior to the project,
+  and at minimum the two latest minor versions.
+- All minor versions of numpy released in the 24 months prior to the project,
+  and at minimum the last three minor versions
+
+PVAnalytics depends on the following packages:
+
+.. literalinclude:: ../requirements.txt
+
 Contents
 ========
 
