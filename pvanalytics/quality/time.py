@@ -225,7 +225,7 @@ def _has_dst(events, date, window, min_difference):
     date : Timestamp
         Timestamp corresponding to midnight on the day to check for daylight
         savings shifts.
-    window : int
+    window : Timedelta
         Number of days before and after `date` to use when checking for
         for shifts in `events`
     min_different : int
