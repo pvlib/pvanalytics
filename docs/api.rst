@@ -121,12 +121,13 @@ spacing, time-shifts, and time zone validation.
    quality.time.spacing
 
 Timestamp shifts, such as daylight savings, can be identified with
-the following funcitons.
+the following functions.
 
 .. autosummary::
    :toctree: generated/
 
    quality.time.shifts_ruptures
+   quality.time.has_dst
 
 Utilities
 ---------

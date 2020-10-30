@@ -58,6 +58,138 @@ def test_timestamp_spacing_too_frequent(times):
     )
 
 
+def _get_sunrise(location, tz):
+    # Get sunrise times for 2020
+    days = pd.date_range(
+        start='1/1/2020',
+        end='1/1/2021',
+        freq='D',
+        tz=tz
+    )
+    return location.get_sun_rise_set_transit(
+        days, method='spa'
+    ).sunrise
+
+
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
+                                              ('America/Denver', True)])
+def test_has_dst(tz, observes_dst, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
+    dst = time.has_dst(sunrise, 'America/Denver')
+    expected = pd.Series(False, index=sunrise.index)
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
+    assert_series_equal(
+        expected,
+        dst,
+        check_names=False
+    )
+
+
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
+                                              ('America/Denver', True)])
+def test_has_dst_input_series_not_localized(tz, observes_dst, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
+    sunrise = sunrise.tz_localize(None)
+    expected = pd.Series(False, index=sunrise.index)
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
+    dst = time.has_dst(sunrise, 'America/Denver')
+    assert_series_equal(
+        expected,
+        dst
+    )
+
+
+@pytest.mark.parametrize("tz, observes_dst", [('MST', False),
+                                              ('America/Denver', True)])
+@pytest.mark.parametrize("freq", ['15T', '30T', 'H'])
+def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
+    sunrise = _get_sunrise(albuquerque, tz)
+    # With rounding to 1-hour timestamps we need to reduce how many
+    # days we look at.
+    window = 7 if freq != 'H' else 1
+    expected = pd.Series(False, index=sunrise.index)
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
+    dst = time.has_dst(
+        sunrise.dt.round(freq),
+        'America/Denver',
+        window=window
+    )
+    assert_series_equal(expected, dst, check_names=False)
+
+
+def test_has_dst_missing_data(albuquerque):
+    sunrise = _get_sunrise(albuquerque, 'America/Denver')
+    sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
+    sunrise.loc['7/1/2020':'7/20/2020'] = pd.NaT
+    # Doesn't raise since both sides still have some data
+    expected = pd.Series(False, index=sunrise.index)
+    expected['3/8/2020'] = True
+    expected['11/1/2020'] = True
+    assert_series_equal(
+        time.has_dst(sunrise, 'America/Denver'),
+        expected
+    )
+    missing_all_before = sunrise.copy()
+    missing_all_after = sunrise.copy()
+    missing_all_before.loc['3/1/2020':'3/5/2020'] = pd.NaT
+    missing_all_after.loc['3/8/2020':'3/14/2020'] = pd.NaT
+    missing_data_message = r'No data at .*\. ' \
+                           r'Consider passing a larger `window`.'
+    # Raises for missing data before transition date
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(missing_all_before, 'America/Denver')
+    # Raises for missing data after transition date
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(missing_all_after, 'America/Denver')
+    # Raises for missing data before and after the shift date
+    sunrise.loc['3/1/2020':'3/7/2020'] = pd.NaT
+    sunrise.loc['3/9/2020':'3/14/2020'] = pd.NaT
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(sunrise, 'America/Denver')
+    with pytest.warns(UserWarning, match=missing_data_message):
+        result = time.has_dst(sunrise, 'America/Denver', missing='warn')
+    expected.loc['3/8/2020'] = False
+    assert_series_equal(expected, result)
+    sunrise.loc['3/1/2020':'3/14/2020'] = pd.NaT
+    with pytest.warns(UserWarning, match=missing_data_message):
+        result = time.has_dst(sunrise, 'America/Denver', missing='warn')
+    assert_series_equal(expected, result)
+    with pytest.raises(ValueError, match=missing_data_message):
+        time.has_dst(sunrise, 'America/Denver')
+
+
+def test_has_dst_gaps(albuquerque):
+    sunrise = _get_sunrise(albuquerque, 'America/Denver')
+    sunrise.loc['3/5/2020':'3/10/2020'] = pd.NaT
+    sunrise.loc['7/1/2020':'7/20/2020'] = pd.NaT
+    sunrise.dropna(inplace=True)
+    expected = pd.Series(False, index=sunrise.index)
+    expected['11/1/2020'] = True
+    assert_series_equal(
+        time.has_dst(sunrise, 'America/Denver'),
+        expected
+    )
+
+
+def test_has_dst_no_dst_in_date_range(albuquerque):
+    sunrise = _get_sunrise(albuquerque, 'America/Denver')
+    july = sunrise['2020-07-01':'2020-07-31']
+    february = sunrise['2020-02-01':'2020-03-05']
+    expected_july = pd.Series(False, index=july.index)
+    expected_march = pd.Series(False, index=february.index)
+    assert_series_equal(
+        expected_july,
+        time.has_dst(july, 'America/Denver')
+    )
+    assert_series_equal(
+        expected_march,
+        time.has_dst(february, 'MST')
+    )
+
+
 @pytest.fixture(scope='module', params=['H', '15T', 'T'])
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
@@ -331,6 +463,32 @@ def test_shifts_ruptures_tz_localized(midday):
             0, index=midday.index.tz_localize(None), dtype='int64'
         ),
         check_names=False
+    )
+
+
+@pytest.mark.parametrize("timezone, expected_dates",
+                         [('America/Denver', ['2020-03-08', '2020-11-01']),
+                          ('CET', ['2020-03-29', '2020-10-25']),
+                          ('MST', [])])
+def test_dst_dates(timezone, expected_dates):
+    index = pd.date_range(
+        start='2020-01-01',
+        end='2020-12-31',
+        freq='D',
+        tz='America/Chicago'
+    )
+    dates = time.dst_dates(
+        index,
+        timezone
+    )
+    expected = pd.Series(False, index=index)
+    for date in expected_dates:
+        expected[date] = True
+    assert_series_equal(dates, expected)
+    # Test without timezone information.
+    assert_series_equal(
+        time.dst_dates(index.tz_localize(None), timezone),
+        expected.tz_localize(None)
     )
 
 
