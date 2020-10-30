@@ -77,7 +77,8 @@ def test_has_dst(tz, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     dst = time.has_dst(sunrise, 'America/Denver')
     expected = pd.Series(False, index=sunrise.index)
-    expected.loc[['2020-03-08', '2020-11-01']] = observes_dst
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
     assert_series_equal(
         expected,
         dst,
@@ -91,7 +92,8 @@ def test_has_dst_input_series_not_localized(tz, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     sunrise = sunrise.tz_localize(None)
     expected = pd.Series(False, index=sunrise.index)
-    expected.loc[['2020-03-08 00:00', '2020-11-01 00:00']] = observes_dst
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
     dst = time.has_dst(sunrise, 'America/Denver')
     assert_series_equal(
         expected,
@@ -108,7 +110,8 @@ def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
     # days we look at.
     window = 7 if freq != 'H' else 1
     expected = pd.Series(False, index=sunrise.index)
-    expected.loc[['2020-03-08 00:00', '2020-11-01 00:00']] = observes_dst
+    expected.loc['2020-03-08'] = observes_dst
+    expected.loc['2020-11-01'] = observes_dst
     dst = time.has_dst(
         sunrise.dt.round(freq),
         'America/Denver',
@@ -143,17 +146,17 @@ def test_has_dst_missing_data(albuquerque):
 
 def test_has_dst_no_dst_in_date_range(albuquerque):
     sunrise = _get_sunrise(albuquerque, 'America/Denver')
-    july = sunrise['2020-07']
-    march = sunrise['2020-03']
+    july = sunrise['2020-07-01':'2020-07-31']
+    february = sunrise['2020-02-01':'2020-03-05']
     expected_july = pd.Series(False, index=july.index)
-    expected_march = pd.Series(False, index=march.index)
+    expected_march = pd.Series(False, index=february.index)
     assert_series_equal(
         expected_july,
         time.has_dst(july, 'America/Denver')
     )
     assert_series_equal(
         expected_march,
-        time.has_dst(march, 'MST')
+        time.has_dst(february, 'MST')
     )
 
 
@@ -434,9 +437,9 @@ def test_shifts_ruptures_tz_localized(midday):
 
 
 @pytest.mark.parametrize("timezone, expected_dates",
-                         [('America/Denver', ('2020-03-08', '2020-11-01')),
-                          ('CET', ('2020-03-29', '2020-10-25')),
-                          ('MST', tuple())])
+                         [('America/Denver', ['2020-03-08', '2020-11-01']),
+                          ('CET', ['2020-03-29', '2020-10-25']),
+                          ('MST', [])])
 def test_dst_dates(timezone, expected_dates):
     index = pd.date_range(
         start='2020-01-01',
@@ -449,7 +452,8 @@ def test_dst_dates(timezone, expected_dates):
         timezone
     )
     expected = pd.Series(False, index=index)
-    expected[expected_dates] = True
+    for date in expected_dates:
+        expected[date] = True
     assert_series_equal(dates, expected)
     # Test without timezone information.
     assert_series_equal(
