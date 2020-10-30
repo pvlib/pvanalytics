@@ -201,7 +201,7 @@ def dst_dates(dates, tz):
     Returns
     -------
     Series
-        Boolean Series with True on days where daylight savins transitions
+        Boolean Series with True on days where daylight savings transitions
         occur.
     """
     midnight = pd.Series(
@@ -263,8 +263,9 @@ def has_dst(events, tz, window=7, min_difference=45):
     events : Series
         Series with one timestamp for each day. The timestamp should
         correspond to an event that occurs at roughly the same time on
-        each day, and shifts with daylight savings transitions. For example,
-        you may pass sunrise, sunset, or solar transit time.
+        each day. For example,
+        you may pass sunrise, sunset, or solar transit time. `events` need
+        not be localized.
     tz : str
         Name of a timezone that observes daylight savings and has the same
         or similar UTC offset as the expected time zone for `events`.
