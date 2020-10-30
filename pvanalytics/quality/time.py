@@ -228,7 +228,7 @@ def _has_dst(events, date, window, min_difference):
     window : Timedelta
         Number of days before and after `date` to use when checking for
         for shifts in `events`
-    min_different : int
+    min_difference : int
         Minimum difference between mean event time before `date` and mean
         event time after `date` for a shift tom be detected.
 
