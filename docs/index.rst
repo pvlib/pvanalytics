@@ -68,7 +68,9 @@ library status.
 Dependencies
 ------------
 
-This project follows the guidelines laid out in NEP-29. It supports:
+This project follows the guidelines laid out in
+`NEP-29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
+It supports:
 
 - All minor versions of Python released 42 months prior to the project,
   and at minimum the two latest minor versions.
