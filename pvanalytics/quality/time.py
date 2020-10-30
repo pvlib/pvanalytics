@@ -309,7 +309,7 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
     shift_dates = shift_dates[shift_dates]
     shift_dates = shift_dates.index.to_series(index=shift_dates.index)
     window = pd.Timedelta(days=window)
-    return shift_dates.apply(
+    shifted = shift_dates.apply(
         lambda t: _has_dst(
             events,
             pd.Timestamp(t.date(), tz=events.index.tz),
@@ -317,4 +317,10 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
             min_difference,
             missing
         )
-    ).astype('bool').reindex(events.index, fill_value=False)
+    )
+    # pandas 0.23 won't allow .astype('bool') and empty Series with
+    # dtype='datetime64[ns]'. Work around this by building a new series
+    # of all False.
+    if len(shifted) == 0:
+        return pd.Series(False, index=events.index)
+    return shifted.reindex(events.index, fill_value=False)
