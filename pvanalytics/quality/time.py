@@ -323,4 +323,4 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
     # of all False.
     if len(shifted) == 0:
         return pd.Series(False, index=events.index)
-    return shifted.reindex(events.index, fill_value=False)
+    return shifted.astype('bool').reindex(events.index, fill_value=False)
