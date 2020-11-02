@@ -8,6 +8,7 @@ python:
 install:
   - pip install pytest==5.4.3 pytest-cov coveralls
   - pip install -r requirements.txt
+  - pip install .[all]
 
 script:
   - pytest --cov=pvanalytics --cov-config=.coveragerc --cov-report term-missing pvanalytics --runslow
