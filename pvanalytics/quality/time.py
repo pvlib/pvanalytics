@@ -321,6 +321,6 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
     # pandas 0.23 won't allow .astype('bool') and empty Series with
     # dtype='datetime64[ns]'. Work around this by building a new series
     # of all False.
-    if len(shifted) == 0:
+    if shifted.empty:
         return pd.Series(False, index=events.index)
     return shifted.astype('bool').reindex(events.index, fill_value=False)
