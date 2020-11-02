@@ -424,6 +424,7 @@ def test_shift_ruptures_shift_min(midday):
     )
 
 
+@requires_ruptures
 def test_shifts_ruptures_tz_localized(midday):
     shift_mask, shift_amount = time.shifts_ruptures(
         midday.tz_localize(None),
