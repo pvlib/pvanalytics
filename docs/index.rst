@@ -65,6 +65,23 @@ library status.
 - :py:mod:`dataclasses` contains classes for normalizing data (e.g. an
   ``IVCurve`` class)
 
+Dependencies
+------------
+
+This project follows the guidelines laid out in
+`NEP-29 <https://numpy.org/neps/nep-0029-deprecation_policy.html>`_.
+It supports:
+
+- All minor versions of Python released 42 months prior to the project,
+  and at minimum the two latest minor versions.
+- All minor versions of numpy released in the 24 months prior to the project,
+  and at minimum the last three minor versions
+- The latest release of `PVLib <https://pvlib-python.readthedocs.io>`_.
+
+PVAnalytics depends on the following packages:
+
+.. literalinclude:: ../requirements.txt
+
 Contents
 ========
 
