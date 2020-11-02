@@ -36,9 +36,12 @@ jobs:
         COVERALLS_PARALLEL: true
 
   coveralls:
+
     name: Finish Coveralls
     needs: test
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
