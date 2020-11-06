@@ -3,6 +3,8 @@ import pytest
 from pandas.util.testing import assert_series_equal
 import numpy as np
 import pandas as pd
+from pvlib import irradiance, temperature, pvsystem, inverter
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import clipping
 
 
@@ -232,3 +234,43 @@ def test_threshold_no_clipping_four_days(quadratic):
     clipped = clipping.threshold(power)
 
     assert not clipped.any()
+
+
+@pytest.fixture(scope='module')
+def july():
+    return pd.date_range(start='7/1/2020', end='8/1/2020', freq='T')
+
+
+@pytest.fixture(scope='module')
+def clearsky_july(july, albuquerque):
+    return albuquerque.get_clearsky(
+        july,
+        model='simplified_solis'
+    )
+
+
+@pytest.fixture(scope='module')
+def solarposition_july(july, albuquerque):
+    return albuquerque.get_solarposition(july)
+
+
+@pytest.fixture(scope='module')
+def power_pvwatts(request, clearsky_july, solarposition_july):
+    pdc0 = 100
+    pdc0_inverter = 110
+    tilt = 30
+    azimuth = 180
+    pdc0_marker = request.node.get_closest_marker("pdc0_inverter")
+    if pdc0_marker is not None:
+        pdc0_inverter = pdc0_marker.args[0]
+    poa = irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solarposition_july['zenith'], solarposition_july['azimuth'],
+        **clearsky_july
+    )
+    cell_temp = temperature.sapm_cell(
+        poa['poa_global'], 25, 0,
+        **TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    )
+    dc = pvsystem.pvwatts_dc(poa['poa_global'], cell_temp, pdc0, -0.004)
+    return inverter.pvwatts(dc, pdc0_inverter)
