@@ -254,7 +254,6 @@ def solarposition_july(july, albuquerque):
     return albuquerque.get_solarposition(july)
 
 
-@pytest.fixture(scope='module')
 def power_pvwatts(request, clearsky_july, solarposition_july):
     pdc0 = 100
     pdc0_inverter = 110
@@ -274,3 +273,14 @@ def power_pvwatts(request, clearsky_july, solarposition_july):
     )
     dc = pvsystem.pvwatts_dc(poa['poa_global'], cell_temp, pdc0, -0.004)
     return inverter.pvwatts(dc, pdc0_inverter)
+
+
+def test_geometric_no_clipping(power_pvwatts):
+    clipped = clipping.geometric(power_pvwatts)
+    assert not clipped.any()
+
+
+@pytest.mark.pdc0_inverter(85)
+def test_geometric_clipping(power_pvwatts):
+    clipped = clipping.geometric(power_pvwatts)
+    assert clipped.any()

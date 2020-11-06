@@ -225,3 +225,7 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
         freq=freq
     )
     return ac_power >= threshold
+
+
+def geometric(power):
+    pass
