@@ -227,5 +227,31 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def geometric(power):
-    pass
+def geometric(ac_power, window=4, derivative_min=0.2):
+    # TODO downsample and mean if freq of `ac_power` is less than 10 minutes.
+    # TODO set larger window for tracking systems
+    ac_power = ac_power.copy()
+    daily_min = ac_power.resample('D').transform('max') * 0.1
+    ac_power.loc[ac_power < daily_min] = np.nan
+    # rolling max/min on reverse ac_power
+    rolling_max = ac_power[::-1].rolling(window=window).max()
+    rolling_min = ac_power[::-1].rolling(window=window).min()
+    # calculate an upper bound on the derivative
+    derivative_max = (rolling_max - rolling_min) \
+                     / ((rolling_max + rolling_min) / 2) * 100
+    clipped = derivative_max < derivative_min
+    # TODO expand the clipmask to all points within the window
+    # TODO resample to input freq if downsampled above
+    # TODO calculate a daily clipping threshold and apply to ac_power
+    clipped_power = ac_power[clipped]
+    daily_clipped_max = clipped_power.resample('D').transform('max').reindex(
+        ac_power.index, method='ffill'
+    )
+    daily_clipped_min = clipped_power.resample('D').transform('min').reindex(
+        ac_power.index, method='ffill'
+    )
+    # TODO add +/- 2*ac_power.resample('D').transform(lambda d: d.std())
+    #      to the max and min clipping respectively for data that has been
+    #      downdampled.
+    return (ac_power >= daily_clipped_min) & (ac_power <= daily_clipped_max)
+
