@@ -276,12 +276,14 @@ def power_pvwatts(request, clearsky_july, solarposition_july):
     return inverter.pvwatts(dc, pdc0_inverter)
 
 
-def test_geometric_no_clipping(power_pvwatts):
-    clipped = clipping.geometric(power_pvwatts)
+@pytest.mark.parametrize('freq', ['T', '15T', '30T', 'H'])
+def test_geometric_no_clipping(power_pvwatts, freq):
+    clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert not clipped.any()
 
 
-@pytest.mark.pdc0_inverter(85)
-def test_geometric_clipping(power_pvwatts):
-    clipped = clipping.geometric(power_pvwatts)
+@pytest.mark.pdc0_inverter(60)
+@pytest.mark.parametrize('freq', ['T', '15T', '30T', 'H'])
+def test_geometric_clipping(power_pvwatts, freq):
+    clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert clipped.any()
