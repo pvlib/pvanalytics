@@ -276,14 +276,23 @@ def power_pvwatts(request, clearsky_july, solarposition_july):
     return inverter.pvwatts(dc, pdc0_inverter)
 
 
-@pytest.mark.parametrize('freq', ['T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
 def test_geometric_no_clipping(power_pvwatts, freq):
     clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert not clipped.any()
 
 
 @pytest.mark.pdc0_inverter(60)
-@pytest.mark.parametrize('freq', ['T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
 def test_geometric_clipping(power_pvwatts, freq):
     clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert clipped.any()
+
+
+@pytest.mark.pdc0_inverter(65)
+@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+def test_geometric_clipping_correct(power_pvwatts, freq):
+    power = power_pvwatts.resample(freq).asfreq()
+    clipped = clipping.geometric(power)
+    expected = power == power.max()
+    assert_series_equal(clipped, expected)
