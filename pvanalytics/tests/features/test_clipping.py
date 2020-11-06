@@ -254,6 +254,7 @@ def solarposition_july(july, albuquerque):
     return albuquerque.get_solarposition(july)
 
 
+@pytest.fixture
 def power_pvwatts(request, clearsky_july, solarposition_july):
     pdc0 = 100
     pdc0_inverter = 110
