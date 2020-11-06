@@ -227,10 +227,19 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def geometric(ac_power, window=4, derivative_min=0.2):
-    # TODO downsample and mean if freq of `ac_power` is less than 10 minutes.
+def _downsample(ac_power, freq):
+    if freq is None:
+        freq = pd.infer_freq(ac_power.index)
+    minutes = util.freq_to_timedelta(freq).seconds / 60
+    if minutes > 10:
+        return ac_power
+    return ac_power.resample('15T').mean()
+
+
+def geometric(ac_power, window=4, derivative_min=0.2, freq=None):
     # TODO set larger window for tracking systems
-    ac_power = ac_power.copy()
+    ac_power_original = ac_power.copy()
+    ac_power = _downsample(ac_power, freq)
     daily_min = ac_power.resample('D').transform('max') * 0.1
     ac_power.loc[ac_power < daily_min] = np.nan
     # rolling max/min on reverse ac_power
@@ -241,17 +250,27 @@ def geometric(ac_power, window=4, derivative_min=0.2):
                      / ((rolling_max + rolling_min) / 2) * 100
     clipped = derivative_max < derivative_min
     # TODO expand the clipmask to all points within the window
-    # TODO resample to input freq if downsampled above
-    # TODO calculate a daily clipping threshold and apply to ac_power
-    clipped_power = ac_power[clipped]
-    daily_clipped_max = clipped_power.resample('D').transform('max').reindex(
-        ac_power.index, method='ffill'
-    )
-    daily_clipped_min = clipped_power.resample('D').transform('min').reindex(
-        ac_power.index, method='ffill'
-    )
-    # TODO add +/- 2*ac_power.resample('D').transform(lambda d: d.std())
-    #      to the max and min clipping respectively for data that has been
-    #      downdampled.
-    return (ac_power >= daily_clipped_min) & (ac_power <= daily_clipped_max)
+    if not ac_power.index.equals(ac_power_original.index):
+        # data was down-sampled. reindex to original index. and use mean
+        # to calculate daily clipping threshold.
+        clipped = clipped.reindex(ac_power_original.index, method='ffill')
+        daily_clipped = clipped.resample('D')
+        daily_mean = daily_clipped.transform(
+            lambda day: ac_power_original[day.index][day].mean()
+        )
+        daily_std = daily_clipped.transform(
+            lambda day: ac_power_original[day.index][day].std()
+        )
+        daily_clipped_max = daily_mean + 2 * daily_std
+        daily_clipped_min = daily_mean - 2 * daily_std
+    else:
+        daily_clipped = clipped.resample('D')
+        daily_clipped_max = daily_clipped.transform(
+            lambda day: ac_power_original[day.index][day].max()
+        )
+        daily_clipped_min = daily_clipped.transform(
+            lambda day: ac_power_original[day.index][day].min()
+        )
+    return (ac_power_original >= daily_clipped_min) \
+           & (ac_power_original <= daily_clipped_max)
 
