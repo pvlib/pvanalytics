@@ -296,3 +296,15 @@ def test_geometric_clipping_correct(power_pvwatts, freq):
     clipped = clipping.geometric(power)
     expected = power == power.max()
     assert_series_equal(clipped, expected)
+
+
+@pytest.mark.pdc0_inverter(65)
+def test_geometric_clipping_midday_clouds(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    power.loc[power.between_time(
+        start_time='17:30', end_time='19:30',
+        include_start=True, include_end=True
+    ).index] = 30
+    clipped = clipping.geometric(power)
+    expected = power == power.max()
+    assert_series_equal(clipped, expected)
