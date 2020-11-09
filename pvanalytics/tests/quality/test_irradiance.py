@@ -1,6 +1,4 @@
 """Tests for irradiance quality control functions."""
-from datetime import datetime
-import pytz
 import pandas as pd
 import numpy as np
 
