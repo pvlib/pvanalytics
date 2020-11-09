@@ -227,29 +227,46 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
     return ac_power >= threshold
 
 
-def _downsample(ac_power, freq):
+def _freq_minutes(index, freq):
+    # Get the frequency in minutes for `freq`. If `freq` is None
+    # then use the frequency inferred from `index`
     if freq is None:
-        freq = pd.infer_freq(ac_power.index)
-    minutes = util.freq_to_timedelta(freq).seconds / 60
+        freq = pd.infer_freq(index)
+    return util.freq_to_timedelta(freq).seconds / 60
+
+
+def _downsample(ac_power, freq):
+    minutes = _freq_minutes(ac_power.index, freq)
     if minutes > 10:
         return ac_power
     return ac_power.resample('15T').mean()
 
 
-def geometric(ac_power, window=4, derivative_min=0.2, freq=None):
+def geometric(ac_power, window=None, derivative_min=0.2, freq=None,
+              tracking=False):
     # TODO set larger window for tracking systems
     ac_power_original = ac_power.copy()
-    ac_power = _downsample(ac_power, freq)
+    freq_minutes = _freq_minutes(ac_power.index, freq)
+    if freq_minutes < 10:
+        ac_power = ac_power.resample('15T').mean()
+    if window is None and tracking and freq_minutes < 30:
+        window = 5
+    else:
+        window = 3
+    # remove low power times to eliminate night.
     daily_min = ac_power.resample('D').transform('max') * 0.1
     ac_power.loc[ac_power < daily_min] = np.nan
-    # rolling max/min on reverse ac_power
-    rolling_max = ac_power[::-1].rolling(window=window).max()
-    rolling_min = ac_power[::-1].rolling(window=window).min()
+    rolling_max = ac_power.rolling(window=window).max()
+    rolling_min = ac_power.rolling(window=window).min()
     # calculate an upper bound on the derivative
-    derivative_max = (rolling_max - rolling_min) \
-                     / ((rolling_max + rolling_min) / 2) * 100
+    derivative_max = ((rolling_max - rolling_min)
+                      / ((rolling_max + rolling_min) / 2) * 100)
     clipped = derivative_max < derivative_min
-    # TODO expand the clipmask to all points within the window
+    clipped_windows = clipped.copy()
+    # flag all points in a window that has clipping
+    for i in range(0, window):
+        clipped_windows |= clipped.shift(-i)
+    clipped = clipped_windows
     if not ac_power.index.equals(ac_power_original.index):
         # data was down-sampled. reindex to original index. and use mean
         # to calculate daily clipping threshold.
@@ -271,6 +288,5 @@ def geometric(ac_power, window=4, derivative_min=0.2, freq=None):
         daily_clipped_min = daily_clipped.transform(
             lambda day: ac_power_original[day.index][day].min()
         )
-    return (ac_power_original >= daily_clipped_min) \
-           & (ac_power_original <= daily_clipped_max)
-
+    return ((ac_power_original >= daily_clipped_min)
+            & (ac_power_original <= daily_clipped_max))
