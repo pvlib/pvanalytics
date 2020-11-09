@@ -370,6 +370,10 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
     -------
     Series
         Boolean Series with True for values that appear to be clipped.
+
+    Notes
+    -----
+    Based on code from the PVFleets QA project.
     """
     ac_power_original = ac_power.copy()
     ac_power = ac_power_original
