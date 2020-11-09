@@ -235,13 +235,6 @@ def _freq_minutes(index, freq):
     return util.freq_to_timedelta(freq).seconds / 60
 
 
-def _downsample(ac_power, freq):
-    minutes = _freq_minutes(ac_power.index, freq)
-    if minutes > 10:
-        return ac_power
-    return ac_power.resample('15T').mean()
-
-
 def _apply_daily_mask(mask, data, f):
     """Apply `f` to the data selected by `mask` on each day.
 
