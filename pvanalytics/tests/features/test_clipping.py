@@ -304,7 +304,7 @@ def test_geometric_clipping_midday_clouds(power_pvwatts):
     power.loc[power.between_time(
         start_time='17:30', end_time='19:30',
         include_start=True, include_end=True
-    ).index] = 30
+    ).index] = list(range(30, 39)) * 31
     clipped = clipping.geometric(power)
     expected = power == power.max()
     assert_series_equal(clipped, expected)
