@@ -244,15 +244,15 @@ def _downsample(ac_power, freq):
 
 def geometric(ac_power, window=None, derivative_min=0.2, freq=None,
               tracking=False):
-    # TODO set larger window for tracking systems
     ac_power_original = ac_power.copy()
+    ac_power = ac_power_original
     freq_minutes = _freq_minutes(ac_power.index, freq)
     if freq_minutes < 10:
         ac_power = ac_power.resample('15T').mean()
     if window is None and tracking and freq_minutes < 30:
         window = 5
     else:
-        window = 3
+        window = window or 3
     # remove low power times to eliminate night.
     daily_min = ac_power.resample('D').transform('max') * 0.1
     ac_power.loc[ac_power < daily_min] = np.nan
