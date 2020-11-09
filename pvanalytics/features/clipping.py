@@ -228,8 +228,8 @@ def threshold(ac_power, slope_max=0.0035, power_min=0.75,
 
 
 def _freq_minutes(index, freq):
-    # Get the frequency in minutes for `freq`. If `freq` is None
-    # then use the frequency inferred from `index`
+    """Return the frequency in minutes for `freq`. If `freq` is None
+    then use the frequency inferred from `index`."""
     if freq is None:
         freq = pd.infer_freq(index)
     return util.freq_to_timedelta(freq).seconds / 60
@@ -268,6 +268,24 @@ def _apply_daily_mask(mask, data, f):
 
 
 def _threshold_mean(mask, data):
+    """Return daily thresholds based on mean and standard deviation.
+
+    Parameters
+    ----------
+    mask : Series
+        Boolean series.
+    data : Series
+        Data with same index as `mask`.
+
+    Returns
+    -------
+    minimum : Series
+        `data` transformed to the mean of ``data[mask]`` minus 2 times
+         the standard deviation of ``data[mask]`` on each day.
+    maximum : Series
+        `data` transformed to the mean of ``data[mask]`` plus 2 times
+         the standard deviation of ``data[mask]`` on each day.
+    """
     daily_mean = _apply_daily_mask(mask, data, pd.Series.mean)
     daily_std = _apply_daily_mask(mask, data, pd.Series.std)
     daily_clipped_max = daily_mean + 2 * daily_std
@@ -276,6 +294,24 @@ def _threshold_mean(mask, data):
 
 
 def _threshold_minmax(mask, data):
+    """Return daily thresholds based on min and max.
+
+    Parameters
+    ----------
+    mask : Series
+        Boolean series
+    data : Series
+        Data with same index as `mask`.
+
+    Returns
+    -------
+    minimum : Series
+        `data` transformed to have the minimum value from ``data[mask]``
+        on each day.
+    maximum : Series
+        `data` transformed to have the maximum value from ``data[mask]``
+        on each day.
+    """
     daily_max = _apply_daily_mask(mask, data, pd.Series.max)
     daily_min = _apply_daily_mask(mask, data, pd.Series.min)
     return daily_min, daily_max
@@ -299,6 +335,49 @@ def _rolling_low_slope(ac_power, window, slope_min):
 
 def geometric(ac_power, window=None, slope_min=0.2, freq=None,
               tracking=False):
+    """Identify clipping based on a the shape of the `ac_power`
+    curve on each day.
+
+    Each day is checked for periods where the slope of `ac_power`
+    is low. The power values in these times are used to calculate
+    a minimum and a maximum clipped power level for that day. Any
+    power values that are within this range are flagged as
+    clipped. The methodology for computing the thresholds varies
+    depending on the frequency of `ac_power`. For high frequency
+    data, less than 10 minute timestamp spacing the minimum
+    clipped power is the mean of the low-slope period(s) on that
+    day minus 2 times the standard deviation in the same period(s).
+    For higher frequency data the absolute minimum and maximum of
+    the low slope period(s) on each day are used.
+
+    If the frequency of `ac_power` is less than ten minutes, then
+    `ac_power` is down-sampled to 15 minutes and the mean value in
+    each 15-minute period is used to reduce noise inherent in
+    high frequency data.
+
+    Parameters
+    ----------
+    ac_power : Series
+        AC power data.
+    window : int, optional
+        Size of the rolling window used to identify low-slope
+        periods. If not specified and `tracking` is False then
+        `window=3` is used. If not specified and `tracking` is
+        True then `window=5` is used.
+    slope_min : float, default 0.2
+        Minimum slope for a window to be flagged as clipped.
+    freq : str, optional
+        Frequency of `ac_power`. If not specified then
+        :py:func:`pandas.infer_freq` is used.
+    tracking : bool, default False
+        If True then a larger default `window` is used. If `window`
+        is specified then `tracking` has no affect.
+
+    Returns
+    -------
+    Series
+        Boolean Series with True for values that appear to be clipped.
+    """
     ac_power_original = ac_power.copy()
     ac_power = ac_power_original
     freq_minutes = _freq_minutes(ac_power.index, freq)
