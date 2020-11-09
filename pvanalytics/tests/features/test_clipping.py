@@ -317,3 +317,21 @@ def test_geometric_clipping_window(power_pvwatts):
     assert clipped.any()
     clipped_window = clipping.geometric(power, window=24)
     assert not clipped_window.any()
+
+
+@pytest.mark.pdc0_inverter(89)
+def test_geometric_clipping_tracking(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    clipped = clipping.geometric(power)
+    assert clipped.any()
+    clipped = clipping.geometric(power, tracking=True)
+    assert not clipped.any()
+
+
+@pytest.mark.pdc0_inverter(80)
+def test_geometric_clipping_window_overrides_tracking(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    clipped = clipping.geometric(power, tracking=True)
+    assert clipped.any()
+    clipped_override = clipping.geometric(power, tracking=True, window=24)
+    assert not clipped_override.any()
