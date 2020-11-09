@@ -290,7 +290,7 @@ def test_geometric_clipping(power_pvwatts, freq):
 
 
 @pytest.mark.pdc0_inverter(65)
-@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['5T', '15T', '30T', 'H'])
 def test_geometric_clipping_correct(power_pvwatts, freq):
     power = power_pvwatts.resample(freq).asfreq()
     clipped = clipping.geometric(power)
