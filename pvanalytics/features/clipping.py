@@ -281,7 +281,23 @@ def _threshold_minmax(mask, data):
     return daily_min, daily_max
 
 
-def geometric(ac_power, window=None, derivative_min=0.2, freq=None,
+def _rolling_low_slope(ac_power, window, slope_min):
+    """Return True for timestamps where the data has slope less
+    than `slope_min` over a rolling window of length `window."""
+    rolling_max = ac_power.rolling(window=window).max()
+    rolling_min = ac_power.rolling(window=window).min()
+    # calculate an upper bound on the derivative
+    derivative_max = ((rolling_max - rolling_min)
+                      / ((rolling_max + rolling_min) / 2) * 100)
+    clipped = derivative_max < slope_min
+    clipped_windows = clipped.copy()
+    # flag all points in a window that has clipping
+    for i in range(0, window):
+        clipped_windows |= clipped.shift(-i)
+    return clipped_windows
+
+
+def geometric(ac_power, window=None, slope_min=0.2, freq=None,
               tracking=False):
     ac_power_original = ac_power.copy()
     ac_power = ac_power_original
@@ -295,17 +311,7 @@ def geometric(ac_power, window=None, derivative_min=0.2, freq=None,
     # remove low power times to eliminate night.
     daily_min = ac_power.resample('D').transform('max') * 0.1
     ac_power.loc[ac_power < daily_min] = np.nan
-    rolling_max = ac_power.rolling(window=window).max()
-    rolling_min = ac_power.rolling(window=window).min()
-    # calculate an upper bound on the derivative
-    derivative_max = ((rolling_max - rolling_min)
-                      / ((rolling_max + rolling_min) / 2) * 100)
-    clipped = derivative_max < derivative_min
-    clipped_windows = clipped.copy()
-    # flag all points in a window that has clipping
-    for i in range(0, window):
-        clipped_windows |= clipped.shift(-i)
-    clipped = clipped_windows
+    clipped = _rolling_low_slope(ac_power, window, slope_min)
     if not ac_power.index.equals(ac_power_original.index):
         # data was down-sampled.
         daily_clipped_min, daily_clipped_max = _threshold_mean(
