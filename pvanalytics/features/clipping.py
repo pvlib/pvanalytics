@@ -332,15 +332,15 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
     curve on each day.
 
     Each day is checked for periods where the slope of `ac_power`
-    is low. The power values in these times are used to calculate
+    is small. The power values in these periods are used to calculate
     a minimum and a maximum clipped power level for that day. Any
     power values that are within this range are flagged as
     clipped. The methodology for computing the thresholds varies
     depending on the frequency of `ac_power`. For high frequency
-    data, less than 10 minute timestamp spacing the minimum
+    data (less than 10 minute timestamp spacing) the minimum
     clipped power is the mean of the low-slope period(s) on that
     day minus 2 times the standard deviation in the same period(s).
-    For higher frequency data the absolute minimum and maximum of
+    For lower frequency data the absolute minimum and maximum of
     the low slope period(s) on each day are used.
 
     If the frequency of `ac_power` is less than ten minutes, then
