@@ -235,7 +235,7 @@ def _freq_minutes(index, freq):
     return util.freq_to_timedelta(freq).seconds / 60
 
 
-def _apply_daily_mask(mask, data, f):
+def _apply_daily_mask(mask, data, transformation):
     """Apply `f` to the data selected by `mask` on each day.
 
     Parameters
@@ -244,20 +244,18 @@ def _apply_daily_mask(mask, data, f):
         Boolean Series with same index as `data`
     data : Series
         Series with the data.
-    f : callable
-        Function that takes a series as an input and returns a
-        sing value.
+    transformation : str or function
+        Any value that can be passed to ``Series.resample().transform()``.
 
     Returns
     -------
     Series
-        Series with same index as `mask` and values returned
-        by applying `f` to ``data[mask]`` on each day.
+        Series with same index as `mask` and values assigned by applying
+        transformation to data in ``data[mask]`` on each day.
     """
-    daily = mask.resample('D')
-    return daily.transform(
-        lambda day: f(data[day.index][day])
-    )
+    data = data.copy()
+    data[~mask] = np.nan
+    return data.resample('D').transform(transformation)
 
 
 def _threshold_mean(mask, data):
@@ -279,11 +277,16 @@ def _threshold_mean(mask, data):
         `data` transformed to the mean of ``data[mask]`` plus 2 times
          the standard deviation of ``data[mask]`` on each day.
     """
-    daily_mean = _apply_daily_mask(mask, data, pd.Series.mean)
-    daily_std = _apply_daily_mask(mask, data, pd.Series.std)
+    daily_mean = _apply_daily_mask(mask, data, 'mean')
+    daily_std = _apply_daily_mask(mask, data, 'std')
     daily_clipped_max = daily_mean + 2 * daily_std
     daily_clipped_min = daily_mean - 2 * daily_std
-    return daily_clipped_min, daily_clipped_max
+    # In cases where the standard deviation is 0 (i.e. all the data is
+    # identical) the min and max values can suffer from floating point
+    # rounding errors that result in the minimum being greater than the
+    # maximum value by a very small amount. To remove the rounding errors
+    # we round again to 8 decimal places.
+    return daily_clipped_min.round(8), daily_clipped_max.round(8)
 
 
 def _threshold_minmax(mask, data):
@@ -305,8 +308,8 @@ def _threshold_minmax(mask, data):
         `data` transformed to have the maximum value from ``data[mask]``
         on each day.
     """
-    daily_max = _apply_daily_mask(mask, data, pd.Series.max)
-    daily_min = _apply_daily_mask(mask, data, pd.Series.min)
+    daily_max = _apply_daily_mask(mask, data, 'max')
+    daily_min = _apply_daily_mask(mask, data, 'min')
     return daily_min, daily_max
 
 
