@@ -340,8 +340,9 @@ def test_geometric_clipping_window_overrides_tracking(power_pvwatts):
     assert not clipped_override.any()
 
 
-def test_geometric_clipping_missing_data(power_pvwatts):
-    power = power_pvwatts.resample('15T').asfreq()
+@pytest.mark.parametrize('freq', ['5T', '15T'])
+def test_geometric_clipping_missing_data(freq, power_pvwatts):
+    power = power_pvwatts.resample(freq).asfreq()
     power.loc[power.between_time('09:00', '10:30').index] = np.nan
     power.loc[power.between_time('12:15', '12:45').index] = np.nan
     power.dropna(inplace=True)
@@ -349,4 +350,4 @@ def test_geometric_clipping_missing_data(power_pvwatts):
                        match="Cannot infer frequency of `ac_power`. "
                              "Please resample or pass `freq`."):
         clipping.geometric(power)
-    assert not clipping.geometric(power, freq='15T').any()
+    assert not clipping.geometric(power, freq=freq).any()
