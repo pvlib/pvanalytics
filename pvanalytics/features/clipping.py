@@ -232,6 +232,8 @@ def _freq_minutes(index, freq):
     then use the frequency inferred from `index`."""
     if freq is None:
         freq = pd.infer_freq(index)
+    if freq is None:
+        raise ValueError("cannot infer frequency")
     return util.freq_to_timedelta(freq).seconds / 60
 
 
@@ -382,7 +384,11 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
     """
     ac_power_original = ac_power.copy()
     ac_power = ac_power_original
-    freq_minutes = _freq_minutes(ac_power.index, freq)
+    try:
+        freq_minutes = _freq_minutes(ac_power.index, freq)
+    except ValueError:
+        raise ValueError("Cannot infer frequency of `ac_power`. "
+                         "Please resample or pass `freq`.")
     if freq_minutes < 10:
         ac_power = ac_power.resample('15T', label='right').mean()
     if window is None and tracking and freq_minutes < 30:
