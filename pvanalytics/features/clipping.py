@@ -313,7 +313,7 @@ def _threshold_minmax(mask, data):
     return daily_min, daily_max
 
 
-def _rolling_low_slope(ac_power, window, slope_min):
+def _rolling_low_slope(ac_power, window, slope_max):
     """Return True for timestamps where the data has slope less
     than `slope_min` over a rolling window of length `window."""
     rolling_max = ac_power.rolling(window=window).max()
@@ -321,7 +321,7 @@ def _rolling_low_slope(ac_power, window, slope_min):
     # calculate an upper bound on the derivative
     derivative_max = ((rolling_max - rolling_min)
                       / ((rolling_max + rolling_min) / 2) * 100)
-    clipped = derivative_max < slope_min
+    clipped = derivative_max < slope_max
     clipped_windows = clipped.copy()
     # flag all points in a window that has clipping
     for i in range(0, window):
@@ -329,7 +329,7 @@ def _rolling_low_slope(ac_power, window, slope_min):
     return clipped_windows
 
 
-def geometric(ac_power, window=None, slope_min=0.2, freq=None,
+def geometric(ac_power, window=None, slope_max=0.2, freq=None,
               tracking=False):
     """Identify clipping based on a the shape of the `ac_power`
     curve on each day.
@@ -360,8 +360,10 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
         periods. If not specified and `tracking` is False then
         `window=3` is used. If not specified and `tracking` is
         True then `window=5` is used.
-    slope_min : float, default 0.2
-        Minimum slope for a window to be flagged as clipped.
+    slope_max : float, default 0.2
+        Maximum difference in maximum and minimum power for a
+        window to be flagged as clipped. Units are percent of
+        average power in the interval.
     freq : str, optional
         Frequency of `ac_power`. If not specified then
         :py:func:`pandas.infer_freq` is used.
@@ -390,7 +392,7 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
     # remove low power times to eliminate night.
     daily_min = ac_power.resample('D').transform('max') * 0.1
     ac_power.loc[ac_power < daily_min] = np.nan
-    clipped = _rolling_low_slope(ac_power, window, slope_min)
+    clipped = _rolling_low_slope(ac_power, window, slope_max)
     if not ac_power.index.equals(ac_power_original.index):
         # data was down-sampled. Missing data is back-filled since in
         # resampling we labeled to the right.
