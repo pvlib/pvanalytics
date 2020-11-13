@@ -79,6 +79,9 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
     for more information.
 
     """
+    power = ac_power
+    ac_power = ac_power.copy()
+    ac_power.dropna(inplace=True)
     num_bins = np.ceil(1.0 / rtol).astype(int)
     flags = pd.Series(index=ac_power.index, data=False)
     power_plateaus, bins = _detect_levels(ac_power, count=levels,
@@ -88,7 +91,7 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
         temp.loc[(ac_power >= lower) & (ac_power <= upper)] = 1.0
         flags = flags | _label_clipping(temp, window=window,
                                         frac=fraction_in_window)
-    return flags
+    return flags.reindex_like(power).fillna(False)
 
 
 def _daytime_powercurve(ac_power, power_quantile):

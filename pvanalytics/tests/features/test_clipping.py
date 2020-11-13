@@ -71,6 +71,16 @@ def test_levels_two_periods(quadratic, quadratic_clipped):
     assert not clipped[50:].any()
 
 
+def test_levels_missing_data(quadratic, quadratic_clipped):
+    quadratic[10:20] = np.nan
+    quadratic_clipped[10:20] = np.nan
+    assert_series_equal(
+        pd.Series(False, quadratic.index),
+        clipping.levels(quadratic, window=10)
+    )
+    assert not clipping.levels(quadratic_clipped, window=10)[10:20].any()
+
+
 def test_threshold_no_clipping(quadratic):
     """In a data set with a single quadratic there is no clipping."""
     quadratic.index = pd.date_range(
