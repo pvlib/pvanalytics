@@ -379,7 +379,7 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
     ac_power = ac_power_original
     freq_minutes = _freq_minutes(ac_power.index, freq)
     if freq_minutes < 10:
-        ac_power = ac_power.resample('15T').mean()
+        ac_power = ac_power.resample('15T', label='right').mean()
     if window is None and tracking and freq_minutes < 30:
         window = 5
     else:
@@ -389,9 +389,10 @@ def geometric(ac_power, window=None, slope_min=0.2, freq=None,
     ac_power.loc[ac_power < daily_min] = np.nan
     clipped = _rolling_low_slope(ac_power, window, slope_min)
     if not ac_power.index.equals(ac_power_original.index):
-        # data was down-sampled.
+        # data was down-sampled. Missing data is back-filled since in
+        # resampling we labeled to the right.
         daily_clipped_min, daily_clipped_max = _threshold_mean(
-            clipped.reindex(ac_power_original.index, method='ffill'),
+            clipped.reindex_like(ac_power_original, method='bfill'),
             ac_power_original
         )
     else:
