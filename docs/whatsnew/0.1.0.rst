@@ -1,0 +1,32 @@
+.. _whatsnew_010:
+
+0.1.0 (November ??, 2020)
+-------------------------
+
+This is the first release of pvanalytics. As such, the list of "changes"
+below is vague. Future releases will describe specific changes here along
+with references to the relevant github issue and pull requests.
+
+API Changes
+~~~~~~~~~~~
+
+Enhancements
+~~~~~~~~~~~~
+
+* Quality control functions.
+* Feature labeling functions.
+* System parameter inference functions.
+* NREL performance ration metric.
+
+Bug Fixes
+~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+* Will Vining (:ghuser:`wfvining`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Saurabh Aneja (:ghuser:`spaneja`)
+
+Special thanks to Matt Muller and Kirsten Perry of NREL for their assistance
+in adapting components from the PVFleets QA project to PVAnalytics.

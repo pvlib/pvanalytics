@@ -30,7 +30,8 @@ author = 'pvlib'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.extlinks'
 ]
 
 autosummary_generate = True
@@ -55,3 +56,18 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+extlinks = {
+    'issue': (
+        'https://github.com/pvlib/pvanalytics/issues/%s',
+        'GH'),
+    'pull': (
+        'https://github.com/pvlib/pvanalytics/pull/%s',
+        'GH'),
+    'wiki': (
+        'https://github.com/pvlib/pvanalytics/wiki/%s',
+        'wiki '),
+    'doi': ('http://dx.doi.org/%s', 'DOI: '),
+    'ghuser': ('https://github.com/%s', '@')
+}
+
