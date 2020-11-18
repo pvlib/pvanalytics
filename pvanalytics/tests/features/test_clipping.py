@@ -3,6 +3,8 @@ import pytest
 from pandas.util.testing import assert_series_equal
 import numpy as np
 import pandas as pd
+from pvlib import irradiance, temperature, pvsystem, inverter
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics.features import clipping
 
 
@@ -242,3 +244,132 @@ def test_threshold_no_clipping_four_days(quadratic):
     clipped = clipping.threshold(power)
 
     assert not clipped.any()
+
+
+@pytest.fixture(scope='module')
+def july():
+    return pd.date_range(start='7/1/2020', end='8/1/2020', freq='T')
+
+
+@pytest.fixture(scope='module')
+def clearsky_july(july, albuquerque):
+    return albuquerque.get_clearsky(
+        july,
+        model='simplified_solis'
+    )
+
+
+@pytest.fixture(scope='module')
+def solarposition_july(july, albuquerque):
+    return albuquerque.get_solarposition(july)
+
+
+@pytest.fixture
+def power_pvwatts(request, clearsky_july, solarposition_july):
+    pdc0 = 100
+    pdc0_inverter = 110
+    tilt = 30
+    azimuth = 180
+    pdc0_marker = request.node.get_closest_marker("pdc0_inverter")
+    if pdc0_marker is not None:
+        pdc0_inverter = pdc0_marker.args[0]
+    poa = irradiance.get_total_irradiance(
+        tilt, azimuth,
+        solarposition_july['zenith'], solarposition_july['azimuth'],
+        **clearsky_july
+    )
+    cell_temp = temperature.sapm_cell(
+        poa['poa_global'], 25, 0,
+        **TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    )
+    dc = pvsystem.pvwatts_dc(poa['poa_global'], cell_temp, pdc0, -0.004)
+    return inverter.pvwatts(dc, pdc0_inverter)
+
+
+@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+def test_geometric_no_clipping(power_pvwatts, freq):
+    clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
+    assert not clipped.any()
+
+
+@pytest.mark.pdc0_inverter(60)
+@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+def test_geometric_clipping(power_pvwatts, freq):
+    clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
+    assert clipped.any()
+
+
+@pytest.mark.pdc0_inverter(65)
+@pytest.mark.parametrize('freq', ['5T', '15T', '30T', 'H'])
+def test_geometric_clipping_correct(power_pvwatts, freq):
+    power = power_pvwatts.resample(freq).asfreq()
+    clipped = clipping.geometric(power)
+    expected = power == power.max()
+    if freq == '5T':
+        assert np.allclose(power[clipped], power.max(), atol=0.5)
+    else:
+        assert_series_equal(clipped, expected)
+
+
+@pytest.mark.pdc0_inverter(65)
+def test_geometric_clipping_midday_clouds(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    power.loc[power.between_time(
+        start_time='17:30', end_time='19:30',
+        include_start=True, include_end=True
+    ).index] = list(range(30, 39)) * 31
+    clipped = clipping.geometric(power)
+    expected = power == power.max()
+    assert_series_equal(clipped, expected)
+
+
+@pytest.mark.pdc0_inverter(80)
+def test_geometric_clipping_window(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    clipped = clipping.geometric(power)
+    assert clipped.any()
+    clipped_window = clipping.geometric(power, window=24)
+    assert not clipped_window.any()
+
+
+@pytest.mark.pdc0_inverter(89)
+def test_geometric_clipping_tracking(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    clipped = clipping.geometric(power)
+    assert clipped.any()
+    clipped = clipping.geometric(power, tracking=True)
+    assert not clipped.any()
+
+
+@pytest.mark.pdc0_inverter(80)
+def test_geometric_clipping_window_overrides_tracking(power_pvwatts):
+    power = power_pvwatts.resample('15T').asfreq()
+    clipped = clipping.geometric(power, tracking=True)
+    assert clipped.any()
+    clipped_override = clipping.geometric(power, tracking=True, window=24)
+    assert not clipped_override.any()
+
+
+@pytest.mark.parametrize('freq', ['5T', '15T'])
+def test_geometric_clipping_missing_data(freq, power_pvwatts):
+    power = power_pvwatts.resample(freq).asfreq()
+    power.loc[power.between_time('09:00', '10:30').index] = np.nan
+    power.loc[power.between_time('12:15', '12:45').index] = np.nan
+    power.dropna(inplace=True)
+    with pytest.raises(ValueError,
+                       match="Cannot infer frequency of `ac_power`. "
+                             "Please resample or pass `freq`."):
+        clipping.geometric(power)
+    assert not clipping.geometric(power, freq=freq).any()
+
+
+def test_geometric_index_not_sorted():
+    power = pd.Series(
+        [1, 2, 3],
+        index=pd.DatetimeIndex(
+            ['20200201 0700', '20200201 0630', '20200201 0730']
+        )
+    )
+    with pytest.raises(ValueError,
+                       match=r"Index must be monotonically increasing\."):
+        clipping.geometric(power, freq='30T')

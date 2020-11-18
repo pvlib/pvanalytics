@@ -14,6 +14,9 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "slow: mark test as slow to run")
+    config.addinivalue_line("markers", "pdc0_inverter: pass inverter"
+                                       "DC input limit to fixture that"
+                                       "models AC power using PVWatts")
 
 
 def pytest_collection_modifyitems(config, items):
