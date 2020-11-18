@@ -70,4 +70,3 @@ extlinks = {
     'doi': ('http://dx.doi.org/%s', 'DOI: '),
     'ghuser': ('https://github.com/%s', '@')
 }
-
