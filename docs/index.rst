@@ -46,6 +46,7 @@ library status.
   - :py:mod:`features.clipping` functions for labeling inverter clipping.
   - :py:mod:`features.clearsky` functions for identifying periods of clear sky
     conditions.
+  - :py:mod:`features.daytime` functions for identifying periods of day and night.
   - :py:mod:`features.orientation` functions for identifying
     orientation-related features in the data (e.g. days where the data looks
     like there is a functioning tracker). These functions are distinct from the
