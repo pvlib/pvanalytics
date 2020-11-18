@@ -284,11 +284,18 @@ def _threshold_mean(mask, data):
     daily_clipped_max = daily_mean + 2 * daily_std
     daily_clipped_min = daily_mean - 2 * daily_std
     # In cases where the standard deviation is 0 (i.e. all the data is
-    # identical) the min and max values can suffer from floating point
-    # rounding errors that result in the minimum being greater than the
-    # maximum value by a very small amount. To remove the rounding errors
-    # we round again to 8 decimal places.
-    return daily_clipped_min.round(8), daily_clipped_max.round(8)
+    # identical) it is possible for the mean to be above the daily maximum
+    # by a very small amount due to floating point rounding errors. To ensure
+    # that rounding errors do not affect the final outcome we lower the daily
+    # clipping minimum if it is greater than the maximum for that day and
+    # raise the daily clipping maximum if it is less than the minimum for
+    # that day.
+    daily_min, daily_max = _threshold_minmax(mask, data)
+    min_above_max = daily_clipped_min > daily_max
+    max_below_min = daily_clipped_max < daily_min
+    daily_clipped_min[min_above_max] = daily_max[min_above_max]
+    daily_clipped_max[max_below_min] = daily_min[max_below_min]
+    return daily_clipped_min, daily_clipped_max
 
 
 def _threshold_minmax(mask, data):
@@ -318,8 +325,8 @@ def _threshold_minmax(mask, data):
 def _rolling_low_slope(ac_power, window, slope_max):
     """Return True for timestamps where the data has slope less
     than `slope_min` over a rolling window of length `window."""
-    rolling_max = ac_power.rolling(window=window).max()
-    rolling_min = ac_power.rolling(window=window).min()
+    rolling_max = ac_power[::-1].rolling(window=window).max().reindex_like(ac_power)
+    rolling_min = ac_power[::-1].rolling(window=window).min().reindex_like(ac_power)
     # calculate an upper bound on the derivative
     derivative_max = ((rolling_max - rolling_min)
                       / ((rolling_max + rolling_min) / 2) * 100)
@@ -327,7 +334,7 @@ def _rolling_low_slope(ac_power, window, slope_max):
     clipped_windows = clipped.copy()
     # flag all points in a window that has clipping
     for i in range(0, window):
-        clipped_windows |= clipped.shift(-i)
+        clipped_windows |= clipped.shift(i)
     return clipped_windows
 
 
@@ -397,7 +404,7 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
         raise ValueError("Cannot infer frequency of `ac_power`. "
                          "Please resample or pass `freq`.")
     if freq_minutes < 10:
-        ac_power = ac_power.resample('15T', label='right').mean()
+        ac_power = ac_power.resample('15T').mean()
     if window is None and tracking and freq_minutes < 30:
         window = 5
     else:
@@ -407,10 +414,9 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
     ac_power.loc[ac_power < daily_min] = np.nan
     clipped = _rolling_low_slope(ac_power, window, slope_max)
     if not ac_power.index.equals(ac_power_original.index):
-        # data was down-sampled. Missing data is back-filled since in
-        # resampling we labeled to the right.
+        # data was down-sampled.
         daily_clipped_min, daily_clipped_max = _threshold_mean(
-            clipped.reindex_like(ac_power_original, method='bfill'),
+            clipped.reindex_like(ac_power_original, method='ffill'),
             ac_power_original
         )
     else:
