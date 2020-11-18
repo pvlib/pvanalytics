@@ -4,7 +4,7 @@
 -------------------------
 
 This is the first release of pvanalytics. As such, the list of "changes"
-below is vague. Future releases will describe specific changes here along
+below is not specific. Future releases will describe specific changes here along
 with references to the relevant github issue and pull requests.
 
 API Changes
@@ -13,7 +13,7 @@ API Changes
 Enhancements
 ~~~~~~~~~~~~
 
-* Quality control functions.
+* Quality control functions for irradiance, weather and time series data. See :py:mod:`pvanalytics.quality` for content.
 * Feature labeling functions.
 * System parameter inference functions.
 * NREL performance ration metric.
