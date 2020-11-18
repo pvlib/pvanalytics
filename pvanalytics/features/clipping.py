@@ -325,8 +325,12 @@ def _threshold_minmax(mask, data):
 def _rolling_low_slope(ac_power, window, slope_max):
     """Return True for timestamps where the data has slope less
     than `slope_min` over a rolling window of length `window."""
-    rolling_max = ac_power[::-1].rolling(window=window).max().reindex_like(ac_power)
-    rolling_min = ac_power[::-1].rolling(window=window).min().reindex_like(ac_power)
+    # Reverse the series to do a forward looking (left-labeled)
+    # rolling max/min.
+    rolling_max = ac_power[::-1].rolling(
+        window=window).max().reindex_like(ac_power)
+    rolling_min = ac_power[::-1].rolling(
+        window=window).min().reindex_like(ac_power)
     # calculate an upper bound on the derivative
     derivative_max = ((rolling_max - rolling_min)
                       / ((rolling_max + rolling_min) / 2) * 100)
