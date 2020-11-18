@@ -378,10 +378,17 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
     Series
         Boolean Series with True for values that appear to be clipped.
 
+    Raises
+    ------
+    ValueError
+        If the index of `ac_power` is not sorted.
+
     Notes
     -----
     Based on code from the PVFleets QA project.
     """
+    if not ac_power.index.is_monotonic_increasing:
+        raise ValueError("Index must be monotonically increasing.")
     ac_power_original = ac_power.copy()
     ac_power = ac_power_original
     try:

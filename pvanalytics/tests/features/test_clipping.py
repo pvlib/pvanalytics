@@ -351,3 +351,15 @@ def test_geometric_clipping_missing_data(freq, power_pvwatts):
                              "Please resample or pass `freq`."):
         clipping.geometric(power)
     assert not clipping.geometric(power, freq=freq).any()
+
+
+def test_geometric_index_not_sorted():
+    power = pd.Series(
+        [1, 2, 3],
+        index=pd.DatetimeIndex(
+            ['20200201 0700', '20200201 0630', '20200201 0730']
+        )
+    )
+    with pytest.raises(ValueError,
+                       match=r"Index must be monotonically increasing\."):
+        clipping.geometric(power, freq='30T')
