@@ -12,6 +12,11 @@ not on this list*
 - [ ] Closes #xxx
 - [ ] Added new API functions to `docs/api.rst`
 - [ ] Clearly documented all new API functions with [PEP257](https://www.python.org/dev/peps/pep-0257/) and [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) compliant docstrings
+- [ ] Adds description and name entries in the appropriate "what's new" file 
+      in [`docs/whatsnew`](https://github.com/pvlib/pvanalytics/tree/master/docs/whatsnew) 
+      for all changes. Includes link to the GitHub Issue with `` :issue:`num` `` 
+      or this Pull Request with `` :pull:`num` ``. Includes contributor name 
+      and/or GitHub username (link with `` :ghuser:`user` ``).
 - [ ] Non-API functions clearly documented with docstrings or comments as necessary
 - [ ] Added tests to cover all new or modified code
 - [ ] Pull request is nearly complete and ready for detailed review

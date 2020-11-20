@@ -1,0 +1,36 @@
+.. _whatsnew_010:
+
+0.1.0 (November 20, 2020)
+-------------------------
+
+This is the first release of PVAnalytics. As such, the list of "changes"
+below is not specific. Future releases will describe specific changes here along
+with references to the relevant github issue and pull requests.
+
+API Changes
+~~~~~~~~~~~
+
+Enhancements
+~~~~~~~~~~~~
+
+* Quality control functions for irradiance, weather and time series data. See
+  :py:mod:`pvanalytics.quality` for content.
+* Feature labeling functions for clipping, clearsky, daytime, and orientation.
+  See :py:mod:`pvanalytics.features` for content.
+* System parameter inference for tilt, azimuth, and whether the system is
+  tracking or fixed. See :py:mod:`pvanalytics.system` for content.
+* NREL performance ratio metric
+  (:py:func:`pvanalytics.metrics.performance_ratio_nrel`).
+
+Bug Fixes
+~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+* Will Vining (:ghuser:`wfvining`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Saurabh Aneja (:ghuser:`spaneja`)
+
+Special thanks to Matt Muller and Kirsten Perry of NREL for their assistance
+in adapting components from the PVFleets QA project to PVAnalytics.

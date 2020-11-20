@@ -91,6 +91,7 @@ Contents
    :caption: Contents:
 
    api
+   whatsnew/index
 
 Indices and tables
 ==================
