@@ -1,6 +1,6 @@
 .. _whatsnew_010:
 
-0.1.0 (November ??, 2020)
+0.1.0 (November 20, 2020)
 -------------------------
 
 This is the first release of PVAnalytics. As such, the list of "changes"
