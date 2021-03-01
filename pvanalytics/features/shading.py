@@ -113,12 +113,12 @@ def _remove_pillars(wires):
                   [1, 0, 0, 0, 1]])
     a1 = np.logical_and(
         wires,
-        np.logical_not(ndimage.binary_hit_or_miss(wires, k, j))
+        np.logical_not(ndimage.binary_hit_or_miss(wires, j, k))
     )
     a2 = np.logical_and(
         wires,
         np.logical_not(
-            ndimage.binary_hit_or_miss(wires, np.flipud(k), np.flipud(j))
+            ndimage.binary_hit_or_miss(wires, np.flipud(j), np.flipud(k))
         )
     )
     return np.logical_and(a1, a2)
