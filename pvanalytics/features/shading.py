@@ -101,7 +101,7 @@ def _detect_clouds(ghi, clearsky_ghi):
         ghi.index,
         window_length=10
     )
-    return clouds.rolling('60T').sum() == 0
+    return clouds.rolling('50T').sum() == 0
 
 
 def _remove_pillars(wires):
@@ -205,12 +205,12 @@ def _tand(degrees):
 
 def _filter_bars(wires):
     """Only keep shadows that are 'bar-shaped' and span multiple days."""
-    for angle in range(0,90,5):
+    for angle in range(0, 90, 5):
         if angle < 75:
             dim = 21
-            mid = 10
+            mid = 11
         else:
-            dim = round(10 + 2 * angle // 5)
+            dim = round(11 + 2 * angle // 5)
             mid = round(6 + angle // 5)
         cc = np.arange(0, dim)
         se = np.zeros((dim, dim))
@@ -220,13 +220,14 @@ def _filter_bars(wires):
         else:
             rr = mid + np.round((cc - mid) * _tand(90 - angle))
             se[cc, rr.astype('int')] = 1
+            se = se.T
         wires = np.logical_or(
             wires,
-            morphology.binary_opening(wires, se.T)
+            morphology.binary_opening(wires, se)
         )
         wires = np.logical_or(
             wires,
-            morphology.binary_opening(wires, np.flipud(se.T))
+            morphology.binary_opening(wires, np.flipud(se))
         )
     return wires
 
