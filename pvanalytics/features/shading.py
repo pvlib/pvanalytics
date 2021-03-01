@@ -170,6 +170,22 @@ def _width(bbox):
     return bbox[3] - bbox[1] + 1
 
 
+def _height(bbox):
+    """Return the height of a bounding box.
+
+    Parameters
+    ----------
+    bbox : tuple
+        4-tuple specifying ``(min_row, min_col, max_row, max_col)``.
+
+    Returns
+    -------
+    int
+        The height of the bounding box in pixels.
+    """
+    return bbox[2] - bbox[0] + 1
+
+
 def _filter_blobs(wires, blob_length, connectivity):
     """Remove blobs shorter than blob_length.
 
@@ -178,7 +194,7 @@ def _filter_blobs(wires, blob_length, connectivity):
     """
     components = measure.label(wires, connectivity=connectivity, background=0)
     keep = [props.label for props in measure.regionprops(components)
-            if _width(props.bbox) > blob_length]
+            if _height(props.bbox) > blob_length]
     return np.isin(components, keep)
 
 
