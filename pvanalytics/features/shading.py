@@ -245,7 +245,7 @@ def _clean_wires(wires):
     return out
 
 
-def fixed(ghi, daytime, clearsky, interval=None):
+def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     """Detects shadows form fixed structures such as wires and poles.
 
     Uses morphological image processing methods to identify shadows
@@ -305,7 +305,6 @@ def fixed(ghi, daytime, clearsky, interval=None):
     # We must use scipy.ndimage here because skimage does not support
     # floating point the data outside the range [-1, 1]
     gradient = ndimage.morphological_gradient(ghi_boosted, size=(1, 3))
-    min_gradient = 2  # TODO consider making this a parameter
     threshold = gradient > min_gradient  # binary image of wire candidates
 
     # From here we CAN use skimage we are working with binary
