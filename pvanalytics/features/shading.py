@@ -203,14 +203,14 @@ def _tand(degrees):
     return np.tan(np.deg2rad(degrees))
 
 
-def _filter_bars(wires):
+def _filter_bars(wires, out):
     """Only keep shadows that are 'bar-shaped' and span multiple days."""
     for angle in range(0, 90, 5):
         if angle < 75:
-            dim = 21
-            mid = 11
+            dim = 20
+            mid = 10
         else:
-            dim = round(11 + 2 * angle // 5)
+            dim = round(10 + 2 * angle // 5)
             mid = round(6 + angle // 5)
         cc = np.arange(0, dim)
         se = np.zeros((dim, dim))
@@ -221,28 +221,28 @@ def _filter_bars(wires):
             rr = mid + np.round((cc - mid) * _tand(90 - angle))
             se[cc, rr.astype('int')] = 1
             se = se.T
-        wires = np.logical_or(
-            wires,
+        out = np.logical_or(
+            out,
             morphology.binary_opening(wires, se)
         )
-        wires = np.logical_or(
-            wires,
+        out = np.logical_or(
+            out,
             morphology.binary_opening(wires, np.flipud(se))
         )
-    return wires
+    return out
 
 
 def _clean_wires(wires):
     """Clean up clouds that are connected to wires."""
-    wires = _remove_pillars(wires)
-    wires = _fill_gaps(wires)
-    wires = _remove_spikes(wires)
-    wires = _fill_gaps(wires)
-    wires = _restore_gaps(wires)
-    wires = _filter_blobs(wires, 20, connectivity=1)
-    wires = _filter_bars(wires)
-    wires = _filter_blobs(wires, 15, connectivity=2)
-    return wires
+    out = _remove_pillars(wires)
+    out = _fill_gaps(out)
+    out = _remove_spikes(out)
+    out = _fill_gaps(out)
+    out = _restore_gaps(out)
+    out = _filter_blobs(out, 20, connectivity=1)
+    out = _filter_bars(wires, out)
+    out = _filter_blobs(out, 15, connectivity=2)
+    return out
 
 
 def fixed(ghi, daytime, clearsky, interval=None):
