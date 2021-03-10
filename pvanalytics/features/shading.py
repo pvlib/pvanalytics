@@ -68,7 +68,7 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     scaled_clearsky = scaled_clearsky.reindex_like(scaled_ghi)
     daytime = daytime.reindex_like(scaled_ghi)
     # Detect clouds.
-    clouds = _detect_clouds(scaled_ghi, scaled_clearsky)
+    clouds = _detect_clouds(scaled_ghi, scaled_clearsky, '50T')
     # Interpolate across days (i.e. along columns) to remove clouds
     # replace clouds with nans
     #
@@ -93,7 +93,7 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     )
 
 
-def _detect_clouds(ghi, clearsky_ghi):
+def _detect_clouds(ghi, clearsky_ghi, window='50T'):
     """Use :py:func:`pvanalytics.clearsky.reno` to detect clouds"""
     clouds = pvlib.clearsky.detect_clearsky(
         ghi,
@@ -101,7 +101,7 @@ def _detect_clouds(ghi, clearsky_ghi):
         ghi.index,
         window_length=10
     )
-    return clouds.rolling('50T').sum() == 0
+    return clouds.rolling(window).sum() == 0
 
 
 def _remove_pillars(wires):
