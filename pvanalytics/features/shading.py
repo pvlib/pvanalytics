@@ -307,14 +307,11 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     gradient = ndimage.morphological_gradient(ghi_boosted, size=(1, 3))
     threshold = gradient > min_gradient  # binary image of wire candidates
 
-    # From here we CAN use skimage we are working with binary
-    # images. We use the grayscale version of these functions rather
-    # than the binary version since the binary version do not support
-    # the 'area_threshold' parameter.
-    three_day_mask = morphology.rectangle(1, 3)
-    wires = morphology.area_opening(
-        morphology.closing(threshold, three_day_mask),
-        area_threshold=200,
+    # From here we CAN use skimage we are working with binary images.
+    three_minute_mask = morphology.rectangle(1, 3)
+    wires = morphology.remove_small_objects(
+        morphology.binary_closing(threshold, three_minute_mask),
+        min_size=200,
         connectivity=2  # all neighbors (including diagonals)
     )
     wires = _clean_wires(wires)
