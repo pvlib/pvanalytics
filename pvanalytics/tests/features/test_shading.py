@@ -49,3 +49,10 @@ def test_fixed_same_index(daytime, clearsky_ghi):
         shadows,
         check_names=False
     )
+
+
+def test_simple_shadow(daytime, clearsky_ghi):
+    shadow_ghi = clearsky_ghi.copy()
+    shadow_ghi[shadow_ghi.between_time('11:00', '11:03').index] *= 0.5
+    shadows, image = shading.fixed(shadow_ghi, daytime, clearsky_ghi)
+    assert shadows.between_time('11:00', '11:03').all()
