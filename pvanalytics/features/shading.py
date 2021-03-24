@@ -25,6 +25,24 @@ def _to_image(data, width):
     return data.reshape(len(data) // width, width)
 
 
+def _to_series(image, image_index):
+    """Convert a binary image to a boolean series.
+
+    Parameters
+    ----------
+    image : ndarray
+        Binary image.
+    image_index : pd.Index
+        Index for the returned series.
+
+    Returns
+    -------
+    Series
+        A pandas Series with index `index` and values from the image.
+    """
+    return pd.Series(image.flatten(), index=image_index)
+
+
 def _smooth(image):
     """Smooth `image` by local mean filtering.
 
@@ -314,6 +332,8 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
         min_size=200,
         connectivity=2  # all neighbors (including diagonals)
     )
-    wires = _clean_wires(wires)
+    wires_image = _clean_wires(wires)
     # TODO convert wires back to a time-series indexed by ghi.index
-    return wires, ghi_image, gradient
+    wires_series = _to_series(wires, index)
+    wires_series = wires_series.reindex(ghi.index, fill_value=False)
+    return wires_series, wires_image

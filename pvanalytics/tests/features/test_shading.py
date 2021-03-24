@@ -36,14 +36,14 @@ def clearsky_ghi(times, albuquerque):
 
 
 def test_fixed_no_shadows(daytime, clearsky_ghi):
-    shadows = shading.fixed(clearsky_ghi, daytime, clearsky_ghi)
+    shadows, image = shading.fixed(clearsky_ghi, daytime, clearsky_ghi)
     assert not shadows.any()
 
 
 def test_fixed_same_index(daytime, clearsky_ghi):
     daytime = daytime['1/2/2020 11:00':'11/2/2020 13:00']
     clearsky_ghi = clearsky_ghi['1/2/2020 11:00':'11/2/2020 13:00']
-    shadows = shading.fixed(daytime, clearsky_ghi, clearsky_ghi)
+    shadows, image = shading.fixed(daytime, clearsky_ghi, clearsky_ghi)
     assert_series_equal(
         pd.series(False, index=daytime.index),
         shadows,
