@@ -325,7 +325,7 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     gradient = ndimage.morphological_gradient(ghi_boosted, size=(1, 3))
     threshold = gradient > min_gradient  # binary image of wire candidates
 
-    # From here we CAN use skimage we are working with binary images.
+    # From here we CAN use skimage because we are working with binary images.
     three_minute_mask = morphology.rectangle(1, 3)
     wires = morphology.remove_small_objects(
         morphology.binary_closing(threshold, three_minute_mask),
@@ -333,7 +333,6 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
         connectivity=2  # all neighbors (including diagonals)
     )
     wires_image = _clean_wires(wires)
-    # TODO convert wires back to a time-series indexed by ghi.index
     wires_series = _to_series(wires, index)
     wires_series = wires_series.reindex(ghi.index, fill_value=False)
     return wires_series, wires_image
