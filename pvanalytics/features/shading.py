@@ -72,9 +72,9 @@ def _prepare_images(ghi, clearsky, daytime, interval):
         later on.
 
     """
-    # Fill missing days by interpolation. Interpolation is limited to
-    # times with valid data before and after; missing data at the
-    # beginning or end of the series is not filled in.
+    # Fill missing times by interpolation. Missing data at the
+    # beginning or end of the series is not filled in, and will be
+    # excluded from the images used for shadow detection.
     image_width = 1440 // interval
     ghi = ghi.interpolate(limit_area='inside')
     # drop incomplete days.
@@ -281,12 +281,12 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     Parameters
     ----------
     ghi : Series
-        Time series of GHI measurements. Should be at 1-minute frequency
-        for best results. Must be 1 year of data.
+        Time series of GHI measurements. Data must be at 1-minute frequency
+        and cover at least several months.
     daytime : Series
         Boolean series with True for times when the sun is up.
     clearsky : Series
-        Clearsky GHI.
+        Clearsky GHI with same index as `ghi`.
     interval : int, optional
         Interval between data points in minutes. If not specified the
         interval is inferred from the frequency of the index of `ghi`.
@@ -322,7 +322,7 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     ghi_boosted = 1000 * (ghi_image + alpha) / (clearsky_image + alpha)
 
     # We must use scipy.ndimage here because skimage does not support
-    # floating point the data outside the range [-1, 1]
+    # floating point data outside the range [-1, 1].
     gradient = ndimage.morphological_gradient(ghi_boosted, size=(1, 3))
     threshold = gradient > min_gradient  # binary image of wire candidates
 
