@@ -309,7 +309,8 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
         interval = util.freq_to_timedelta(
             pd.infer_freq(ghi.index)
         ).seconds // 60
-    # TODO Handle invalid intervals
+    if interval != 1:
+        raise ValueError("Data must be at 1-minute intervals")
     ghi_image, clearsky_image, clouds_image, index = _prepare_images(
         ghi,
         clearsky,

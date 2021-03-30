@@ -4,14 +4,6 @@ import pytest
 from pvanalytics.features import shading
 
 
-# TODO testing plan
-#      - [ ] index of output same as input
-#      - [ ] no shadows -> all False
-#      - [ ] 5-minute timestamps
-#      - [ ] unaligned timestamps (?)
-#      - [ ] partial days at start and end of series
-
-
 @pytest.fixture(scope='module')
 def times():
     return pd.date_range(
@@ -56,3 +48,12 @@ def test_simple_shadow(daytime, clearsky_ghi):
     shadow_ghi[shadow_ghi.between_time('11:00', '11:03').index] *= 0.5
     shadows, image = shading.fixed(shadow_ghi, daytime, clearsky_ghi)
     assert shadows.between_time('11:00', '11:03').all()
+
+
+def test_invalid_interval(daytime, clearsky_ghi):
+    ghi = clearsky_ghi.resample('5T').first()
+    daytime_resampled = daytime.resample('5T').first()
+    with pytest.raises(ValueError, match="Data must be at 1-minute intervals"):
+        shading.fixed(ghi, daytime_resampled, ghi)
+    with pytest.raises(ValueError, match="Data must be at 1-minute intervals"):
+        shading.fixed(daytime, clearsky_ghi, clearsky_ghi, interval=2)
