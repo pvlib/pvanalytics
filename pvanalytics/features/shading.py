@@ -112,15 +112,22 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     )
 
 
-def _detect_clouds(ghi, clearsky_ghi, window='50T'):
-    """Use :py:func:`pvanalytics.clearsky.reno` to detect clouds"""
+def _detect_clouds(ghi, clearsky_ghi, duration='50T'):
+    """Use :py:func:`pvanalytics.clearsky.reno` to detect clouds.
+
+    Returns
+    -------
+    Series
+        Boolean series with true for cloudy periods that are at least as long
+        as `duration`.
+    """
     clouds = pvlib.clearsky.detect_clearsky(
         ghi,
         clearsky_ghi,
         ghi.index,
         window_length=10
     )
-    return clouds.rolling(window).sum() == 0
+    return clouds.rolling(duration).sum() == 0
 
 
 def _remove_pillars(wires):
@@ -282,7 +289,7 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     ----------
     ghi : Series
         Time series of GHI measurements. Data must be at 1-minute frequency
-        and cover at least several months.
+        and should cover at least 60 days.
     daytime : Series
         Boolean series with True for times when the sun is up.
     clearsky : Series
