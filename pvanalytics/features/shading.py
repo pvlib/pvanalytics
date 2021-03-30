@@ -265,13 +265,13 @@ def _clean_wires(wires):
 
 
 def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
-    """Detects shadows form fixed structures such as wires and poles.
+    """Detects shadows from fixed structures such as wires and poles.
 
     Uses morphological image processing methods to identify shadows
-    from fixed local objects in GHI data. GHI data are are assumed to
+    from fixed local objects in GHI data. GHI data are assumed to
     be reasonably complete with relatively few missing values and at a
     fixed time interval nominally of 1 minute over the course of
-    several months. Shadows are assumed to be relatively short
+    several months. Detection focuses on shadows with relatively short
     duration. The algorithm forms a 2D image of the GHI data by
     arranging time of day along the x-axis and day of year along the
     y-axis. Rapid change in GHI in the x-direction is used to identify
