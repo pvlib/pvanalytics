@@ -48,7 +48,7 @@ def _smooth(image):
 
     Local means are computed in a 3x3 square surrounding each pixel.
     """
-    return ndimage.uniform_filter(image, size=15)
+    return ndimage.uniform_filter(image, size=(3, 3))
 
 
 def _prepare_images(ghi, clearsky, daytime, interval):
