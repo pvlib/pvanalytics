@@ -81,12 +81,13 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     ghi = ghi[ghi.resample('D').transform('count') == image_width]
     image_times = ghi.index
     ghi_image = _to_image(ghi.to_numpy(), image_width)
-    scaled_ghi = (ghi * 1000) / _smooth(ghi_image).max()
+    scaled_ghi = (ghi * 1000) / np.max(_smooth(ghi_image))
     scaled_clearsky = (clearsky * 1000) / clearsky.max()
     scaled_clearsky = scaled_clearsky.reindex_like(scaled_ghi)
     daytime = daytime.reindex_like(scaled_ghi)
     # Detect clouds.
     clouds = _detect_clouds(scaled_ghi, scaled_clearsky, '50T')
+    cloud_mask = _to_image(clouds.to_numpy(), image_width)
     # Interpolate across days (i.e. along columns) to remove clouds
     # replace clouds with nans
     #
@@ -94,9 +95,9 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     # but the easiest approach is to turn the image into a dataframe and
     # interpolate along the columns.
     cloudless_image = ghi_image.copy()
-    cloudless_image[_to_image(clouds.to_numpy(), image_width)] = np.nan
+    cloudless_image[cloud_mask] = np.nan
     clouds_image = ghi_image.copy()
-    clouds_image[~_to_image(clouds.to_numpy(), image_width)] = np.nan
+    clouds_image[~cloud_mask] = np.nan
     ghi_image = pd.DataFrame(cloudless_image).interpolate(
         axis=0,
         limit_direction='both'
