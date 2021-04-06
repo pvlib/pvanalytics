@@ -57,6 +57,17 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     Performs pre-processing steps on `ghi` and `clearsky` before
     returning images for use in the shadow detection algorithm.
 
+    Parameters
+    ----------
+    ghi : Series
+        Measured GHI.
+    clearsky : Series
+        Expected clearsky GHI.
+    daytime : Series
+        Boolean series with True for daytime and False for night.
+    interval : int
+        Time between data points in `ghi`. [minutes]
+
     Returns
     -------
     ghi_image : np.ndarray
