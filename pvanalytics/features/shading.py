@@ -241,7 +241,22 @@ def _tand(degrees):
 
 
 def _filter_bars(wires, out):
-    """Only keep shadows that are 'bar-shaped' and span multiple days."""
+    """Only keep shadows that are 'bar-shaped' and span multiple days.
+
+    Parameters
+    ----------
+    wires : ndarray
+        Binary image of candidate shadows.
+    out : ndarray
+        An ndarray that will hold the output image resulting from this
+        filtering operation. If None then a new array will be allocated.
+
+    Returns
+    -------
+    ndarray
+        The output array. If `out` is not none, will return `out`.
+    """
+    temp_image = np.ndarray(wires.shape)
     for angle in range(0, 90, 5):
         if angle < 75:
             dim = 20
@@ -258,13 +273,17 @@ def _filter_bars(wires, out):
             rr = mid + np.round((cc - mid) * _tand(90 - angle))
             se[cc, rr.astype('int')] = 1
             se = se.T
-        out = np.logical_or(
+        morphology.binary_opening(wires, se, out=temp_image)
+        np.logical_or(
             out,
-            morphology.binary_opening(wires, se)
+            temp_image,
+            out=out
         )
-        out = np.logical_or(
+        morphology.binary_opening(wires, np.flipud(se), out=temp_image)
+        np.logical_or(
             out,
-            morphology.binary_opening(wires, np.flipud(se))
+            temp_image,
+            out=out
         )
     return out
 
