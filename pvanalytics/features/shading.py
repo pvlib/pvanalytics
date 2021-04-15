@@ -191,22 +191,6 @@ def _restore_gaps(wires):
     )
 
 
-def _width(bbox):
-    """Return the width of a bounding box.
-
-    Parameters
-    ----------
-    bbox : tuple
-        4-tuple specifying ``(min_row, min_col, max_row, max_col)``.
-
-    Returns
-    -------
-    int
-        The width of the bounding box in pixels.
-    """
-    return bbox[3] - bbox[1] + 1
-
-
 def _height(bbox):
     """Return the height of a bounding box.
 
