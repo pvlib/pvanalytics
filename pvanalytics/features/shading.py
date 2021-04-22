@@ -161,18 +161,25 @@ def _remove_pillars(wires):
     return np.logical_and(a1, a2)
 
 
-def _fill_gaps(wires):
+def _fill_gaps(wires, out):
     """Fill 1-minute gaps."""
     mask = np.array([[1, 0, 1]])
-    return np.logical_or(wires, ndimage.binary_hit_or_miss(wires, mask))
+    return np.logical_or(
+        wires, ndimage.binary_hit_or_miss(wires, mask), out=out)
 
 
-def _remove_spikes(wires):
+def _remove_spikes(wires, out):
     """Remove 1-day spikes."""
     mask = np.array([[0, 1, 0]]).T
+    temp_image = np.ndarray(wires.shape)
+    hit_miss = ndimage.binary_hit_or_miss(wires, mask)
     return np.logical_and(
         wires,
-        np.logical_not(ndimage.binary_hit_or_miss(wires, mask))
+        np.logical_not(
+            hit_miss,
+            out=temp_image
+        ),
+        out=out
     )
 
 
@@ -275,9 +282,9 @@ def _filter_bars(wires, out):
 def _clean_wires(wires):
     """Clean up clouds that are connected to wires."""
     out = _remove_pillars(wires)
-    out = _fill_gaps(out)
-    out = _remove_spikes(out)
-    out = _fill_gaps(out)
+    out = _fill_gaps(out, out)
+    out = _remove_spikes(out, out)
+    out = _fill_gaps(out, out)
     out = _restore_gaps(out)
     out = _filter_blobs(out, 20, connectivity=1)
     out = _filter_bars(wires, out)
