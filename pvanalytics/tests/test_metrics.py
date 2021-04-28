@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from pvanalytics import metrics
 import pytest
 
@@ -23,3 +24,42 @@ def test_performance_ratio_nrel():
                                                        wind_speed, pac, pdc0,
                                                        a, b, deltaT, gamma_pdc)
     assert performance_ratio == pytest.approx(expected)
+
+
+@pytest.fixture
+def variability_inputs():
+    times = pd.date_range('2019-01-01', freq='1min', periods=60*24)
+    clear = pd.Series(100.0, index=times)
+    # alternating sawtooth:
+    jagged = pd.Series([100.0, 101.0] * (len(times)//2), index=times)
+    return pd.DataFrame({
+        'clear': clear,
+        'jagged': jagged
+    })
+
+
+def test_variability_index(variability_inputs):
+    # default freq parameter
+    clear = variability_inputs['clear']
+    jagged = variability_inputs['jagged']
+
+    clear_clear = metrics.variability_index(clear, clear)
+    assert clear_clear == pytest.approx(1.0)
+
+    jagged_clear = metrics.variability_index(jagged, clear)
+    assert jagged_clear == pytest.approx(2**0.5)
+
+
+def test_variability_index_freq(variability_inputs):
+    # custom freq parameter
+    clear = variability_inputs['clear']
+    jagged = variability_inputs['jagged']
+    times = clear.resample('h').mean().index
+
+    expected_clear_clear = pd.Series(1.0, index=times)
+    actual_clear_clear = metrics.variability_index(clear, clear, freq='h')
+    pd.testing.assert_series_equal(actual_clear_clear, expected_clear_clear)
+
+    expected_jagged_clear = pd.Series(2**0.5, index=times)
+    actual_jagged_clear = metrics.variability_index(jagged, clear, freq='h')
+    pd.testing.assert_series_equal(actual_jagged_clear, expected_jagged_clear)
