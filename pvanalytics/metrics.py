@@ -67,7 +67,7 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
     return performance_ratio
 
 
-def _calc_pathlength(signal, freq='d'):
+def _calc_pathlength(signal, freq):
     # utility function to calculate the arc length of a time series.
     # used when calculating the variability index.
     dt = signal.index.to_series(keep_tz=True).diff().dt.total_seconds()/60
