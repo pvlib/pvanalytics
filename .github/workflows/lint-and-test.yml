@@ -39,6 +39,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: ${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.requirements }}
         COVERALLS_PARALLEL: true
+        COVERALLS_SERVICE_NAME: github
 
   coveralls:
 
