@@ -90,7 +90,7 @@ def variability_index(measured, clearsky, freq=None):
         Time series of the expected clearsky GHI. [W/m2]
     freq : pandas datetime offset, optional
         Aggregation period (e.g. 'D' for daily).  If not specified,
-        a single value of VI for the entire time series will be returned.
+        the variability index for the entire time series will be returned.
 
     Returns
     -------
