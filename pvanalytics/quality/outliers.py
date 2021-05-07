@@ -38,7 +38,7 @@ def tukey(data, k=1.5):
             | (data > (third_quartile + k*iqr)))
 
 
-def zscore(data, zmax=1.5):
+def zscore(data, zmax=1.5, nan_policy = 'raise'):
     """Identify outliers using the z-score.
 
     Points with z-score greater than `zmax` are considered as outliers.
@@ -49,6 +49,9 @@ def zscore(data, zmax=1.5):
         A series of numeric values in which to find outliers.
     zmax : float
         Upper limit of the absolute values of the z-score.
+    nan_policy : str
+        Define how to handle NaNs in the input series, inputs should be
+        consistent with scipy.
 
     Returns
     -------
@@ -57,7 +60,9 @@ def zscore(data, zmax=1.5):
         outlier.
 
     """
-    return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
+    return pd.Series((abs(stats.zscore(data, 
+                                       nan_policy=nan_policy)) > zmax), 
+                                       index=data.index)
 
 
 def hampel(data, window=5, max_deviation=3.0, scale=None):
