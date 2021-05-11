@@ -61,8 +61,8 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
 
     """
     return pd.Series((abs(stats.zscore(data,
-                                       nan_policy=nan_policy)) > zmax),
-                                       index=data.index)
+                                       nan_policy=nan_policy))
+                      > zmax), index=data.index)
 
 
 def hampel(data, window=5, max_deviation=3.0, scale=None):
