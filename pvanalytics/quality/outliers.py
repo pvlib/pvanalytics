@@ -38,7 +38,7 @@ def tukey(data, k=1.5):
             | (data > (third_quartile + k*iqr)))
 
 
-def zscore(data, zmax=1.5, nan_policy = 'raise'):
+def zscore(data, zmax=1.5, nan_policy='raise'):
     """Identify outliers using the z-score.
 
     Points with z-score greater than `zmax` are considered as outliers.
@@ -60,8 +60,8 @@ def zscore(data, zmax=1.5, nan_policy = 'raise'):
         outlier.
 
     """
-    return pd.Series((abs(stats.zscore(data, 
-                                       nan_policy=nan_policy)) > zmax), 
+    return pd.Series((abs(stats.zscore(data,
+                                       nan_policy=nan_policy)) > zmax),
                                        index=data.index)
 
 
