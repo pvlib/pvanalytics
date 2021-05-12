@@ -5,10 +5,14 @@ from pvlib.pvsystem import pvwatts_dc
 
 
 def _performance_ratio(measured, modeled):
+    """ Returns the ratio sum(measured) / sum(modeled)
+    """
     return measured.sum() / modeled.sum()
 
 
 def _calc_cell_temp_weighted(cell_temperature, irradiance):
+    """ Returns the ratio sum(cell_temperature * irradiance) / sum(irradiance)
+    """
     numerator = cell_temperature * irradiance
     return numerator.sum() / irradiance.sum()
 
