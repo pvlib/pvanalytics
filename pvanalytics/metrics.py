@@ -71,3 +71,43 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
                          temp_ref=tavg)
 
     return _performance_ratio(pac, modeled)
+
+
+def _calc_pathlength(signal, freq):
+    # utility function to calculate the arc length of a time series.
+    # used when calculating the variability index.
+    dt = signal.index.to_series(keep_tz=True).diff().dt.total_seconds()/60
+    dy = signal.diff()
+    d = (dy**2 + dt**2)**0.5
+    if freq is not None:
+        return d.resample(freq).sum()
+    return d.sum()
+
+
+def variability_index(measured, clearsky, freq=None):
+    """
+    Calculate the variability index.
+
+    Parameters
+    ----------
+    measured : Series
+        Time series of measured GHI. [W/m2]
+    clearsky : Series
+        Time series of the expected clearsky GHI. [W/m2]
+    freq : pandas datetime offset, optional
+        Aggregation period (e.g. 'D' for daily).  If not specified,
+        the variability index for the entire time series will be returned.
+
+    Returns
+    -------
+    vi : Series or float
+        The calculated variability index
+
+    References
+    ----------
+    .. [1] Stein, Joshua, Hansen, Clifford, and Reno, Matthew J. THE
+       VARIABILITY INDEX: A NEW AND NOVEL METRIC FOR QUANTIFYING IRRADIANCE
+       AND PV OUTPUT VARIABILITY. SAND2012-2088C, World Renewable Energy Forum,
+       2012.
+    """
+    return _calc_pathlength(measured, freq) / _calc_pathlength(clearsky, freq)
