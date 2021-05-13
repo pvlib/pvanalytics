@@ -1,0 +1,24 @@
+.. _whatsnew_011:
+
+0.1.1 (MONTH DAY, YEAR)
+-------------------------
+
+API Changes
+~~~~~~~~~~~
+
+Enhancements
+~~~~~~~~~~~~
+
+* Quantification of irradiance variability with
+  :py:func:`pvanalytics.metrics.variability_index`. (:issue:`60`, :pull:`106`)
+* Internal refactor of `pvanalytics.metrics.performance_ratio_nrel` to support
+  other performance ratio formulas. (:pull:`109`)
+
+Bug Fixes
+~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
