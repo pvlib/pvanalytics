@@ -4,6 +4,19 @@ from pvlib.temperature import sapm_cell
 from pvlib.pvsystem import pvwatts_dc
 
 
+def _performance_ratio(measured, modeled):
+    """ Returns the ratio sum(measured) / sum(modeled)
+    """
+    return measured.sum() / modeled.sum()
+
+
+def _calc_cell_temp_weighted(cell_temperature, irradiance):
+    """ Returns the ratio sum(cell_temperature * irradiance) / sum(irradiance)
+    """
+    numerator = cell_temperature * irradiance
+    return numerator.sum() / irradiance.sum()
+
+
 def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
                            a=-3.56, b=-0.075, deltaT=3, gamma_pdc=-0.00433):
     r"""
@@ -56,15 +69,12 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
     cell_temperature = sapm_cell(poa_global, temp_air, wind_speed, a, b,
                                  deltaT)
 
-    tcell_poa_global = poa_global * cell_temperature
-    tref = tcell_poa_global.sum() / poa_global.sum()
+    tavg = _calc_cell_temp_weighted(cell_temperature, poa_global)
 
-    pdc = pvwatts_dc(poa_global, cell_temperature, pdc0, gamma_pdc,
-                     temp_ref=tref)
+    modeled = pvwatts_dc(poa_global, cell_temperature, pdc0, gamma_pdc,
+                         temp_ref=tavg)
 
-    performance_ratio = pac.sum() / pdc.sum()
-
-    return performance_ratio
+    return _performance_ratio(pac, modeled)
 
 
 def _calc_pathlength(signal, freq):
