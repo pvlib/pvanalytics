@@ -51,9 +51,9 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         Upper limit of the absolute values of the z-score.
     nan_policy : str, default 'raise'
         Define how to handle NaNs in the input series.
-        If 'raise', raises a ValueError.
-        If 'omit', removes NaN values, computes zscore,
-        and places False booleans where the NaNs originally were.
+        If 'raise', a ValueError is raised when `data` contains NaNs.
+        If 'omit', NaNs are ignored and False is returned at indices that
+        contained NaN in `data`.
 
     Returns
     -------
