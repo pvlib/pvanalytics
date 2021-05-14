@@ -65,7 +65,7 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
     data = data.copy()
     nan_mask = pd.Series([False] * len(data))
 
-    if data.isnull().values.any():
+    if data.hasnans:
         if nan_policy == 'raise':
             raise ValueError("The input contains nan values.")
         elif nan_policy == 'omit':
