@@ -49,7 +49,7 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         A series of numeric values in which to find outliers.
     zmax : float
         Upper limit of the absolute values of the z-score.
-    nan_policy : str
+    nan_policy : str, default 'raise'
         Define how to handle NaNs in the input series.
         If 'raise', raises a ValueError.
         If 'omit', removes NaN values, computes zscore,
