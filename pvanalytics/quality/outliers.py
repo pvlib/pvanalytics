@@ -50,8 +50,10 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
     zmax : float
         Upper limit of the absolute values of the z-score.
     nan_policy : str
-        Define how to handle NaNs in the input series, inputs should be
-        consistent with scipy.
+        Define how to handle NaNs in the input series.
+        If 'raise', raises a ValueError.
+        If 'omit', removes NaN values, computes zscore,
+        and places False booleans where the NaNs originally were.
 
     Returns
     -------
@@ -60,9 +62,25 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         outlier.
 
     """
-    return pd.Series((abs(stats.zscore(data,
-                                       nan_policy=nan_policy))
-                      > zmax), index=data.index)
+    data = data.copy()
+    nan_mask = pd.Series([False] * len(data))
+
+    if data.isnull().values.any():
+        if nan_policy == 'raise':
+            raise ValueError("The input contains nan values.")
+        elif nan_policy == 'omit':
+            nan_mask = data.isna()
+        else:
+            raise ValueError("Incorrect specification passed " +
+                             "to zscore's nan_policy.")
+
+    data[~nan_mask] = pd.Series(abs(stats.zscore(data[~nan_mask])) > zmax,
+                                index=data[~nan_mask].index)
+
+    # Place False where original series had NaNs
+    data[nan_mask] = False
+    # Return a boolean-casted series
+    return data.astype(bool)
 
 
 def hampel(data, window=5, max_deviation=3.0, scale=None):

@@ -43,6 +43,25 @@ def test_tukey_lower_criteria():
     )
 
 
+def test_zscore_raise_nan_input():
+    data = pd.Series([1, 0, -1, 0, np.NaN, 1, -1, 10])
+
+    try:
+        outliers.zscore(data, nan_policy='raise')
+    except ValueError:
+        assert True
+    else:
+        assert False
+
+
+def test_zscore_omit_nan_input():
+    data = pd.Series([1, 0, -1, 0, np.NaN, 1, -1, 10])
+    assert_series_equal(
+        pd.Series([False, False, False, False, False, False, False, True]),
+        outliers.zscore(outliers.zscore(data, nan_policy='omit'))
+    )
+
+
 def test_zscore_all_same():
     """If all data is identical there are no outliers."""
     data = pd.Series([1 for _ in range(20)])
