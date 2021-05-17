@@ -49,11 +49,11 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         A series of numeric values in which to find outliers.
     zmax : float
         Upper limit of the absolute values of the z-score.
-    nan_policy : str
+    nan_policy : str, default 'raise'
         Define how to handle NaNs in the input series.
-        If 'raise', raises a ValueError.
-        If 'omit', removes NaN values, computes zscore,
-        and places False booleans where the NaNs originally were.
+        If 'raise', a ValueError is raised when `data` contains NaNs.
+        If 'omit', NaNs are ignored and False is returned at indices that
+        contained NaN in `data`.
 
     Returns
     -------
@@ -65,7 +65,7 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
     data = data.copy()
     nan_mask = pd.Series([False] * len(data))
 
-    if data.isnull().values.any():
+    if data.hasnans:
         if nan_policy == 'raise':
             raise ValueError("The input contains nan values.")
         elif nan_policy == 'omit':
