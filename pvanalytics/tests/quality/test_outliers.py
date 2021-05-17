@@ -51,6 +51,13 @@ def test_zscore_raise_nan_input():
         outliers.zscore(data, nan_policy='raise')
 
 
+def test_zscore_invalid_nan_policy():
+    data = pd.Series([1, 0, -1, 0, np.NaN, 1, -1, 10])
+
+    with pytest.raises(ValueError):
+        outliers.zscore(data, nan_policy='incorrect_str')
+
+
 def test_zscore_omit_nan_input():
     data = pd.Series([1, 0, -1, 0, np.NaN, 1, -1, 10])
     assert_series_equal(
