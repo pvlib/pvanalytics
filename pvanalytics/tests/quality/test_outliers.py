@@ -1,4 +1,5 @@
 """Tests for the quality.outliers module."""
+import pytest
 import pandas as pd
 import numpy as np
 from pandas.util.testing import assert_series_equal
@@ -46,12 +47,8 @@ def test_tukey_lower_criteria():
 def test_zscore_raise_nan_input():
     data = pd.Series([1, 0, -1, 0, np.NaN, 1, -1, 10])
 
-    try:
+    with pytest.raises(ValueError):
         outliers.zscore(data, nan_policy='raise')
-    except ValueError:
-        assert True
-    else:
-        assert False
 
 
 def test_zscore_omit_nan_input():
