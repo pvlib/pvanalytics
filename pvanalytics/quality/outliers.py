@@ -71,8 +71,8 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         elif nan_policy == 'omit':
             nan_mask = data.isna()
         else:
-            raise ValueError("Incorrect specification passed. "
-                             "Expected `raise` or `omit`.")
+            raise ValueError(f"Unnexpected value ({nan_policy}) passed to nan_policy. "
+                             "Expected 'raise' or 'omit'.")
 
     data[~nan_mask] = pd.Series(abs(stats.zscore(data[~nan_mask])) > zmax,
                                 index=data[~nan_mask].index)
