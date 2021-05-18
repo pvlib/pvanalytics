@@ -38,7 +38,7 @@ def tukey(data, k=1.5):
             | (data > (third_quartile + k*iqr)))
 
 
-def zscore(data, zmax=1.5):
+def zscore(data, zmax=1.5, nan_policy='raise'):
     """Identify outliers using the z-score.
 
     Points with z-score greater than `zmax` are considered as outliers.
@@ -49,6 +49,11 @@ def zscore(data, zmax=1.5):
         A series of numeric values in which to find outliers.
     zmax : float
         Upper limit of the absolute values of the z-score.
+    nan_policy : str, default 'raise'
+        Define how to handle NaNs in the input series.
+        If 'raise', a ValueError is raised when `data` contains NaNs.
+        If 'omit', NaNs are ignored and False is returned at indices that
+        contained NaN in `data`.
 
     Returns
     -------
@@ -57,7 +62,25 @@ def zscore(data, zmax=1.5):
         outlier.
 
     """
-    return pd.Series((abs(stats.zscore(data)) > zmax), index=data.index)
+    data = data.copy()
+    nan_mask = pd.Series([False] * len(data))
+
+    if data.hasnans:
+        if nan_policy == 'raise':
+            raise ValueError("The input contains nan values.")
+        elif nan_policy == 'omit':
+            nan_mask = data.isna()
+        else:
+            raise ValueError(f"Unnexpected value ({nan_policy}) passed to "
+                             "nan_policy. Expected 'raise' or 'omit'.")
+
+    data[~nan_mask] = pd.Series(abs(stats.zscore(data[~nan_mask])) > zmax,
+                                index=data[~nan_mask].index)
+
+    # Place False where original series had NaNs
+    data[nan_mask] = False
+    # Return a boolean-casted series
+    return data.astype(bool)
 
 
 def hampel(data, window=5, max_deviation=3.0, scale=None):

@@ -17,6 +17,9 @@ Enhancements
 Bug Fixes
 ~~~~~~~~~
 
+* Added nan_policy to zscore calculation
+  :py:func:`pvanalytics.quality.outliers.zscore`.
+
 Contributors
 ~~~~~~~~~~~~
 
