@@ -312,8 +312,8 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     Parameters
     ----------
     ghi : Series
-        Time series of GHI measurements. Data must be at 1-minute frequency
-        and should cover at least 60 days.
+        Time series of GHI measurements. Data must be in local time at
+        1-minute frequency and should cover at least 60 days.
     daytime : Series
         Boolean series with True for times when the sun is up.
     clearsky : Series
@@ -326,10 +326,13 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     -------
     Series
         Boolean series with true for times that are impacted by shadows.
+    ndarray
+        A boolean image (black and white) showing the shadows that were
+        detected.
 
     References
     ----------
-    References
+
     .. [1] Martin, C. E., Hansen, C. W., An Image Processing Algorithm to
        Identify Near-Field Shading in Irradiance Measurements, preprint 2016
     .. [2] Reno, M.J. and C.W. Hansen, "Identification of periods of clear sky
