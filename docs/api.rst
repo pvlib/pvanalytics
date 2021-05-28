@@ -271,3 +271,13 @@ The following functions can be used to calculate system performance metrics.
    :toctree: generated/
 
    metrics.performance_ratio_nrel
+
+Variability
+-----------
+
+Functions to calculate variability statistics.
+
+.. autosummary::
+   :toctree: generated/
+
+   metrics.variability_index
