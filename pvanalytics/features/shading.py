@@ -97,7 +97,8 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     scaled_clearsky = scaled_clearsky.reindex_like(scaled_ghi)
     daytime = daytime.reindex_like(scaled_ghi)
     # Detect clouds.
-    clouds = _detect_clouds(scaled_ghi, scaled_clearsky, '50T')
+    window_size = 50 // interval
+    clouds = _detect_clouds(scaled_ghi, scaled_clearsky, window_size)
     cloud_mask = _to_image(clouds.to_numpy(), image_width)
     # Interpolate across days (i.e. along columns) to remove clouds
     # replace clouds with nans
@@ -123,7 +124,7 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     )
 
 
-def _detect_clouds(ghi, clearsky_ghi, duration='50T'):
+def _detect_clouds(ghi, clearsky_ghi, window_size):
     """Use :py:func:`pvanalytics.clearsky.reno` to detect clouds.
 
     Returns
@@ -132,22 +133,24 @@ def _detect_clouds(ghi, clearsky_ghi, duration='50T'):
         Boolean series with true for cloudy periods that are at least as long
         as `duration`.
     """
-    clouds = pvlib.clearsky.detect_clearsky(
+    cleartimes = pvlib.clearsky.detect_clearsky(
         ghi,
         clearsky_ghi,
         ghi.index,
-        window_length=10
+        window_length=10,
+        max_iterations=1
     )
-    return clouds.rolling(duration).sum() == 0
+
+    return cleartimes.rolling(window_size, center=True).sum() == 0
 
 
 def _remove_pillars(wires):
     j = np.array([[0, 0, 0, 0, 0],
                   [0, 0, 1, 0, 0],
-                  [0, 0, 1, 0, 0]])
+                  [0, 0, 1, 0, 0]]).T
     k = np.array([[1, 0, 0, 0, 1],
                   [1, 0, 0, 0, 1],
-                  [1, 0, 0, 0, 1]])
+                  [1, 0, 0, 0, 1]]).T
     a1 = np.logical_and(
         wires,
         np.logical_not(ndimage.binary_hit_or_miss(wires, j, k))
