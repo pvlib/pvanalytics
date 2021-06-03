@@ -12,7 +12,7 @@ def _to_image(data, width):
 
     Parameters
     ----------
-    data : Series
+    data : array_like
         Values of the pixels
     width : int
         Width of the image in pixels
@@ -60,9 +60,9 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     Parameters
     ----------
     ghi : Series
-        Measured GHI.
+        Measured GHI. [W/m^2]
     clearsky : Series
-        Expected clearsky GHI.
+        Expected clearsky GHI. [W/m^2]
     daytime : Series
         Boolean series with True for daytime and False for night.
     interval : int
@@ -131,7 +131,7 @@ def _detect_clouds(ghi, clearsky_ghi, window_size):
     -------
     Series
         Boolean series with true for cloudy periods that are at least as long
-        as `duration`.
+        as `window_size`.
     """
     cleartimes = pvlib.clearsky.detect_clearsky(
         ghi,
