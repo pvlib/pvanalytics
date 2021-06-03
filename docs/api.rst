@@ -231,6 +231,16 @@ Functions that return a Boolean mask indicating day and night.
 
    features.daytime.power_or_irradiance
 
+Shading
+-------
+
+Functions for labeling shadows.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.shading.fixed
+
 System
 ======
 
