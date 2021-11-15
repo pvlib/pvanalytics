@@ -2,6 +2,10 @@
 
 from pvlib.temperature import sapm_cell
 from pvlib.pvsystem import pvwatts_dc
+from dataclasses import dataclass, field
+from typing import Union
+import numpy as np
+import pandas as pd
 
 
 def _performance_ratio(measured, modeled):
@@ -115,3 +119,58 @@ def variability_index(measured, clearsky, freq=None):
        2012.
     """
     return _calc_pathlength(measured, freq) / _calc_pathlength(clearsky, freq)
+
+
+@dataclass
+class BenchmarkingMetrics:
+
+    # Define inputs and their possible types
+    measured: Union[pd.Series, np.array] = field(default=None)
+    modeled: Union[pd.Series, np.array] = field(default=None)
+
+    def __post_init__(self):
+        self.N = len(self.measured)
+
+    # Absolute Mean Bias Deviation (aMBD).
+    def MBD(self):
+        return (self.modeled - self.measured).sum()
+
+    # Relative Mean Bias Deviation (rMBD)
+    def rMBD(self):
+        return (self.modeled - self.measured).sum() / self.measured.mean()
+
+    # Absolute Root Mean Square Deviation (aRMSD)
+    def RMSD(self):
+        return np.sqrt(((self.modeled - self.measured)**2).sum() / self.N)
+
+    # Relative Root Mean Square Deviation (rRMSD)
+    def rRMSD(self):
+        return (np.sqrt(((self.modeled - self.measured)**2).sum() / self.N)
+                / self.measured.mean())
+
+    # Absolute Mean Absolute Deviation (aMAD)
+    def aMAD(self):
+        return np.abs(self.modeled - self.measured).sum()
+
+    # Absolute Mean Absolute Deviation (aMAD)
+    def rMAD(self):
+        return np.abs(self.modeled-self.measured).sum() / self.measured.mean()
+
+    # Absolute Standard Deviation (SD)
+    # By default Pandas uses ddof=1 and Numpy uses ddof=0
+    def aSD(self):
+        return np.sqrt(
+            (self.N*(self.modeled-self.measured)**2).sum()
+            -((self.modeled-self.measured).sum())**2)/self.N
+
+    ## Relative Standard Deviation (SD)
+    def rSD(self):
+        return self.aSD() / self.measured.mean()
+
+    # Coefficient of determination (R^2)
+    def R_squared(self):
+        return (
+            ((self.modeled-self.modeled.mean()) *
+             (self.measured-self.measured.mean())).sum() /
+            ((self.modeled-self.modeled.mean())**2 *
+             (self.measured-self.measured.mean())**2))**2
