@@ -2,7 +2,7 @@
 
 from pvlib.temperature import sapm_cell
 from pvlib.pvsystem import pvwatts_dc
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Union
 import numpy as np
 import pandas as pd
@@ -132,9 +132,15 @@ class stats:
     sd: float
     rsd: float
     r_squared: float
+    ksi: float
+    rksi: float
+    over: float
+    rover: float
+    cpi: float
 
 
-def compare_series(measured: pd.Series, modeled: pd.Series) -> stats:
+def compare_series(measured: Union[pd.Series, np.array],
+                   modeled: Union[pd.Series, np.array]) -> stats:
 
     N = len(measured)
 
@@ -172,4 +178,29 @@ def compare_series(measured: pd.Series, modeled: pd.Series) -> stats:
         ((modeled-modeled.mean()) * (measured-measured.mean())).sum() /
         ((modeled-modeled.mean())**2 * (measured-measured.mean())**2))**2
 
-    return stats(mbd, rmbd, rmsd, rrmsd, mad, rmad, sd, rsd, r_squared)
+    # Kolmogoroff-Smirnoff Index (KSI)
+    x_min = measured.min()
+    x_max = measured.max()
+    bins = 100
+    dx = (x_max - x_min) / bins
+    hist_measured, bin_edges = np.histogram(
+        measured, bins=bins, range=(x_min, x_max))
+    hist_modeled, _ = np.histogram(modeled, bins=bin_edges)
+    cdf_measured = np.cumsum(hist_measured / hist_measured.sum())
+    cdf_modeled = np.cumsum(hist_modeled / hist_modeled.sum())
+    D_n = np.abs(cdf_modeled - cdf_measured)
+    # Integrate using the trapezoidal rule
+    ksi = np.trapz(y=D_n, dx=dx)
+    rksi = ksi / measured_mean
+
+    # OVER
+    D_c = 1.63 / np.sqrt(N)  # Critical value (approximated)
+    D_n_aux = D_n.copy()
+    D_n_aux[D_n_aux <= D_c] = 0  # Set values lower than critical value to zero
+    over = np.trapz(y=D_n_aux, dx=dx)
+    rover = over / measured_mean
+    # Combined Performance Index (CPI)
+    cpi = (rksi + rover + 2*rrmsd)/4
+
+    return stats(mbd, rmbd, rmsd, rrmsd, mad, rmad, sd, rsd, r_squared, ksi,
+                 rksi, over, rover, cpi)
