@@ -183,13 +183,14 @@ def compare_series(measured: Union[pd.Series, np.array],
     x_max = measured.max()
     bins = 100
     dx = (x_max - x_min) / bins
-    hist_measured, bin_edges = np.histogram(
+    counts_measured, bin_edges = np.histogram(
         measured, bins=bins, range=(x_min, x_max))
-    hist_modeled, _ = np.histogram(modeled, bins=bin_edges)
-    cdf_measured = np.cumsum(hist_measured / hist_measured.sum())
-    cdf_modeled = np.cumsum(hist_modeled / hist_modeled.sum())
+    counts_modeled, _ = np.histogram(modeled, bins=bin_edges)
+    cdf_measured = np.cumsum(counts_measured / counts_measured.sum())
+    cdf_modeled = np.cumsum(counts_modeled / counts_modeled.sum())
+    # Calculate absolute difference between CDFs
     D_n = np.abs(cdf_modeled - cdf_measured)
-    # Integrate using the trapezoidal rule
+    # Integrate D_n using the trapezoidal rule
     ksi = np.trapz(y=D_n, dx=dx)
     rksi = ksi / measured_mean
 
