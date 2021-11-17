@@ -122,55 +122,54 @@ def variability_index(measured, clearsky, freq=None):
 
 
 @dataclass
-class BenchmarkingMetrics:
+class stats:
+    mbd: float
+    rmbd: float
+    rmsd: float
+    rrmsd: float
+    mad: float
+    rmad: float
+    sd: float
+    rsd: float
+    r_squared: float
 
-    # Define inputs and their possible types
-    measured: Union[pd.Series, np.array] = field(default=None)
-    modeled: Union[pd.Series, np.array] = field(default=None)
 
-    def __post_init__(self):
-        self.N = len(self.measured)
+def compare_series(measured: pd.Series, modeled: pd.Series) -> stats:
+
+    N = len(measured)
+
+    measured_mean = measured.mean()
 
     # Absolute Mean Bias Deviation (aMBD).
-    def MBD(self):
-        return (self.modeled - self.measured).sum()
+    mbd = (modeled - measured).sum()
 
     # Relative Mean Bias Deviation (rMBD)
-    def rMBD(self):
-        return (self.modeled - self.measured).sum() / self.measured.mean()
+    rmbd = mbd / measured_mean
 
     # Absolute Root Mean Square Deviation (aRMSD)
-    def RMSD(self):
-        return np.sqrt(((self.modeled - self.measured)**2).sum() / self.N)
+    rmsd = np.sqrt(((modeled - measured)**2).sum() / N)
 
     # Relative Root Mean Square Deviation (rRMSD)
-    def rRMSD(self):
-        return (np.sqrt(((self.modeled - self.measured)**2).sum() / self.N)
-                / self.measured.mean())
+    rrmsd = rmsd / measured_mean
 
     # Absolute Mean Absolute Deviation (aMAD)
-    def aMAD(self):
-        return np.abs(self.modeled - self.measured).sum()
+    mad = np.abs(modeled - measured).sum()
 
     # Absolute Mean Absolute Deviation (aMAD)
-    def rMAD(self):
-        return np.abs(self.modeled-self.measured).sum() / self.measured.mean()
+    rmad = mad / measured_mean
 
     # Absolute Standard Deviation (SD)
     # By default Pandas uses ddof=1 and Numpy uses ddof=0
-    def aSD(self):
-        return np.sqrt(
-            (self.N*(self.modeled-self.measured)**2).sum()
-            -((self.modeled-self.measured).sum())**2)/self.N
+    sd = np.sqrt(
+        (N*(modeled - measured)**2).sum() - ((modeled - measured).sum())**2
+        ) / N
 
-    ## Relative Standard Deviation (SD)
-    def rSD(self):
-        return self.aSD() / self.measured.mean()
+    # Relative Standard Deviation (SD)
+    rsd = sd / measured_mean
 
     # Coefficient of determination (R^2)
-    def R_squared(self):
-        return (
-            ((self.modeled-self.modeled.mean()) *
-             (self.measured-self.measured.mean())).sum() /
-            ((self.modeled-self.modeled.mean())**2 *
-             (self.measured-self.measured.mean())**2))**2
+    r_squared = (
+        ((modeled-modeled.mean()) * (measured-measured.mean())).sum() /
+        ((modeled-modeled.mean())**2 * (measured-measured.mean())**2))**2
+
+    return stats(mbd, rmbd, rmsd, rrmsd, mad, rmad, sd, rsd, r_squared)
