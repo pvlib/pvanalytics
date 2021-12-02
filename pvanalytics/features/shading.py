@@ -321,6 +321,9 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     interval : int, optional
         Interval between data points in minutes. If not specified the
         interval is inferred from the frequency of the index of `ghi`.
+    min_gradient : int, default 2
+        Threshold value for the morphological gradient.
+        TODO: what is a threshold value for a morphological gradient?
 
     Returns
     -------

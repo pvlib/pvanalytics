@@ -140,7 +140,7 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     time of day. To establish the expected midday time, calculate solar
     transit time in time of day. This function detects shifts in the
     difference between the observed and expected midday times, and
-    returns (here I'm unclear what is being returned)
+    returns (TODO: here I'm unclear what is being returned)
 
     Derived from the PVFleets QA project.
 
