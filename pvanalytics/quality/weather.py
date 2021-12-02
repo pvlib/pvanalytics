@@ -10,7 +10,7 @@ def temperature_limits(air_temperature, limits=(-35.0, 50.0)):
     ----------
     air_temperature : Series
         Air temperature [C].
-    temp_limits : tuple, default (-35, 50)
+    limits : tuple, default (-35, 50)
         (lower bound, upper bound) for temperature.
 
     Returns
@@ -74,7 +74,7 @@ def wind_limits(wind_speed, limits=(0.0, 50.0)):
     ----------
     wind_speed : Series
         Wind speed in :math:`m/s`
-    wind_limits : tuple, default (0, 50)
+    limits : tuple, default (0, 50)
         (lower bound, upper bound) for wind speed.
 
     Returns

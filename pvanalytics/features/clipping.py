@@ -384,7 +384,7 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
         :py:func:`pandas.infer_freq` is used.
     tracking : bool, default False
         If True then a larger default `window` is used. If `window`
-        is specified then `tracking` has no affect.
+        is specified then `tracking` has no effect.
 
     Returns
     -------

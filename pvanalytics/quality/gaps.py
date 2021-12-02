@@ -169,8 +169,8 @@ def stale_values_round(x, window=6, decimals=3, mark='tail'):
 
     Notes
     -----
-        Based on code from the pvfleets_qa_analysis project. Copyright
-        (c) 2020 Alliance for Sustainable Energy, LLC.
+    Based on code from the pvfleets_qa_analysis project. Copyright
+    (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
     rounded_diff = x.round(decimals=decimals).diff()
@@ -335,7 +335,7 @@ def complete(series, minimum_completeness=0.333, freq=None):
 
     See Also
     --------
-    :py:func:`completeness_score`
+    completeness_score
 
     """
     return completeness_score(series, freq=freq) >= minimum_completeness
@@ -407,7 +407,7 @@ def trim(series, days=10):
 
     See Also
     --------
-    :py:func:`start_stop_dates`
+    start_stop_dates
 
     """
     start, end = start_stop_dates(series, days=days)
@@ -446,9 +446,8 @@ def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
 
     See Also
     --------
-    :py:func:`trim`
-
-    :py:func:`completeness_score`
+    trim
+    completeness_score
 
     """
     completeness = completeness_score(series, freq=freq)

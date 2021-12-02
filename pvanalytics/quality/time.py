@@ -102,7 +102,7 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
         variations will tend to be rounded to zero. [minutes]
     prediction_penalty : int, default 13
         Penalty used in assessing change points.
-        See :py:method:`ruptures.detection.Pelt.predict` for more information.
+        See :py:meth:`ruptures.detection.Pelt.predict` for more information.
 
     Returns
     -------
@@ -286,7 +286,7 @@ def has_dst(events, tz, window=7, min_difference=45, missing='raise'):
         date and the mean event time after the event time. If the difference
         is greater than `min_difference` a shift has occurred on that date.
         [minutes]
-    missing : str, default 'raise'
+    missing : {'raise', 'warn'}, default 'raise'
         Whether to raise an exception or issue a warning when there is
         no data at a transition date. Can be 'raise' or 'warn'. If 'warn'
         and there is no data adjacent to a transition date, False is
