@@ -138,9 +138,7 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     sunrise and sunset are inferred from the PV system data, the midday
     time can be inferred as the average of each day's sunrise and sunset
     time of day. To establish the expected midday time, calculate solar
-    transit time in time of day. This function detects shifts in the
-    difference between the observed and expected midday times, and
-    returns (TODO: here I'm unclear what is being returned)
+    transit time in time of day.
 
     Derived from the PVFleets QA project.
 
