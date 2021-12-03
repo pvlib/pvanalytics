@@ -72,7 +72,6 @@ extlinks = {
     'ghuser': ('https://github.com/%s', '@')
 }
 
-
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
