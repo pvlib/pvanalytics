@@ -46,7 +46,6 @@ def power_tracking(clearsky, albuquerque, system_parameters):
     mc = modelchain.ModelChain(
         system,
         albuquerque,
-        orientation_strategy='south_at_latitude_tilt'
     )
     mc.run_model(clearsky)
     return mc.ac
