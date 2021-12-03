@@ -52,11 +52,12 @@ def summer_ghi(summer_clearsky):
 @pytest.fixture
 def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
     """Simulated power from a FIXED PVSystem in Albuquerque, NM."""
-    pv_system = pvsystem.PVSystem(**system_parameters)
+    pv_system = pvsystem.PVSystem(surface_azimuth=180,
+                                  surface_tilt=albuquerque.latitude,
+                                  **system_parameters)
     mc = modelchain.ModelChain(
         pv_system,
         albuquerque,
-        orientation_strategy='south_at_latitude_tilt'
     )
     mc.run_model(summer_clearsky)
     return mc.ac
@@ -64,12 +65,11 @@ def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
 
 @pytest.fixture
 def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
-    """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
+    """Simulated power for a TRACKING PVSystem in Albuquerque"""
     pv_system = tracking.SingleAxisTracker(**system_parameters)
     mc = modelchain.ModelChain(
         pv_system,
-        albuquerque,
-        orientation_strategy='south_at_latitude_tilt'
+        albuquerque
     )
     mc.run_model(summer_clearsky)
     return mc.ac

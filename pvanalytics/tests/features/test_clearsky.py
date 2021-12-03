@@ -4,7 +4,7 @@ import pandas as pd
 from pvanalytics.features import clearsky
 
 
-@pytest.mark.xfail(strict=True)
+@pytest.mark.skip(reason="GH #105")
 @pytest.mark.filterwarnings("ignore:Support for multi-dimensional indexing")
 def test_reno_identical(quadratic):
     """Identical clearsky and measured irradiance all True"""
@@ -14,7 +14,7 @@ def test_reno_identical(quadratic):
     assert clearsky.reno(quadratic, quadratic).all()
 
 
-@pytest.mark.xfail(strict=True)
+@pytest.mark.skip(reason="GH #105")
 @pytest.mark.filterwarnings("ignore:Support for multi-dimensional indexing")
 @pytest.mark.filterwarnings("ignore:invalid value encountered in")
 def test_reno_begining_end(quadratic):
