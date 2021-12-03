@@ -322,7 +322,7 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
         Interval between data points in minutes. If not specified the
         interval is inferred from the frequency of the index of `ghi`.
     min_gradient : float, default 2
-        Threshold value for the morphological gradient.
+        Threshold value for the morphological gradient [3]_.
 
     Returns
     -------
@@ -340,7 +340,8 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     .. [2] Reno, M.J. and C.W. Hansen, "Identification of periods of clear sky
        irradiance in time series of GHI measurements" Renewable Energy, v90,
        p. 520-531, 2016.
-    """
+    .. [3] https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.morphological_gradient.html
+    """  # noqa: E501
     if interval is None:
         interval = util.freq_to_timedelta(
             pd.infer_freq(ghi.index)
