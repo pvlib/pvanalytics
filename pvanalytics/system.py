@@ -540,6 +540,8 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     wind_speed : float or Series, default 0
         Wind speed. If a float then a constant wind speed is used. If a
         Series, must have the same index as `power_ac`. [m/s]
+    temperature_coefficient : float, default -0.004
+        Temperature coefficient of DC power. [1/C]
     temperature_model_parameters : dict, optional
         Parameters fot the cell temperature model. If not specified
         ``pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][

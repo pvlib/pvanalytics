@@ -40,7 +40,7 @@ INSTALL_REQUIRES = [
 ]
 
 DOCS_REQUIRE = [
-    'sphinx == 2.2.0'
+    'sphinx == 4.3.1'
 ]
 
 EXTRAS_REQUIRE = {

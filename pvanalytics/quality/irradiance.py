@@ -220,8 +220,8 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         True for each value that is physically possible. None if `ghi` is None.
     dhi_limit_flag : Series
         True for each value that is physically possible. None if `dni` is None.
-    dhi_limit_flag : Series
-        True for each value that is physically possible. None if `dhi` is None.
+    dni_limit_flag : Series
+        True for each value that is physically possible. None if `dni` is None.
 
     Notes
     -----

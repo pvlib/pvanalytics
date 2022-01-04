@@ -31,7 +31,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
-    'sphinx.ext.extlinks'
+    'sphinx.ext.extlinks',
+    'sphinx.ext.intersphinx',
 ]
 
 autosummary_generate = True
@@ -69,4 +70,10 @@ extlinks = {
         'wiki '),
     'doi': ('http://dx.doi.org/%s', 'DOI: '),
     'ghuser': ('https://github.com/%s', '@')
+}
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
+    'pvlib': ('https://pvlib-python.readthedocs.io/en/stable/', None),
 }
