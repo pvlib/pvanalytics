@@ -4,9 +4,10 @@ import scipy.optimize
 
 
 def _quadratic(xs, ys):
-    # fit a quadratic function of `xs` to the data in `ys`
-    coefficients = np.polynomial.Polynomial.fit(xs, ys, 2)
-    return np.poly1d(coefficients)
+    # fit a quadratic function of `xs` to the data in `ys`  
+    coefficients = list(np.polynomial.Polynomial.fit(xs, ys, 2).convert())
+    coefficients.reverse()
+    return np.poly1d(np.array(coefficients))
 
 
 def quadratic_vertex(x, y):
