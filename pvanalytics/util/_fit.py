@@ -4,7 +4,7 @@ import scipy.optimize
 
 
 def _quadratic(xs, ys):
-    # fit a quadratic function of `xs` to the data in `ys`  
+    # fit a quadratic function of `xs` to the data in `ys`
     coefficients = np.flipud(np.polynomial.polynomial.polyfit(xs, ys, 2))
     return np.poly1d(coefficients)
 
