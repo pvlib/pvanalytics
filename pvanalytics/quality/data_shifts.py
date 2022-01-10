@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import ruptures as rpt
 import warnings
+import abc
 
 
 def _run_data_checks(time_series, method, cost, penalty):
@@ -32,16 +33,19 @@ def _run_data_checks(time_series, method, cost, penalty):
     if not isinstance(time_series.index, pd.DatetimeIndex):
         raise TypeError('Must be a Pandas series with a datetime index.')
     # Check that the method passed is one of the approved ruptures methods
+    if type(method) !=  abc.ABCMeta:
+        raise TypeError("Method must be of type: ruptures.Pelt, "\
+                         "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")         
     if (method.__name__ != "Pelt") & \
         (method.__name__ != "Binseg") &\
         (method.__name__ != "BottomUp") &\
         (method.__name__ != "Window"):
-        raise ValueError("Method must be of type: ruptures.Pelt, "\
+        raise TypeError("Method must be of type: ruptures.Pelt, "\
                          "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")    
     # Check that the cost passed is one of the approved ruptures costs
     if (cost != "rbf") & (cost != "l1") & (cost != "l2") & (cost != "normal") &\
         (cost != "cosine") & (cost != "linear"):
-        raise ValueError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "\
+        raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "\
                          "'cosine', or 'linear'.")
     # Check that the penalty is an int value
     if not isinstance(penalty, int):

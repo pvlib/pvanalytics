@@ -12,22 +12,22 @@ import data_shifts as dt
 
 #@pytest.fixture
 def generate_daily_time_series():
-    location = pvlib.location.Location(lat, long)
-    years = ['2014', '2015', '2016', '2017',
-             '2018', '2019']
-    # # Add datetime index to series
-    # time_range = pd.date_range('2016-01-01T00:00:00.000Z',
-    #                            '2018-06-06T00:00:00.000Z', freq='1D')
-    # signal, bkps = rpt.pw_wavy(800, 0, noise_std=20)
-    # # Add a changepoint in the middle of the signal sequence
-    # signal[250:] = signal[250:] + 50
-    # # Create pandas series with datetime index and no datetime index
-    # signal_no_index = pd.Series(signal)
-    # signal_datetime_index = pd.Series(signal)
-    # signal_datetime_index.index = pd.to_datetime(time_range[:800])
-    # # Create a third time series that is less than 365 days in length to test on
-    # signal_datetime_index_short = signal_datetime_index[:300]
-    # return signal_no_index, signal_datetime_index, signal_datetime_index_short
+    # location = pvlib.location.Location(lat, long)
+    # years = ['2014', '2015', '2016', '2017',
+    #          '2018', '2019']
+    # Add datetime index to series
+    time_range = pd.date_range('2016-01-01T00:00:00.000Z',
+                                '2018-06-06T00:00:00.000Z', freq='1D')
+    signal, bkps = rpt.pw_wavy(800, 0, noise_std=20)
+    # Add a changepoint in the middle of the signal sequence
+    signal[250:] = signal[250:] + 50
+    # Create pandas series with datetime index and no datetime index
+    signal_no_index = pd.Series(signal)
+    signal_datetime_index = pd.Series(signal)
+    signal_datetime_index.index = pd.to_datetime(time_range[:800])
+    # Create a third time series that is less than 365 days in length to test on
+    signal_datetime_index_short = signal_datetime_index[:300]
+    return signal_no_index, signal_datetime_index, signal_datetime_index_short
 
 def test_detect_data_shifts():
     """
@@ -39,11 +39,16 @@ def test_detect_data_shifts():
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
     # Test that an error is thrown when an incorrect ruptures method is passed
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index)
-    # Test that an error is thrown when an integer isn't passed in the penalty variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index)
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, "Pelt")
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Dynp)
     # Test that an error is thrown when an incorrect string is passed as the cost variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index)
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Binseg,
+                  "none")
+    # Test that an error is thrown when an integer isn't passed in the penalty variable
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Binseg,
+                  "rbf", 3.14)
+    # Test that a warning is thrown when the time series is less than 2 years long.
+    pytest.warns(UserWarning, dt.detect_data_shifts, signal_datetime_index[:500])
     # Test that a data shift is successfully detecting at index 250 for the datetime-
     # indexed time series
     shift_indices = dt.detect_data_shifts(time_series = signal_datetime_index)
