@@ -188,9 +188,14 @@ def filter_data_shifts(time_series, filtering=True,
         return passing_dates_dict
     else:
         # Find the longest date segment in the time series, with the most data points.
-        passing_dates_dict = {"start_date": time_series.index.min(),
-                              "end_date": time_series.index.max()
-                                }
+        segment_lengths = [len(time_series[data_shift_dates[i]:data_shift_dates[i+1]]) \
+                           for i in range(len(data_shift_dates)-1)]
+        max_segment_length = segment_lengths.index(max(segment_lengths))
+        passing_dates_dict = {"start_date": data_shift_dates[max_segment_length-1],
+                              "end_date": data_shift_dates[max_segment_length]
+                              }
+        return passing_dates_dict
+        
         pass
     
     
