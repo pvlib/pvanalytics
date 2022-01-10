@@ -25,16 +25,14 @@ def generate_daily_time_series():
     signal_no_index = pd.Series(signal)
     signal_datetime_index = pd.Series(signal)
     signal_datetime_index.index = pd.to_datetime(time_range[:800])
-    # Create a third time series that is less than 365 days in length to test on
-    signal_datetime_index_short = signal_datetime_index[:300]
-    return signal_no_index, signal_datetime_index, signal_datetime_index_short
+    return signal_no_index, signal_datetime_index
 
 def test_detect_data_shifts():
     """
     Unit test that data shifts are correctly identified in the simulated time 
     series.
     """
-    signal_no_index, signal_datetime_index, signal_short = generate_daily_time_series()
+    signal_no_index, signal_datetime_index = generate_daily_time_series()
     # Test that an error is thrown when a Pandas series with no datetime index is
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
@@ -52,8 +50,6 @@ def test_detect_data_shifts():
     # Test that a data shift is successfully detecting at index 250 for the datetime-
     # indexed time series
     shift_indices = dt.detect_data_shifts(time_series = signal_datetime_index)
-    
-    
 
 def test_filter_data_shifts():
     """
@@ -61,4 +57,10 @@ def test_filter_data_shifts():
     the simulated daily time series data set.
     """
     signal_no_index, signal_datetime_index = generate_daily_time_series()
+    # Run the time series where there are no changepoints
+    dt.filter_data_shifts(time_series = signal_datetime_index)
+    # Run the time series where there is a changepoint
+    dt.filter_data_shifts(time_series = signal_datetime_index)
+    
+    
     

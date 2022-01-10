@@ -6,9 +6,7 @@ from pvanalytics.quality import gaps
 import numpy as np
 import pandas as pd
 import ruptures as rpt
-import warnings
 import abc
-
 
 def _run_data_checks(time_series, method, cost, penalty):
     """
@@ -52,7 +50,6 @@ def _run_data_checks(time_series, method, cost, penalty):
         raise TypeError('Penalty value must be an integer.')
     return
 
-
 def _erroneous_filter(time_series): 
     """
     Remove any outliers from the time series.
@@ -64,9 +61,11 @@ def _erroneous_filter(time_series):
 
     Returns
     -------
-    None.
+    time_series: Pandas series, with a datetime index.
+        Time series, after filtering out outliers. This includes removal of stale/
+        repeat readings, negative readings, and data greater than the 99th percentile
+        or less than the 1st percentile.
     """
-    time_series = time_series.copy()
     # Detect and mask stale data 
     stale_mask = gaps.stale_values_round(time_series, window=6, 
                                          decimals=3, mark='tail')
@@ -78,7 +77,6 @@ def _erroneous_filter(time_series):
                 (time_series >= time_series.quantile(.99))] = np.nan
     time_series = time_series.drop_duplicates()
     return time_series
-
 
 def _preprocess_data(time_series):
     """
@@ -93,7 +91,9 @@ def _preprocess_data(time_series):
 
     Returns
     -------
-    None.
+    Pandas series with a dtetime index:
+        Time series, after data processing. This includes min-max normalization, and, 
+        if the time series is in greater than 2 years in length, seasonality removal.
     """
     # Convert the time series to a dataframe to do the pre-processing
     column_name = time_series.name
@@ -116,8 +116,8 @@ def _preprocess_data(time_series):
         df['month'] = pd.DatetimeIndex(df.index).month
         df['day'] = pd.DatetimeIndex(pd.Series(df.index)).day
         df['seasonal_val'] = df.groupby(['month','day'])[column_name + "_normalized"].transform("median")
+        # Remove seasonlity from the time series
         return df[column_name + "_normalized"] - df['seasonal_val']
-
 
 def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
                        cost = "rbf", penalty = 40):
@@ -136,7 +136,8 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
 
     Returns
     -------
-    None.
+    list
+        The list returned contains the pandas timestamps where data shifts were detected.
     """
     # Run data checks on cleaned data to make sure that the data can be run successfully
     # through the routine
@@ -160,7 +161,6 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     time_series_processed = time_series_processed.reset_index()
     return list(time_series_processed.loc[result]['datetime'])
         
-
 def filter_data_shifts(time_series, filtering=True,
                        method = rpt.BottomUp, cost = "rbf", penalty = 40):
     """
@@ -178,7 +178,11 @@ def filter_data_shifts(time_series, filtering=True,
 
     Returns
     -------
-    None.
+    passing_dates_dict: Dictionary.
+        Dictionary object containing the longest continuous time segment with no 
+        detected data shifts. The start date of the period is represented in the
+        "start_date" field, and the end date of the period is represented in the
+        "end_date" field.
     """    
     # Detect indices where data shifts occur
     data_shift_dates = detect_data_shifts(time_series, filtering,
@@ -199,8 +203,3 @@ def filter_data_shifts(time_series, filtering=True,
                               "end_date": data_shift_dates[max_segment_length]
                               }
         return passing_dates_dict
-        
-        pass
-    
-    
-    
