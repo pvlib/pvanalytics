@@ -1,19 +1,14 @@
 """Tests for data shift quality control functions."""
-from datetime import datetime
-import pytz
 import pandas as pd
-import numpy as np
 import ruptures as rpt
 import pytest
-from pandas.util.testing import assert_series_equal
-import matplotlib.pyplot as plt
-#from pvanalytics.quality import data_shifts as dt
-import data_shifts as dt
+from pvanalytics.quality import data_shifts as dt
+#import data_shifts as dt
 
-#@pytest.fixture
+@pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
-    df = pd.read_csv("C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/pvlib_data_shift_data_stream.csv")
+    df = pd.read_csv("./data/pvlib_data_shift_data_stream.csv")
     signal_no_index = df['value']
     df.index = pd.to_datetime(df['timestamp'])
     signal_datetime_index = df['value']
@@ -40,10 +35,9 @@ def test_detect_data_shifts():
                   "rbf", 3.14)
     # Test that a warning is thrown when the time series is less than 2 years long.
     pytest.warns(UserWarning, dt.detect_data_shifts, signal_datetime_index[:500])
-    # Test that a data shift is successfully detecting at index 250 for the datetime-
-    # indexed time series
-    shift_indices = dt.detect_data_shifts(time_series = signal_datetime_index)
-    assert shift_indices == []
+    # Test that a data shift is successfully detected within 5 days of inserted changepoint
+    shift_index = dt.detect_data_shifts(time_series = signal_datetime_index)
+    assert abs((changepoint_date - shift_index[0]).days) <= 5
 
 def test_filter_data_shifts():
     """
@@ -52,9 +46,12 @@ def test_filter_data_shifts():
     """
     signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series()
     # Run the time series where there are no changepoints
-    dt.filter_data_shifts(time_series = signal_datetime_index)
+    interval_dict_short = dt.filter_data_shifts(time_series = signal_datetime_index[:100])
     # Run the time series where there is a changepoint
-    dt.filter_data_shifts(time_series = signal_datetime_index)
-    
+    interval_dict = dt.filter_data_shifts(time_series = signal_datetime_index)
+    assert (interval_dict['start_date'] == pd.to_datetime('2015-10-30')) & \
+        (interval_dict['end_date'] == pd.to_datetime('2020-12-31')) 
+    assert (interval_dict_short['start_date'] == signal_datetime_index.index.min()) & \
+        (interval_dict_short['end_date'] == signal_datetime_index[:100].index.max()) 
     
     

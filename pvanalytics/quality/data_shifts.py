@@ -46,23 +46,23 @@ def _run_data_checks(time_series, method, cost, penalty):
         raise TypeError('Must be a Pandas series with a datetime index.')
     # Check that the time series is sampled on a daily basis
     if pd.infer_freq(time_series.index) != "D":
-        warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "\
+        warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "
                       "resampling the daily sum value.")
         time_series = time_series.resample('d').sum()
     # Check that the method passed is one of the approved ruptures methods
     if type(method) !=  abc.ABCMeta:
-        raise TypeError("Method must be of type: ruptures.Pelt, "\
+        raise TypeError("Method must be of type: ruptures.Pelt, "
                          "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")         
     if (method.__name__ != "Pelt") & \
         (method.__name__ != "Binseg") &\
         (method.__name__ != "BottomUp") &\
         (method.__name__ != "Window"):
-        raise TypeError("Method must be of type: ruptures.Pelt, "\
+        raise TypeError("Method must be of type: ruptures.Pelt, "
                          "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")    
     # Check that the cost passed is one of the approved ruptures costs
     if (cost != "rbf") & (cost != "l1") & (cost != "l2") & (cost != "normal") &\
         (cost != "cosine") & (cost != "linear"):
-        raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "\
+        raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "
                          "'cosine', or 'linear'.")
     # Check that the penalty is an int value
     if not isinstance(penalty, int):
@@ -184,8 +184,7 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     # Check if the time series is more than 2 years long. If so, remove seasonality.
     # If not, run analysis on the normalized time series
     if (time_series.index.max() - time_series.index.min()).days <= 730:
-        warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "
-                      "resampling the daily sum value.")("The passed time series is less than 2 years in length, and "
+        warnings.warn("The passed time series is less than 2 years in length, and "
                       "cannot be corrected for seasonality. Runnning data shift detection "
                       "on the min-max normalized time series (NO seasonality correction).")
         time_series_processed = _preprocess_data(time_series,
@@ -259,11 +258,18 @@ def filter_data_shifts(time_series, filtering=True,
                                 }
         return passing_dates_dict
     else:
+        # Add the start and end dates in the sequence, and remove any
+        # duplications. Finally, sort in order of timestamp, from oldest to 
+        # newest.
+        data_shift_dates.append(time_series.index.min())
+        data_shift_dates.append(time_series.index.max())
+        data_shift_dates = list(set(data_shift_dates))
+        data_shift_dates.sort()
         # Find the longest date segment in the time series, with the most data points.
         segment_lengths = [len(time_series[data_shift_dates[i]:data_shift_dates[i+1]]) \
                            for i in range(len(data_shift_dates)-1)]
-        max_segment_length = segment_lengths.index(max(segment_lengths))
-        passing_dates_dict = {"start_date": data_shift_dates[max_segment_length-1],
-                              "end_date": data_shift_dates[max_segment_length]
+        max_segment_length_idx = segment_lengths.index(max(segment_lengths))
+        passing_dates_dict = {"start_date": data_shift_dates[max_segment_length_idx],
+                              "end_date": data_shift_dates[max_segment_length_idx + 1]
                               }
         return passing_dates_dict
