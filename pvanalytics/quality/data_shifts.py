@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import ruptures as rpt
 import abc
+import warnings
 
 def _run_data_checks(time_series, method, cost, penalty):
     """
@@ -45,7 +46,9 @@ def _run_data_checks(time_series, method, cost, penalty):
         raise TypeError('Must be a Pandas series with a datetime index.')
     # Check that the time series is sampled on a daily basis
     if pd.infer_freq(time_series.index) != "D":
-        raise ValueError("Inferred time series frequency is not daily. Adjust to daily frequency.")
+        warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "\
+                      "resampling the daily sum value.")
+        time_series = time_series.resample('d').sum()
     # Check that the method passed is one of the approved ruptures methods
     if type(method) !=  abc.ABCMeta:
         raise TypeError("Method must be of type: ruptures.Pelt, "\
@@ -96,7 +99,7 @@ def _erroneous_filter(time_series):
     time_series = time_series.drop_duplicates()
     return time_series
 
-def _preprocess_data(time_series):
+def _preprocess_data(time_series, remove_seasonality):
     """
     Pre-process the time series, including the following:
         1. Min-max normalization of the time series.
@@ -125,10 +128,7 @@ def _preprocess_data(time_series):
     df[column_name + "_normalized"] = (df[column_name] - df[column_name].min())/(df[column_name].max() - df[column_name].min())
     # Check if the time series is greater than one year in length. If not, flag a warning
     # and pass back the normalized time series
-    if (df.index.max() - df.index.min()).days <= 730:
-        raise Warning("The passed time series is less than 2 years in length, and "
-                      "cannot be corrected for seasonality. Runnning data shift detection "
-                      "on the min-max normalized time series (NO seasonality correction).")
+    if not remove_seasonality:
         return df[column_name + "_normalized"]
     else:
         # Take the average of every day of the year across all years in the data set and use this
@@ -140,7 +140,7 @@ def _preprocess_data(time_series):
         return df[column_name + "_normalized"] - df['seasonal_val']
 
 def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
-                       cost = "rbf", penalty = 40):
+                       cost = 'rbf', penalty = 40):
     """
     Detect data shifts in the time series, and return list of dates where these data
     shifts occur.
@@ -181,15 +181,27 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     # Run the filtering sequence, if marked as True
     if filtering:
         time_series = _erroneous_filter(time_series)
-    # Perform pre-processing on the time series, to get the seasonality-removed
-    # time series.
-    time_series_processed = _preprocess_data(time_series)  
+    # Check if the time series is more than 2 years long. If so, remove seasonality.
+    # If not, run analysis on the normalized time series
+    if (time_series.index.max() - time_series.index.min()).days <= 730:
+        warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "
+                      "resampling the daily sum value.")("The passed time series is less than 2 years in length, and "
+                      "cannot be corrected for seasonality. Runnning data shift detection "
+                      "on the min-max normalized time series (NO seasonality correction).")
+        time_series_processed = _preprocess_data(time_series,
+                                                 remove_seasonality = False)  
+    else:
+        # Perform pre-processing on the time series, to get the seasonality-removed
+        # time series.
+        time_series_processed = _preprocess_data(time_series,
+                                                 remove_seasonality = True)  
     # Run changepoint detection on the time series
-    algo = method(model=cost).fit(np.array(time_series_processed))
+    points = np.array(time_series_processed.dropna())
+    algo = method(model=cost).fit(points)
     result = algo.predict(pen=penalty)
     # Remove the first and last indices of the time series, if present
-    if len(time_series) in result:
-        result.remove(len(time_series))
+    if len(points) in result:
+        result.remove(len(points))
     if 1 in result:
         result.remove(1)
     # Return a list of dates where changepoints are detected

@@ -12,33 +12,23 @@ import data_shifts as dt
 
 #@pytest.fixture
 def generate_daily_time_series():
-    # location = pvlib.location.Location(lat, long)
-    # years = ['2014', '2015', '2016', '2017',
-    #          '2018', '2019']
-    # Add datetime index to series
-    time_range = pd.date_range('2016-01-01T00:00:00.000Z',
-                                '2018-06-06T00:00:00.000Z', freq='1D')
-    signal, bkps = rpt.pw_wavy(800, 0, noise_std=20)
-    # Add a changepoint in the middle of the signal sequence
-    signal[250:] = signal[250:] + 50
-    # Create pandas series with datetime index and no datetime index
-    signal_no_index = pd.Series(signal)
-    signal_datetime_index = pd.Series(signal)
-    signal_datetime_index.index = pd.to_datetime(time_range[:800])
-    return signal_no_index, signal_datetime_index
+    # Pull down the saved PVLib dataframe and process it
+    df = pd.read_csv("C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/pvlib_data_shift_data_stream.csv")
+    signal_no_index = df['value']
+    df.index = pd.to_datetime(df['timestamp'])
+    signal_datetime_index = df['value']
+    changepoint_date = df[df['label'] == 1].index[0]
+    return signal_no_index, signal_datetime_index, changepoint_date
 
 def test_detect_data_shifts():
     """
     Unit test that data shifts are correctly identified in the simulated time 
     series.
     """
-    signal_no_index, signal_datetime_index = generate_daily_time_series()
+    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series()
     # Test that an error is thrown when a Pandas series with no datetime index is
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
-    # Throw an error if a time series with hourly intervals is passed, instead of 
-    # daily intervals
-    
     # Test that an error is thrown when an incorrect ruptures method is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, "Pelt")
     pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Dynp)
@@ -60,7 +50,7 @@ def test_filter_data_shifts():
     Unit test that the longest interval between data shifts is selected for
     the simulated daily time series data set.
     """
-    signal_no_index, signal_datetime_index = generate_daily_time_series()
+    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series()
     # Run the time series where there are no changepoints
     dt.filter_data_shifts(time_series = signal_datetime_index)
     # Run the time series where there is a changepoint
