@@ -3,12 +3,11 @@ import pandas as pd
 import ruptures as rpt
 import pytest
 from pvanalytics.quality import data_shifts as dt
-#import data_shifts as dt
 
 @pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
-    df = pd.read_csv("./data/pvlib_data_shift_data_stream.csv")
+    df = pd.read_csv("./data/pvlib_data_shift_stream_example_1.csv")
     signal_no_index = df['value']
     df.index = pd.to_datetime(df['timestamp'])
     signal_datetime_index = df['value']
