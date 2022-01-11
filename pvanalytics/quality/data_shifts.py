@@ -12,15 +12,28 @@ def _run_data_checks(time_series, method, cost, penalty):
     """
     Check that the passed parameters can be run through the function. 
     This includes checking the passed time series, method, cost, 
-    and penalty values.
+    and penalty values. Throws an error if any of the passed parameter
+    types are incorrect.
 
     Parameters
     ----------
     time_series : Pandas series with datetime index.
-        DESCRIPTION.
+        Daily time series of a PV data stream, which can include irradiance and power
+        data streams. This series represents the summed daily values of the particular
+        data stream.
     method: ruptures search method object.
+        Ruptures method object. Can be one of the following methods: ruptures.Pelt,
+        ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
+        documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to 
+        ruptures.BottomUp.
     cost: str
-    penalty: int
+        Cost function passed to the ruptures changepoint detection method. Can be one
+        of the following string values: 'rbf', 'l1', 'l2', 'normal', 'cosine', or 'linear'.
+        See the following documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to "rbf".
+    penalty: int.
+        Penalty value passed to the ruptures changepoint detection method. 
 
     Returns
     -------
@@ -30,6 +43,9 @@ def _run_data_checks(time_series, method, cost, penalty):
     # values
     if not isinstance(time_series.index, pd.DatetimeIndex):
         raise TypeError('Must be a Pandas series with a datetime index.')
+    # Check that the time series is sampled on a daily basis
+    if pd.infer_freq(time_series.index) != "D":
+        raise ValueError("Inferred time series frequency is not daily. Adjust to daily frequency.")
     # Check that the method passed is one of the approved ruptures methods
     if type(method) !=  abc.ABCMeta:
         raise TypeError("Method must be of type: ruptures.Pelt, "\
@@ -56,8 +72,10 @@ def _erroneous_filter(time_series):
     
     Parameters
     ----------
-    time_series : TYPE
-        DESCRIPTION.
+    time_series : Pandas series with datetime index.
+        Daily time series of a PV data stream, which can include irradiance and power
+        data streams. This series represents the summed daily values of the particular
+        data stream.
 
     Returns
     -------
@@ -86,8 +104,10 @@ def _preprocess_data(time_series):
 
     Parameters
     ----------
-    time_series : TYPE
-        DESCRIPTION.
+    time_series : Pandas series with datetime index.
+        Daily time series of a PV data stream, which can include irradiance and power
+        data streams. This series represents the summed daily values of the particular
+        data stream.
 
     Returns
     -------
@@ -127,12 +147,28 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     
     Parameters
     ----------
-    time_series : TYPE
-        DESCRIPTION.
+    time_series : Pandas series with datetime index.
+        Daily time series of a PV data stream, which can include irradiance and power
+        data streams. This series represents the summed daily values of the particular
+        data stream.
     filtering : Boolean.
+        Whether or not to filter out outliers and stale data from the time series. If 
+        True, then this data is filtered out before running the data shift detection 
+        sequence. If False, this data is not filtered out. Default set to True.
     method: ruptures search method object.
+        Ruptures method object. Can be one of the following methods: ruptures.Pelt,
+        ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
+        documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to 
+        ruptures.BottomUp search method.
     cost: str
-    penalty: int
+        Cost function passed to the ruptures changepoint detection method. Can be one
+        of the following string values: 'rbf', 'l1', 'l2', 'normal', 'cosine', or 'linear'.
+        See the following documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to "rbf".
+    penalty: int.
+        Penalty value passed to the ruptures changepoint detection method. Default
+        set to 40.
 
     Returns
     -------
@@ -169,12 +205,28 @@ def filter_data_shifts(time_series, filtering=True,
     
     Parameters
     ----------
-    time_series : TYPE
-        DESCRIPTION.
+    time_series : Pandas series with datetime index.
+        Daily time series of a PV data stream, which can include irradiance and power
+        data streams. This series represents the summed daily values of the particular
+        data stream.
     filtering : Boolean.
+        Whether or not to filter out outliers and stale data from the time series. If 
+        True, then this data is filtered out before running the data shift detection 
+        sequence. If False, this data is not filtered out. Default set to True.
     method: ruptures search method object.
+        Ruptures method object. Can be one of the following methods: ruptures.Pelt,
+        ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
+        documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to 
+        ruptures.BottomUp.
     cost: str
-    penalty: int
+        Cost function passed to the ruptures changepoint detection method. Can be one
+        of the following string values: 'rbf', 'l1', 'l2', 'normal', 'cosine', or 'linear'.
+        See the following documentation for further information: 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set to "rbf".
+    penalty: int.
+        Penalty value passed to the ruptures changepoint detection method. Default value
+        set to 40.
 
     Returns
     -------

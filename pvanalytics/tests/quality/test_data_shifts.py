@@ -36,6 +36,9 @@ def test_detect_data_shifts():
     # Test that an error is thrown when a Pandas series with no datetime index is
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
+    # Throw an error if a time series with hourly intervals is passed, instead of 
+    # daily intervals
+    
     # Test that an error is thrown when an incorrect ruptures method is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, "Pelt")
     pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Dynp)
@@ -50,6 +53,7 @@ def test_detect_data_shifts():
     # Test that a data shift is successfully detecting at index 250 for the datetime-
     # indexed time series
     shift_indices = dt.detect_data_shifts(time_series = signal_datetime_index)
+    assert shift_indices == []
 
 def test_filter_data_shifts():
     """
