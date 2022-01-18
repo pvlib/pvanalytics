@@ -9,7 +9,7 @@ import ruptures as rpt
 import abc
 import warnings
 
-def _run_data_checks(time_series, method, cost, penalty):
+def _run_data_checks(time_series, use_default_models, method, cost, penalty):
     """
     Check that the passed parameters can be run through the function. 
     This includes checking the passed time series, method, cost, 
@@ -22,6 +22,11 @@ def _run_data_checks(time_series, method, cost, penalty):
         Daily time series of a PV data stream, which can include irradiance and power
         data streams. This series represents the summed daily values of the particular
         data stream.
+    use_default_models: Boolean. 
+        If set to True, then default CPD model parameters are used, based on the length
+        of the time series (Window-based models for time series shorter than 2 years in
+        length and BottomUp models for time series longer than 2 years in length). If 
+        set to True, none of the method + cost + penalty variables are used.
     method: ruptures search method object.
         Ruptures method object. Can be one of the following methods: ruptures.Pelt,
         ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
@@ -49,24 +54,25 @@ def _run_data_checks(time_series, method, cost, penalty):
         warnings.warn("Time series frequency not set. Setting freqeuncy to daily, and "
                       "resampling the daily sum value.")
         time_series = time_series.resample('d').sum()
-    # Check that the method passed is one of the approved ruptures methods
-    if type(method) !=  abc.ABCMeta:
-        raise TypeError("Method must be of type: ruptures.Pelt, "
-                         "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")         
-    if (method.__name__ != "Pelt") & \
-        (method.__name__ != "Binseg") &\
-        (method.__name__ != "BottomUp") &\
-        (method.__name__ != "Window"):
-        raise TypeError("Method must be of type: ruptures.Pelt, "
-                         "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")    
-    # Check that the cost passed is one of the approved ruptures costs
-    if (cost != "rbf") & (cost != "l1") & (cost != "l2") & (cost != "normal") &\
-        (cost != "cosine") & (cost != "linear"):
-        raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "
-                         "'cosine', or 'linear'.")
-    # Check that the penalty is an int value
-    if not isinstance(penalty, int):
-        raise TypeError('Penalty value must be an integer.')
+    if not use_default_models:
+        # Check that the method passed is one of the approved ruptures methods
+        if type(method) !=  abc.ABCMeta:
+            raise TypeError("Method must be of type: ruptures.Pelt, "
+                            "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")         
+        if (method.__name__ != "Pelt") & \
+            (method.__name__ != "Binseg") &\
+            (method.__name__ != "BottomUp") &\
+            (method.__name__ != "Window"):
+            raise TypeError("Method must be of type: ruptures.Pelt, "
+                            "ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.")    
+        # Check that the cost passed is one of the approved ruptures costs
+        if (cost != "rbf") & (cost != "l1") & (cost != "l2") & (cost != "normal") &\
+            (cost != "cosine") & (cost != "linear"):
+            raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', 'normal', "
+                            "'cosine', or 'linear'.")
+        # Check that the penalty is an int value
+        if not isinstance(penalty, int):
+            raise TypeError('Penalty value must be an integer.')
     return
 
 def _erroneous_filter(time_series): 
@@ -139,8 +145,8 @@ def _preprocess_data(time_series, remove_seasonality):
         # Remove seasonlity from the time series
         return df[column_name + "_normalized"] - df['seasonal_val']
 
-def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
-                       cost = 'rbf', penalty = 40):
+def detect_data_shifts(time_series, filtering=True, use_default_models = True,
+                       method = rpt.BottomUp, cost = 'rbf', penalty = 40):
     """
     Detect data shifts in the time series, and return list of dates where these data
     shifts occur.
@@ -155,6 +161,11 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
         Whether or not to filter out outliers and stale data from the time series. If 
         True, then this data is filtered out before running the data shift detection 
         sequence. If False, this data is not filtered out. Default set to True.
+    use_default_models: Boolean. 
+        If set to True, then default CPD model parameters are used, based on the length
+        of the time series (Window-based models for time series shorter than 2 years in
+        length and BottomUp models for time series longer than 2 years in length). If 
+        set to True, none of the method + cost + penalty variables are used.
     method: ruptures search method object.
         Ruptures method object. Can be one of the following methods: ruptures.Pelt,
         ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
@@ -177,7 +188,7 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     """
     # Run data checks on cleaned data to make sure that the data can be run successfully
     # through the routine
-    _run_data_checks(time_series, method, cost, penalty)
+    _run_data_checks(time_series, use_default_models, method, cost, penalty)
     # Run the filtering sequence, if marked as True
     if filtering:
         time_series = _erroneous_filter(time_series)
@@ -188,16 +199,28 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
                       "cannot be corrected for seasonality. Runnning data shift detection "
                       "on the min-max normalized time series (NO seasonality correction).")
         time_series_processed = _preprocess_data(time_series,
-                                                 remove_seasonality = False)  
+                                                 remove_seasonality = False)
+        seasonality_rmv = False
     else:
         # Perform pre-processing on the time series, to get the seasonality-removed
         # time series.
         time_series_processed = _preprocess_data(time_series,
                                                  remove_seasonality = True)  
-    # Run changepoint detection on the time series
+        seasonality_rmv = True
     points = np.array(time_series_processed.dropna())
-    algo = method(model=cost).fit(points)
-    result = algo.predict(pen=penalty)
+    # If seasonality has been removed and default model is used, run BottomUp method
+    if (seasonality_rmv) & (use_default_models):
+        algo = rpt.BottomUp(model='rbf').fit(points)
+        result = algo.predict(pen=40)    
+    # If there is no seasonality but default model is used, run Window-based method
+    elif (not seasonality_rmv) &  (use_default_models):
+        algo = rpt.Window(model = 'rbf',
+                          width = 50).fit(points)
+        result = algo.predict(pen=30)        
+    # Otherwise run changepoint detection with the passed parameters
+    else:
+        algo = method(model=cost).fit(points)
+        result = algo.predict(pen=penalty)
     # Remove the first and last indices of the time series, if present
     if len(points) in result:
         result.remove(len(points))
@@ -208,7 +231,7 @@ def detect_data_shifts(time_series, filtering=True, method = rpt.BottomUp,
     time_series_processed = time_series_processed.reset_index()
     return list(time_series_processed.loc[result]['datetime'])
         
-def filter_data_shifts(time_series, filtering=True,
+def filter_data_shifts(time_series, filtering=True, use_default_models = True,
                        method = rpt.BottomUp, cost = "rbf", penalty = 40):
     """
     Filter the time series by the longest continuous time series segment, by performing
@@ -224,6 +247,11 @@ def filter_data_shifts(time_series, filtering=True,
         Whether or not to filter out outliers and stale data from the time series. If 
         True, then this data is filtered out before running the data shift detection 
         sequence. If False, this data is not filtered out. Default set to True.
+    use_default_models: Boolean. 
+        If set to True, then default CPD model parameters are used, based on the length
+        of the time series (Window-based models for time series shorter than 2 years in
+        length and BottomUp models for time series longer than 2 years in length). If 
+        set to True, none of the method + cost + penalty variables are used.
     method: ruptures search method object.
         Ruptures method object. Can be one of the following methods: ruptures.Pelt,
         ruptures.Binseg, ruptures.BottomUp, or ruptures.Window. See the following 
@@ -249,6 +277,7 @@ def filter_data_shifts(time_series, filtering=True,
     """    
     # Detect indices where data shifts occur
     data_shift_dates = detect_data_shifts(time_series, filtering,
+                                          use_default_models,
                                           method, cost, penalty)
     # Get longest continuous data segment, by number of days in the time series.
     if not data_shift_dates:

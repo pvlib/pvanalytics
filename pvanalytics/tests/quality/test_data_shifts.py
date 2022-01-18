@@ -24,16 +24,19 @@ def test_detect_data_shifts():
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
     # Test that an error is thrown when an incorrect ruptures method is passed
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, "Pelt")
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Dynp)
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True,
+                  False, "Pelt")
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True,
+                  False, rpt.Dynp)
     # Test that an error is thrown when an incorrect string is passed as the cost variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Binseg,
-                  "none")
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True,
+                  False, rpt.Binseg, "none")
     # Test that an error is thrown when an integer isn't passed in the penalty variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True, rpt.Binseg,
-                  "rbf", 3.14)
-    # Test that a warning is thrown when the time series is less than 2 years long.
-    pytest.warns(UserWarning, dt.detect_data_shifts, signal_datetime_index[:500])
+    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index, True,
+                  False, rpt.Binseg, "rbf", 3.14)
+    # Test that a warning is thrown when the data is less than 2 years in length
+    pytest.warns(UserWarning, dt.detect_data_shifts, signal_datetime_index[:500],
+                 True, True)
     # Test that a data shift is successfully detected within 5 days of inserted changepoint
     shift_index = dt.detect_data_shifts(time_series = signal_datetime_index)
     assert abs((changepoint_date - shift_index[0]).days) <= 5
