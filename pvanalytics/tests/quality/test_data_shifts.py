@@ -4,7 +4,7 @@ import ruptures as rpt
 import pytest
 from pvanalytics.quality import data_shifts as dt
 
-#@pytest.fixture
+@pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv("https://datahub.duramat.org/dataset/7b72ae24-c0c2-4339-93dd-2c9c10d64c90/resource/a2f73100-2482-4d9f-a348-c45a6512964f/download/pvlib_data_shift_stream_example_1.csv")
@@ -20,7 +20,7 @@ def test_detect_data_shifts():
     Unit test that data shifts are correctly identified in the simulated time 
     series.
     """
-    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series()
+    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series
     # Test that an error is thrown when a Pandas series with no datetime index is
     # passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
@@ -47,7 +47,7 @@ def test_filter_data_shifts():
     Unit test that the longest interval between data shifts is selected for
     the simulated daily time series data set.
     """
-    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series()
+    signal_no_index, signal_datetime_index, changepoint_date = generate_daily_time_series
     # Run the time series where there are no changepoints
     interval_dict_short = dt.filter_data_shifts(time_series = signal_datetime_index[:100])
     # Run the time series where there is a changepoint
