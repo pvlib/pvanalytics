@@ -245,11 +245,9 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     else:
         algo = method(model=cost).fit(points)
         result = algo.predict(pen=penalty)
-    # Remove the first and last indices of the time series, if present
+    # Remove the last index of the time series, if present
     if len(points) in result:
         result.remove(len(points))
-    if 1 in result:
-        result.remove(1)
     # Return a list of dates where changepoints are detected
     time_series_processed.index.name = "datetime"
     time_series_processed = time_series_processed.reset_index()

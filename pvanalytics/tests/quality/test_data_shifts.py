@@ -5,7 +5,7 @@ import pytest
 from pvanalytics.quality import data_shifts as dt
 
 
-@pytest.fixture
+#@pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv("https://datahub.duramat.org/dataset/7b72ae24-c0c2-4339"
@@ -26,7 +26,7 @@ def test_detect_data_shifts(generate_daily_time_series):
     series.
     """
     signal_no_index, signal_datetime_index, changepoint_date = \
-        generate_daily_time_series
+        generate_daily_time_series()
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
@@ -50,7 +50,15 @@ def test_detect_data_shifts(generate_daily_time_series):
     # Test that a data shift is successfully detected within 5 days of
     # inserted changepoint
     shift_index = dt.detect_data_shifts(time_series=signal_datetime_index)
-    assert abs((changepoint_date - shift_index[0]).days) <= 5
+    # Test that the column name is handled if a series with no name is passed
+    signal_unnamed = signal_datetime_index.rename(None)
+    shift_index_unnamed = dt.detect_data_shifts(signal_unnamed)
+    # Run model with manually entered parameters
+    shift_index_param = dt.detect_data_shifts(signal_datetime_index, True,
+                                              False)
+    assert (abs((changepoint_date - shift_index[0]).days) <= 5) & \
+        (abs((changepoint_date - shift_index_unnamed[0]).days) <= 5) &\
+        (abs((changepoint_date - shift_index_param[0]).days) <= 5)
 
 
 def test_filter_data_shifts(generate_daily_time_series):
