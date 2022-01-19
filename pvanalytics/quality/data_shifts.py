@@ -72,8 +72,8 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
                             "ruptures.Binseg, ruptures.BottomUp, "
                             "or ruptures.Window.")
         # Check that the cost passed is one of the approved ruptures costs
-        if (cost != "rbf") & (cost != "l1") & (cost != "l2") & (cost != "normal") &\
-                (cost != "cosine") & (cost != "linear"):
+        if (cost != "rbf") & (cost != "l1") & (cost != "l2") & \
+                (cost != "normal") & (cost != "cosine") & (cost != "linear"):
             raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', "
                             "'normal', 'cosine', or 'linear'.")
         # Check that the penalty is an int value
