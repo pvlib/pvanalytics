@@ -120,7 +120,7 @@ def _preprocess_data(time_series, remove_seasonality):
 
     Returns
     -------
-    Pandas series with a dtetime index:
+    Pandas series with a datetime index:
         Time series, after data processing. This includes min-max normalization, and, 
         if the time series is in greater than 2 years in length, seasonality removal.
     """
