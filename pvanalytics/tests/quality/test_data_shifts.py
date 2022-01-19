@@ -5,7 +5,7 @@ import pytest
 from pvanalytics.quality import data_shifts as dt
 
 
-#@pytest.fixture
+@pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv("https://datahub.duramat.org/dataset/7b72ae24-c0c2-4339"
@@ -26,7 +26,7 @@ def test_detect_data_shifts(generate_daily_time_series):
     series.
     """
     signal_no_index, signal_datetime_index, changepoint_date = \
-        generate_daily_time_series()
+        generate_daily_time_series
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
