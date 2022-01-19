@@ -15,7 +15,7 @@ def generate_daily_time_series():
     changepoint_date = df[df['label'] == 1].index[0]
     return signal_no_index, signal_datetime_index, changepoint_date
 
-def test_detect_data_shifts():
+def test_detect_data_shifts(generate_daily_time_series):
     """
     Unit test that data shifts are correctly identified in the simulated time 
     series.
@@ -42,7 +42,7 @@ def test_detect_data_shifts():
     shift_index = dt.detect_data_shifts(time_series = signal_datetime_index)
     assert abs((changepoint_date - shift_index[0]).days) <= 5
 
-def test_filter_data_shifts():
+def test_filter_data_shifts(generate_daily_time_series):
     """
     Unit test that the longest interval between data shifts is selected for
     the simulated daily time series data set.
