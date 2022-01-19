@@ -85,7 +85,7 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
 def _erroneous_filter(time_series):
     """
     Remove any outliers from the time series.
-    
+
     Parameters
     ----------
     time_series : Pandas series with datetime index.
@@ -163,7 +163,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     """
     Detect data shifts in the time series, and return list of dates where these
     data shifts occur.
-    
+
     Parameters
     ----------
     time_series : Pandas series with datetime index.
@@ -251,13 +251,13 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     time_series_processed = time_series_processed.reset_index()
     return list(time_series_processed.loc[result]['datetime'])
 
-        
+
 def filter_data_shifts(time_series, filtering=True, use_default_models=True,
                        method=rpt.BottomUp, cost="rbf", penalty=40):
     """
     Filter the time series by the longest continuous time series segment, by
     performing data shift detection.
-    
+
     Parameters
     ----------
     time_series : Pandas series with datetime index.
