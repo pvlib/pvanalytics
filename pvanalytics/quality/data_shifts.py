@@ -73,7 +73,8 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
                             "or ruptures.Window.")
         # Check that the cost passed is one of the approved ruptures costs
         if (cost != "rbf") & (cost != "l1") & (cost != "l2") & \
-                (cost != "normal") & (cost != "cosine") & (cost != "linear"):
+                (cost != "normal") & (cost != "cosine") & \
+                (cost != "linear"):
             raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', "
                             "'normal', 'cosine', or 'linear'.")
         # Check that the penalty is an int value
@@ -141,7 +142,8 @@ def _preprocess_data(time_series, remove_seasonality):
         time_series = time_series.rename(column_name)
     df = time_series.to_frame()
     # Min-max normalize the series
-    df[column_name + "_normalized"] = (df[column_name] - df[column_name].min())\
+    df[column_name + "_normalized"] = (df[column_name] -
+                                       df[column_name].min())\
         / (df[column_name].max() - df[column_name].min())
     # Check if the time series is greater than one year in length. If not, flag
     # a warning and pass back the normalized time series
