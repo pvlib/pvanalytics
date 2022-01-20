@@ -42,7 +42,7 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
         'cosine', or 'linear'. See the following documentation for further
         information: https://centre-borelli.github.io/ruptures-docs/user-guide/
         Default set to "rbf".
-    penalty: int.
+    penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
 
     Returns
@@ -58,28 +58,6 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
         warnings.warn("Time series frequency not set. Setting frequency to "
                       "daily, and resampling the daily sum value.")
         time_series = time_series.resample('d').sum()
-    if not use_default_models:
-        # Check that the method passed is one of the approved ruptures methods
-        if type(method) != abc.ABCMeta:
-            raise TypeError("Method must be of type: ruptures.Pelt, "
-                            "ruptures.Binseg, ruptures.BottomUp, or "
-                            "ruptures.Window.")
-        if (method.__name__ != "Pelt") & \
-            (method.__name__ != "Binseg") &\
-            (method.__name__ != "BottomUp") &\
-                (method.__name__ != "Window"):
-            raise TypeError("Method must be of type: ruptures.Pelt, "
-                            "ruptures.Binseg, ruptures.BottomUp, "
-                            "or ruptures.Window.")
-        # Check that the cost passed is one of the approved ruptures costs
-        if (cost != "rbf") & (cost != "l1") & (cost != "l2") & \
-                (cost != "normal") & (cost != "cosine") & \
-                (cost != "linear"):
-            raise TypeError("Cost must be of type: 'rbf', 'l1', 'l2', "
-                            "'normal', 'cosine', or 'linear'.")
-        # Check that the penalty is an int value
-        if not isinstance(penalty, int):
-            raise TypeError('Penalty value must be an integer.')
     return
 
 
@@ -197,7 +175,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         'cosine', or 'linear'. See the following documentation for further
         information: https://centre-borelli.github.io/ruptures-docs/user-guide/
         Default set to "rbf".
-    penalty: int.
+    penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
 
@@ -289,7 +267,7 @@ def filter_data_shifts(time_series, filtering=True, use_default_models=True,
         'cosine', or 'linear'. See the following documentation for further
         information: https://centre-borelli.github.io/ruptures-docs/user-guide/
         Default set to "rbf".
-    penalty: int.
+    penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
 

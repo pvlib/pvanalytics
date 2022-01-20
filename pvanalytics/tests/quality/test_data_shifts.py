@@ -2,10 +2,10 @@
 import pandas as pd
 import ruptures as rpt
 import pytest
-from pvanalytics.quality import data_shifts as dt
+#from pvanalytics.quality import data_shifts as dt
+import data_shifts as dt
 
-
-@pytest.fixture
+#@pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv("https://datahub.duramat.org/dataset/7b72ae24-c0c2-4339"
@@ -26,23 +26,17 @@ def test_detect_data_shifts(generate_daily_time_series):
     series.
     """
     signal_no_index, signal_datetime_index, changepoint_date = \
-        generate_daily_time_series
+        generate_daily_time_series()
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
     # Test that an error is thrown when an incorrect ruptures method is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index,
                   True, False, "Pelt")
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index,
-                  True, False, rpt.Dynp)
     # Test that an error is thrown when an incorrect string is passed as the
     # cost variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index,
+    pytest.raises(ValueError, dt.detect_data_shifts, signal_datetime_index,
                   True, False, rpt.Binseg, "none")
-    # Test that an error is thrown when an integer isn't passed in the
-    # penalty variable
-    pytest.raises(TypeError, dt.detect_data_shifts, signal_datetime_index,
-                  True, False, rpt.Binseg, "rbf", 3.14)
     # Test that a warning is thrown when the data is less than 2 years
     # in length
     pytest.warns(UserWarning, dt.detect_data_shifts,
