@@ -11,7 +11,7 @@ import abc
 import warnings
 
 
-def _run_data_checks(time_series, use_default_models, method, cost, penalty):
+def _run_data_checks(time_series):
     """
     Check that the passed parameters can be run through the function.
     This includes checking the passed time series, method, cost,
@@ -31,15 +31,13 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
         longer than 2 years in length). If set to True, none of the method +
         cost + penalty variables are used.
     method: ruptures search method object.
-        Ruptures method object. Can be one of the following methods:
-        ruptures.Pelt, ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.
-        See the following documentation for further information:
+        Ruptures method object.See the following documentation for further
+        information:
         https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
         to ruptures.BottomUp.
     cost: str
-        Cost function passed to the ruptures changepoint detection method. Can
-        be one of the following string values: 'rbf', 'l1', 'l2', 'normal',
-        'cosine', or 'linear'. See the following documentation for further
+        Cost function passed to the ruptures changepoint detection method.
+        See the following documentation for further
         information: https://centre-borelli.github.io/ruptures-docs/user-guide/
         Default set to "rbf".
     penalty: numeric (float or int)
@@ -128,7 +126,7 @@ def _preprocess_data(time_series, remove_seasonality):
     if not remove_seasonality:
         return df[column_name + "_normalized"]
     else:
-        # Take the average of every day of the year across all years in the
+        # Take the median of every day of the year across all years in the
         # data, and use this as the seasonality of the time series
         df['month'] = pd.DatetimeIndex(df.index).month
         df['day'] = pd.DatetimeIndex(pd.Series(df.index)).day
@@ -164,15 +162,13 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         longer than 2 years in length). If set to True, none of the method +
         cost + penalty variables are used.
     method: ruptures search method object.
-        Ruptures method object. Can be one of the following methods:
-        ruptures.Pelt, ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.
-        See the following documentation for further information:
+        Ruptures method object.See the following documentation for further
+        information:
         https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
-        to ruptures.BottomUp search method.
+        to ruptures.BottomUp.
     cost: str
-        Cost function passed to the ruptures changepoint detection method. Can
-        be one of the following string values: 'rbf', 'l1', 'l2', 'normal',
-        'cosine', or 'linear'. See the following documentation for further
+        Cost function passed to the ruptures changepoint detection method.
+        See the following documentation for further
         information: https://centre-borelli.github.io/ruptures-docs/user-guide/
         Default set to "rbf".
     penalty: numeric (float or int)
@@ -187,7 +183,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     """
     # Run data checks on cleaned data to make sure that the data can be run
     # successfully through the routine
-    _run_data_checks(time_series, use_default_models, method, cost, penalty)
+    _run_data_checks(time_series)
     # Run the filtering sequence, if marked as True
     if filtering:
         time_series = _erroneous_filter(time_series)
