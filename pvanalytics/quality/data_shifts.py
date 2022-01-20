@@ -7,7 +7,6 @@ from pvanalytics.quality import gaps
 import numpy as np
 import pandas as pd
 import ruptures as rpt
-import abc
 import warnings
 
 

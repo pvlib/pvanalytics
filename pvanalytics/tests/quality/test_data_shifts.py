@@ -4,6 +4,7 @@ import ruptures as rpt
 import pytest
 from pvanalytics.quality import data_shifts as dt
 
+
 @pytest.fixture
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
