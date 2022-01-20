@@ -307,8 +307,6 @@ def filter_data_shifts(time_series, filtering=True, use_default_models=True,
                                           method, cost, penalty)
     # Get longest continuous data segment by number of days in the time series
     if not data_shift_dates:
-        print("No data shifts detected in the time series. Returning the full "
-              "time series dates...")
         passing_dates_dict = {"start_date": time_series.index.min(),
                               "end_date": time_series.index.max()
                               }
