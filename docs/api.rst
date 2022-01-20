@@ -8,7 +8,7 @@ Quality
 =======
 
 Data Shifts
---------
+-----------
 
 Functions for detecting data shifts in time series and filtering out data shift periods.
 
