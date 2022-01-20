@@ -10,7 +10,8 @@ Quality
 Data Shifts
 -----------
 
-Functions for detecting data shifts in time series and filtering out data shift periods.
+Functions for detecting data shifts in time series and filtering
+out data shift periods.
 
 .. autosummary::
    :toctree: generated/
@@ -18,7 +19,8 @@ Functions for detecting data shifts in time series and filtering out data shift 
    quality.data_shifts.detect_data_shifts
    quality.data_shifts.filter_data_shifts
 
-Uses changepoint detection to detect data shifts in a daily summed time series of either power or irradiance data.
+Uses changepoint detection to detect data shifts in a daily summed
+time series of either power or irradiance data.
 
 Irradiance
 ----------
