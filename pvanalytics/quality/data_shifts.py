@@ -55,7 +55,7 @@ def _run_data_checks(time_series, use_default_models, method, cost, penalty):
         raise TypeError('Must be a Pandas series with a datetime index.')
     # Check that the time series is sampled on a daily basis
     if pd.infer_freq(time_series.index) != "D":
-        warnings.warn("Time series frequency not set. Setting freqeuncy to "
+        warnings.warn("Time series frequency not set. Setting frequency to "
                       "daily, and resampling the daily sum value.")
         time_series = time_series.resample('d').sum()
     if not use_default_models:
