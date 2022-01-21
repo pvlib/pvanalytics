@@ -67,7 +67,7 @@ coverage.xml
 
 
 #Datafiles
-*.csv
+#*.csv
 
 # vi
 *.swp
