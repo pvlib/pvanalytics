@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import re
 sys.path.insert(0, os.path.abspath('..'))
 
 
@@ -33,6 +34,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.extlinks',
     'sphinx.ext.intersphinx',
+    'sphinx_gallery.gen_gallery',
 ]
 
 autosummary_generate = True
@@ -43,7 +45,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'examples']
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -76,4 +78,20 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
     'pvlib': ('https://pvlib-python.readthedocs.io/en/stable/', None),
+}
+
+
+# settings for sphinx-gallery
+sphinx_gallery_conf = {
+    'examples_dirs': ['examples'],  # location of gallery scripts
+    'gallery_dirs': ['generated/gallery'],  # location of generated output
+    # sphinx-gallery only shows plots from plot_*.py files by default:
+    'filename_pattern': re.escape(os.sep),
+
+    # directory where function/class granular galleries are stored
+    'backreferences_dir': 'generated/gallery_backreferences',
+
+    # Modules for which function/class level galleries are created. In
+    # this case only pvanalytics, could include others though.  must be tuple of str
+    'doc_module': ('pvanalytics',),
 }
