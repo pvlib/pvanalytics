@@ -92,6 +92,6 @@ sphinx_gallery_conf = {
     'backreferences_dir': 'generated/gallery_backreferences',
 
     # Modules for which function/class level galleries are created. In
-    # this case only pvanalytics, could include others though.  must be tuple of str
+    # this case only pvanalytics currently.  must be tuple of str
     'doc_module': ('pvanalytics',),
 }
