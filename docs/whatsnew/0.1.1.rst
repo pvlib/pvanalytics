@@ -25,6 +25,12 @@ Bug Fixes
   ``.groupby().rolling()``.  Newer versions starting in 1.2.0 and older
   versions going back to 0.24.0 are still allowed. (:issue:`82`, :pull:`118`)
 
+Documentation
+~~~~~~~~~~~~~
+
+* Started an example gallery and added an example for
+  :py:func:`pvanalytics.features.clearsky.reno`  (:issue:`125`, :pull:`127`)
+
 Contributors
 ~~~~~~~~~~~~
 
