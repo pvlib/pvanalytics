@@ -166,10 +166,8 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
         to ruptures.BottomUp.
     cost: str
-        Cost function passed to the ruptures changepoint detection method.
-        See the following documentation for further
-        information: https://centre-borelli.github.io/ruptures-docs/user-guide/
-        Default set to "rbf".
+        Cost function passed to the ruptures changepoint search instance.
+        See https://centre-borelli.github.io/ruptures-docs/user-guide/
     penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
