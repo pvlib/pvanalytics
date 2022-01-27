@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
+from pathlib import Path
+
+TEST_DIR = Path(__file__).parent
+DATA_DIR = TEST_DIR.parent / 'data'
 
 
 def pytest_addoption(parser):
