@@ -155,11 +155,11 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         data shift detection sequence. If False, this data is not filtered
         out. Default set to True.
     use_default_models: Boolean.
-        If set to True, then default CPD model parameters are used, based
-        on the length of the time series (Window-based models for time series
-        shorter than 2 years in length and BottomUp models for time series
-        longer than 2 years in length). If set to True, none of the method +
-        cost + penalty variables are used.
+        If True, then default change point detection search parameters are used.
+        For time series shorter than 2 years in length, the search function is `rpt.Window`
+        with `model='rbf'`, `width=40` and `penalty=30`. For time series 2 years or
+        longer in length, the search function is `rpt.BottomUp` with `model='rbf'`
+        and `penalty=40`.
     method: ruptures search method object.
         Ruptures method object.See the following documentation for further
         information:
