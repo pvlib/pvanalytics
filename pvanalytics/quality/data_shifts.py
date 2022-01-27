@@ -61,14 +61,14 @@ def _erroneous_filter(time_series):
     # Detect and mask stale data
     stale_mask = gaps.stale_values_round(time_series, window=6,
                                          decimals=3, mark='tail')
-    time_series = time_series[~stale_mask]
-    # Set in negative values to NaN
-    time_series.loc[time_series <= 0] = np.nan
-    # Remove the top 10% and bottom 10% data points, and keep everything
-    # else intact
-    time_series[(time_series <= time_series.quantile(.01)) |
-                (time_series >= time_series.quantile(.99))] = np.nan
-    time_series = time_series.drop_duplicates()
+    # Mask negative and 0 values
+    negative_mask = (time_series <= 0)
+    # Mask the top 1% and bottom 1% of data points
+    quantile_mask = ((time_series <= time_series.quantile(.01)) |
+                     (time_series >= time_series.quantile(.99)))
+    # Filter out the associated data by masking
+    time_series = time_series[(~stale_mask) & (~negative_mask) &
+                              (~quantile_mask)]
     return time_series
 
 
@@ -173,6 +173,8 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     # Run the filtering sequence, if marked as True
     if filtering:
         time_series = _erroneous_filter(time_series)
+    # Drop any duplicated data from the time series
+    time_series = time_series.drop_duplicates()
     # Check if the time series is more than 2 years long. If so, remove
     # seasonality. If not, run analysis on the normalized time series
     if (time_series.index.max() - time_series.index.min()).days <= 730:

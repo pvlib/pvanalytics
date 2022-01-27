@@ -12,7 +12,6 @@ test_file_1 = DATA_DIR / "pvlib_data_shift_stream_example_1.csv"
 def generate_daily_time_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv(test_file_1)
-    df = df.iloc[1:, :]
     signal_no_index = df['value']
     df.index = pd.to_datetime(df['timestamp'])
     signal_datetime_index = df['value']
