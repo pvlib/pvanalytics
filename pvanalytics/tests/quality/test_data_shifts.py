@@ -43,14 +43,17 @@ def test_detect_data_shifts(generate_daily_time_series):
     # Test that a data shift is successfully detected within 5 days of
     # inserted changepoint
     shift_index = dt.detect_data_shifts(time_series=signal_datetime_index)
+    shift_index_dates = list(shift_index[shift_index].index)
     # Test that the column name is handled if a series with no name is passed
     signal_unnamed = signal_datetime_index.rename(None)
     shift_index_unnamed = dt.detect_data_shifts(signal_unnamed)
+    shift_index_unnamed_dates = list(
+        shift_index_unnamed[shift_index_unnamed].index)
     # Run model with manually entered parameters
     shift_index_param = dt.detect_data_shifts(signal_datetime_index, True,
                                               False)
-    assert (abs((changepoint_date - shift_index[0]).days) <= 5) & \
-        (abs((changepoint_date - shift_index_unnamed[0]).days) <= 5) &\
+    assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5) & \
+        (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5) &\
         (abs((changepoint_date - shift_index_param[0]).days) <= 5)
 
 

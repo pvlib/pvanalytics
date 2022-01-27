@@ -157,9 +157,10 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
 
     Returns
     -------
-    list
-        The returned list contains the pandas timestamps where data shifts were
-        detected.
+    Pandas Series
+        Series of boolean values with a datetime index, where detected
+        changepoints are labeled as True, and all other values are labeled
+        as False.
 
     References
     -------
@@ -213,7 +214,10 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     # Return a list of dates where changepoints are detected
     time_series_processed.index.name = "datetime"
     time_series_processed = time_series_processed.reset_index()
-    return list(time_series_processed.loc[result]['datetime'])
+    time_series_processed['cpd_mask'] = time_series_processed.index.isin(
+        result)
+    time_series_processed.index = time_series_processed['datetime']
+    return time_series_processed['cpd_mask']
 
 
 def filter_data_shifts(time_series, filtering=True, use_default_models=True,
@@ -270,11 +274,11 @@ def filter_data_shifts(time_series, filtering=True, use_default_models=True,
        Specialists Conference (PVSC). Submitted.
     """
     # Detect indices where data shifts occur
-    data_shift_dates = detect_data_shifts(time_series, filtering,
-                                          use_default_models,
-                                          method, cost, penalty)
+    cpd_mask = detect_data_shifts(time_series, filtering,
+                                  use_default_models,
+                                  method, cost, penalty)
     # Get longest continuous data segment by number of days in the time series
-    if not data_shift_dates:
+    if all(~cpd_mask):
         passing_dates_dict = {"start_date": time_series.index.min(),
                               "end_date": time_series.index.max()
                               }
@@ -283,6 +287,7 @@ def filter_data_shifts(time_series, filtering=True, use_default_models=True,
         # Add the start and end dates in the sequence, and remove any
         # duplications. Finally, sort in order of timestamp, from oldest to
         # newest.
+        data_shift_dates = list(cpd_mask[cpd_mask].index)
         data_shift_dates.append(time_series.index.min())
         data_shift_dates.append(time_series.index.max())
         data_shift_dates = list(set(data_shift_dates))
