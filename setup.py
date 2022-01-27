@@ -78,5 +78,6 @@ setup(
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     classifiers=CLASSIFIERS,
-    url=URL
+    url=URL,
+    include_package_data=True,
 )
