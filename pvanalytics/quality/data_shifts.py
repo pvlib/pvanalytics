@@ -154,7 +154,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         series. If True, then this data is filtered out before running the
         data shift detection sequence. If False, this data is not filtered
         out. Default set to True.
-    use_default_models: Boolean.
+    use_default_models: Boolean, default True
         If True, then default change point detection search parameters are used.
         For time series shorter than 2 years in length, the search function is `rpt.Window`
         with `model='rbf'`, `width=40` and `penalty=30`. For time series 2 years or
