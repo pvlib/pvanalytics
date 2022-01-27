@@ -149,7 +149,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
-    filtering : Boolean.
+    filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
         data shift detection sequence. If False, this data is not filtered
