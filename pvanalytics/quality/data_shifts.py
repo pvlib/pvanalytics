@@ -149,27 +149,25 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
-    filtering : Boolean.
+    filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
         data shift detection sequence. If False, this data is not filtered
         out. Default set to True.
-    use_default_models: Boolean.
-        If set to True, then default CPD model parameters are used, based
-        on the length of the time series (Window-based models for time series
-        shorter than 2 years in length and BottomUp models for time series
-        longer than 2 years in length). If set to True, none of the method +
-        cost + penalty variables are used.
+    use_default_models: Boolean, default True
+        If True, then default change point detection search parameters are used.
+        For time series shorter than 2 years in length, the search function is `rpt.Window`
+        with `model='rbf'`, `width=40` and `penalty=30`. For time series 2 years or
+        longer in length, the search function is `rpt.BottomUp` with `model='rbf'`
+        and `penalty=40`.
     method: ruptures search method object.
         Ruptures method object.See the following documentation for further
         information:
         https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
         to ruptures.BottomUp.
     cost: str
-        Cost function passed to the ruptures changepoint detection method.
-        See the following documentation for further
-        information: https://centre-borelli.github.io/ruptures-docs/user-guide/
-        Default set to "rbf".
+        Cost function passed to the ruptures changepoint search instance.
+        See https://centre-borelli.github.io/ruptures-docs/user-guide/
     penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
