@@ -23,24 +23,6 @@ def _run_data_checks(time_series):
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily
         values of the particular data stream.
-    use_default_models: Boolean.
-        If set to True, then default CPD model parameters are used, based on
-        the length of the time series (Window-based models for time series
-        shorter than 2 years in length and BottomUp models for time series
-        longer than 2 years in length). If set to True, none of the method +
-        cost + penalty variables are used.
-    method: ruptures search method object.
-        Ruptures method object.See the following documentation for further
-        information:
-        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
-        to ruptures.BottomUp.
-    cost: str
-        Cost function passed to the ruptures changepoint detection method.
-        See the following documentation for further
-        information: https://centre-borelli.github.io/ruptures-docs/user-guide/
-        Default set to "rbf".
-    penalty: numeric (float or int)
-        Penalty value passed to the ruptures changepoint detection method.
 
     Returns
     -------
@@ -155,10 +137,11 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         data shift detection sequence. If False, this data is not filtered
         out. Default set to True.
     use_default_models: Boolean, default True
-        If True, then default change point detection search parameters are used.
-        For time series shorter than 2 years in length, the search function is `rpt.Window`
-        with `model='rbf'`, `width=40` and `penalty=30`. For time series 2 years or
-        longer in length, the search function is `rpt.BottomUp` with `model='rbf'`
+        If True, then default change point detection search parameters are
+        used. For time series shorter than 2 years in length, the search
+        function is `rpt.Window`  with `model='rbf'`, `width=40` and
+        `penalty=30`. For time series 2 years or longer in length, the
+        search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
     method: ruptures search method object.
         Ruptures method object.See the following documentation for further
@@ -177,6 +160,12 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     list
         The returned list contains the pandas timestamps where data shifts were
         detected.
+
+    References
+    -------
+    .. [1] Perry K., and Muller, M. "Automated shift detection in sensor-based
+       PV power and irradiance time series", 2022 IEEE 48th Photovoltaic
+       Specialists Conference (PVSC). Submitted.
     """
     # Run data checks on cleaned data to make sure that the data can be run
     # successfully through the routine
@@ -271,6 +260,12 @@ def filter_data_shifts(time_series, filtering=True, use_default_models=True,
         with no detected data shifts. The start date of the period is
         represented in the "start_date" field, and the end date of the
         period is represented in the "end_date" field.
+
+    References
+    -------
+    .. [1] Perry K., and Muller, M. "Automated shift detection in sensor-based
+       PV power and irradiance time series", 2022 IEEE 48th Photovoltaic
+       Specialists Conference (PVSC). Submitted.
     """
     # Detect indices where data shifts occur
     data_shift_dates = detect_data_shifts(time_series, filtering,
