@@ -1,10 +1,14 @@
 """Tests for feature labeling functions."""
 import pytest
 import pandas as pd
+import pvlib
 from pvanalytics.features import clearsky
 
+from pkg_resources import parse_version
+is_old_pvlib = parse_version(pvlib.__version__) < parse_version("0.9.0")
 
-@pytest.mark.skip(reason="GH #105")
+
+@pytest.mark.skipif(is_old_pvlib, reason="GH #105")
 @pytest.mark.filterwarnings("ignore:Support for multi-dimensional indexing")
 def test_reno_identical(quadratic):
     """Identical clearsky and measured irradiance all True"""
@@ -14,7 +18,7 @@ def test_reno_identical(quadratic):
     assert clearsky.reno(quadratic, quadratic).all()
 
 
-@pytest.mark.skip(reason="GH #105")
+@pytest.mark.skipif(is_old_pvlib, reason="GH #105")
 @pytest.mark.filterwarnings("ignore:Support for multi-dimensional indexing")
 @pytest.mark.filterwarnings("ignore:invalid value encountered in")
 def test_reno_begining_end(quadratic):
