@@ -6,7 +6,6 @@ streams.
 from pvanalytics.quality import gaps
 import numpy as np
 import pandas as pd
-import ruptures as rpt
 import warnings
 
 
@@ -119,8 +118,9 @@ def _preprocess_data(time_series, remove_seasonality):
         return df[column_name + "_normalized"] - df['seasonal_val']
 
 
-def detect_data_shifts(time_series, filtering=True, use_default_models=True,
-                       method=rpt.BottomUp, cost='rbf', penalty=40):
+def detect_data_shifts(time_series, method=None,
+                       filtering=True, use_default_models=True,
+                       cost=None, penalty=40):
     """
     Detect data shifts in the time series, and return list of dates where these
     data shifts occur.
@@ -131,6 +131,9 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
+    method: ruptures search method instance or None, default None.
+        Ruptures search method instance. See
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
@@ -143,9 +146,6 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
-    method: ruptures search method instance or None, default None.
-        Ruptures search method instance. See
-        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
@@ -166,6 +166,10 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
        PV power and irradiance time series", 2022 IEEE 48th Photovoltaic
        Specialists Conference (PVSC). Submitted.
     """
+    try:
+        import ruptures as rpt
+    except ImportError:
+        raise ImportError("time.shifts_ruptures() requires ruptures.")
     # Run data checks on cleaned data to make sure that the data can be run
     # successfully through the routine
     _run_data_checks(time_series)
@@ -218,9 +222,10 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     return time_series_processed['cpd_mask']
 
 
-def get_longest_shift_segment_dates(time_series, filtering=True,
+def get_longest_shift_segment_dates(time_series, method=None,
+                                    filtering=True,
                                     use_default_models=True,
-                                    method=rpt.BottomUp, cost="rbf",
+                                    cost=None,
                                     penalty=40):
     """
     Return the start and end dates of the longest continuous time series
@@ -234,29 +239,24 @@ def get_longest_shift_segment_dates(time_series, filtering=True,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
-    filtering : Boolean.
+    method: ruptures search method instance or None, default None.
+        Ruptures search method instance. See
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
+    filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
         data shift detection sequence. If False, this data is not filtered
         out. Default set to True.
-    use_default_models: Boolean.
-        If set to True, then default CPD model parameters are used, based
-        on the length of the time series (Window-based models for time series
-        shorter than 2 years in length and BottomUp models for time series
-        longer than 2 years in length). If set to True, none of the method +
-        cost + penalty variables are used.
-    method: ruptures search method object.
-        Ruptures method object. Can be one of the following methods:
-        ruptures.Pelt, ruptures.Binseg, ruptures.BottomUp, or ruptures.Window.
-        See the following documentation for further information:
-        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
-        to ruptures.BottomUp search method.
-    cost: str
-        Cost function passed to the ruptures changepoint detection method. Can
-        be one of the following string values: 'rbf', 'l1', 'l2', 'normal',
-        'cosine', or 'linear'. See the following documentation for further
-        information: https://centre-borelli.github.io/ruptures-docs/user-guide/
-        Default set to "rbf".
+    use_default_models: Boolean, default True
+        If True, then default change point detection search parameters are
+        used. For time series shorter than 2 years in length, the search
+        function is `rpt.Window`  with `model='rbf'`, `width=40` and
+        `penalty=30`. For time series 2 years or longer in length, the
+        search function is `rpt.BottomUp` with `model='rbf'`
+        and `penalty=40`.
+    cost: str or None, default None
+        Cost function passed to the ruptures changepoint search instance.
+        See https://centre-borelli.github.io/ruptures-docs/user-guide/
     penalty: numeric (float or int)
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
