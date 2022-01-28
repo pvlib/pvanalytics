@@ -287,24 +287,23 @@ def get_longest_shift_segment_dates(time_series, filtering=True,
                               "end_date": time_series.index.max()
                               }
         return passing_dates_dict
-    else:
-        # Add the start and end dates in the sequence, and remove any
-        # duplications. Finally, sort in order of timestamp, from oldest to
-        # newest.
-        data_shift_dates = list(cpd_mask[cpd_mask].index)
-        data_shift_dates.append(time_series.index.min())
-        data_shift_dates.append(time_series.index.max())
-        data_shift_dates = list(set(data_shift_dates))
-        data_shift_dates.sort()
-        # Find the longest date segment in the time series, with the most data
-        # points.
-        segment_lengths = [len(time_series[data_shift_dates[i]:
-                                           data_shift_dates[i+1]])
-                           for i in range(len(data_shift_dates)-1)]
-        max_segment_length_idx = segment_lengths.index(max(segment_lengths))
-        passing_dates_dict = {"start_date":
-                              data_shift_dates[max_segment_length_idx],
-                              "end_date":
-                                  data_shift_dates[max_segment_length_idx + 1]
-                              }
-        return passing_dates_dict
+    # Add the start and end dates in the sequence, and remove any
+    # duplications. Finally, sort in order of timestamp, from oldest to
+    # newest.
+    data_shift_dates = list(cpd_mask[cpd_mask].index)
+    data_shift_dates.append(time_series.index.min())
+    data_shift_dates.append(time_series.index.max())
+    data_shift_dates = list(set(data_shift_dates))
+    data_shift_dates.sort()
+    # Find the longest date segment in the time series, with the most data
+    # points.
+    segment_lengths = [len(time_series[data_shift_dates[i]:
+                                       data_shift_dates[i+1]])
+                       for i in range(len(data_shift_dates)-1)]
+    max_segment_length_idx = segment_lengths.index(max(segment_lengths))
+    passing_dates_dict = {"start_date":
+                          data_shift_dates[max_segment_length_idx],
+                          "end_date":
+                              data_shift_dates[max_segment_length_idx + 1]
+                          }
+    return passing_dates_dict
