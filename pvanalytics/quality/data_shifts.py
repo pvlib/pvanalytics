@@ -103,8 +103,9 @@ def _preprocess_data(time_series, remove_seasonality):
         # data, and use this as the seasonality of the time series
         month_values = pd.DatetimeIndex(time_series.index).month
         day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
-        time_series_seasonality = time_series_normalized.groupby(
-            [month_values, day_values]).transform("median")
+        time_series_seasonality = time_series_normalized.groupby([month_values,
+                                                                  day_values])\
+            .transform("median")
         # Remove seasonlity from the time series
         return (time_series_normalized - time_series_seasonality)
 
