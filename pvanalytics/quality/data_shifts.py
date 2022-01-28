@@ -92,8 +92,8 @@ def _preprocess_data(time_series, remove_seasonality):
         length, seasonality removal.
     """
     # Min-max normalize the series
-    time_series_normalized = (time_series - time_series.min())\
-        /(time_series.max() - time_series.min())
+    time_series_normalized = (time_series - time_series.min()) \
+        / (time_series.max() - time_series.min())
     # Check if the time series is greater than one year in length. If not, flag
     # a warning and pass back the normalized time series
     if not remove_seasonality:
@@ -103,8 +103,8 @@ def _preprocess_data(time_series, remove_seasonality):
         # data, and use this as the seasonality of the time series
         month_values = pd.DatetimeIndex(time_series.index).month
         day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
-        time_series_seasonality = time_series_normalized.groupby([month_values,
-                                                             day_values]).transform("median")
+        time_series_seasonality = time_series_normalized.groupby(
+            [month_values, day_values]).transform("median")
         # Remove seasonlity from the time series
         return (time_series_normalized - time_series_seasonality)
 
