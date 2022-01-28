@@ -146,7 +146,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     method: ruptures search method instance or None, default None.
         Ruptures search method instance. See 
         https://centre-borelli.github.io/ruptures-docs/user-guide/.
-    cost: str
+    cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
     penalty: numeric (float or int)
