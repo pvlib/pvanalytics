@@ -220,11 +220,15 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     return time_series_processed['cpd_mask']
 
 
-def filter_data_shifts(time_series, filtering=True, use_default_models=True,
-                       method=rpt.BottomUp, cost="rbf", penalty=40):
+def get_longest_shift_segment_dates(time_series, filtering=True,
+                                    use_default_models=True,
+                                    method=rpt.BottomUp, cost="rbf",
+                                    penalty=40):
     """
-    Filter the time series by the longest continuous time series segment, by
-    performing data shift detection.
+    Return the start and end dates of the longest continuous time series
+    segment. During this process, data shift detection is performed, and the
+    longest time series segment between changepoints is identified, and the
+    start and end dates of that segment are returned.
 
     Parameters
     ----------

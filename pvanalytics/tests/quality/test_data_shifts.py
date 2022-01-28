@@ -65,10 +65,10 @@ def test_filter_data_shifts(generate_daily_time_series):
     signal_no_index, signal_datetime_index, changepoint_date = \
         generate_daily_time_series
     # Run the time series where there are no changepoints
-    interval_dict_short = dt.filter_data_shifts(
+    interval_dict_short = dt.get_longest_shift_segment_dates(
         time_series=signal_datetime_index[:100])
     # Run the time series where there is a changepoint
-    interval_dict = dt.filter_data_shifts(
+    interval_dict = dt.get_longest_shift_segment_dates(
         time_series=signal_datetime_index)
     assert (interval_dict['start_date'] == pd.to_datetime('2015-10-30')) & \
         (interval_dict['end_date'] == pd.to_datetime('2020-12-31'))
