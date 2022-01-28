@@ -143,12 +143,10 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
-    method: ruptures search method object.
-        Ruptures method object.See the following documentation for further
-        information:
-        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
-        to ruptures.BottomUp.
-    cost: str
+    method: ruptures search method instance or None, default None.
+        Ruptures search method instance. See 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
+    cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
     penalty: numeric (float or int)
@@ -180,9 +178,9 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     # seasonality. If not, run analysis on the normalized time series
     if (time_series.index.max() - time_series.index.min()).days <= 730:
         warnings.warn("The passed time series is less than 2 years in length, "
-                      "and cannot be corrected for seasonality. Runnning data "
+                      "and will not be corrected for seasonality. Runnning data "
                       "shift detection on the min-max normalized time series "
-                      "(NO seasonality correction).")
+                      "with no seasonality correction.")
         time_series_processed = _preprocess_data(time_series,
                                                  remove_seasonality=False)
         seasonality_rmv = False
