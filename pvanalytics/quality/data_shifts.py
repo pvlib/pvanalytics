@@ -178,9 +178,9 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
     # seasonality. If not, run analysis on the normalized time series
     if (time_series.index.max() - time_series.index.min()).days <= 730:
         warnings.warn("The passed time series is less than 2 years in length, "
-                      "and cannot be corrected for seasonality. Runnning data "
+                      "and will not be corrected for seasonality. Runnning data "
                       "shift detection on the min-max normalized time series "
-                      "(NO seasonality correction).")
+                      "with no seasonality correction.")
         time_series_processed = _preprocess_data(time_series,
                                                  remove_seasonality=False)
         seasonality_rmv = False
