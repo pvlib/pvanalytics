@@ -144,10 +144,8 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
     method: ruptures search method instance or None, default None.
-        Ruptures method object.See the following documentation for further
-        information:
-        https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
-        to ruptures.BottomUp.
+        Ruptures search method instance. See 
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     cost: str
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
