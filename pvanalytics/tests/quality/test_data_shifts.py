@@ -1,6 +1,5 @@
 """Tests for data shift quality control functions."""
 import pandas as pd
-import ruptures as rpt
 import pytest
 from pvanalytics.quality import data_shifts as dt
 from ..conftest import DATA_DIR
@@ -19,13 +18,24 @@ def generate_daily_time_series():
     return signal_no_index, signal_datetime_index, changepoint_date
 
 
+def requires_ruptures(test):
+    """Skip `test` if ruptures is not installed."""
+    try:
+        import ruptures  # noqa: F401
+        has_ruptures = True
+    except ImportError:
+        has_ruptures = False
+    return pytest.mark.skipif(
+        not has_ruptures, reason="requires ruptures")(test)
+
+@requires_ruptures
 def test_detect_data_shifts(generate_daily_time_series):
     """
     Unit test that data shifts are correctly identified in the simulated time
     series.
     """
     signal_no_index, signal_datetime_index, changepoint_date = \
-        generate_daily_time_series
+        generate_daily_time_series     
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
@@ -35,7 +45,7 @@ def test_detect_data_shifts(generate_daily_time_series):
     # Test that an error is thrown when an incorrect string is passed as the
     # cost variable
     pytest.raises(ValueError, dt.detect_data_shifts, signal_datetime_index,
-                  True, False, rpt.Binseg, "none")
+                  True, False, ruptures.Binseg, "none")
     # Test that a warning is thrown when the data is less than 2 years
     # in length
     pytest.warns(UserWarning, dt.detect_data_shifts,
@@ -51,7 +61,7 @@ def test_detect_data_shifts(generate_daily_time_series):
         shift_index_unnamed[shift_index_unnamed].index)
     # Run model with manually entered parameters
     shift_index_param = dt.detect_data_shifts(signal_datetime_index, True,
-                                              False, rpt.BottomUp, "rbf")
+                                              False, ruptures.BottomUp, "rbf")
     shift_index_param_dates = list(
         shift_index_param[shift_index_param].index)
     assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5) & \
