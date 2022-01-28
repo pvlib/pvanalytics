@@ -52,9 +52,11 @@ def test_detect_data_shifts(generate_daily_time_series):
     # Run model with manually entered parameters
     shift_index_param = dt.detect_data_shifts(signal_datetime_index, True,
                                               False)
+    shift_index_param_dates = list(
+        shift_index_param[shift_index_param].index)
     assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5) & \
         (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5) &\
-        (abs((changepoint_date - shift_index_param[0]).days) <= 5)
+        (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
 
 
 def test_filter_data_shifts(generate_daily_time_series):
