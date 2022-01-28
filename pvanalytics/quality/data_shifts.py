@@ -110,9 +110,9 @@ def _preprocess_data(time_series, remove_seasonality):
         return (time_series_normalized - time_series_seasonality)
 
 
-def detect_data_shifts(time_series, method=None,
+def detect_data_shifts(time_series,
                        filtering=True, use_default_models=True,
-                       cost=None, penalty=40):
+                       method=None, cost=None, penalty=40):
     """
     Detect data shifts in the time series, and return list of dates where these
     data shifts occur.
@@ -123,9 +123,6 @@ def detect_data_shifts(time_series, method=None,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
-    method: ruptures search method instance or None, default None.
-        Ruptures search method instance. See
-        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
@@ -138,6 +135,9 @@ def detect_data_shifts(time_series, method=None,
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
+    method: ruptures search method instance or None, default None.
+        Ruptures search method instance. See
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
@@ -214,10 +214,10 @@ def detect_data_shifts(time_series, method=None,
     return time_series_processed['cpd_mask']
 
 
-def get_longest_shift_segment_dates(time_series, method=None,
+def get_longest_shift_segment_dates(time_series,
                                     filtering=True,
                                     use_default_models=True,
-                                    cost=None,
+                                    method=None, cost=None,
                                     penalty=40):
     """
     Return the start and end dates of the longest continuous time series
@@ -231,9 +231,6 @@ def get_longest_shift_segment_dates(time_series, method=None,
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
-    method: ruptures search method instance or None, default None.
-        Ruptures search method instance. See
-        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     filtering : Boolean, default True.
         Whether or not to filter out outliers and stale data from the time
         series. If True, then this data is filtered out before running the
@@ -246,6 +243,9 @@ def get_longest_shift_segment_dates(time_series, method=None,
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
+    method: ruptures search method instance or None, default None.
+        Ruptures search method instance. See
+        https://centre-borelli.github.io/ruptures-docs/user-guide/.
     cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
