@@ -143,7 +143,7 @@ def detect_data_shifts(time_series, filtering=True, use_default_models=True,
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
-    method: ruptures search method object.
+    method: ruptures search method instance or None, default None.
         Ruptures method object.See the following documentation for further
         information:
         https://centre-borelli.github.io/ruptures-docs/user-guide/. Default set
