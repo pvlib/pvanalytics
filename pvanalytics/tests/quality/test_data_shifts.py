@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from pvanalytics.quality import data_shifts as dt
 from ..conftest import DATA_DIR
+import ruptures
 
 test_file_1 = DATA_DIR / "pvlib_data_shift_stream_example_1.csv"
 
@@ -28,6 +29,7 @@ def requires_ruptures(test):
     return pytest.mark.skipif(
         not has_ruptures, reason="requires ruptures")(test)
 
+
 @requires_ruptures
 def test_detect_data_shifts(generate_daily_time_series):
     """
@@ -35,7 +37,7 @@ def test_detect_data_shifts(generate_daily_time_series):
     series.
     """
     signal_no_index, signal_datetime_index, changepoint_date = \
-        generate_daily_time_series     
+        generate_daily_time_series
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
