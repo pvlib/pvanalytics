@@ -91,31 +91,22 @@ def _preprocess_data(time_series, remove_seasonality):
         normalization, and, if the time series is in greater than 2 years in
         length, seasonality removal.
     """
-    # Convert the time series to a dataframe to do the pre-processing
-    column_name = time_series.name
-    if column_name is None:
-        column_name = "value"
-        time_series = time_series.rename(column_name)
-    df = time_series.to_frame()
     # Min-max normalize the series
-    df[column_name + "_normalized"] = (df[column_name] -
-                                       df[column_name].min())\
-        / (df[column_name].max() - df[column_name].min())
+    time_series_normalized = (time_series - time_series.min())\
+        /(time_series.max() - time_series.min())
     # Check if the time series is greater than one year in length. If not, flag
     # a warning and pass back the normalized time series
     if not remove_seasonality:
-        return df[column_name + "_normalized"]
+        return time_series_normalized
     else:
         # Take the median of every day of the year across all years in the
         # data, and use this as the seasonality of the time series
-        df['month'] = pd.DatetimeIndex(df.index).month
-        df['day'] = pd.DatetimeIndex(pd.Series(df.index)).day
-        df['seasonal_val'] = df.groupby(['month',
-                                         'day'])[column_name +
-                                                 "_normalized"].transform(
-                                                     "median")
+        month_values = pd.DatetimeIndex(time_series.index).month
+        day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
+        time_series_seasonality = time_series_normalized.groupby([month_values,
+                                                             day_values]).transform("median")
         # Remove seasonlity from the time series
-        return df[column_name + "_normalized"] - df['seasonal_val']
+        return (time_series_normalized - time_series_seasonality)
 
 
 def detect_data_shifts(time_series, method=None,
