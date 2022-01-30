@@ -202,10 +202,12 @@ def test_threshold_clipping_four_days(quadratic, quadratic_clipped):
     # scale the rest of the days below the clipping threshold
     full_day *= 0.75
 
-    power = full_day_clipped
-    power.append(full_day)
-    power.append(full_day)
-    power.append(full_day)
+    power = pd.concat([
+        full_day_clipped,
+        full_day,
+        full_day,
+        full_day,
+    ])
 
     power.index = pd.date_range(
         start='01/01/2020 00:00', freq='10T', periods=len(power)
@@ -232,10 +234,12 @@ def test_threshold_no_clipping_four_days(quadratic):
     )
     full_day.fillna(0)
 
-    power = full_day
-    power.append(full_day * 1.3)
-    power.append(full_day * 1.2)
-    power.append(full_day * 1.1)
+    power = pd.concat([
+        full_day,
+        full_day * 1.3,
+        full_day * 1.2,
+        full_day * 1.1,
+    ])
 
     power.index = pd.date_range(
         start='01/01/2020 00:00', freq='10T', periods=len(power)
