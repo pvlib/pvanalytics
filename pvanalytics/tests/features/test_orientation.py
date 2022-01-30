@@ -1,7 +1,7 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import tracking, modelchain, irradiance
+from pvlib import pvsystem, modelchain, irradiance
 from pvanalytics.features import orientation
 
 
@@ -40,15 +40,22 @@ def test_ghi_not_tracking(clearsky, solarposition):
 
 
 @pytest.fixture
-def power_tracking(clearsky, albuquerque, system_parameters):
+def power_tracking(clearsky, albuquerque, array_parameters, system_parameters):
     """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
-    system = tracking.SingleAxisTracker(**system_parameters)
+    array = pvsystem.Array(pvsystem.SingleAxisTrackerMount(),
+                           **array_parameters)
+    system = pvsystem.PVSystem(arrays=[array],
+                               **system_parameters)
     mc = modelchain.ModelChain(
         system,
         albuquerque,
     )
     mc.run_model(clearsky)
-    return mc.ac
+    try:
+        ac = mc.results.ac
+    except AttributeError:
+        ac = mc.ac  # pvlib < 0.9.0
+    return ac
 
 
 def test_power_tracking(power_tracking, solarposition):

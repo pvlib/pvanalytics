@@ -60,19 +60,31 @@ def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
         albuquerque,
     )
     mc.run_model(summer_clearsky)
-    return mc.ac
+    try:
+        ac = mc.results.ac
+    except AttributeError:
+        ac = mc.ac  # pvlib < 0.9.0
+    return ac
 
 
 @pytest.fixture
-def summer_power_tracking(summer_clearsky, albuquerque, system_parameters):
+def summer_power_tracking(summer_clearsky, albuquerque, array_parameters,
+                          system_parameters):
     """Simulated power for a TRACKING PVSystem in Albuquerque"""
-    pv_system = tracking.SingleAxisTracker(**system_parameters)
+    array = pvsystem.Array(pvsystem.SingleAxisTrackerMount(),
+                           **array_parameters)
+    system = pvsystem.PVSystem(arrays=[array],
+                               **system_parameters)
     mc = modelchain.ModelChain(
-        pv_system,
+        system,
         albuquerque
     )
     mc.run_model(summer_clearsky)
-    return mc.ac
+    try:
+        ac = mc.results.ac
+    except AttributeError:
+        ac = mc.ac  # pvlib < 0.9.0
+    return ac
 
 
 def test_ghi_tracking_envelope_fixed(summer_ghi):

@@ -106,17 +106,24 @@ def solarposition_year(one_year_hourly, albuquerque):
 
 
 @pytest.fixture(scope='module')
-def system_parameters():
-    """System parameters for generating simulated power data."""
+def array_parameters():
+    """Array parameters for generating simulated power data."""
     sandia_modules = pvsystem.retrieve_sam('SandiaMod')
-    sapm_inverters = pvsystem.retrieve_sam('cecinverter')
     module = sandia_modules['Canadian_Solar_CS5P_220M___2009_']
-    inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
     temperature_model_parameters = (
         TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
     )
     return {
         'module_parameters': module,
-        'inverter_parameters': inverter,
         'temperature_model_parameters': temperature_model_parameters
+    }
+
+
+@pytest.fixture(scope='module')
+def system_parameters():
+    """PVSystem parameters for generating simulated power data."""
+    sapm_inverters = pvsystem.retrieve_sam('cecinverter')
+    inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
+    return {
+        'inverter_parameters': inverter,
     }
