@@ -296,7 +296,7 @@ def _shift_between(series, shift, start, end):
     during = series[start:end]
     after = series[end:]
     during = during + shift
-    shifted = before.append(during).append(after)
+    shifted = pd.concat([before, during, after])
     return shifted[~shifted.index.duplicated()]
 
 
