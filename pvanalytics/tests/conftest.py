@@ -2,8 +2,11 @@
 import pytest
 import numpy as np
 import pandas as pd
+import pvlib
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
+
+from pkg_resources import Requirement, parse_version
 
 
 def pytest_addoption(parser):
@@ -27,6 +30,25 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+
+
+def requires_pvlib(versionspec, reason=''):
+    """
+    Decorator to skip pytest tests if a dependency version is not satisfied.
+
+    Parameters
+    ----------
+    versionspec : str
+        A version specifier like '==0.8.1' or '<=0.9.0'
+    reason : str, optional
+        Additional context to show in pytest log output
+    """
+    req = Requirement.parse('pvlib' + versionspec)
+    is_satisfied = parse_version(pvlib.__version__) in req
+    message = 'requires pvlib' + versionspec
+    if reason:
+        message += f'({reason})'
+    return pytest.mark.skipif(not is_satisfied, reason=message)
 
 
 @pytest.fixture

@@ -7,22 +7,7 @@ from pvlib import location, pvsystem, tracking, modelchain, irradiance
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics import system
 
-
-@pytest.fixture
-def system_parameters():
-    """System parameters for generating simulated power data."""
-    sandia_modules = pvsystem.retrieve_sam('SandiaMod')
-    sapm_inverters = pvsystem.retrieve_sam('cecinverter')
-    module = sandia_modules['Canadian_Solar_CS5P_220M___2009_']
-    inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
-    temperature_model_parameters = (
-        TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
-    )
-    return {
-        'module_parameters': module,
-        'inverter_parameters': inverter,
-        'temperature_model_parameters': temperature_model_parameters
-    }
+from .conftest import requires_pvlib
 
 
 @pytest.fixture(scope='module')
@@ -50,11 +35,12 @@ def summer_ghi(summer_clearsky):
 
 
 @pytest.fixture
-def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
+def summer_power_fixed(summer_clearsky, albuquerque, array_parameters,
+                       system_parameters):
     """Simulated power from a FIXED PVSystem in Albuquerque, NM."""
     pv_system = pvsystem.PVSystem(surface_azimuth=180,
                                   surface_tilt=albuquerque.latitude,
-                                  **system_parameters)
+                                  **array_parameters, **system_parameters)
     mc = modelchain.ModelChain(
         pv_system,
         albuquerque,
@@ -65,6 +51,22 @@ def summer_power_fixed(summer_clearsky, albuquerque, system_parameters):
     except AttributeError:
         ac = mc.ac  # pvlib < 0.9.0
     return ac
+
+
+@pytest.fixture
+def summer_power_tracking_old_pvlib(summer_clearsky, albuquerque,
+                                    array_parameters, system_parameters):
+    """Simulated power for a TRACKING PVSystem in Albuquerque"""
+    # copy of `summer_power_tracking` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    pv_system = tracking.SingleAxisTracker(**array_parameters,
+                                           **system_parameters)
+    mc = modelchain.ModelChain(
+        pv_system,
+        albuquerque
+    )
+    mc.run_model(summer_clearsky)
+    return mc.ac
 
 
 @pytest.fixture
@@ -80,11 +82,7 @@ def summer_power_tracking(summer_clearsky, albuquerque, array_parameters,
         albuquerque
     )
     mc.run_model(summer_clearsky)
-    try:
-        ac = mc.results.ac
-    except AttributeError:
-        ac = mc.ac  # pvlib < 0.9.0
-    return ac
+    return mc.results.ac
 
 
 def test_ghi_tracking_envelope_fixed(summer_ghi):
@@ -105,6 +103,20 @@ def test_power_tracking_envelope_fixed(summer_power_fixed):
     ) is system.Tracker.FIXED
 
 
+@requires_pvlib('<0.9.0', reason="SingleAxisTracker deprecation")
+def test_power_tracking_envelope_tracking_old_pvlib(
+        summer_power_tracking_old_pvlib):
+    """Simulated single axis tracker is identified as TRACKING."""
+    # copy of `test_power_tracking_envelope_tracking` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    assert system.is_tracking_envelope(
+        summer_power_tracking_old_pvlib,
+        summer_power_tracking_old_pvlib > 0,
+        pd.Series(False, index=summer_power_tracking_old_pvlib.index)
+    ) is system.Tracker.TRACKING
+
+
+@requires_pvlib('>=0.9.0', reason="Array class")
 def test_power_tracking_envelope_tracking(summer_power_tracking):
     """Simulated single axis tracker is identified as TRACKING."""
     assert system.is_tracking_envelope(
@@ -139,6 +151,30 @@ def test_constant_unknown_tracking_envelope(summer_ghi):
     ) is system.Tracker.UNKNOWN
 
 
+@requires_pvlib('<0.9.0', reason="SingleAxisTracker deprecation")
+@pytest.mark.filterwarnings("ignore:invalid value encountered in",
+                            "ignore:divide by zero encountered in")
+def test_median_mismatch_tracking_old_pvlib(summer_power_tracking_old_pvlib):
+    """If the median does not have the same fit as the 99.5% quantile then
+    tracking is UNKNOWN."""
+    # copy of `test_median_mismatch_tracking` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    power_half_tracking = summer_power_tracking_old_pvlib.copy()
+    power_half_tracking.iloc[0:100*24] = 1
+    assert system.is_tracking_envelope(
+        power_half_tracking,
+        pd.Series(True, index=power_half_tracking.index),
+        pd.Series(False, index=power_half_tracking.index),
+        fit_median=False
+    ) is system.Tracker.TRACKING
+    assert system.is_tracking_envelope(
+        power_half_tracking,
+        pd.Series(True, index=power_half_tracking.index),
+        pd.Series(False, index=power_half_tracking.index)
+    ) is system.Tracker.UNKNOWN
+
+
+@requires_pvlib('>=0.9.0', reason="Array class")
 @pytest.mark.filterwarnings("ignore:invalid value encountered in",
                             "ignore:divide by zero encountered in")
 def test_median_mismatch_tracking(summer_power_tracking):
