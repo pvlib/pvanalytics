@@ -1,7 +1,6 @@
 """Tests for feature labeling functions."""
 import pytest
 import pandas as pd
-import pvlib
 from pvanalytics.features import clearsky
 from ..conftest import requires_pvlib
 
