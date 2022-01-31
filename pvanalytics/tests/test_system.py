@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import pvlib
 from pvlib import location, pvsystem, tracking, modelchain, irradiance
-from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvanalytics import system
 
 from .conftest import requires_pvlib
