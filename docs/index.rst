@@ -25,6 +25,8 @@ library status.
 - :py:mod:`quality` contains submodules for different kinds of data quality
   checks.
 
+  - :py:mod:`quality.data_shifts` contains quality checks for detecting and 
+    isolating data shifts in PV time series data.
   - :py:mod:`quality.irradiance` contains quality checks for irradiance
     measurements.
   - :py:mod:`quality.weather` contains quality checks for weather data (e.g.

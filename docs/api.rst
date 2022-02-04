@@ -18,7 +18,7 @@ that identify shifts in time, see ``quality.time``
    :toctree: generated/
 
    quality.data_shifts.detect_data_shifts
-   quality.data_shifts.filter_data_shifts
+   quality.data_shifts.get_longest_shift_segment_dates
 
 Irradiance
 ----------

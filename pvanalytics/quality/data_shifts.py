@@ -12,10 +12,9 @@ import warnings
 def _run_data_checks(time_series):
     """
     Check that the passed parameters can be run through the function.
-    This includes checking the passed time series, method, cost,
-    and penalty values. Throws an error if any of the passed parameter
-    types are incorrect.
-
+    This includes checking the passed time series to ensure it has a
+    datetime index, and resampling to daily summed data, if needed.
+    
     Parameters
     ----------
     time_series : Pandas series with datetime index.
@@ -83,6 +82,10 @@ def _preprocess_data(time_series, remove_seasonality):
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
+    remove_seasonality: Boolean.
+        Whether or not to remove seasonality from the time series. If set to 
+        True, the seasonality-removal routine is run on the min-max normalized
+        data. If not, the routine is skipped.
 
     Returns
     -------
@@ -101,10 +104,8 @@ def _preprocess_data(time_series, remove_seasonality):
     else:
         # Take the median of every day of the year across all years in the
         # data, and use this as the seasonality of the time series
-        month_values = pd.DatetimeIndex(time_series.index).month
-        day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
-        time_series_seasonality = time_series_normalized.groupby([month_values,
-                                                                  day_values])\
+        day_year_values = pd.DatetimeIndex(pd.Series(time_series.index)).dayofyear
+        time_series_seasonality = time_series_normalized.groupby([day_year_values])\
             .transform("median")
         # Remove seasonlity from the time series
         return (time_series_normalized - time_series_seasonality)
@@ -141,7 +142,7 @@ def detect_data_shifts(time_series,
     cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
-    penalty: numeric (float or int)
+    penalty: int, default 40
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
 
@@ -249,7 +250,7 @@ def get_longest_shift_segment_dates(time_series,
     cost: str or None, default None
         Cost function passed to the ruptures changepoint search instance.
         See https://centre-borelli.github.io/ruptures-docs/user-guide/
-    penalty: numeric (float or int)
+    penalty: int, default 40
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
 

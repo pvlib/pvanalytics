@@ -66,9 +66,9 @@ def test_detect_data_shifts(generate_daily_time_series):
                                               False, ruptures.BottomUp, "rbf")
     shift_index_param_dates = list(
         shift_index_param[shift_index_param].index)
-    assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5) & \
-        (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5) &\
-        (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
+    assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5)
+    assert (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5)
+    assert (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
 
 
 def test_filter_data_shifts(generate_daily_time_series):
