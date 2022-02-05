@@ -207,13 +207,10 @@ def detect_data_shifts(time_series,
     # Remove the last index of the time series, if present
     if len(points) in result:
         result.remove(len(points))
-    # Return a list of dates where changepoints are detected
     time_series_processed.index.name = "datetime"
-    time_series_processed = time_series_processed.reset_index()
-    time_series_processed['cpd_mask'] = time_series_processed.index.isin(
-        result)
-    time_series_processed.index = time_series_processed['datetime']
-    return time_series_processed['cpd_mask']
+    mask = pd.Series(False, index=time_series_processed.index)
+    mask.iloc[result] = True
+    return mask
 
 
 def get_longest_shift_segment_dates(time_series,
@@ -273,29 +270,8 @@ def get_longest_shift_segment_dates(time_series,
     cpd_mask = detect_data_shifts(time_series, filtering,
                                   use_default_models,
                                   method, cost, penalty)
-    # Get longest continuous data segment by number of days in the time series
-    if all(~cpd_mask):
-        passing_dates_dict = {"start_date": time_series.index.min(),
-                              "end_date": time_series.index.max()
-                              }
-        return passing_dates_dict
-    # Add the start and end dates in the sequence, and remove any
-    # duplications. Finally, sort in order of timestamp, from oldest to
-    # newest.
-    data_shift_dates = list(cpd_mask[cpd_mask].index)
-    data_shift_dates.append(time_series.index.min())
-    data_shift_dates.append(time_series.index.max())
-    data_shift_dates = list(set(data_shift_dates))
-    data_shift_dates.sort()
-    # Find the longest date segment in the time series, with the most data
-    # points.
-    segment_lengths = [len(time_series[data_shift_dates[i]:
-                                       data_shift_dates[i+1]])
-                       for i in range(len(data_shift_dates)-1)]
-    max_segment_length_idx = segment_lengths.index(max(segment_lengths))
-    passing_dates_dict = {"start_date":
-                          data_shift_dates[max_segment_length_idx],
-                          "end_date":
-                              data_shift_dates[max_segment_length_idx + 1]
-                          }
+    interval_id = cpd_mask.cumsum()
+    longest_interval_id = interval_id.value_counts().idxmax()
+    index = interval_id.index[interval_id == longest_interval_id]
+    passing_dates_dict = {'start_date': index.min(), 'end_date': index.max()}
     return passing_dates_dict
