@@ -207,10 +207,17 @@ def detect_data_shifts(time_series,
     # Remove the last index of the time series, if present
     if len(points) in result:
         result.remove(len(points))
+    # Return a list of dates where changepoints are detected
     time_series_processed.index.name = "datetime"
-    mask = pd.Series(False, index=time_series_processed.index)
-    mask.iloc[result] = True
-    return mask
+    time_series_processed = time_series_processed.reset_index()
+    time_series_processed['cpd_mask'] = time_series_processed.index.isin(
+        result)
+    time_series_processed.index = time_series_processed['datetime']
+    return time_series_processed['cpd_mask']
+    # time_series_processed.index.name = "datetime"
+    # mask = pd.Series(False, index=time_series_processed.index)
+    # mask.iloc[result] = True
+    # return mask
 
 
 def get_longest_shift_segment_dates(time_series,
