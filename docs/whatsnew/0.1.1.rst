@@ -27,6 +27,8 @@ Bug Fixes
 * Prohibit pandas versions in the 1.1.x series to avoid an issue in
   ``.groupby().rolling()``.  Newer versions starting in 1.2.0 and older
   versions going back to 0.24.0 are still allowed. (:issue:`82`, :pull:`118`)
+* Fixed an issue with :py:func:`pvanalytics.features.clearsky.reno` in recent
+  pandas versions (:issue:`125`, :pull:`128`)
 
 Contributors
 ~~~~~~~~~~~~
