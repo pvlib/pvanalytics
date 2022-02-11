@@ -164,7 +164,7 @@ def detect_data_shifts(time_series,
     try:
         import ruptures as rpt
     except ImportError:
-        raise ImportError("time.shifts_ruptures() requires ruptures.")
+        raise ImportError("data_shifts() requires ruptures.")
     # Run data checks on cleaned data to make sure that the data can be run
     # successfully through the routine
     _run_data_checks(time_series)
