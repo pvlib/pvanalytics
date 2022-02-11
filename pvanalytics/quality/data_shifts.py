@@ -97,7 +97,7 @@ def _preprocess_data(time_series, remove_seasonality):
     # Min-max normalize the series
     time_series_normalized = (time_series - time_series.min()) \
         / (time_series.max() - time_series.min())
-    # Check if the time series is greater than one year in length. If not, flag
+    # Check if the time series is greater than two years in length. If not, flag
     # a warning and pass back the normalized time series
     if not remove_seasonality:
         return time_series_normalized
