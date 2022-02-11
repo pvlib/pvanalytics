@@ -29,11 +29,11 @@ def _run_data_checks(time_series):
     # values
     if not isinstance(time_series.index, pd.DatetimeIndex):
         raise TypeError('Must be a Pandas series with a datetime index.')
-    # Check that the time series is sampled on a daily basis. If not, 
+    # Check that the time series is sampled on a daily basis. If not,
     # throw a ValueError exception
     if time_series.index.to_series().diff().value_counts().idxmax().days != 1:
-        raise ValueError("Time series frequency not daily. Please resample time "
-                         "series to daily summed values.")
+        raise ValueError("Time series frequency not daily. Please resample "
+                         "time series to daily summed values.")
     return
 
 
@@ -154,7 +154,7 @@ def detect_data_shifts(time_series,
         changepoints are labeled as True, and all other values are labeled
         as False.
 
-    .. warning:: If the passed time series is less than 2 years in length, 
+    .. warning:: If the passed time series is less than 2 years in length,
         it will not be corrected for seasonality. Data shift detection will
         be run on the min-max normalized time series with no seasonality
         correction.
