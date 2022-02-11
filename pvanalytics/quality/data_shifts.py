@@ -13,7 +13,7 @@ def _run_data_checks(time_series):
     """
     Check that the passed parameters can be run through the function.
     This includes checking the passed time series to ensure it has a
-    datetime index, and resampling to daily summed data, if needed.
+    datetime index, and that it is a daily sampled time series.
 
     Parameters
     ----------
@@ -30,11 +30,11 @@ def _run_data_checks(time_series):
     # values
     if not isinstance(time_series.index, pd.DatetimeIndex):
         raise TypeError('Must be a Pandas series with a datetime index.')
-    # Check that the time series is sampled on a daily basis
-    if pd.infer_freq(time_series.index) != "D":
-        warnings.warn("Time series frequency not set. Setting frequency to "
-                      "daily, and resampling the daily sum value.")
-        time_series = time_series.resample('d').sum()
+    # Check that the time series is sampled on a daily basis. If not, 
+    # throw a ValueError exception
+    if time_series.index.to_series().diff().value_counts().idxmax().days != 1:
+        raise ValueError("Time series frequency not daily. Please resample time "
+                         "series to daily summed values.")
     return
 
 
@@ -97,8 +97,8 @@ def _preprocess_data(time_series, remove_seasonality):
     # Min-max normalize the series
     time_series_normalized = (time_series - time_series.min()) \
         / (time_series.max() - time_series.min())
-    # Check if the time series is greater than two years in length. If not, flag
-    # a warning and pass back the normalized time series
+    # Check if the time series is greater than two years in length. If not,
+    # pass back the normalized time series
     if not remove_seasonality:
         return time_series_normalized
     else:
@@ -155,6 +155,11 @@ def detect_data_shifts(time_series,
         changepoints are labeled as True, and all other values are labeled
         as False.
 
+    .. warning:: If the passed time series is less than 2 years in length, 
+        it will not be corrected for seasonality. Data shift detection will
+        be run on the min-max normalized time series with no seasonality
+        correction.
+
     References
     -------
     .. [1] Perry K., and Muller, M. "Automated shift detection in sensor-based
@@ -176,10 +181,6 @@ def detect_data_shifts(time_series,
     # Check if the time series is more than 2 years long. If so, remove
     # seasonality. If not, run analysis on the normalized time series
     if (time_series.index.max() - time_series.index.min()).days <= 730:
-        warnings.warn("The passed time series is less than 2 years in length, "
-                      "and will not be corrected for seasonality. Runnning "
-                      "data shift detection on the min-max normalized time "
-                      "series with no seasonality correction.")
         time_series_processed = _preprocess_data(time_series,
                                                  remove_seasonality=False)
         seasonality_rmv = False
