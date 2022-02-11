@@ -278,14 +278,3 @@ def get_longest_shift_segment_dates(time_series,
     index = interval_id.index[interval_id == longest_interval_id]
     passing_dates_dict = {'start_date': index.min(), 'end_date': index.max()}
     return passing_dates_dict
-
-
-
-test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/pvlib_data_shift_stream_example_1.csv"
-df = pd.read_csv(test_file_1)
-signal_no_index = df['value']
-df.index = pd.to_datetime(df['timestamp'])
-signal_datetime_index = df['value']
-changepoint_date = df[df['label'] == 1].index[0]
-
-r = detect_data_shifts(time_series = signal_datetime_index)
