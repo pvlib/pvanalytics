@@ -9,7 +9,6 @@ import pandas as pd
 import warnings
 
 
-
 def _run_data_checks(time_series):
     """
     Check that the passed parameters can be run through the function.
