@@ -6,7 +6,6 @@ streams.
 from pvanalytics.quality import gaps
 import numpy as np
 import pandas as pd
-import warnings
 
 
 def _run_data_checks(time_series):
