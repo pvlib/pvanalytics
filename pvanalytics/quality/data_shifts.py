@@ -9,6 +9,7 @@ import pandas as pd
 import warnings
 
 
+
 def _run_data_checks(time_series):
     """
     Check that the passed parameters can be run through the function.
@@ -104,11 +105,12 @@ def _preprocess_data(time_series, remove_seasonality):
     else:
         # Take the median of every day of the year across all years in the
         # data, and use this as the seasonality of the time series
-        day_year_values = pd.DatetimeIndex(
-            pd.Series(time_series.index)).dayofyear
-        time_series_seasonality = time_series_normalized.groupby(
-            [day_year_values]).transform("median")
-        # Remove seasonlity from the time series
+        month_values = pd.DatetimeIndex(time_series.index).month
+        day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
+        time_series_seasonality = time_series_normalized.groupby([month_values,
+                                                                  day_values])\
+            .transform("median")
+        # Remove seasonality from the time series
         return (time_series_normalized - time_series_seasonality)
 
 
@@ -209,15 +211,9 @@ def detect_data_shifts(time_series,
         result.remove(len(points))
     # Return a list of dates where changepoints are detected
     time_series_processed.index.name = "datetime"
-    time_series_processed = time_series_processed.reset_index()
-    time_series_processed['cpd_mask'] = time_series_processed.index.isin(
-        result)
-    time_series_processed.index = time_series_processed['datetime']
-    return time_series_processed['cpd_mask']
-    # time_series_processed.index.name = "datetime"
-    # mask = pd.Series(False, index=time_series_processed.index)
-    # mask.iloc[result] = True
-    # return mask
+    mask = pd.Series(False, index=time_series_processed.index)
+    mask.iloc[result] = True
+    return mask
 
 
 def get_longest_shift_segment_dates(time_series,
@@ -282,3 +278,14 @@ def get_longest_shift_segment_dates(time_series,
     index = interval_id.index[interval_id == longest_interval_id]
     passing_dates_dict = {'start_date': index.min(), 'end_date': index.max()}
     return passing_dates_dict
+
+
+
+test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/pvlib_data_shift_stream_example_1.csv"
+df = pd.read_csv(test_file_1)
+signal_no_index = df['value']
+df.index = pd.to_datetime(df['timestamp'])
+signal_datetime_index = df['value']
+changepoint_date = df[df['label'] == 1].index[0]
+
+r = detect_data_shifts(time_series = signal_datetime_index)
