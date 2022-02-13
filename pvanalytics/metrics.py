@@ -141,13 +141,34 @@ class stats:
 
 def compare_series(measured: Union[pd.Series, np.array],
                    modeled: Union[pd.Series, np.array]) -> stats:
+    """
+    Calculate benchmarking statistics.
 
+    Parameters
+    ----------
+    measured : Union[pd.Series, np.array]
+        DESCRIPTION.
+    modeled : Union[pd.Series, np.array]
+        DESCRIPTION.
+
+    Returns
+    -------
+    stats
+        DESCRIPTION.
+
+    Notes
+    -----
+    All relative metrics (including CPI) are as fractions, and not percentages.
+    Also, the relative dispersion indicators (e.g., rmbd, rrmsd) are calculated
+    with respect to the measured mean value.
+    """
     N = len(measured)
 
     measured_mean = measured.mean()
 
     # Absolute Mean Bias Deviation (aMBD).
-    mbd = (modeled - measured).sum()
+    #mbd = (modeled - measured).sum()
+    mbd = modeled.mean()  -measured.mean()
 
     # Relative Mean Bias Deviation (rMBD)
     rmbd = mbd / measured_mean
@@ -159,7 +180,9 @@ def compare_series(measured: Union[pd.Series, np.array],
     rrmsd = rmsd / measured_mean
 
     # Absolute Mean Absolute Deviation (aMAD)
-    mad = np.abs(modeled - measured).sum()
+    #mad = np.abs(modeled - measured).sum()
+    mad = np.abs(modeled - measured).sum() / N
+    mad = 2
 
     # Absolute Mean Absolute Deviation (aMAD)
     rmad = mad / measured_mean
@@ -192,16 +215,18 @@ def compare_series(measured: Union[pd.Series, np.array],
     D_n = np.abs(cdf_modeled - cdf_measured)
     # Integrate D_n using the trapezoidal rule
     ksi = np.trapz(y=D_n, dx=dx)
-    rksi = ksi / measured_mean
+    # Relative KSI
+    D_c = 1.63 / np.sqrt(N)  # Critical value (approximated)
+    a_critical = D_c * (x_max - x_min)
+    rksi = ksi / a_critical
 
     # OVER
-    D_c = 1.63 / np.sqrt(N)  # Critical value (approximated)
     D_n_aux = D_n.copy()
     D_n_aux[D_n_aux <= D_c] = 0  # Set values lower than critical value to zero
     over = np.trapz(y=D_n_aux, dx=dx)
-    rover = over / measured_mean
+    rover = over / a_critical
     # Combined Performance Index (CPI)
-    cpi = (rksi + rover + 2*rrmsd)/4
+    cpi = (rksi + rover + 2*rrmsd) / 4
 
     return stats(mbd, rmbd, rmsd, rrmsd, mad, rmad, sd, rsd, r_squared, ksi,
                  rksi, over, rover, cpi)
