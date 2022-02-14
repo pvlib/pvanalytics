@@ -48,10 +48,6 @@ def test_detect_data_shifts(generate_daily_time_series):
     # cost variable
     pytest.raises(ValueError, dt.detect_data_shifts, signal_datetime_index,
                   True, False, ruptures.Binseg, "none")
-    # Test that a warning is thrown when the data is less than 2 years
-    # in length
-    pytest.warns(UserWarning, dt.detect_data_shifts,
-                 signal_datetime_index[:500], True, True)
     # Test that a data shift is successfully detected within 5 days of
     # inserted changepoint
     shift_index = dt.detect_data_shifts(time_series=signal_datetime_index)
