@@ -2,3 +2,5 @@ prune .github
 exclude .gitignore
 exclude .readthedocs.yml
 exclude .travis.yml
+
+graft pvanalytics/data

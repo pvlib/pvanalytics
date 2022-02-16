@@ -68,6 +68,8 @@ coverage.xml
 
 #Datafiles
 *.csv
+# but don't ignore pvanalytics/data
+!pvanalytics/data/*.csv
 
 # vi
 *.swp
