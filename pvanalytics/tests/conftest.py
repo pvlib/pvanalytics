@@ -11,6 +11,7 @@ from pkg_resources import Requirement, parse_version
 TEST_DIR = Path(__file__).parent
 DATA_DIR = TEST_DIR.parent / 'data'
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--runslow", action="store_true", default=False, help="run slow tests"
