@@ -40,7 +40,7 @@ INSTALL_REQUIRES = [
 ]
 
 DOCS_REQUIRE = [
-    'sphinx == 4.3.1'
+    'sphinx == 4.3.1', 'sphinx-gallery', 'matplotlib',
 ]
 
 EXTRAS_REQUIRE = {
@@ -78,5 +78,6 @@ setup(
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     classifiers=CLASSIFIERS,
-    url=URL
+    url=URL,
+    include_package_data=True,
 )

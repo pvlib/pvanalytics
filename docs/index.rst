@@ -94,7 +94,9 @@ Contents
    :caption: Contents:
 
    api
+   generated/gallery/index
    whatsnew/index
+
 
 Indices and tables
 ==================
