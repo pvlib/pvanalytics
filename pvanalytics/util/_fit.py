@@ -62,9 +62,11 @@ def quadratic_r2(x, y):
     Alliance for Sustainable Energy, LLC.
 
     """
+    if np.std(y) == 0:
+        return 0
     quadratic = _quadratic(x, y)
     _, _, correlation, _, _ = scipy.stats.linregress(
-        y, quadratic(x)
+        quadratic(x), y
     )
     return correlation**2
 
