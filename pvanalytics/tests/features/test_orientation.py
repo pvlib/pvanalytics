@@ -1,8 +1,10 @@
 import pytest
 from pandas.util.testing import assert_series_equal
 import pandas as pd
-from pvlib import tracking, modelchain, irradiance
+from pvlib import tracking, pvsystem, modelchain, irradiance
 from pvanalytics.features import orientation
+
+from ..conftest import requires_pvlib
 
 
 def test_clearsky_ghi_fixed(clearsky, solarposition):
@@ -40,9 +42,13 @@ def test_ghi_not_tracking(clearsky, solarposition):
 
 
 @pytest.fixture
-def power_tracking(clearsky, albuquerque, system_parameters):
+def power_tracking_old_pvlib(clearsky, albuquerque, array_parameters,
+                             system_parameters):
     """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
-    system = tracking.SingleAxisTracker(**system_parameters)
+    # copy of `power_tracking` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    system = tracking.SingleAxisTracker(**array_parameters,
+                                        **system_parameters)
     mc = modelchain.ModelChain(
         system,
         albuquerque,
@@ -51,6 +57,34 @@ def power_tracking(clearsky, albuquerque, system_parameters):
     return mc.ac
 
 
+@pytest.fixture
+def power_tracking(clearsky, albuquerque, array_parameters, system_parameters):
+    """Simulated power for a pvlib SingleAxisTracker PVSystem in Albuquerque"""
+    array = pvsystem.Array(pvsystem.SingleAxisTrackerMount(),
+                           **array_parameters)
+    system = pvsystem.PVSystem(arrays=[array],
+                               **system_parameters)
+    mc = modelchain.ModelChain(
+        system,
+        albuquerque,
+    )
+    mc.run_model(clearsky)
+    return mc.results.ac
+
+
+@requires_pvlib('<0.9.0', reason="SingleAxisTracker deprecation")
+def test_power_tracking_old_pvlib(power_tracking_old_pvlib, solarposition):
+    """simulated power from a single axis tracker is identified as sunny
+    with tracking=True"""
+    # copy of `test_power_tracking` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    assert orientation.tracking_nrel(
+        power_tracking_old_pvlib,
+        solarposition['zenith'] < 87
+    ).all()
+
+
+@requires_pvlib('>=0.9.0', reason="Array class")
 def test_power_tracking(power_tracking, solarposition):
     """simulated power from a single axis tracker is identified as sunny
     with tracking=True"""
@@ -60,6 +94,33 @@ def test_power_tracking(power_tracking, solarposition):
     ).all()
 
 
+@requires_pvlib('<0.9.0', reason="SingleAxisTracker deprecation")
+def test_power_tracking_perturbed_old_pvlib(power_tracking_old_pvlib,
+                                            solarposition):
+    """A day with perturbed values is not marked as tracking."""
+    # copy of `test_power_tracking_perturbed` but with older pvlib API
+    # TODO: remove when minimum pvlib version is >= 0.9.0
+    power_tracking_old_pvlib.iloc[6:18] = 10
+    expected = pd.Series(True, index=power_tracking_old_pvlib.index)
+    expected.iloc[0:24] = False
+    assert_series_equal(
+        expected,
+        orientation.tracking_nrel(
+            power_tracking_old_pvlib,
+            solarposition['zenith'] < 87
+        )
+    )
+    assert_series_equal(
+        expected,
+        orientation.tracking_nrel(
+            power_tracking_old_pvlib,
+            solarposition['zenith'] < 87,
+            peak_min=100
+        )
+    )
+
+
+@requires_pvlib('>=0.9.0', reason="Array class")
 def test_power_tracking_perturbed(power_tracking, solarposition):
     """A day with perturbed values is not marked as tracking."""
     power_tracking.iloc[6:18] = 10

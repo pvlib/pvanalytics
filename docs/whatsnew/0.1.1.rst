@@ -27,6 +27,11 @@ Bug Fixes
 * Fixed an issue with :py:func:`pvanalytics.features.clearsky.reno` in recent
   pandas versions (:issue:`125`, :pull:`128`)
 
+Requirements
+~~~~~~~~~~~~
+
+* Drop support for python 3.6, which reached end of life Dec 2021 (:pull:`129`)
+
 Documentation
 ~~~~~~~~~~~~~
 
