@@ -27,6 +27,12 @@ Bug Fixes
 * Fixed an issue with :py:func:`pvanalytics.features.clearsky.reno` in recent
   pandas versions (:issue:`125`, :pull:`128`)
 
+Documentation
+~~~~~~~~~~~~~
+
+* Started an example gallery and added an example for
+  :py:func:`pvanalytics.features.clearsky.reno`  (:issue:`125`, :pull:`127`)
+
 Contributors
 ~~~~~~~~~~~~
 
