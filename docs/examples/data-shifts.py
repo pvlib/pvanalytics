@@ -1,6 +1,6 @@
 """
 Data Shift Detection & Removal
-===================
+==============================
 This example covers identifying data shift periods in a time series
 and filtering them out, using the PVAnalytics quality.data_shifts
 module.
