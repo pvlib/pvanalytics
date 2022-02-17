@@ -174,19 +174,20 @@ def detect_data_shifts(time_series,
     _run_data_checks(time_series)
     # Run the filtering sequence, if marked as True
     if filtering:
-        time_series = _erroneous_filter(time_series)
+        time_series_filtered = _erroneous_filter(time_series)
     # Drop any duplicated data from the time series
-    time_series = time_series.drop_duplicates()
+    time_series_filtered = time_series_filtered.drop_duplicates()
     # Check if the time series is more than 2 years long. If so, remove
     # seasonality. If not, run analysis on the normalized time series
-    if (time_series.index.max() - time_series.index.min()).days <= 730:
-        time_series_processed = _preprocess_data(time_series,
+    if (time_series_filtered.index.max() -
+            time_series_filtered.index.min()).days <= 730:
+        time_series_processed = _preprocess_data(time_series_filtered,
                                                  remove_seasonality=False)
         seasonality_rmv = False
     else:
         # Perform pre-processing on the time series, to get the
         # seasonality-removed time series.
-        time_series_processed = _preprocess_data(time_series,
+        time_series_processed = _preprocess_data(time_series_filtered,
                                                  remove_seasonality=True)
         seasonality_rmv = True
     points = np.array(time_series_processed.dropna())
@@ -212,6 +213,9 @@ def detect_data_shifts(time_series,
     time_series_processed.index.name = "datetime"
     mask = pd.Series(False, index=time_series_processed.index)
     mask.iloc[result] = True
+    # Re-index the mask to include any timestamps that were
+    # filtered out as outliers
+    mask = mask.reindex(time_series.index, fill_value=False)
     return mask
 
 

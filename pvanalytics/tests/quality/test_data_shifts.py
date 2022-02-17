@@ -65,6 +65,7 @@ def test_detect_data_shifts(generate_daily_time_series):
     assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
+    assert (len(shift_index_param.index) == len(signal_datetime_index.index))
 
 
 def test_filter_data_shifts(generate_daily_time_series):
