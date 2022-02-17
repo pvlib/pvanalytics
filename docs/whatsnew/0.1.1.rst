@@ -38,7 +38,7 @@ Documentation
 * Started an example gallery and added an example for
   :py:func:`pvanalytics.features.clearsky.reno`  (:issue:`125`, :pull:`127`)
 * Added an example for
-  :py:func:`pvanalytics.quality.data_shifts` routine  (:pull:`127`)
+  :py:func:`pvanalytics.quality.data_shifts` routine  (:pull:`131`)
 
 Contributors
 ~~~~~~~~~~~~
