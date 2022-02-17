@@ -223,12 +223,16 @@ def get_longest_shift_segment_dates(time_series,
                                     filtering=True,
                                     use_default_models=True,
                                     method=None, cost=None,
-                                    penalty=40):
+                                    penalty=40, buffer_day_length=7):
     """
     Return the start and end dates of the longest continuous time series
     segment. During this process, data shift detection is performed, and the
     longest time series segment between changepoints is identified, and the
-    start and end dates of that segment are returned.
+    start and end dates of that segment are returned, with a settable buffer
+    period added to the start date and subtracted from the end date,
+    to allow for the segment to stabilize (this helps if the
+    changepoint is detected a few days early or a few days late,
+    compared to the actual shift date).
 
     Parameters
     ----------
@@ -257,6 +261,13 @@ def get_longest_shift_segment_dates(time_series,
     penalty: int, default 40
         Penalty value passed to the ruptures changepoint detection method.
         Default set to 40.
+    buffer_day_length: int, default 7
+        Number of days to add to the start date and subtract from the
+        end date of the longest detected data shift-free period. This
+        buffer period helps to filter out any data that doesn't fit
+        within the current data segment. This issue occurs when the
+        changepoint is detected a few days early or late compared
+        to the actual data shift date.
 
     Returns
     -------
@@ -279,5 +290,9 @@ def get_longest_shift_segment_dates(time_series,
     interval_id = cpd_mask.cumsum()
     longest_interval_id = interval_id.value_counts().idxmax()
     index = interval_id.index[interval_id == longest_interval_id]
-    passing_dates_dict = {'start_date': index.min(), 'end_date': index.max()}
+    # Add a week-long buffer for the start and end dates
+    passing_dates_dict = {'start_date': index.min() +
+                          pd.DateOffset(days=buffer_day_length),
+                          'end_date': index.max() -
+                          pd.DateOffset(days=buffer_day_length)}
     return passing_dates_dict

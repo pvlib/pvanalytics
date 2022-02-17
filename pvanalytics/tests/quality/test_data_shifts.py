@@ -81,9 +81,9 @@ def test_filter_data_shifts(generate_daily_time_series):
     # Run the time series where there is a changepoint
     interval_dict = dt.get_longest_shift_segment_dates(
         time_series=signal_datetime_index)
-    assert (interval_dict['start_date'] == pd.to_datetime('2015-10-30')) & \
-        (interval_dict['end_date'] == pd.to_datetime('2020-12-31'))
+    assert (interval_dict['start_date'] == pd.to_datetime('2015-11-06')) & \
+        (interval_dict['end_date'] == pd.to_datetime('2020-12-24'))
     assert (interval_dict_short['start_date'] ==
-            signal_datetime_index.index.min()) & \
+            signal_datetime_index.index.min()+pd.DateOffset(days=7)) & \
         (interval_dict_short['end_date'] ==
-         signal_datetime_index[:100].index.max())
+         signal_datetime_index[:100].index.max()-pd.DateOffset(days=7))
