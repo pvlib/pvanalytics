@@ -1,17 +1,14 @@
 .. _whatsnew_011:
 
-0.1.1 (MONTH DAY, YEAR)
+0.1.1 (February 18, 2022)
 -------------------------
-
-API Changes
-~~~~~~~~~~~
 
 Enhancements
 ~~~~~~~~~~~~
 
 * Quantification of irradiance variability with
   :py:func:`pvanalytics.metrics.variability_index`. (:issue:`60`, :pull:`106`)
-* Internal refactor of `pvanalytics.metrics.performance_ratio_nrel` to support
+* Internal refactor of :py:func:`pvanalytics.metrics.performance_ratio_nrel` to support
   other performance ratio formulas. (:pull:`109`)
 * Detect shadows from fixed objects in GHI data using
   :py:func:`pvanalytics.features.shading.fixed`. (:issue:`24`, :pull:`101`)
@@ -19,13 +16,15 @@ Enhancements
 Bug Fixes
 ~~~~~~~~~
 
-* Added nan_policy to zscore calculation
+* Added ``nan_policy`` parameter to zscore calculation in
   :py:func:`pvanalytics.quality.outliers.zscore`. (:issue:`102`, :pull:`108`)
 * Prohibit pandas versions in the 1.1.x series to avoid an issue in
   ``.groupby().rolling()``.  Newer versions starting in 1.2.0 and older
   versions going back to 0.24.0 are still allowed. (:issue:`82`, :pull:`118`)
 * Fixed an issue with :py:func:`pvanalytics.features.clearsky.reno` in recent
   pandas versions (:issue:`125`, :pull:`128`)
+* Improved convergence in :py:func:`pvanalytics.features.orientation.fixed_nrel`
+  (:issue:`119`, :pull:`120`)
 
 Requirements
 ~~~~~~~~~~~~
@@ -44,3 +43,7 @@ Contributors
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
 * Will Vining (:ghuser:`wfvining`)
+* Kirsten Perry (:ghuser:`kperrynrel`)
+* Michael Hopwood (:ghuser:`MichaelHopwood`)
+* Carlos Silva (:ghuser:`camsilva`)
+* Ben Taylor (:ghuser:`bt-`)
