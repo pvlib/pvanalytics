@@ -54,7 +54,7 @@ EXTRAS_REQUIRE['all'] = sorted(set(sum(EXTRAS_REQUIRE.values(), [])))
 SETUP_REQUIRES = ['setuptools_scm']
 
 CLASSIFIERS = [
-    'Development Status :: 2 - Pre-Alpha',
+    'Development Status :: 4 - Beta',
     'Operating System :: OS Independent',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python :: 3',
