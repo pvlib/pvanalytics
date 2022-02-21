@@ -8,13 +8,13 @@ Identifying clipping periods using the PVAnalytics clipping module.
 # %%
 # Identifying and removing clipping periods from AC power time series
 # data aids in generating more accurate degradation analysis results,
-# as using clipped data can lead to over-predicting degradation. In this
+# as using clipped data can lead to under-predicting degradation. In this
 # example, we show how to use
 # :py:func:`pvanalytics.features.clipping.geometric`
 # to mask clipping periods in an AC power time series. We use a
 # normalized time series example provided by the PV Fleets Initiative,
 # where clipping periods are labeled as True, and non-clipping periods are
-# labeled as False. This example is provided taken from the DuraMAT DataHub:
+# labeled as False. This example is adapted from the DuraMAT DataHub clipping data set:
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
 
 import pvanalytics
@@ -30,20 +30,19 @@ import numpy as np
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file_1 = pvanalytics_dir / 'data' / 'ac_power_inv_7539.csv'
-data = pd.read_csv(ac_power_file_1, index_col=3, parse_dates=True)
+data = pd.read_csv(ac_power_file_1, index_col=0, parse_dates=True)
 data['label'] = data['label'].astype(bool)
-freq = str(int(data.index.to_series().diff().value_counts().idxmax()
-               .seconds/60))+"T"
-scatter = plt.scatter(data.index[3500:4000],
-                      data['value_normalized'][3500:4000],
-                      c=data.label[3500:4000].astype('int'),
-                      cmap="bwr")
-plt.legend(handles=scatter.legend_elements()[0],
-           labels=[False, True],
+# This is the known frequency of the time series. You may need to infer
+# the frequency or set the frequency with your AC power time series.
+freq = "15T"
+
+data['value_normalized'].plot()
+data.loc[data['label'], 'value_normalized'].plot(ls='', marker='o')
+plt.legend(labels=[False, True],
            title="Clipped")
-plt.xticks(rotation=45)
-plt.xlabel("Date", size=18)
-plt.ylabel("Normalized AC Power", size=18)
+plt.xticks(rotation=20)
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
 plt.tight_layout()
 plt.show()
 
@@ -52,16 +51,13 @@ plt.show()
 # clipping periods in the time series. Re-plot the data subset with this mask.
 predicted_clipping_mask = geometric(ac_power=data['value_normalized'],
                                     freq=freq)
-scatter = plt.scatter(data.index[3500:4000],
-                      data['value_normalized'][3500:4000],
-                      c=predicted_clipping_mask[3500:4000].astype('int'),
-                      cmap="bwr")
-plt.legend(handles=scatter.legend_elements()[0],
-           labels=[False, True],
+data['value_normalized'].plot()
+data.loc[predicted_clipping_mask, 'value_normalized'].plot(ls='', marker='o')
+plt.legend(labels=[False, True],
            title="Clipped")
-plt.xticks(rotation=45)
-plt.xlabel("Date", size=18)
-plt.ylabel("Normalized AC Power", size=18)
+plt.xticks(rotation=20)
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
 plt.tight_layout()
 plt.show()
 

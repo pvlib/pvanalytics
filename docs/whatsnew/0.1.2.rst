@@ -1,6 +1,6 @@
 .. _whatsnew_012:
 
-0.1.2 (February 21, 2022)
+0.1.2 (TBD)
 -------------------------
 
 Enhancements
