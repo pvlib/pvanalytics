@@ -9,7 +9,7 @@ Identifying clipping periods using the PVAnalytics clipping module.
 # Identifying and removing clipping periods from AC power time series
 # data aids in generating more accurate degradation analysis results,
 # as using clipped data can lead to over-predicting degradation. In this
-# example, we show how to use 
+# example, we show how to use
 # :py:func:`pvanalytics.features.clipping.geometric`
 # to mask clipping periods in an AC power time series. We use a
 # normalized time series example provided by the PV Fleets Initiative,
