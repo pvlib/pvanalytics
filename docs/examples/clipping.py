@@ -14,7 +14,8 @@ Identifying clipping periods using the PVAnalytics clipping module.
 # to mask clipping periods in an AC power time series. We use a
 # normalized time series example provided by the PV Fleets Initiative,
 # where clipping periods are labeled as True, and non-clipping periods are
-# labeled as False. This example is adapted from the DuraMAT DataHub clipping data set:
+# labeled as False. This example is adapted from the DuraMAT DataHub 
+# clipping data set:
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
 
 import pvanalytics
