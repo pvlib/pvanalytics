@@ -44,6 +44,7 @@ plt.legend(handles=scatter.legend_elements()[0],
 plt.xticks(rotation=45)
 plt.xlabel("Date", size=18)
 plt.ylabel("Normalized AC Power", size=18)
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -61,6 +62,7 @@ plt.legend(handles=scatter.legend_elements()[0],
 plt.xticks(rotation=45)
 plt.xlabel("Date", size=18)
 plt.ylabel("Normalized AC Power", size=18)
+plt.tight_layout()
 plt.show()
 
 
