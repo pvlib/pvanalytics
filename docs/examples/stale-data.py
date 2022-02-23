@@ -62,8 +62,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_diff` to identify
-# stale values in data. We visualize the detected stale periods graphicallyy.
+# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_diff` to
+# identify stale values in data. We visualize the detected stale periods
+# graphicallyy.
 
 stale_data_mask = gaps.stale_values_diff(data['value_normalized'])
 data['value_normalized'].plot()
@@ -75,11 +76,11 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_round` to identify
-# stale values in data, using rounded data. This function yields similar
-# results as :py:func:`pvanalytics.features.gaps.stale_values_diff`, except it
-# looks for consecutive repeating data that has been rounded to a settable
-# decimals place.
+# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_round` to
+# identify stale values in data, using rounded data. This function yields
+# similar results as :py:func:`pvanalytics.features.gaps.stale_values_diff`,
+# except it looks for consecutive repeating data that has been rounded to
+# a settable decimals place.
 
 stale_data_round_mask = gaps.stale_values_round(data['value_normalized'])
 data['value_normalized'].plot()
