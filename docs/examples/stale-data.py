@@ -1,5 +1,5 @@
 """
-Stale Data Filtering
+Stale Data Periods
 ===================
 
 Identifying stale data periods, defined as periods of

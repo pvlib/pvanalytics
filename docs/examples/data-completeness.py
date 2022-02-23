@@ -1,5 +1,5 @@
 """
-Time Series Completeness
+Missing Data Periods
 ===================
 
 Identifying days with missing data using a "completeness" score metric,

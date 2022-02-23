@@ -1,5 +1,5 @@
 """
-Identifying Interpolated Data Periods
+Interpolated Data Periods
 ===================
 
 Identifying periods in a time series where the data has been
