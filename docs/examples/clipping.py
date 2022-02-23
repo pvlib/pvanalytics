@@ -54,7 +54,7 @@ predicted_clipping_mask = geometric(ac_power=data['value_normalized'],
                                     freq=freq)
 data['value_normalized'].plot()
 data.loc[predicted_clipping_mask, 'value_normalized'].plot(ls='', marker='o')
-plt.legend(labels=[False, True],
+plt.legend(labels=["AC Power", "Detected Clipping"],
            title="Clipped")
 plt.xticks(rotation=20)
 plt.xlabel("Date")
