@@ -23,7 +23,7 @@ import numpy as np
 
 # %%
 # First, we import the AC power data stream that we are going to check for
-# completeness. The time series we download is a normalized AC power time
+# stale data periods. The time series we download is a normalized AC power time
 # series from the PV Fleets Initiative, and is available via the DuraMAT
 # DataHub:
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
@@ -62,8 +62,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, use :py:func:`pvanalytics.features.gaps.stale_values_diff` to identify
-# stale values in data.
+# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_diff` to identify
+# stale values in data. We visualize the detected stale periods graphicallyy.
 
 stale_data_mask = gaps.stale_values_diff(data['value_normalized'])
 data['value_normalized'].plot()
@@ -75,9 +75,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, use :py:func:`pvanalytics.features.gaps.stale_values_round` to identify
+# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_round` to identify
 # stale values in data, using rounded data. This function yields similar
-# results as :py:func:`pvanalytics.features.gaps.stale_values_diff, except it
+# results as :py:func:`pvanalytics.features.gaps.stale_values_diff`, except it
 # looks for consecutive repeating data that has been rounded to a settable
 # decimals place.
 

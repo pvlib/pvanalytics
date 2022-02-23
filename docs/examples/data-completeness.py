@@ -12,9 +12,9 @@ future data analysis.
 # when performing data analysis. This example shows how to use a
 # daily data "completeness" score to identify and filter out days with missing
 # data. This includes using
-# :py:func:`pvanalytics.quality.gaps.completeness_score,
+# :py:func:`pvanalytics.quality.gaps.completeness_score`,
 # :py:func:`pvanalytics.quality.gaps.complete`, and
-# :py:func:`pvanalytics.quality.gaps.complete`.
+# :py:func:`pvanalytics.quality.gaps.trim_incomplete`.
 
 import pvanalytics
 from pvanalytics.quality import gaps
@@ -68,9 +68,9 @@ plt.show()
 
 # %%
 # Trim the time series based on the completeness score, where the time
-# series most have at least 10 consecutive days of data that meets the
+# series must have at least 10 consecutive days of data that meet the
 # completeness threshold. This is done using
-# :py:func:`pvanalytics.quality.gaps.complete`
+# :py:func:`pvanalytics.quality.gaps.trim_incomplete`
 number_consecutive_days = 10
 completeness_trim_mask = gaps.trim_incomplete(data['value_normalized'],
                                               days=number_consecutive_days)
