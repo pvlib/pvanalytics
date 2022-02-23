@@ -8,18 +8,55 @@ Identifying Interpolated Data Periods
 # 
 
 import pvanalytics
-from pvanalytics.features import gaps
+from pvanalytics.quality import gaps
 import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
-import numpy as np
 
 # %%
-# 
-
+# First, we import the AC power data stream that we are going to check for
+# completeness. The time series we download is a normalized AC power time
+# series from the PV Fleets Initiative, and is available via the DuraMAT
+# DataHub:
+# https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
+pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+file = pvanalytics_dir / 'data' / 'ac_power_inv_2173.csv'
+data = pd.read_csv(file, index_col=0, parse_dates=True)
+data = data.asfreq("15T")
 
 # %%
-# Now, use :py:func:`pvanalytics.features.gaps.interpolation_diff` to identify
-# clipping periods in the time series. Re-plot the data subset with this mask.
+# We plot the time series before linearly interpolating missing data periods.
+data.plot()
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
+plt.tight_layout()
+plt.show()
 
-gaps.interpolation_diff(x)
+# %%
+# We add linearly interpolated data periods into the time series for the
+# :py:func:`pvanalytics.features.gaps.interpolation_diff` to catch, and
+# re-visualize the data with those interpolated periods masked.
+interpolated_data_mask = (data['value_normalized'].isna())
+data = data.interpolate(method='linear', limit_direction='forward', axis=0)
+data['value_normalized'].plot()
+data.loc[interpolated_data_mask, "value_normalized"].plot(ls='', marker='.')
+plt.legend(labels=["AC Power", "Interpolated Data"])
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
+plt.tight_layout()
+plt.show()
+
+# %%
+# Now, we use :py:func:`pvanalytics.features.gaps.interpolation_diff` to
+# identify linearly interpolated periods in the time series. We re-plot
+# the data subset with this mask.
+detected_interpolated_data_mask = gaps.interpolation_diff(
+    data['value_normalized'])
+data['value_normalized'].plot()
+data.loc[detected_interpolated_data_mask,
+         "value_normalized"].plot(ls='', marker='.')
+plt.legend(labels=["AC Power", "Detected Interpolated Data"])
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
+plt.tight_layout()
+plt.show()
