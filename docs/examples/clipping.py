@@ -39,7 +39,7 @@ freq = "15T"
 
 data['value_normalized'].plot()
 data.loc[data['label'], 'value_normalized'].plot(ls='', marker='o')
-plt.legend(labels=[False, True],
+plt.legend(labels=["AC Power", "Labeled Clipping"],
            title="Clipped")
 plt.xticks(rotation=20)
 plt.xlabel("Date")
