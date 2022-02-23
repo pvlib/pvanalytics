@@ -2,10 +2,16 @@
 Identifying Interpolated Data Periods
 ===================
 
+Identifying periods in a time series where the data has been
+linearly interpolated.
 """
 
 # %%
-# 
+# Identifying periods where time series data has been linearly interpolated
+# and removing these periods may help to reduce noise when performing future
+# data anaylsis. This example shows how to use
+# :py:func:`pvanalytics.features.gaps.interpolation_diff, which identifies and
+# masks linearly interpolated periods.
 
 import pvanalytics
 from pvanalytics.quality import gaps

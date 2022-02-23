@@ -2,7 +2,8 @@
 Stale Data Filtering
 ===================
 
-Identifying stale data in time series.
+Identifying stale data periods, defined as periods of
+consecutive repeating values, in time series.
 """
 
 # %%
