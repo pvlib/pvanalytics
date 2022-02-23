@@ -17,6 +17,9 @@ import numpy as np
 
 # %%
 # 
+
+# %%
+# 
 gaps.start_stop_dates(series, days=10)
 
 # %%

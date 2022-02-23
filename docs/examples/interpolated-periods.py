@@ -2,7 +2,6 @@
 Identifying Interpolated Data Periods
 ===================
 
-
 """
 
 # %%
