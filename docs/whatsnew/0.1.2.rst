@@ -1,0 +1,27 @@
+.. _whatsnew_012:
+
+0.1.2 (TBD)
+-------------------------
+
+Enhancements
+~~~~~~~~~~~~
+
+
+Bug Fixes
+~~~~~~~~~
+
+
+Requirements
+~~~~~~~~~~~~
+
+
+Documentation
+~~~~~~~~~~~~~
+
+* Added an example for
+  :py:func:`pvanalytics.features.clipping.geometric`  (:issue:`133`, :pull:`134`)
+
+Contributors
+~~~~~~~~~~~~
+
+* Kirsten Perry (:ghuser:`kperrynrel`)
