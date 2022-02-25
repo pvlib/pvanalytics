@@ -26,8 +26,8 @@ import pathlib
 # DataHub:
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data.
 # This data set has a Pandas DateTime index, with the min-max normalized
-# AC power time series represented in the 'value_normalized' column,and a
-# interpolated data mask in the "interpolated_data_mask" column, where
+# AC power time series represented in the 'value_normalized' column. There is
+# also an "interpolated_data_mask" column, where
 # interpolated periods are labeled as True, and all other data is labeled
 # as False. The data is sampled at 15-minute intervals.
 
@@ -48,8 +48,8 @@ plt.show()
 # Now, we use :py:func:`pvanalytics.quality.gaps.interpolation_diff` to
 # identify linearly interpolated periods in the time series. We re-plot
 # the data with this mask. Please note that nighttime periods generally consist
-# of repeating 0 values; this means these periods are linear. Consequently,
-# these periods are flagged by
+# of repeating 0 values; this means that these periods can be linearly
+# interpolated. Consequently, these periods are flagged by
 # :py:func:`pvanalytics.quality.gaps.interpolation_diff`.
 detected_interpolated_data_mask = gaps.interpolation_diff(
     data['value_normalized'])

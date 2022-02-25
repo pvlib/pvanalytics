@@ -30,8 +30,7 @@ import pathlib
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data.
 # This data set has a Pandas DateTime index, with the min-max normalized
 # AC power time series represented in the 'value_normalized' column. The data
-# is sampled at 15-minute intervals. Outside of min-max normalization, no
-# additional processes have been performed on this data set. This data set
+# is sampled at 15-minute intervals. This data set
 # does contain NaN values.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
@@ -40,7 +39,7 @@ data = pd.read_csv(file, index_col=0, parse_dates=True)
 data = data.asfreq("15T")
 
 # %%
-# Now, use :py:func:`pvanalytics.quality.gaps.completeness_score` to get the
+# Now, we use :py:func:`pvanalytics.quality.gaps.completeness_score` to get the
 # percentage of daily data that isn't NaN. This percentage score is calculated
 # as the total number of non-NA values over a 24-hour period, meaning that
 # nighttime values are expected.
@@ -54,8 +53,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Mask complete days, based on daily completeness score, using
-# :py:func:`pvanalytics.quality.gaps.complete`
+# We mask complete days, based on daily completeness score, using
+# :py:func:`pvanalytics.quality.gaps.complete`.
 min_completeness = 0.333
 daily_completeness_mask = gaps.complete(data['value_normalized'],
                                         minimum_completeness=min_completeness)
@@ -74,10 +73,10 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Trim the time series based on the completeness score, where the time
+# We trim the time series based on the completeness score, where the time
 # series must have at least 10 consecutive days of data that meet the
 # completeness threshold. This is done using
-# :py:func:`pvanalytics.quality.gaps.trim_incomplete`
+# :py:func:`pvanalytics.quality.gaps.trim_incomplete`.
 number_consecutive_days = 10
 completeness_trim_mask = gaps.trim_incomplete(data['value_normalized'],
                                               days=number_consecutive_days)

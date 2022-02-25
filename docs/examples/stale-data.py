@@ -27,8 +27,8 @@ import pathlib
 # DataHub:
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
 # This data set has a Pandas DateTime index, with the min-max normalized
-# AC power time series represented in the 'value_normalized' column, and a
-# stale data mask in the "stale_data_mask" column, where stale periods are
+# AC power time series represented in the 'value_normalized' column.
+# Additionally, there is a "stale_data_mask" column, where stale periods are
 # labeled as True, and all other data is labeled as False. The data
 # is sampled at 15-minute intervals.
 
@@ -47,8 +47,8 @@ plt.show()
 # %%
 # Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_diff` to
 # identify stale values in data. We visualize the detected stale periods
-# graphically. Please note that nighttime periods generally contain repeating
-# 0 values, which are flagged by
+# graphically. Please note that nighttime periods generally contain consecutive
+# repeating 0 values, which are flagged by
 # :py:func:`pvanalytics.quality.gaps.stale_values_diff`.
 
 stale_data_mask = gaps.stale_values_diff(data['value_normalized'])
@@ -67,7 +67,7 @@ plt.show()
 # except it looks for consecutive repeating data that has been rounded to
 # a settable decimals place.
 # Please note that nighttime periods generally
-# contain repeating 0 values, which are flagged by
+# contain consecutive repeating 0 values, which are flagged by
 # :py:func:`pvanalytics.quality.gaps.stale_values_diff`.
 
 stale_data_round_mask = gaps.stale_values_round(data['value_normalized'])
