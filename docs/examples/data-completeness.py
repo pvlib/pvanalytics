@@ -27,7 +27,12 @@ import pathlib
 # completeness. The time series we download is a normalized AC power time
 # series from the PV Fleets Initiative, and is available via the DuraMAT
 # DataHub:
-# https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
+# https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data.
+# This data set has a Pandas DateTime index, with the min-max normalized
+# AC power time series represented in the 'value_normalized' column. The data
+# is sampled at 15-minute intervals. Outside of min-max normalization, no
+# additional processes have been performed on this data set. This data set
+# does contain NaN values.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'ac_power_inv_2173.csv'
@@ -36,7 +41,9 @@ data = data.asfreq("15T")
 
 # %%
 # Now, use :py:func:`pvanalytics.quality.gaps.completeness_score` to get the
-# percentage of daily data that isn't NaN.
+# percentage of daily data that isn't NaN. This percentage score is calculated
+# as the total number of non-NA values over a 24-hour period, meaning that
+# nighttime values are expected.
 data_completeness_score = gaps.completeness_score(data['value_normalized'])
 
 # Visualize data completeness score as a time series.
