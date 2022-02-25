@@ -1,6 +1,6 @@
 """
 Missing Data Periods
-===================
+====================
 
 Identifying days with missing data using a "completeness" score metric,
 and filtering out consecutive days with a low completeness score for
@@ -51,7 +51,7 @@ plt.show()
 # :py:func:`pvanalytics.quality.gaps.complete`
 minimum_completeness = 0.333
 daily_completeness_mask = gaps.complete(data['value_normalized'],
-                                        minimum_completeness=0.333)
+                                        minimum_completeness=minimum_completeness)
 
 # Mask complete days, based on daily completeness score
 data_completeness_score.plot()

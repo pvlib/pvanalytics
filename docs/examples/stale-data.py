@@ -1,6 +1,6 @@
 """
 Stale Data Periods
-===================
+==================
 
 Identifying stale data periods, defined as periods of
 consecutive repeating values, in time series.
@@ -10,8 +10,8 @@ consecutive repeating values, in time series.
 # Identifing and removing stale, or consecutive repeating, values in time
 # series data reduces noise when performing data analysis. This example shows
 # how to use two PVAnalytics functions,
-# :py:func:`pvanalytics.features.gaps.stale_values_diff`
-# and :py:func:`pvanalytics.features.gaps.stale_values_round`, to identify
+# :py:func:`pvanalytics.quality.gaps.stale_values_diff`
+# and :py:func:`pvanalytics.quality.gaps.stale_values_round`, to identify
 # and mask stale data periods in time series data.
 
 import pvanalytics
@@ -50,7 +50,9 @@ plt.show()
 data[460:520] = data.iloc[460]
 data[755:855] = data.iloc[755]
 data[1515:1600] = data.iloc[1515]
-stale_data_insert_mask = pd.Series([False] * len(data), index=data.index)
+stale_data_insert_mask = pd.Series(False, index=data.index)
+# Numpy.r_ translates slice objects to concatenation along the first axis. See here:
+# https://numpy.org/doc/stable/reference/generated/numpy.r_.html
 stale_data_insert_mask.iloc[np.r_[460:520, 755:855, 1515:1600]] = True
 
 data['value_normalized'].plot()
@@ -62,9 +64,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_diff` to
+# Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_diff` to
 # identify stale values in data. We visualize the detected stale periods
-# graphicallyy.
+# graphically.
 
 stale_data_mask = gaps.stale_values_diff(data['value_normalized'])
 data['value_normalized'].plot()
@@ -76,9 +78,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, we use :py:func:`pvanalytics.features.gaps.stale_values_round` to
+# Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_round` to
 # identify stale values in data, using rounded data. This function yields
-# similar results as :py:func:`pvanalytics.features.gaps.stale_values_diff`,
+# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
 # except it looks for consecutive repeating data that has been rounded to
 # a settable decimals place.
 

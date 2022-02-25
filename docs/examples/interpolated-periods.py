@@ -1,6 +1,6 @@
 """
 Interpolated Data Periods
-===================
+=========================
 
 Identifying periods in a time series where the data has been
 linearly interpolated.
@@ -10,7 +10,7 @@ linearly interpolated.
 # Identifying periods where time series data has been linearly interpolated
 # and removing these periods may help to reduce noise when performing future
 # data analysis. This example shows how to use
-# :py:func:`pvanalytics.features.gaps.interpolation_diff`, which identifies and
+# :py:func:`pvanalytics.quality.gaps.interpolation_diff`, which identifies and
 # masks linearly interpolated periods.
 
 import pvanalytics
@@ -40,9 +40,9 @@ plt.show()
 
 # %%
 # We add linearly interpolated data periods to the time series for the
-# :py:func:`pvanalytics.features.gaps.interpolation_diff` to catch, and
+# :py:func:`pvanalytics.quality.gaps.interpolation_diff` to catch, and
 # re-visualize the data with those interpolated periods masked.
-interpolated_data_mask = (data['value_normalized'].isna())
+interpolated_data_mask = data['value_normalized'].isna()
 data = data.interpolate(method='linear', limit_direction='forward', axis=0)
 data['value_normalized'].plot()
 data.loc[interpolated_data_mask, "value_normalized"].plot(ls='', marker='.')
@@ -53,7 +53,7 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Now, we use :py:func:`pvanalytics.features.gaps.interpolation_diff` to
+# Now, we use :py:func:`pvanalytics.quality.gaps.interpolation_diff` to
 # identify linearly interpolated periods in the time series. We re-plot
 # the data with this mask.
 detected_interpolated_data_mask = gaps.interpolation_diff(
