@@ -45,7 +45,7 @@ plt.show()
 # %%
 # We insert some repeating/stale data periods into the time series for the
 # stale data functions to catch, and re-visualize the data, with those stale
-# periods masked
+# periods masked.
 
 data[460:520] = data.iloc[460]
 data[755:855] = data.iloc[755]
