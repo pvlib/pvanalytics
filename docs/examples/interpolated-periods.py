@@ -32,7 +32,7 @@ import pathlib
 # as False. The data is sampled at 15-minute intervals.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'ac_power_inv_2173.csv'
+file = pvanalytics_dir / 'data' / 'ac_power_inv_2173_interpolated_data.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 data = data.asfreq("15T")
 data['value_normalized'].plot()
