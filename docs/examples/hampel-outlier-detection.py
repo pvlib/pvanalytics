@@ -2,13 +2,14 @@
 Hampel Outlier Detection
 ========================
 
-Identifying outliers in time series using the :py:func:`pvanalytics.quality.outliers.hampel`
+Identifying outliers in time series using
+:py:func:`pvanalytics.quality.outliers.hampel`
 """
 
 # %%
 # Identifying and removing outliers from PV sensor time series
 # data allows for more accurate data analysis.
-# In this example, we demonstrate how to use 
+# In this example, we demonstrate how to use
 # :py:func:`pvanalytics.quality.outliers.tukey` to identify and filter
 # out outliers in a time series.
 # We use a normalized time series example provided by the PV Fleets Initiative.
@@ -17,44 +18,58 @@ Identifying outliers in time series using the :py:func:`pvanalytics.quality.outl
 # https://datahub.duramat.org/dataset/inverter-clipping-ml-training-set-real-data
 
 import pvanalytics
-from pvanalytics.quality.outliers import tukey
+from pvanalytics.quality.outliers import hampel
 import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
 
 # %%
-# First, we read in the ac_power_inv_7539 example, and visualize a subset of the
-# clipping periods via the "label" mask column.
-
+# First, we read in the ac_power_inv_7539 example, and visualize the min-max
+# normalized time series.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/ac_power_inv_7539.csv"#pvanalytics_dir / 'data' / 'ac_power_inv_7539.csv'
+ac_power_file_1 = pvanalytics_dir / 'data' / 'ac_power_inv_7539.csv'
 data = pd.read_csv(ac_power_file_1, index_col=0, parse_dates=True)
 
 data['value_normalized'].plot()
-plt.xticks(rotation=20)
 plt.xlabel("Date")
 plt.ylabel("Normalized AC Power")
 plt.tight_layout()
 plt.show()
 
-
 # %%
-# Add some outliers to the time series, for :py:func:`pvanalytics.quality.outliers.tukey`
-# to detect.
-
-
-
-# %%
-# Use :py:func:`pvanalytics.quality.outliers.tukey` to identify
-# outliers in the time series. Re-plot the data subset with this mask.
+# Add some outliers to the time series, for
+# :py:func:`pvanalytics.quality.outliers.hampel`to detect.
+anomaly_dictionary = {35: data['value_normalized'][35]*1.5,
+                      80: -.5,
+                      160: -.4,
+                      195: data['value_normalized'][195]*2,
+                      200: data['value_normalized'][200]*.1,
+                      333:  data['value_normalized'][333]*2
+                      }
+data.loc[:, 'anomaly'] = False
+# Create fake anomaly values based on anomaly_dictionary
+for index, anomaly_value in anomaly_dictionary.items():
+    index_date = data.iloc[index].name
+    data.loc[index_date, 'value_normalized'] = anomaly_value
+    data.loc[index_date, 'anomaly'] = True
 
 data['value_normalized'].plot()
-data.loc[predicted_clipping_mask, 'value_normalized'].plot(ls='', marker='o')
-plt.legend(labels=["AC Power", "Detected Clipping"],
-           title="Clipped")
-plt.xticks(rotation=20)
+data.loc[data['anomaly'], 'value_normalized'].plot(ls='', marker='o')
+plt.legend(labels=["AC Power", "Generated Outlier"])
 plt.xlabel("Date")
 plt.ylabel("Normalized AC Power")
 plt.tight_layout()
 plt.show()
 
+# %%
+# Use :py:func:`pvanalytics.quality.outliers.hampel` to identify
+# outliers in the time series. Re-plot the data subset with this mask.
+hampel_outlier_mask = hampel(data=data['value_normalized'],
+                             window=10)
+data['value_normalized'].plot()
+data.loc[hampel_outlier_mask, 'value_normalized'].plot(ls='', marker='o')
+plt.legend(labels=["AC Power", "Detected Outlier"])
+plt.xlabel("Date")
+plt.ylabel("Normalized AC Power")
+plt.tight_layout()
+plt.show()
