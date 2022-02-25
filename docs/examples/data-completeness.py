@@ -49,15 +49,15 @@ plt.show()
 # %%
 # Mask complete days, based on daily completeness score, using
 # :py:func:`pvanalytics.quality.gaps.complete`
-minimum_completeness = 0.333
+min_completeness = 0.333
 daily_completeness_mask = gaps.complete(data['value_normalized'],
-                                        minimum_completeness=minimum_completeness)
+                                        minimum_completeness=min_completeness)
 
 # Mask complete days, based on daily completeness score
 data_completeness_score.plot()
 data_completeness_score.loc[daily_completeness_mask].plot(ls='', marker='.')
 data_completeness_score.loc[~daily_completeness_mask].plot(ls='', marker='.')
-plt.axhline(y=minimum_completeness, color='r', linestyle='--')
+plt.axhline(y=min_completeness, color='r', linestyle='--')
 plt.legend(labels=["Completeness Score", "Threshold met",
                    "Threshold not met", "Completeness Threshold (.33)"],
            loc="upper left")

@@ -51,7 +51,8 @@ data[460:520] = data.iloc[460]
 data[755:855] = data.iloc[755]
 data[1515:1600] = data.iloc[1515]
 stale_data_insert_mask = pd.Series(False, index=data.index)
-# Numpy.r_ translates slice objects to concatenation along the first axis. See here:
+# Numpy.r_ translates slice objects to concatenation along the first axis.
+# See here:
 # https://numpy.org/doc/stable/reference/generated/numpy.r_.html
 stale_data_insert_mask.iloc[np.r_[460:520, 755:855, 1515:1600]] = True
 
