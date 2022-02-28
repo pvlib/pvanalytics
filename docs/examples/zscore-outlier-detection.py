@@ -43,8 +43,8 @@ plt.show()
 
 
 # %%
-# Use :py:func:`pvanalytics.quality.outliers.zscore` to identify
-# outliers in the time series. We re-plot the data with this mask.
+# We then use :py:func:`pvanalytics.quality.outliers.zscore` to identify
+# outliers in the time series, and plot the data with the z-score outlier mask.
 zscore_outlier_mask = zscore(data=data['value_normalized'])
 data['value_normalized'].plot()
 data.loc[zscore_outlier_mask, 'value_normalized'].plot(ls='', marker='o')

@@ -41,8 +41,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Use :py:func:`pvanalytics.quality.outliers.tukey` to identify
-# outliers in the time series. We re-plot the data with this mask.
+# We then use :py:func:`pvanalytics.quality.outliers.tukey` to identify
+# outliers in the time series, and plot the data with the tukey outlier mask.
 tukey_outlier_mask = tukey(data=data['value_normalized'],
                            k=0.5)
 data['value_normalized'].plot()

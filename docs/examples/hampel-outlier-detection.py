@@ -41,8 +41,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
-# Use :py:func:`pvanalytics.quality.outliers.hampel` to identify
-# outliers in the time series. Plot the data with this mask.
+# We then use :py:func:`pvanalytics.quality.outliers.hampel` to identify
+# outliers in the time series, and plot the data with the hampel outlier mask.
 hampel_outlier_mask = hampel(data=data['value_normalized'],
                              window=10)
 data['value_normalized'].plot()
