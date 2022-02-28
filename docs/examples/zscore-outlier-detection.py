@@ -30,8 +30,8 @@ import pathlib
 # "outlier" where inserted outliers are labeled as True, and all other values
 # are labeled as False.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file_1 = pvanalytics_dir / 'data' / 'ac_power_inv_7539_outliers.csv'
-data = pd.read_csv(ac_power_file_1, index_col=0, parse_dates=True)
+ac_power_file = pvanalytics_dir / 'data' / 'ac_power_inv_7539_outliers.csv'
+data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 
 data['value_normalized'].plot()
 data.loc[data['outlier'], 'value_normalized'].plot(ls='', marker='o')
@@ -40,7 +40,6 @@ plt.xlabel("Date")
 plt.ylabel("Normalized AC Power")
 plt.tight_layout()
 plt.show()
-
 
 
 # %%
