@@ -2,7 +2,7 @@
 Tukey Outlier Detection
 =======================
 
-Identifying outliers in time series using 
+Identifying outliers in time series using
 :py:func:`pvanalytics.quality.outliers.tukey`
 """
 
@@ -23,40 +23,17 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
 
-
 # %%
-# First, we read in the ac_power_inv_7539 example, and visualize the min-max
-# normalized time series.
-
+# First, we read in the ac_power_inv_7539_outliers example. Normalized AC power
+# is represented by the "value_normalized" column. There is a boolean column
+# "outlier" where inserted outliers are labeled as True, and all other values
+# are labeled as False.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file_1 = pvanalytics_dir / 'data' / 'ac_power_inv_7539.csv'
+ac_power_file_1 = pvanalytics_dir / 'data' / 'ac_power_inv_7539_outliers.csv'
 data = pd.read_csv(ac_power_file_1, index_col=0, parse_dates=True)
 
 data['value_normalized'].plot()
-plt.xlabel("Date")
-plt.ylabel("Normalized AC Power")
-plt.tight_layout()
-plt.show()
-
-# %%
-# Add some outliers to the time series, for
-# :py:func:`pvanalytics.quality.outliers.tukey` to detect.
-anomaly_dictionary = {35: data['value_normalized'][35]*1.5,
-                      80: -.5,
-                      160: -.4,
-                      195: data['value_normalized'][195]*2,
-                      200: data['value_normalized'][200]*.1,
-                      333:  data['value_normalized'][333]*2
-                      }
-data.loc[:, 'anomaly'] = False
-# Create fake anomaly values based on anomaly_dictionary
-for index, anomaly_value in anomaly_dictionary.items():
-    index_date = data.iloc[index].name
-    data.loc[index_date, 'value_normalized'] = anomaly_value
-    data.loc[index_date, 'anomaly'] = True
-
-data['value_normalized'].plot()
-data.loc[data['anomaly'], 'value_normalized'].plot(ls='', marker='o')
+data.loc[data['outlier'], 'value_normalized'].plot(ls='', marker='o')
 plt.legend(labels=["AC Power", "Generated Outlier"])
 plt.xlabel("Date")
 plt.ylabel("Normalized AC Power")
@@ -65,7 +42,7 @@ plt.show()
 
 # %%
 # Use :py:func:`pvanalytics.quality.outliers.tukey` to identify
-# outliers in the time series. Re-plot the data subset with this mask.
+# outliers in the time series. We re-plot the data with this mask.
 tukey_outlier_mask = tukey(data=data['value_normalized'],
                            k=0.5)
 data['value_normalized'].plot()
