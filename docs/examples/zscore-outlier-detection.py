@@ -32,6 +32,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / 'ac_power_inv_7539_outliers.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
+print(data.head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.outliers.zscore` to identify
