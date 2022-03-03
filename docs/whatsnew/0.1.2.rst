@@ -20,6 +20,14 @@ Documentation
 
 * Added an example for
   :py:func:`pvanalytics.features.clipping.geometric`  (:issue:`133`, :pull:`134`)
+* Added examples for the quality.data_gaps module, including
+  :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
+  :py:func:`pvanalytics.quality.gaps.stale_values_round`,
+  :py:func:`pvanalytics.quality.gaps.interpolation_diff`,
+  :py:func:`pvanalytics.quality.gaps.completeness_score`,
+  :py:func:`pvanalytics.quality.gaps.complete`, and
+  :py:func:`pvanalytics.quality.gaps.trim_incomplete`
+  (:issue:`133`, :pull:`135`)
 
 Contributors
 ~~~~~~~~~~~~
