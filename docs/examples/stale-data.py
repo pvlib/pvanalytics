@@ -2,8 +2,7 @@
 Stale Data Periods
 ==================
 
-Identifying stale data periods, defined as periods of
-consecutive repeating values, in time series.
+Identifying stale data periods in a time series.
 """
 
 # %%
@@ -63,12 +62,12 @@ plt.show()
 # %%
 # Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_round` to
 # identify stale values in data, using rounded data. This function yields
-# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
+# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_round`,
 # except it looks for consecutive repeating data that has been rounded to
 # a settable decimals place.
 # Please note that nighttime periods generally
 # contain consecutive repeating 0 values, which are flagged by
-# :py:func:`pvanalytics.quality.gaps.stale_values_diff`.
+# :py:func:`pvanalytics.quality.gaps.stale_values_round`.
 
 stale_data_round_mask = gaps.stale_values_round(data['value_normalized'])
 data['value_normalized'].plot()

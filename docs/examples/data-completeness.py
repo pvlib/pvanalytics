@@ -2,9 +2,7 @@
 Missing Data Periods
 ====================
 
-Identifying days with missing data using a "completeness" score metric,
-and filtering out consecutive days with a low completeness score for
-future data analysis.
+Identifying days with missing data using a "completeness" score metric.
 """
 
 # %%
