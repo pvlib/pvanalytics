@@ -62,7 +62,7 @@ plt.show()
 # %%
 # Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_round` to
 # identify stale values in data, using rounded data. This function yields
-# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_round`,
+# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
 # except it looks for consecutive repeating data that has been rounded to
 # a settable decimals place.
 # Please note that nighttime periods generally
