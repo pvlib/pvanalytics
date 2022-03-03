@@ -3,7 +3,7 @@ Z-Score Outlier Detection
 =========================
 
 Identifying outliers in time series using
-:py:func:`pvanalytics.quality.outliers.zscore`
+z-score outlier detection.
 """
 
 # %%

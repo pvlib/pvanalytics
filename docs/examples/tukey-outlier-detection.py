@@ -3,7 +3,7 @@ Tukey Outlier Detection
 =======================
 
 Identifying outliers in time series using
-:py:func:`pvanalytics.quality.outliers.tukey`
+Tukey outlier detection.
 """
 
 # %%

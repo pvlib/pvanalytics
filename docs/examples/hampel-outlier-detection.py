@@ -3,7 +3,7 @@ Hampel Outlier Detection
 ========================
 
 Identifying outliers in time series using
-:py:func:`pvanalytics.quality.outliers.hampel`
+Hampel outlier detection.
 """
 
 # %%
