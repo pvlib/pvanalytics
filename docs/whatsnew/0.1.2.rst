@@ -10,6 +10,8 @@ Enhancements
 Bug Fixes
 ~~~~~~~~~
 
+* Updated the outliers routine for z-score, where the NaN mask is assigned the time
+  series index (:issue:`133`, :pull:`138`)
 
 Requirements
 ~~~~~~~~~~~~
