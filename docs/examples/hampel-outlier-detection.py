@@ -24,7 +24,7 @@ import pathlib
 # First, we read in the ac_power_inv_7539_outliers example. Min-max normalized
 # AC power is represented by the "value_normalized" column. There is a boolean
 # column "outlier" where inserted outliers are labeled as True, and all other
-# values are labeled as False. These outlier valued were inserted manually into
+# values are labeled as False. These outlier values were inserted manually into
 # the data set to illustrate outlier detection by each of the functions.
 # We use a normalized time series example provided by the PV Fleets Initiative.
 # This example is adapted from the DuraMAT DataHub
