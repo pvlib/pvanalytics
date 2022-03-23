@@ -25,7 +25,7 @@ import numpy as np
 # a column representing an AC power data stream.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
+ac_power_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"#pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 # This is the known frequency of the time series. You may need to infer
@@ -68,13 +68,19 @@ data.loc[data['ac_power__752'] < 0, 'ac_power__752'] = 0
 # %%
 # Now, use :py:func:`pvanalytics.features.daytime.power_or_irradiance`
 # to identify day periods in the time series. Re-plot the data
-# subset with this mask.
+# subset with this mask, as well as the SPA-calculate sunrise and sunset
 predicted_day_night_mask = power_or_irradiance(series=data['ac_power__752'],
                                                freq=freq)
 data['ac_power__752'].plot()
 data.loc[predicted_day_night_mask, 'ac_power__752'].plot(ls='', marker='o')
 data.loc[~predicted_day_night_mask, 'ac_power__752'].plot(ls='', marker='o')
-plt.legend(labels=["AC Power", "Daytime", "Nighttime"])
+sunrise_sunset_times = sunrise_sunset_df[['sunrise',
+                                          'sunset']].drop_duplicates()
+for sunrise, sunset in sunrise_sunset_times.itertuples(index=False):
+    plt.axvline(x=sunrise, c="blue")
+    plt.axvline(x=sunset, c="red")
+plt.legend(labels=["AC Power", "Daytime", "Nighttime",
+                   "SPA Sunrise", "SPA Sunset"])
 plt.xticks(rotation=20)
 plt.xlabel("Date")
 plt.ylabel("AC Power (kW)")
@@ -89,35 +95,21 @@ acc = 100 * np.sum(np.equal(data.daytime_mask,
                             predicted_day_night_mask))/len(data.daytime_mask)
 print("Overall model prediction accuracy: " + str(round(acc, 2)) + "%")
 
-# Get predicted sunrise and sunset times
-predicted_day_night_df = pd.concat([pd.Series(
-    predicted_day_night_mask.index.date, predicted_day_night_mask.index,
-    name="date"),
-    pd.Series(predicted_day_night_mask.index, predicted_day_night_mask.index,
-              name="datetime"), predicted_day_night_mask], axis=1)
-sunrise = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
-    .groupby(['date', 'ac_power__752'])['datetime'].min()
-sunset = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
-    .groupby(['date', 'ac_power__752'])['datetime'].max()
-predicted_sunrise_sunset = pd.concat([sunrise.rename('predicted_sunrise'),
-                                      sunset.rename('predicted_sunset')],
-                                     axis=1).reset_index(drop=True)
-predicted_sunrise_sunset = predicted_sunrise_sunset.set_index(
-    predicted_sunrise_sunset.predicted_sunrise.dt.date)
-gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
-                                       'sunset']].\
-    drop_duplicates().reset_index(drop=True)
-gt_sunrise_sunset = gt_sunrise_sunset.set_index(
-    gt_sunrise_sunset.sunrise.dt.date)
+# Generate predicted + SPA sunrise times for each day
+print("Sunrise Comparison:")
+print(pd.DataFrame({'predicted_sunrise': predicted_day_night_mask
+                    .index[predicted_day_night_mask]
+                    .to_series().resample("d").first(),
+                    'pvlib_spa_sunrise': sunrise_sunset_df["sunrise"]
+                    .resample("d").first()}))
+# Generate predicted + SPA sunset times for each day
+print("Sunset Comparison:")
+print(pd.DataFrame({'predicted_sunset': predicted_day_night_mask
+                    .index[predicted_day_night_mask]
+                    .to_series().resample("d").last(),
+                    'pvlib_spa_sunset': sunrise_sunset_df["sunrise"]
+                    .resample("d").last()}))
 
-# Compare predicted sunrise and sunset times to ground truth sunrise
-# and sunset times
-sunrise_sunset_comparison_df = pd.concat([predicted_sunrise_sunset,
-                                          gt_sunrise_sunset], axis=1)
-print("Comparing sunrise times:")
-print(sunrise_sunset_comparison_df[['sunrise', 'predicted_sunrise']])
-print("Comparing sunset times:")
-print(sunrise_sunset_comparison_df[['sunset', 'predicted_sunset']])
 
 # %%
 # Now we repeat the above process with 15-minute sampled AC power time series
@@ -169,7 +161,13 @@ predicted_day_night_mask = power_or_irradiance(series=data['ac_power__752'],
 data['ac_power__752'].plot()
 data.loc[predicted_day_night_mask, 'ac_power__752'].plot(ls='', marker='o')
 data.loc[~predicted_day_night_mask, 'ac_power__752'].plot(ls='', marker='o')
-plt.legend(labels=["AC Power", "Daytime", "Nighttime"])
+sunrise_sunset_times = sunrise_sunset_df[['sunrise',
+                                          'sunset']].drop_duplicates()
+for sunrise, sunset in sunrise_sunset_times.itertuples(index=False):
+    plt.axvline(x=sunrise, c="blue")
+    plt.axvline(x=sunset, c="red")
+plt.legend(labels=["AC Power", "Daytime", "Nighttime",
+                   "SPA Sunrise", "SPA Sunset"])
 plt.xticks(rotation=20)
 plt.xlabel("Date")
 plt.ylabel("AC Power (kW)")
@@ -184,32 +182,17 @@ acc = 100 * np.sum(np.equal(data.daytime_mask,
                             predicted_day_night_mask))/len(data.daytime_mask)
 print("Overall model prediction accuracy: " + str(round(acc, 2)) + "%")
 
-# Get predicted sunrise and sunset times
-predicted_day_night_df = pd.concat([pd.Series(
-    predicted_day_night_mask.index.date, predicted_day_night_mask.index,
-    name="date"),
-    pd.Series(predicted_day_night_mask.index, predicted_day_night_mask.index,
-              name="datetime"), predicted_day_night_mask], axis=1)
-sunrise = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
-    .groupby(['date', 'ac_power__752'])['datetime'].min()
-sunset = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
-    .groupby(['date', 'ac_power__752'])['datetime'].max()
-predicted_sunrise_sunset = pd.concat([sunrise.rename('predicted_sunrise'),
-                                      sunset.rename('predicted_sunset')
-                                      ], axis=1).reset_index(drop=True)
-predicted_sunrise_sunset = predicted_sunrise_sunset.set_index(
-    predicted_sunrise_sunset.predicted_sunrise.dt.date)
-gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
-                                       'sunset']].\
-    drop_duplicates().reset_index(drop=True)
-gt_sunrise_sunset = gt_sunrise_sunset.set_index(
-    gt_sunrise_sunset.sunrise.dt.date)
-
-# Compare predicted sunrise and sunset times to ground truth sunrise
-# and sunset times
-sunrise_sunset_comparison_df = pd.concat([predicted_sunrise_sunset,
-                                          gt_sunrise_sunset], axis=1)
-print("Comparing sunrise times:")
-print(sunrise_sunset_comparison_df[['sunrise', 'predicted_sunrise']])
-print("Comparing sunset times:")
-print(sunrise_sunset_comparison_df[['sunset', 'predicted_sunset']])
+# Generate predicted + SPA sunrise times for each day
+print("Sunrise Comparison:")
+print(pd.DataFrame({'predicted_sunrise': predicted_day_night_mask
+                    .index[predicted_day_night_mask]
+                    .to_series().resample("d").first(),
+                    'pvlib_spa_sunrise': sunrise_sunset_df["sunrise"]
+                    .resample("d").first()}))
+# Generate predicted + SPA sunset times for each day
+print("Sunset Comparison:")
+print(pd.DataFrame({'predicted_sunset': predicted_day_night_mask
+                    .index[predicted_day_night_mask]
+                    .to_series().resample("d").last(),
+                    'pvlib_spa_sunset': sunrise_sunset_df["sunrise"]
+                    .resample("d").last()}))
