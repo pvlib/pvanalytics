@@ -100,8 +100,8 @@ sunrise = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
 sunset = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
     .groupby(['date', 'ac_power__752'])['datetime'].max()
 predicted_sunrise_sunset = pd.concat([sunrise.rename('predicted_sunrise'),
-                                      sunset.rename('predicted_sunset')], axis=1).\
-    reset_index(drop=True)
+                                      sunset.rename('predicted_sunset')],
+                                     axis=1).reset_index(drop=True)
 predicted_sunrise_sunset = predicted_sunrise_sunset.set_index(
     predicted_sunrise_sunset.predicted_sunrise.dt.date)
 gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
@@ -110,9 +110,14 @@ gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
 gt_sunrise_sunset = gt_sunrise_sunset.set_index(
     gt_sunrise_sunset.sunrise.dt.date)
 
-# Print the dataframe comparing predicted sunrise and sunset times to
-# ground truth sunrise and sunset times
-print(pd.concat([predicted_sunrise_sunset, gt_sunrise_sunset], axis=1))
+# Compare predicted sunrise and sunset times to ground truth sunrise
+# and sunset times
+sunrise_sunset_comparison_df = pd.concat([predicted_sunrise_sunset,
+                                          gt_sunrise_sunset], axis=1)
+print("Comparing sunrise times:")
+print(sunrise_sunset_comparison_df[['sunrise', 'predicted_sunrise']])
+print("Comparing sunset times:")
+print(sunrise_sunset_comparison_df[['sunset', 'predicted_sunset']])
 
 # %%
 # Now we repeat the above process with 15-minute sampled AC power time series
@@ -190,8 +195,8 @@ sunrise = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
 sunset = predicted_day_night_df[predicted_day_night_df['ac_power__752']]\
     .groupby(['date', 'ac_power__752'])['datetime'].max()
 predicted_sunrise_sunset = pd.concat([sunrise.rename('predicted_sunrise'),
-                                      sunset.rename('predicted_sunset')], axis=1).\
-    reset_index(drop=True)
+                                      sunset.rename('predicted_sunset')
+                                      ], axis=1).reset_index(drop=True)
 predicted_sunrise_sunset = predicted_sunrise_sunset.set_index(
     predicted_sunrise_sunset.predicted_sunrise.dt.date)
 gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
@@ -200,6 +205,11 @@ gt_sunrise_sunset = sunrise_sunset_df[['sunrise',
 gt_sunrise_sunset = gt_sunrise_sunset.set_index(
     gt_sunrise_sunset.sunrise.dt.date)
 
-# Print the dataframe comparing predicted sunrise and sunset times to
-# ground truth sunrise and sunset times
-print(pd.concat([predicted_sunrise_sunset, gt_sunrise_sunset], axis=1))
+# Compare predicted sunrise and sunset times to ground truth sunrise
+# and sunset times
+sunrise_sunset_comparison_df = pd.concat([predicted_sunrise_sunset,
+                                          gt_sunrise_sunset], axis=1)
+print("Comparing sunrise times:")
+print(sunrise_sunset_comparison_df[['sunrise', 'predicted_sunrise']])
+print("Comparing sunset times:")
+print(sunrise_sunset_comparison_df[['sunset', 'predicted_sunset']])
