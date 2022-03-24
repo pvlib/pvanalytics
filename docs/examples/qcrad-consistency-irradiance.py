@@ -34,20 +34,19 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 latitude = 39.742
 longitude = -105.18
 time_zone = "Etc/GMT+7"
-CSi = data.index.tz_localize(time_zone,
-                             ambiguous='NaT',
-                             nonexistent='NaT')
-solar_position = pvlib.solarposition.get_solarposition(CSi,
+data = data.tz_localize(time_zone,
+                        ambiguous='NaT',
+                        nonexistent='NaT')
+solar_position = pvlib.solarposition.get_solarposition(data.index,
                                                        latitude,
                                                        longitude)
 
 # %%
-# Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
-# to identify if the daily insolation lies between a minimum
-# and a maximum value. Here, we check POA irradiance field
-# 'irradiance_poa__7984'.
+# Use
+# :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
 
-check_irradiance_consistency_qcrad(ghi=data['irradiance_ghi__7981'],
-                                   solar_zenith=solar_position['zenith'],
-                                   dhi=data['irradiance_dhi__7983'],
-                                   dni=data['irradiance_dni__7982'])
+qcrad_consistency_mask = check_irradiance_consistency_qcrad(
+    ghi=data['irradiance_ghi__7981'],
+    solar_zenith=solar_position['zenith'],
+    dhi=data['irradiance_dhi__7983'],
+    dni=data['irradiance_dni__7982'])

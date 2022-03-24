@@ -44,4 +44,4 @@ clearsky = location.get_clearsky(data.index)
 # 'irradiance_poa__7984'.
 
 daily_insolation_mask = daily_insolation_limits(data['irradiance_poa__7984'],
-                                                clearsky)
+                                                clearsky['ghi'])

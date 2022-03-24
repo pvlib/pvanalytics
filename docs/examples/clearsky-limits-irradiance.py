@@ -36,10 +36,8 @@ location = pvlib.location.Location(39.7407, -105.1686)
 clearsky = location.get_clearsky(data.index)
 
 # %%
-# Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
-# to identify if the daily insolation lies between a minimum
-# and a maximum value. Here, we check POA irradiance field
-# 'irradiance_poa__7984'.
+# Use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
+# Here, we check GHI irradiance field 'irradiance_ghi__7981'.
 
-clearsky_limits(data['irradiance_poa__7984'],
-                clearsky)
+clearsky_limit_mask = clearsky_limits(data['irradiance_ghi__7981'],
+                                      clearsky['ghi'])
