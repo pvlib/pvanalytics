@@ -25,7 +25,7 @@ import numpy as np
 # a column representing an AC power data stream.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"#pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
+ac_power_file = pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 # This is the known frequency of the time series. You may need to infer
