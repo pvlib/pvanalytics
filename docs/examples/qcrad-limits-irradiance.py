@@ -28,10 +28,18 @@ rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
-# Now model clear-sky irradiance for the location and times of the
-# measured data:
-location = pvlib.location.Location(39.742, -105.18)
-clearsky = location.get_clearsky(data.index)
+# Now generate solar zenith measurements for the location,
+# based on the data's time zone and site latitude-longitude
+# coordinates.
+latitude = 39.742
+longitude = -105.18
+time_zone = "Etc/GMT+7"
+CSi = data.index.tz_localize(time_zone,
+                             ambiguous='NaT',
+                             nonexistent='NaT')
+solar_position = pvlib.solarposition.get_solarposition(CSi,
+                                                       latitude,
+                                                       longitude)
 
 # %%
 # Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
@@ -39,5 +47,7 @@ clearsky = location.get_clearsky(data.index)
 # and a maximum value. Here, we check POA irradiance field
 # 'irradiance_poa__7984'.
 
-daily_insolation_limits(data['irradiance_poa__7984'],
-                        clearsky)
+check_irradiance_limits_qcrad(solar_zenith=solar_position['zenith'],
+                              ghi=data['irradiance_ghi__7981'],
+                              dhi=data['irradiance_dhi__7983'],
+                              dni=data['irradiance_dni__7982'])
