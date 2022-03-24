@@ -30,9 +30,10 @@ rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
-# Next, we generate the clearsky time series associated with the site.
-# using PVLib.
-
+# Now model clear-sky irradiance for the location and times of the
+# measured data:
+location = pvlib.location.Location(39.7407, -105.1686)
+clearsky = location.get_clearsky(data.index)
 
 # %%
 # Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
@@ -40,5 +41,5 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 # and a maximum value. Here, we check POA irradiance field
 # 'irradiance_poa__7984'.
 
-daily_insolation_limits(data['irradiance_poa__7984'],
-                        clearsky)
+clearsky_limits(data['irradiance_poa__7984'],
+                clearsky)

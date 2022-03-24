@@ -34,7 +34,7 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 # %%
 # Now model clear-sky irradiance for the location and times of the
 # measured data:
-location = pvlib.location.Location(39.742, -105.18)
+location = pvlib.location.Location(39.7407, -105.1686)
 clearsky = location.get_clearsky(data.index)
 
 # %%
@@ -43,5 +43,5 @@ clearsky = location.get_clearsky(data.index)
 # and a maximum value. Here, we check POA irradiance field
 # 'irradiance_poa__7984'.
 
-daily_insolation_limits(data['irradiance_poa__7984'],
-                        clearsky)
+daily_insolation_mask = daily_insolation_limits(data['irradiance_poa__7984'],
+                                                clearsky)
