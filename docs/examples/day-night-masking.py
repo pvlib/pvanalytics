@@ -110,7 +110,6 @@ print(pd.DataFrame({'predicted_sunset': predicted_day_night_mask
                     'pvlib_spa_sunset': sunrise_sunset_df["sunrise"]
                     .resample("d").last()}))
 
-
 # %%
 # Now we repeat the above process with 15-minute sampled AC power time series
 # data, taken from the SERF East installation on the NREL campus. This data
