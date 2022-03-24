@@ -19,36 +19,25 @@ import pandas as pd
 import pathlib
 
 # %%
-# First, read in the GHI measurements.  For this example we'll use an example
-# file included in pvanalytics covering a single day, but the same process
-# applies to data of any length.
+# First, read in the RMIS NREL system. This data set contains
+# 5-minute right-aligned sampled data. It includes POA, GHI,
+# DNI, DHI, and GNI measurements.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ghi_file = pvanalytics_dir / 'data' / 'midc_bms_ghi_20220120.csv'
-data = pd.read_csv(ghi_file, index_col=0, parse_dates=True)
-
-# or you can fetch the data straight from the source using pvlib:
-# date = pd.to_datetime('2022-01-20')
-# data = pvlib.iotools.read_midc_raw_data_from_nrel('BMS', date, date)
-
-measured_ghi = data['Global CMP22 (vent/cor) [W/m^2]']
+rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
 # Now model clear-sky irradiance for the location and times of the
 # measured data:
-
 location = pvlib.location.Location(39.742, -105.18)
 clearsky = location.get_clearsky(data.index)
-clearsky_ghi = clearsky['ghi']
 
 # %%
-# Finally, use :py:func:`pvanalytics.features.clearsky.reno` to identify
-# measurements during clear-sky conditions:
+# Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
+# to identify if the daily insolation lies between a minimum
+# and a maximum value. Here, we check POA irradiance field
+# 'irradiance_poa__7984'.
 
-is_clearsky = reno(measured_ghi, clearsky_ghi)
-
-# clear-sky times indicated in black
-measured_ghi.plot()
-measured_ghi[is_clearsky].plot(ls='', marker='o', ms=2, c='k')
-plt.ylabel('Global Horizontal Irradiance [W/m2]')
-plt.show()
+daily_insolation_limits(data['irradiance_poa__7984'],
+                        clearsky)
