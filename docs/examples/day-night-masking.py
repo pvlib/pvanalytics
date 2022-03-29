@@ -70,9 +70,7 @@ predicted_day_night_mask = power_or_irradiance(series=data['ac_power__752'],
 
 sunrise_sunset_df = pvlib.solarposition.sun_rise_set_transit_spa(data.index,
                                                                  latitude,
-                                                                 longitude,
-                                                                 how='numpy',
-                                                                 delta_t=67.0)
+                                                                 longitude)
 data['sunrise_time'] = sunrise_sunset_df['sunrise']
 data['sunset_time'] = sunrise_sunset_df['sunset']
 
