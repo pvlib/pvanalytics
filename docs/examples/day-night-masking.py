@@ -82,7 +82,7 @@ data.loc[(data.index < data.sunrise_time) |
 
 
 # %%
-# Plot the Ac power data stream with the mask output from
+# Plot the AC power data stream with the mask output from
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance`,
 # as well as the SPA-calculate sunrise and sunset
 
