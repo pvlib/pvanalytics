@@ -45,3 +45,17 @@ clearsky = location.get_clearsky(data.index)
 
 daily_insolation_mask = daily_insolation_limits(data['irradiance_poa__7984'],
                                                 clearsky['ghi'])
+
+# %%
+# Plot the 'irradiance_poa__7984' data stream and its associated clearsky GHI
+# data stream. Mask the POA time series by its daily_insolation_mask.
+data['irradiance_poa__7984'].plot()
+clearsky['ghi'].plot()
+data.loc[daily_insolation_mask]['irradiance_poa__7984'].plot(ls='', marker='.')
+plt.legend(labels=["RMIS POA", "Clearsky GHI",
+                   "Daily Insolation in Range"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("GHI (W/m^2)")
+plt.tight_layout()
+plt.show()

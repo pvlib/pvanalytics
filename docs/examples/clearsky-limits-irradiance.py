@@ -31,7 +31,10 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
 # Now model clear-sky irradiance for the location and times of the
-# measured data:
+# measured data. You can do this using
+# :py:func:`pvlib.location.Location.get_clearsky`, using the lat-long
+# coordinates associated the RMIS NREL system.
+
 location = pvlib.location.Location(39.7407, -105.1686)
 clearsky = location.get_clearsky(data.index)
 
@@ -41,3 +44,18 @@ clearsky = location.get_clearsky(data.index)
 
 clearsky_limit_mask = clearsky_limits(data['irradiance_ghi__7981'],
                                       clearsky['ghi'])
+
+
+# %%
+# Plot the 'irradiance_ghi__7981' data stream and its associated clearsky GHI
+# data stream. Mask the GHI time series by its clearsky_limit_mask.
+data['irradiance_ghi__7981'].plot()
+clearsky['ghi'].plot()
+data.loc[clearsky_limit_mask]['irradiance_ghi__7981'].plot(ls='', marker='.')
+plt.legend(labels=["RMIS GHI", "Clearsky GHI",
+                   "Clearsky Limit Reached"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("GHI (W/m^2)")
+plt.tight_layout()
+plt.show()
