@@ -10,8 +10,8 @@ Masking day-night periods using the PVAnalytics daytime module.
 # irradiance time series can aid in future data analysis, such as detecting
 # if a time series has daylight savings time or time shifts. Here, we use
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` to mask day/night
-# periods, as well as to estimate sunrise and sunset times in the data set. This
-# function is particularly useful for cases where the time zone of a data
+# periods, as well as to estimate sunrise and sunset times in the data set.
+# This function is particularly useful for cases where the time zone of a data
 # stream is unknown or incorrect, as its outputs can be used to determine time
 # zone.
 
