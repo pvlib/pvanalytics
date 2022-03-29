@@ -10,9 +10,10 @@ Masking day-night periods using the PVAnalytics daytime module.
 # irradiance time series can aid in future data analysis, such as detecting
 # if a time series has daylight savings time or time shifts. Here, we use
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` to mask day/night
-# periods, as well as estimate sunrise and sunset times in the data set. This
+# periods, as well as to estimate sunrise and sunset times in the data set. This
 # function is particularly useful for cases where the time zone of a data
-# stream is unknown or incorrect.
+# stream is unknown or incorrect, as its outputs can be used to determine time
+# zone.
 
 import pvanalytics
 from pvanalytics.features.daytime import power_or_irradiance
@@ -54,7 +55,7 @@ data.loc[data['ac_power__752'] < 0, 'ac_power__752'] = 0
 
 # %%
 # Now, use :py:func:`pvanalytics.features.daytime.power_or_irradiance`
-# to identify day periods in the time series.
+# to mask day periods in the time series.
 predicted_day_night_mask = power_or_irradiance(series=data['ac_power__752'],
                                                freq=freq)
 
@@ -65,7 +66,8 @@ predicted_day_night_mask = power_or_irradiance(series=data['ac_power__752'],
 # associated with SPA daytime periods is labeled as True, and data associated
 # with SPA nighttime periods is labeled as False.
 # SPA sunrise and sunset times are used here as a point of comparison to the
-# sensor-based AC power data; SPA-based sunrise and sunset values are not
+# :py:func:`pvanalytics.features.daytime.power_or_irradiance` outputs.
+# SPA-based sunrise and sunset values are not
 # needed to run :py:func:`pvanalytics.features.daytime.power_or_irradiance`.
 
 sunrise_sunset_df = pvlib.solarposition.sun_rise_set_transit_spa(data.index,
@@ -82,7 +84,7 @@ data.loc[(data.index < data.sunrise_time) |
 # %%
 # Plot the AC power data stream with the mask output from
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance`,
-# as well as the SPA-calculate sunrise and sunset
+# as well as the SPA-calculated sunrise and sunset
 
 data['ac_power__752'].plot()
 data.loc[predicted_day_night_mask, 'ac_power__752'].plot(ls='', marker='o')
