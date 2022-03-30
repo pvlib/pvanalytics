@@ -10,7 +10,7 @@ Checking the clearsky limits of irradiance data.
 # useful way to reduce noise during analysis. In this example,
 # we use :py:func:`pvanalytics.quality.clearksy_limits`
 # to identify irradiance values that do not exceed
-#clearsky values. For this example we'll use
+# clearsky values. For this example we'll use
 # GHI measurements from NREL in Golden CO.
 
 import pvanalytics
@@ -26,8 +26,11 @@ import pathlib
 # DNI, DHI, and GNI measurements.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
+# Make the datetime index tz-aware.
+data.index = data.index.tz_localize("Etc/GMT+7")
+
 
 # %%
 # Now model clear-sky irradiance for the location and times of the
@@ -53,7 +56,7 @@ data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
 data.loc[clearsky_limit_mask]['irradiance_ghi__7981'].plot(ls='', marker='.')
 plt.legend(labels=["RMIS GHI", "Clearsky GHI",
-                   "Clearsky Limit Reached"],
+                   "Under Clearsky Limit"],
            loc="upper left")
 plt.xlabel("Date")
 plt.ylabel("GHI (W/m^2)")

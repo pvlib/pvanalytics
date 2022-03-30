@@ -24,7 +24,7 @@ import pathlib
 # DNI, DHI, and GNI measurements.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
@@ -34,9 +34,7 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 latitude = 39.742
 longitude = -105.18
 time_zone = "Etc/GMT+7"
-data = data.tz_localize(time_zone,
-                        ambiguous='NaT',
-                        nonexistent='NaT')
+data = data.tz_localize(time_zone)
 solar_position = pvlib.solarposition.get_solarposition(data.index,
                                                        latitude,
                                                        longitude)
@@ -46,7 +44,44 @@ solar_position = pvlib.solarposition.get_solarposition(data.index,
 
 qcrad_limit_mask = check_irradiance_limits_qcrad(
     solar_zenith=solar_position['zenith'],
+    # TODO: What is this? Is it derived from PVLib???
     dni_extra=data['irradiance_dni__7982'],
     ghi=data['irradiance_ghi__7981'],
     dhi=data['irradiance_dhi__7983'],
     dni=data['irradiance_dni__7982'])
+
+# %%
+# Plot the 'irradiance_ghi__7981' data stream with its associated QCRAD limit
+# mask.
+data['irradiance_ghi__7981'].plot()
+data.loc[qcrad_limit_mask[0], 'irradiance_ghi__7981'].plot(ls='', marker='.')
+plt.legend(labels=["RMIS GHI", "Within QCRAD Limits"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("GHI (W/m^2)")
+plt.tight_layout()
+plt.show()
+
+# %%
+# Plot the 'irradiance_dhi__7983 data stream with its associated QCRAD limit
+# mask.
+data['irradiance_dhi__7983'].plot()
+data.loc[qcrad_limit_mask[1], 'irradiance_dhi__7983'].plot(ls='', marker='.')
+plt.legend(labels=["RMIS DHI", "Within QCRAD Limits"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("DHI (W/m^2)")
+plt.tight_layout()
+plt.show()
+
+# # %%
+# # Plot the 'irradiance_dni__7982' data stream with its associated QCRAD limit
+# # mask.
+# data['irradiance_dni__7982'].plot()
+# data.loc[qcrad_limit_mask[2], 'irradiance_dni__7982'].plot(ls='', marker='.')
+# plt.legend(labels=["RMIS DNI", "Within QCRAD Limits"],
+#            loc="upper left")
+# plt.xlabel("Date")
+# plt.ylabel("DNI (W/m^2)")
+# plt.tight_layout()
+# plt.show()

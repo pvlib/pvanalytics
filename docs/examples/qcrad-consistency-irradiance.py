@@ -24,7 +24,7 @@ import pathlib
 # DNI, DHI, and GNI measurements.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
@@ -34,9 +34,7 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 latitude = 39.742
 longitude = -105.18
 time_zone = "Etc/GMT+7"
-data = data.tz_localize(time_zone,
-                        ambiguous='NaT',
-                        nonexistent='NaT')
+data = data.tz_localize(time_zone)
 solar_position = pvlib.solarposition.get_solarposition(data.index,
                                                        latitude,
                                                        longitude)
@@ -50,3 +48,35 @@ qcrad_consistency_mask = check_irradiance_consistency_qcrad(
     solar_zenith=solar_position['zenith'],
     dhi=data['irradiance_dhi__7983'],
     dni=data['irradiance_dni__7982'])
+
+
+# %%
+# Plot the GHI, DHI, and DNI data streams with the QCRAD
+# consistency mask overlay. This mask applies to all 3 data streams.
+fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
+            'irradiance_dni__7982']].plot()
+# Highlperiod periods where the QCRAD consistency mask is True
+fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
+                 where=qcrad_consistency_mask[0], alpha=0.4)
+fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI", "QCRAD Consistent"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("Irradiance (W/m^2)")
+plt.tight_layout()
+plt.show()
+
+# %%
+# Plot the GHI, DHI, and DNI data streams with the diffuse
+# ratio limit mask overlay. This mask applies to all 3 data streams.
+fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
+            'irradiance_dni__7982']].plot()
+# Highlperiod periods where the QCRAD consistency mask is True
+fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
+                 where=qcrad_consistency_mask[1], alpha=0.4)
+fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI",
+                   "Within Diffuse Ratio Limit"],
+           loc="upper left")
+plt.xlabel("Date")
+plt.ylabel("Irradiance (W/m^2)")
+plt.tight_layout()
+plt.show()

@@ -28,8 +28,10 @@ import pathlib
 # DNI, DHI, and GNI measurements.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
+# Make the datetime index tz-aware.
+data.index = data.index.tz_localize("Etc/GMT+7")
 
 # %%
 # Now model clear-sky irradiance for the location and times of the
@@ -40,20 +42,20 @@ clearsky = location.get_clearsky(data.index)
 # %%
 # Use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
 # to identify if the daily insolation lies between a minimum
-# and a maximum value. Here, we check POA irradiance field
-# 'irradiance_poa__7984'.
+# and a maximum value. Here, we check GHI irradiance field
+# 'irradiance_ghi__7981'.
 
-daily_insolation_mask = daily_insolation_limits(data['irradiance_poa__7984'],
+daily_insolation_mask = daily_insolation_limits(data['irradiance_ghi__7981'],
                                                 clearsky['ghi'])
 
 # %%
-# Plot the 'irradiance_poa__7984' data stream and its associated clearsky GHI
-# data stream. Mask the POA time series by its daily_insolation_mask.
-data['irradiance_poa__7984'].plot()
+# Plot the 'irradiance_ghi__7981' data stream and its associated clearsky GHI
+# data stream. Mask the GHI time series by its daily_insolation_mask.
+data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
-data.loc[daily_insolation_mask]['irradiance_poa__7984'].plot(ls='', marker='.')
-plt.legend(labels=["RMIS POA", "Clearsky GHI",
-                   "Daily Insolation in Range"],
+data.loc[daily_insolation_mask, 'irradiance_ghi__7981'].plot(ls='', marker='.')
+plt.legend(labels=["RMIS GHI", "Clearsky GHI",
+                   "Under Daily Insolation Limit"],
            loc="upper left")
 plt.xlabel("Date")
 plt.ylabel("GHI (W/m^2)")
