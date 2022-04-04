@@ -75,7 +75,7 @@ plt.show()
 # ratio passes the limit test
 fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
             'irradiance_dni__7982']].plot()
-#Highlight periods where the GHI ratio passes the limit test
+# Highlight periods where the GHI ratio passes the limit test
 fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
                  where=qcrad_consistency_mask[1], alpha=0.4)
 fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI",
