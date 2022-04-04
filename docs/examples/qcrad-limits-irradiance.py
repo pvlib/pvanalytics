@@ -10,6 +10,8 @@ Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 # useful way to reduce noise during analysis. In this example,
 # we use :py:func:`pvanalytics.quality.check_irradiance_limits_qcrad`
 # to test for physical limits on GHI, DHI or DNI using the QCRad criteria.
+# For this example we will use the RMIS weather system located on the
+# NREL campus in CO.
 
 import pvanalytics
 from pvanalytics.quality.irradiance import check_irradiance_limits_qcrad
@@ -41,6 +43,7 @@ solar_position = pvlib.solarposition.get_solarposition(data.index,
 
 # %%
 # Use :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
+# to generate the QCRAD irradiance limit mask
 
 qcrad_limit_mask = check_irradiance_limits_qcrad(
     solar_zenith=solar_position['zenith'],

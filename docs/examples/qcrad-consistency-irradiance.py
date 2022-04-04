@@ -10,6 +10,9 @@ Check consistency of GHI, DHI and DNI using QCRad criteria.
 # useful way to reduce noise during analysis. In this example,
 # we use :py:func:`pvanalytics.quality.check_irradiance_consistency_qcrad`
 # to check the consistency of GHI, DHI and DNI data using QCRad criteria.
+# For this example we will use the RMIS weather system located on the
+# NREL campus in CO.
+
 
 import pvanalytics
 from pvanalytics.quality.irradiance import check_irradiance_consistency_qcrad
@@ -42,6 +45,7 @@ solar_position = pvlib.solarposition.get_solarposition(data.index,
 # %%
 # Use
 # :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
+# to generate the QCRAD consistency mask.
 
 qcrad_consistency_mask = check_irradiance_consistency_qcrad(
     ghi=data['irradiance_ghi__7981'],
@@ -55,7 +59,7 @@ qcrad_consistency_mask = check_irradiance_consistency_qcrad(
 # consistency mask overlay. This mask applies to all 3 data streams.
 fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
             'irradiance_dni__7982']].plot()
-# Highlperiod periods where the QCRAD consistency mask is True
+# Highlight periods where the QCRAD consistency mask is True
 fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
                  where=qcrad_consistency_mask[0], alpha=0.4)
 fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI", "QCRAD Consistent"],
@@ -67,10 +71,11 @@ plt.show()
 
 # %%
 # Plot the GHI, DHI, and DNI data streams with the diffuse
-# ratio limit mask overlay. This mask applies to all 3 data streams.
+# ratio limit mask overlay. This mask is true when the GHI
+# ratio passes the limit test
 fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
             'irradiance_dni__7982']].plot()
-# Highlperiod periods where the QCRAD consistency mask is True
+#Highlight periods where the GHI ratio passes the limit test
 fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
                  where=qcrad_consistency_mask[1], alpha=0.4)
 fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI",

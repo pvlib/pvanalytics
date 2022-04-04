@@ -8,10 +8,10 @@ Checking the clearsky limits of irradiance data.
 # %%
 # Identifying and filtering out invalid irradiance data is a
 # useful way to reduce noise during analysis. In this example,
-# we use :py:func:`pvanalytics.quality.clearksy_limits`
+# we use :py:func:`pvanalytics.quality.irradiance.clearksy_limits`
 # to identify irradiance values that do not exceed
-# clearsky values. For this example we'll use
-# GHI measurements from NREL in Golden CO.
+# clearsky values. For this example we will use the RMIS weather
+# system located on the NREL campus in CO.
 
 import pvanalytics
 from pvanalytics.quality.irradiance import clearsky_limits
@@ -42,7 +42,7 @@ location = pvlib.location.Location(39.7407, -105.1686)
 clearsky = location.get_clearsky(data.index)
 
 # %%
-# Use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
+# Use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`.
 # Here, we check GHI irradiance field 'irradiance_ghi__7981'.
 
 clearsky_limit_mask = clearsky_limits(data['irradiance_ghi__7981'],
