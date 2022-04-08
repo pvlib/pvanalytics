@@ -8,7 +8,7 @@ Checking the clearsky limits of irradiance data.
 # %%
 # Identifying and filtering out invalid irradiance data is a
 # useful way to reduce noise during analysis. In this example,
-# we use :py:func:`pvanalytics.quality.irradiance.clearksy_limits`
+# we use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
 # to identify irradiance values that do not exceed
 # clearsky values. For this example we will use the RMIS weather
 # system located on the NREL campus in CO.
