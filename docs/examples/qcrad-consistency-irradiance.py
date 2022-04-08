@@ -8,7 +8,8 @@ Check consistency of GHI, DHI and DNI using QCRad criteria.
 # %%
 # Identifying and filtering out invalid irradiance data is a
 # useful way to reduce noise during analysis. In this example,
-# we use :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
+# we use
+# :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
 # to check the consistency of GHI, DHI and DNI data using QCRad criteria.
 # For this example we will use the RMIS weather system located on the
 # NREL campus in CO.
