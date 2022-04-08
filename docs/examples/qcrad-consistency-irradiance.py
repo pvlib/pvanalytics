@@ -31,7 +31,7 @@ rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 
 # %%
-# Now generate solar zenith measurements for the location,
+# Now generate solar zenith estimates for the location,
 # based on the data's time zone and site latitude-longitude
 # coordinates.
 latitude = 39.742
