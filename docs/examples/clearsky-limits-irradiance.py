@@ -43,7 +43,7 @@ clearsky = location.get_clearsky(data.index)
 
 # %%
 # Use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`.
-# Here, we check GHI irradiance field 'irradiance_ghi__7981'.
+# Here, we check GHI field 'irradiance_ghi__7981'.
 
 clearsky_limit_mask = clearsky_limits(data['irradiance_ghi__7981'],
                                       clearsky['ghi'])
