@@ -35,7 +35,7 @@ data.index = data.index.tz_localize("Etc/GMT+7")
 # %%
 # Now model clear-sky irradiance for the location and times of the
 # measured data. You can do this using
-# :py:func:`pvlib.location.Location.get_clearsky`, using the lat-long
+# :py:meth:`pvlib.location.Location.get_clearsky`, using the lat-long
 # coordinates associated the RMIS NREL system.
 
 location = pvlib.location.Location(39.7407, -105.1686)
