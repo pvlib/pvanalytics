@@ -1,6 +1,6 @@
 """
-Clearky Limits for Irradiance Data
-==================================
+Clearsky Limits for Irradiance Data
+===================================
 
 Checking the clearsky limits of irradiance data.
 """
