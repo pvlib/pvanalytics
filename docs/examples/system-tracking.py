@@ -6,15 +6,16 @@ Identifying if a system is equipped with a tracker.
 """
 
 # %%
-# Identifing and removing stale, or consecutive repeating, values in time
-# series data reduces noise when performing data analysis. This example shows
-# how to use two PVAnalytics functions,
-# :py:func:`pvanalytics.quality.gaps.stale_values_diff`
-# and :py:func:`pvanalytics.quality.gaps.stale_values_round`, to identify
-# and mask stale data periods in time series data.
+# It is valuable to identify if a system is fixed tilt or tracking for
+# future analysis. This example shows how to use
+# :py:func:`pvanalytics.system.is_tracking_envelope` to determine if a
+# system is tracking or not by fitting data to a maximum power or
+# irradiance envelope, and fitting this envelope to quadratic and
+# quartic curves. The r^2 output from these fits is used to determine
+# if the system fits a tracking or fixed-tilt profile.
 
 import pvanalytics
-from pvanalytics.quality import gaps
+from pvanalytics.system import is_tracking_envelope
 import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
@@ -53,25 +54,6 @@ plt.show()
 stale_data_mask = gaps.stale_values_diff(data['value_normalized'])
 data['value_normalized'].plot()
 data.loc[stale_data_mask, "value_normalized"].plot(ls='', marker='.')
-plt.legend(labels=["AC Power", "Detected Stale Data"])
-plt.xlabel("Date")
-plt.ylabel("Normalized AC Power")
-plt.tight_layout()
-plt.show()
-
-# %%
-# Now, we use :py:func:`pvanalytics.quality.gaps.stale_values_round` to
-# identify stale values in data, using rounded data. This function yields
-# similar results as :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
-# except it looks for consecutive repeating data that has been rounded to
-# a settable decimals place.
-# Please note that nighttime periods generally
-# contain consecutive repeating 0 values, which are flagged by
-# :py:func:`pvanalytics.quality.gaps.stale_values_round`.
-
-stale_data_round_mask = gaps.stale_values_round(data['value_normalized'])
-data['value_normalized'].plot()
-data.loc[stale_data_round_mask, "value_normalized"].plot(ls='', marker='.')
 plt.legend(labels=["AC Power", "Detected Stale Data"])
 plt.xlabel("Date")
 plt.ylabel("Normalized AC Power")
