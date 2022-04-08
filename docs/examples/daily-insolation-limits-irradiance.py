@@ -1,8 +1,8 @@
 """
-Daily Insolation Limits for Irradiance Data
-===========================================
+Clearsky Limits for Daily Insolation
+====================================
 
-Checking the daily insolation limits of irradiance data.
+Checking the clearsky limits for daily insolation data.
 """
 
 # %%
