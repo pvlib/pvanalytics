@@ -23,7 +23,7 @@ import pathlib
 # %%
 # First, read in the RMIS NREL system. This data set contains
 # 5-minute right-aligned sampled data. It includes POA, GHI,
-# DNI, DHI, and GNI measurements.
+# DNI, DHI, and GNI measurements, but only the GHI is relevant here.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
