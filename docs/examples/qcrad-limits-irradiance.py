@@ -8,7 +8,7 @@ Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 # %%
 # Identifying and filtering out invalid irradiance data is a
 # useful way to reduce noise during analysis. In this example,
-# we use :py:func:`pvanalytics.quality.check_irradiance_limits_qcrad`
+# we use :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
 # to test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 # For this example we will use the RMIS weather system located on the
 # NREL campus in CO.
