@@ -33,8 +33,12 @@ Documentation
 * Added examples for the quality.outliers module, including
   :py:func:`pvanalytics.quality.outliers.tukey`,
   :py:func:`pvanalytics.quality.outliers.zscore`,
-  :py:func:`pvanalytics.quality.outliers.hampel`,
+  :py:func:`pvanalytics.quality.outliers.hampel`
   (:issue:`133`, :pull:`138`)
+* Added examples for the pvanalytics.features.daytime module,
+  including :py:func:`pvanalytics.features.daytime.power_or_irradiance`
+  (:issue:`133`, :pull:`139`)
+
 
 Contributors
 ~~~~~~~~~~~~
