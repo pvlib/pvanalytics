@@ -72,8 +72,8 @@ plt.show()
 
 # %%
 # Plot the GHI, DHI, and DNI data streams with the diffuse
-# ratio limit mask overlay. This mask is true when the GHI
-# ratio passes the limit test
+# ratio limit mask overlay. This mask is true when the
+# DHI / GHI ratio passes the limit test.
 fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
             'irradiance_dni__7982']].plot()
 # Highlight periods where the GHI ratio passes the limit test
