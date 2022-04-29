@@ -64,7 +64,7 @@ fig = data[['irradiance_ghi__7981', 'irradiance_dhi__7983',
 fig.fill_between(data.index, fig.get_ylim()[0], fig.get_ylim()[1],
                  where=qcrad_consistency_mask[0], alpha=0.4)
 fig.legend(labels=["RMIS GHI", "RMIS DHI", "RMIS DNI", "QCRAD Consistent"],
-           loc="upper left")
+           loc="upper center")
 plt.xlabel("Date")
 plt.ylabel("Irradiance (W/m^2)")
 plt.tight_layout()
