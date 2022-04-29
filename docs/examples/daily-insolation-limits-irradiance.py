@@ -45,6 +45,11 @@ clearsky = location.get_clearsky(data.index)
 # to identify if the daily insolation lies between a minimum
 # and a maximum value. Here, we check GHI irradiance field
 # 'irradiance_ghi__7981'.
+# :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
+# returns a mask that identifies data that falls between
+# lower and upper limits. The defaults (used here)
+# are upper bound of 125% of clear-sky daily insolation,
+# and lower bound of 40% of clear-sky daily insolation.
 
 daily_insolation_mask = daily_insolation_limits(data['irradiance_ghi__7981'],
                                                 clearsky['ghi'])
