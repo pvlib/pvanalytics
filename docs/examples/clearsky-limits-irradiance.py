@@ -27,7 +27,7 @@ import pathlib
 # but only the GHI is relevant here.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = 'C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv'#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 freq = '5T'
 # Make the datetime index tz-aware.
