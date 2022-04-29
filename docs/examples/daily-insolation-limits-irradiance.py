@@ -61,7 +61,7 @@ data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
 data.loc[daily_insolation_mask, 'irradiance_ghi__7981'].plot(ls='', marker='.')
 plt.legend(labels=["RMIS GHI", "Clearsky GHI",
-                   "Under Daily Insolation Limit"],
+                   "Within Daily Insolation Limit"],
            loc="upper left")
 plt.xlabel("Date")
 plt.ylabel("GHI (W/m^2)")
