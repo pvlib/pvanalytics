@@ -9,7 +9,7 @@ Checking the clearsky limits for daily insolation data.
 # Identifying and filtering out invalid irradiance data is a
 # useful way to reduce noise during analysis. In this example,
 # we use :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
-# to determine if the daily insolation lies between a minimum
+# to determine when the daily insolation lies between a minimum
 # and a maximum value. Irradiance measurements and clear-sky
 # irradiance on each day are integrated with the trapezoid rule
 # to calculate daily insolation. For this example we will use the
