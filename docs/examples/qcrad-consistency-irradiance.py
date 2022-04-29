@@ -49,8 +49,8 @@ solar_position = pvlib.solarposition.get_solarposition(data.index,
 # to generate the QCRAD consistency mask.
 
 qcrad_consistency_mask = check_irradiance_consistency_qcrad(
-    ghi=data['irradiance_ghi__7981'],
     solar_zenith=solar_position['zenith'],
+    ghi=data['irradiance_ghi__7981'],
     dhi=data['irradiance_dhi__7983'],
     dni=data['irradiance_dni__7982'])
 
