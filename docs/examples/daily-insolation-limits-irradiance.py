@@ -12,8 +12,9 @@ Checking the clearsky limits for daily insolation data.
 # to determine when the daily insolation lies between a minimum
 # and a maximum value. Irradiance measurements and clear-sky
 # irradiance on each day are integrated with the trapezoid rule
-# to calculate daily insolation. For this example we will use the
-# RMIS weather system located on the NREL campus in CO.
+# to calculate daily insolation. For this example we will use data
+# from the RMIS weather system located on the NREL campus
+# in Colorado, USA.
 
 import pvanalytics
 from pvanalytics.quality.irradiance import daily_insolation_limits
@@ -44,6 +45,11 @@ clearsky = location.get_clearsky(data.index)
 # to identify if the daily insolation lies between a minimum
 # and a maximum value. Here, we check GHI irradiance field
 # 'irradiance_ghi__7981'.
+# :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`
+# returns a mask that identifies data that falls between
+# lower and upper limits. The defaults (used here)
+# are upper bound of 125% of clear-sky daily insolation,
+# and lower bound of 40% of clear-sky daily insolation.
 
 daily_insolation_mask = daily_insolation_limits(data['irradiance_ghi__7981'],
                                                 clearsky['ghi'])
@@ -55,7 +61,7 @@ data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
 data.loc[daily_insolation_mask, 'irradiance_ghi__7981'].plot(ls='', marker='.')
 plt.legend(labels=["RMIS GHI", "Clearsky GHI",
-                   "Under Daily Insolation Limit"],
+                   "Within Daily Insolation Limit"],
            loc="upper left")
 plt.xlabel("Date")
 plt.ylabel("GHI (W/m^2)")
