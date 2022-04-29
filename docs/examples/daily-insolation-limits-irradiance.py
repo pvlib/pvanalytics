@@ -12,8 +12,9 @@ Checking the clearsky limits for daily insolation data.
 # to determine when the daily insolation lies between a minimum
 # and a maximum value. Irradiance measurements and clear-sky
 # irradiance on each day are integrated with the trapezoid rule
-# to calculate daily insolation. For this example we will use the
-# RMIS weather system located on the NREL campus in CO.
+# to calculate daily insolation. For this example we will use data
+# from the RMIS weather system located on the NREL campus
+# in Colorado, USA.
 
 import pvanalytics
 from pvanalytics.quality.irradiance import daily_insolation_limits
