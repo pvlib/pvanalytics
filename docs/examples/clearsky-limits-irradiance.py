@@ -10,11 +10,12 @@ Checking the clearsky limits of irradiance data.
 # useful way to reduce noise during analysis. In this example,
 # we use :py:func:`pvanalytics.quality.irradiance.clearsky_limits`
 # to identify irradiance values that do not exceed
-# a limit based on a clear-sky model. For this example we will use GHI data from the RMIS weather
-# system located on the NREL campus in CO.
+# a limit based on a clear-sky model. For this example we will
+# use GHI data from the RMIS weather system located on the NREL campus in CO.
 
 import pvanalytics
 from pvanalytics.quality.irradiance import clearsky_limits
+from pvanalytics.features.daytime import power_or_irradiance
 import pvlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,8 +27,9 @@ import pathlib
 # but only the GHI is relevant here.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = 'C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv'#pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
+freq = '5T'
 # Make the datetime index tz-aware.
 data.index = data.index.tz_localize("Etc/GMT+7")
 
@@ -55,11 +57,20 @@ clearsky_limit_mask = clearsky_limits(data['irradiance_ghi__7981'],
 
 
 # %%
+# Mask nighttime values in the GHI time series using the
+# :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
+# We will then remove nighttime values from the GHI time series.
+
+day_night_mask = power_or_irradiance(series=data['irradiance_ghi__7981'],
+                                     freq=freq)
+
+# %%
 # Plot the 'irradiance_ghi__7981' data stream and its associated clearsky GHI
 # data stream. Mask the GHI time series by its clearsky_limit_mask.
 data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
-data.loc[clearsky_limit_mask]['irradiance_ghi__7981'].plot(ls='', marker='.')
+data.loc[clearsky_limit_mask & day_night_mask][
+    'irradiance_ghi__7981'].plot(ls='', marker='.')
 plt.legend(labels=["RMIS GHI", "Clearsky GHI",
                    "Under Clearsky Limit"],
            loc="upper left")
