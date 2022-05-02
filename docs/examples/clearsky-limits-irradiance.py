@@ -66,7 +66,11 @@ day_night_mask = power_or_irradiance(series=data['irradiance_ghi__7981'],
 
 # %%
 # Plot the 'irradiance_ghi__7981' data stream and its associated clearsky GHI
-# data stream. Mask the GHI time series by its clearsky_limit_mask.
+# data stream. Mask the GHI time series by its clearsky_limit_mask for daytime
+# periods.
+# Please note that a simple Ineichen model with static monthly turbidities
+# isn't always accurate, as in this case. Other models that may provide better
+# clear-sky estimates include McClear or PSM3.
 data['irradiance_ghi__7981'].plot()
 clearsky['ghi'].plot()
 data.loc[clearsky_limit_mask & day_night_mask][
