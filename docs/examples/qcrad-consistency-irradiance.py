@@ -11,8 +11,8 @@ Check consistency of GHI, DHI and DNI using QCRad criteria.
 # we use
 # :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
 # to check the consistency of GHI, DHI and DNI data using QCRad criteria.
-# For this example we will use the RMIS weather system located on the
-# NREL campus in CO.
+# For this example we will use data from the RMIS weather system located
+# on the NREL campus in Colorado, USA.
 
 
 import pvanalytics
