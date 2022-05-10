@@ -22,7 +22,7 @@ import pandas as pd
 import pathlib
 
 # %%
-# First, read in the RMIS NREL system. This data set contains
+# First, read in data from the RMIS NREL system. This data set contains
 # 5-minute right-aligned data. It includes POA, GHI,
 # DNI, DHI, and GNI measurements.
 
