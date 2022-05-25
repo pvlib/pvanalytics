@@ -7,19 +7,6 @@ API Reference
 Quality
 =======
 
-Data Shifts
------------
-
-Functions for identifying shifts in data values in time series
-and for identifying periods with data shifts. For functions
-that identify shifts in time, see ``quality.time``
-
-.. autosummary::
-   :toctree: generated/
-
-   quality.data_shifts.detect_data_shifts
-   quality.data_shifts.get_longest_shift_segment_dates
-
 Irradiance
 ----------
 
