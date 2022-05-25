@@ -33,13 +33,13 @@ def requires_ruptures(test):
 
 
 @requires_ruptures
-def test_detect_data_shifts(generate_daily_time_series):
+def test_detect_data_shifts(generate_time_series):
     """
     Unit test that data shifts are correctly identified in the simulated time
     series.
     """
     signal_no_index, signal_datetime_index, df_weekly_resample, \
-        changepoint_date = generate_daily_time_series
+        changepoint_date = generate_time_series
     # Test that an error is thrown when a Pandas series with no datetime
     # index is passed
     pytest.raises(TypeError, dt.detect_data_shifts, signal_no_index)
@@ -72,13 +72,13 @@ def test_detect_data_shifts(generate_daily_time_series):
     assert (len(shift_index_param.index) == len(signal_datetime_index.index))
 
 
-def test_filter_data_shifts(generate_daily_time_series):
+def test_filter_data_shifts(generate_time_series):
     """
     Unit test that the longest interval between data shifts is selected for
     the simulated daily time series data set.
     """
     signal_no_index, signal_datetime_index, df_weekly_resample, \
-        changepoint_date = generate_daily_time_series
+        changepoint_date = generate_time_series
     # Run the time series where there are no changepoints
     interval_dict_short = dt.get_longest_shift_segment_dates(
         time_series=signal_datetime_index[:100])
