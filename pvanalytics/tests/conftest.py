@@ -5,11 +5,8 @@ import pandas as pd
 import pvlib
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-from pathlib import Path
-from pkg_resources import Requirement, parse_version
 
-TEST_DIR = Path(__file__).parent
-DATA_DIR = TEST_DIR.parent / 'data'
+from pkg_resources import Requirement, parse_version
 
 
 def pytest_addoption(parser):
