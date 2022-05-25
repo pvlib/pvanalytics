@@ -71,6 +71,7 @@ def test_detect_data_shifts(generate_time_series):
     # Test that an Import error is thrown when ruptures is not available
     _temp_ruptures = sys.modules['ruptures']
     sys.modules['ruptures'] = None
+    assert requires_ruptures(None).mark.kwargs['reason'] == 'requires ruptures'
     pytest.raises(ImportError, dt.detect_data_shifts, signal_datetime_index)
     # Re-import ruptures
     sys.modules['ruptures'] = _temp_ruptures
