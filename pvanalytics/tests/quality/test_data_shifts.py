@@ -69,8 +69,11 @@ def test_detect_data_shifts(generate_time_series):
     shift_index_param_dates = list(
         shift_index_param[shift_index_param].index)
     # Test that an Import error is thrown when ruptures is not available
+    _temp_ruptures = sys.modules['ruptures']
     sys.modules['ruptures'] = None
     requires_ruptures(None).mark.kwargs['reason'] == 'requires ruptures'
+    # Re-import ruptures
+    sys.modules['ruptures'] = _temp_ruptures
     assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
