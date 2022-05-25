@@ -7,6 +7,7 @@ import ruptures
 
 test_file_1 = DATA_DIR / "pvlib_data_shift.csv"
 
+
 @pytest.fixture
 def generate_time_series():
     # Pull down the saved PVLib dataframe and process it
