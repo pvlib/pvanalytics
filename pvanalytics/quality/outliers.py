@@ -63,7 +63,8 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
 
     """
     data = data.copy()
-    nan_mask = pd.Series([False] * len(data))
+    nan_mask = pd.Series([False] * len(data),
+                         index=data.index)
 
     if data.hasnans:
         if nan_policy == 'raise':
