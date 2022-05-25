@@ -5,9 +5,7 @@ import pandas as pd
 import pvlib
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-
 from pkg_resources import Requirement, parse_version
-
 
 def pytest_addoption(parser):
     parser.addoption(

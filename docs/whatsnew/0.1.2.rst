@@ -5,7 +5,9 @@
 
 Enhancements
 ~~~~~~~~~~~~
-
+* Detect data shifts in daily summed time series and remove data shift periods
+  from the time series with   :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts`
+  and :py:func:`pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`. (:pull:`124`)
 
 Bug Fixes
 ~~~~~~~~~
