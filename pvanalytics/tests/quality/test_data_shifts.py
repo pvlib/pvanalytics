@@ -70,14 +70,14 @@ def test_get_longest_shift_segment_dates(generate_series):
     signal_no_index, signal_datetime_index, df_weekly_resample, \
         changepoint_date = generate_series
     # Run the time series where there are no changepoints
-    interval_dict_short = dt.get_longest_shift_segment_dates(
+    start_date_short, end_date_short = dt.get_longest_shift_segment_dates(
         series=signal_datetime_index[:100])
     # Run the time series where there is a changepoint
-    interval_dict = dt.get_longest_shift_segment_dates(
+    start_date, end_date = dt.get_longest_shift_segment_dates(
         series=signal_datetime_index)
-    assert (interval_dict['start_date'] == pd.to_datetime('2015-11-06')) & \
-        (interval_dict['end_date'] == pd.to_datetime('2020-12-24'))
-    assert (interval_dict_short['start_date'] ==
+    assert (start_date == pd.to_datetime('2015-11-06')) & \
+        (end_date == pd.to_datetime('2020-12-24'))
+    assert (start_date_short ==
             signal_datetime_index.index.min()+pd.DateOffset(days=7)) & \
-        (interval_dict_short['end_date'] ==
+        (end_date_short ==
          signal_datetime_index[:100].index.max()-pd.DateOffset(days=7))

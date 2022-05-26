@@ -119,6 +119,11 @@ def detect_data_shifts(series,
     Detect data shifts in the time series, and return list of dates where these
     data shifts occur.
 
+    .. warning:: If the passed time series is less than 2 years in length,
+        it will not be corrected for seasonality. Data shift detection will
+        be run on the min-max normalized time series with no seasonality
+        correction.
+
     Parameters
     ----------
     series : Pandas series with datetime index.
@@ -153,11 +158,6 @@ def detect_data_shifts(series,
         Series of boolean values with a datetime index, where detected
         changepoints are labeled as True, and all other values are labeled
         as False.
-
-    .. warning:: If the passed time series is less than 2 years in length,
-        it will not be corrected for seasonality. Data shift detection will
-        be run on the min-max normalized time series with no seasonality
-        correction.
 
     References
     -------
@@ -271,11 +271,12 @@ def get_longest_shift_segment_dates(series,
 
     Returns
     -------
-    passing_dates_dict: Dictionary.
-        Dictionary object containing the longest continuous time segment
-        with no detected data shifts. The start date of the period is
-        represented in the "start_date" field, and the end date of the
-        period is represented in the "end_date" field.
+    start_date: Pandas datetime
+        Start date of the longest continuous time series segment that is
+        free of data shifts.
+    end_date: Pandas datetime
+        End date of the longest continuous time series segment that is
+        free of data shifts.
 
     References
     -------
@@ -291,8 +292,6 @@ def get_longest_shift_segment_dates(series,
     longest_interval_id = interval_id.value_counts().idxmax()
     index = interval_id.index[interval_id == longest_interval_id]
     # Add a week-long buffer for the start and end dates
-    passing_dates_dict = {'start_date': index.min() +
-                          pd.DateOffset(days=buffer_day_length),
-                          'end_date': index.max() -
-                          pd.DateOffset(days=buffer_day_length)}
-    return passing_dates_dict
+    start_date = index.min() + pd.DateOffset(days=buffer_day_length)
+    end_date = index.max() - pd.DateOffset(days=buffer_day_length)
+    return start_date, end_date
