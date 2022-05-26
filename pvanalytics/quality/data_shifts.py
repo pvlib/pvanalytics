@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 
-def _run_data_checks(time_series):
+def _run_data_checks(series):
     """
     Check that the passed parameters can be run through the function.
     This includes checking the passed time series to ensure it has a
@@ -16,7 +16,7 @@ def _run_data_checks(time_series):
 
     Parameters
     ----------
-    time_series : Pandas series with datetime index.
+    series : Pandas series with datetime index.
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily
         values of the particular data stream.
@@ -27,57 +27,57 @@ def _run_data_checks(time_series):
     """
     # Check that the time series has a datetime index, and consists of numeric
     # values
-    if not isinstance(time_series.index, pd.DatetimeIndex):
+    if not isinstance(series.index, pd.DatetimeIndex):
         raise TypeError('Must be a Pandas series with a datetime index.')
     # Check that the time series is sampled on a daily basis. If not,
     # throw a ValueError exception
-    if time_series.index.to_series().diff().value_counts().idxmax().days != 1:
+    if series.index.to_series().diff().value_counts().idxmax().days != 1:
         raise ValueError("Time series frequency not daily. Please resample "
                          "time series to daily summed values.")
     return
 
 
-def _erroneous_filter(time_series):
+def _erroneous_filter(series):
     """
     Remove any outliers from the time series.
 
     Parameters
     ----------
-    time_series : Pandas series with datetime index.
+    series : Pandas series with datetime index.
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
 
     Returns
     -------
-    time_series: Pandas series, with a datetime index.
+    series: Pandas series, with a datetime index.
         Time series, after filtering out outliers. This includes removal
         of stale repeat readings, negative readings, and data greater than
         the 99th percentile or less than the 1st percentile.
     """
     # Detect and mask stale data
-    stale_mask = gaps.stale_values_round(time_series, window=6,
+    stale_mask = gaps.stale_values_round(series, window=6,
                                          decimals=3, mark='tail')
     # Mask negative and 0 values
-    negative_mask = (time_series <= 0)
+    negative_mask = (series <= 0)
     # Mask the top 1% and bottom 1% of data points
-    quantile_mask = ((time_series <= time_series.quantile(.01)) |
-                     (time_series >= time_series.quantile(.99)))
+    quantile_mask = ((series <= series.quantile(.01)) |
+                     (series >= series.quantile(.99)))
     # Filter out the associated data by masking
-    time_series = time_series[(~stale_mask) & (~negative_mask) &
-                              (~quantile_mask)]
-    return time_series
+    series = series[(~stale_mask) & (~negative_mask) & (~quantile_mask)]
+    return series
 
 
-def _preprocess_data(time_series, remove_seasonality):
+def _preprocess_data(series, remove_seasonality):
     """
     Pre-process the time series, including the following:
         1. Min-max normalization of the time series.
-        2. Removing seasonality from the time series.
+        2. Removing seasonality from the time series, if remove_seasonality
+        is True.
 
     Parameters
     ----------
-    time_series : Pandas series with datetime index.
+    series : Pandas series with datetime index.
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
@@ -94,25 +94,25 @@ def _preprocess_data(time_series, remove_seasonality):
         length, seasonality removal.
     """
     # Min-max normalize the series
-    time_series_normalized = (time_series - time_series.min()) \
-        / (time_series.max() - time_series.min())
-    # Check if the time series is greater than two years in length. If not,
-    # pass back the normalized time series
+    series_normalized = (series - series.min()) \
+        / (series.max() - series.min())
+    # If remove_seasonality=True, run the seasonality removal process. If
+    # False, return the min-max normalized time series
     if not remove_seasonality:
-        return time_series_normalized
+        return series_normalized
     else:
         # Take the median of every day of the year across all years in the
         # data, and use this as the seasonality of the time series
-        month_values = pd.DatetimeIndex(time_series.index).month
-        day_values = pd.DatetimeIndex(pd.Series(time_series.index)).day
-        time_series_seasonality = time_series_normalized.groupby([month_values,
-                                                                  day_values])\
+        month_values = series.index.month
+        day_values = series.index.day
+        series_seasonality = series_normalized.groupby([month_values,
+                                                        day_values])\
             .transform("median")
         # Remove seasonality from the time series
-        return (time_series_normalized - time_series_seasonality)
+        return (series_normalized - series_seasonality)
 
 
-def detect_data_shifts(time_series,
+def detect_data_shifts(series,
                        filtering=True, use_default_models=True,
                        method=None, cost=None, penalty=40):
     """
@@ -121,7 +121,7 @@ def detect_data_shifts(time_series,
 
     Parameters
     ----------
-    time_series : Pandas series with datetime index.
+    series : Pandas series with datetime index.
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
@@ -133,7 +133,7 @@ def detect_data_shifts(time_series,
     use_default_models: Boolean, default True
         If True, then default change point detection search parameters are
         used. For time series shorter than 2 years in length, the search
-        function is `rpt.Window`  with `model='rbf'`, `width=40` and
+        function is `rpt.Window`  with `model='rbf'`, `width=50` and
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
@@ -171,26 +171,26 @@ def detect_data_shifts(time_series,
         raise ImportError("data_shifts() requires ruptures.")
     # Run data checks on cleaned data to make sure that the data can be run
     # successfully through the routine
-    _run_data_checks(time_series)
+    _run_data_checks(series)
     # Run the filtering sequence, if marked as True
     if filtering:
-        time_series_filtered = _erroneous_filter(time_series)
+        series_filtered = _erroneous_filter(series)
     # Drop any duplicated data from the time series
-    time_series_filtered = time_series_filtered.drop_duplicates()
+    series_filtered = series_filtered.drop_duplicates()
     # Check if the time series is more than 2 years long. If so, remove
     # seasonality. If not, run analysis on the normalized time series
-    if (time_series_filtered.index.max() -
-            time_series_filtered.index.min()).days <= 730:
-        time_series_processed = _preprocess_data(time_series_filtered,
-                                                 remove_seasonality=False)
+    if (series_filtered.index.max() -
+            series_filtered.index.min()).days <= 730:
+        series_processed = _preprocess_data(series_filtered,
+                                            remove_seasonality=False)
         seasonality_rmv = False
     else:
         # Perform pre-processing on the time series, to get the
         # seasonality-removed time series.
-        time_series_processed = _preprocess_data(time_series_filtered,
-                                                 remove_seasonality=True)
+        series_processed = _preprocess_data(series_filtered,
+                                            remove_seasonality=True)
         seasonality_rmv = True
-    points = np.array(time_series_processed.dropna())
+    points = np.array(series_processed.dropna())
     # If seasonality has been removed and default model is used, run
     # BottomUp method
     if (seasonality_rmv) & (use_default_models):
@@ -210,16 +210,16 @@ def detect_data_shifts(time_series,
     if len(points) in result:
         result.remove(len(points))
     # Return a list of dates where changepoints are detected
-    time_series_processed.index.name = "datetime"
-    mask = pd.Series(False, index=time_series_processed.index)
+    series_processed.index.name = "datetime"
+    mask = pd.Series(False, index=series_processed.index)
     mask.iloc[result] = True
     # Re-index the mask to include any timestamps that were
     # filtered out as outliers
-    mask = mask.reindex(time_series.index, fill_value=False)
+    mask = mask.reindex(series.index, fill_value=False)
     return mask
 
 
-def get_longest_shift_segment_dates(time_series,
+def get_longest_shift_segment_dates(series,
                                     filtering=True,
                                     use_default_models=True,
                                     method=None, cost=None,
@@ -236,7 +236,7 @@ def get_longest_shift_segment_dates(time_series,
 
     Parameters
     ----------
-    time_series : Pandas series with datetime index.
+    series : Pandas series with datetime index.
         Daily time series of a PV data stream, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
@@ -248,7 +248,7 @@ def get_longest_shift_segment_dates(time_series,
     use_default_models: Boolean, default True
         If True, then default change point detection search parameters are
         used. For time series shorter than 2 years in length, the search
-        function is `rpt.Window`  with `model='rbf'`, `width=40` and
+        function is `rpt.Window`  with `model='rbf'`, `width=50` and
         `penalty=30`. For time series 2 years or longer in length, the
         search function is `rpt.BottomUp` with `model='rbf'`
         and `penalty=40`.
@@ -284,7 +284,7 @@ def get_longest_shift_segment_dates(time_series,
        Specialists Conference (PVSC). Submitted.
     """
     # Detect indices where data shifts occur
-    cpd_mask = detect_data_shifts(time_series, filtering,
+    cpd_mask = detect_data_shifts(series, filtering,
                                   use_default_models,
                                   method, cost, penalty)
     interval_id = cpd_mask.cumsum()

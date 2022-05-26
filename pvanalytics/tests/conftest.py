@@ -54,6 +54,17 @@ def requires_pvlib(versionspec, reason=''):
     return pytest.mark.skipif(not is_satisfied, reason=message)
 
 
+def requires_ruptures(test):
+    """Skip `test` if ruptures is not installed."""
+    try:
+        import ruptures  # noqa: F401
+        has_ruptures = True
+    except ImportError:
+        has_ruptures = False
+    return pytest.mark.skipif(
+        not has_ruptures, reason="requires ruptures")(test)
+
+
 @pytest.fixture
 def quadratic():
     """Downward facing quadratic.

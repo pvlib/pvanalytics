@@ -2,8 +2,7 @@
 import pandas as pd
 import pytest
 from pvanalytics.quality import data_shifts as dt
-from ..conftest import DATA_DIR
-import sys
+from ..conftest import DATA_DIR, requires_ruptures
 import ruptures
 
 
@@ -21,17 +20,6 @@ def generate_time_series():
     df_weekly_resample = df.resample('W').median()['value']
     return (signal_no_index, signal_datetime_index,
             df_weekly_resample, changepoint_date)
-
-
-def requires_ruptures(test):
-    """Skip `test` if ruptures is not installed."""
-    try:
-        import ruptures  # noqa: F401
-        has_ruptures = True
-    except ImportError:
-        has_ruptures = False
-    return pytest.mark.skipif(
-        not has_ruptures, reason="requires ruptures")(test)
 
 
 @requires_ruptures
@@ -68,20 +56,13 @@ def test_detect_data_shifts(generate_time_series):
                                               False, ruptures.BottomUp, "rbf")
     shift_index_param_dates = list(
         shift_index_param[shift_index_param].index)
-    # Test that an Import error is thrown when ruptures is not available
-    _temp_ruptures = sys.modules['ruptures']
-    sys.modules['ruptures'] = None
-    assert requires_ruptures(None).mark.kwargs['reason'] == 'requires ruptures'
-    pytest.raises(ImportError, dt.detect_data_shifts, signal_datetime_index)
-    # Re-import ruptures
-    sys.modules['ruptures'] = _temp_ruptures
     assert (abs((changepoint_date - shift_index_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_unnamed_dates[0]).days) <= 5)
     assert (abs((changepoint_date - shift_index_param_dates[0]).days) <= 5)
     assert (len(shift_index_param.index) == len(signal_datetime_index.index))
 
 
-def test_filter_data_shifts(generate_time_series):
+def test_get_longest_shift_segment_dates(generate_time_series):
     """
     Unit test that the longest interval between data shifts is selected for
     the simulated daily time series data set.
