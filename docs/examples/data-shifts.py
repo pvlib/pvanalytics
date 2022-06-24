@@ -15,7 +15,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pvanalytics.quality import data_shifts as dt
 import pathlib
-import ruptures
 
 # %%
 # As an example, we load in a simulated PVLib AC power time series with a
