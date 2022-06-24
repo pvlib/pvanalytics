@@ -127,7 +127,7 @@ def detect_data_shifts(series,
     Parameters
     ----------
     series : Pandas series with datetime index.
-        Daily time series of a PV data stream, which can include irradiance
+        Time series of daily PV data values, which can include irradiance
         and power data streams. This series represents the summed daily values
         of the particular data stream.
     filtering : Boolean, default True.
