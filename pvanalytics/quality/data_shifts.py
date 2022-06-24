@@ -1,6 +1,5 @@
 """
-Quality tests related to detecting and filtering out data shifts in data
-streams.
+Quality tests related to detecting shifts in data streams.
 """
 
 from pvanalytics.quality import gaps
