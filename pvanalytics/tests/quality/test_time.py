@@ -5,6 +5,7 @@ import pytest
 import pandas as pd
 from pandas.util.testing import assert_series_equal
 from pvanalytics.quality import time
+from ..conftest import requires_ruptures
 
 
 @pytest.fixture
@@ -207,17 +208,6 @@ def midday(request, albuquerque):
     mid_day = mid_day.dt.hour * 60 + mid_day.dt.minute
     mid_day.index = pd.DatetimeIndex(mid_day.index, tz='MST')
     return mid_day
-
-
-def requires_ruptures(test):
-    """Skip `test` if ruptures is not installed."""
-    try:
-        import ruptures  # noqa: F401
-        has_ruptures = True
-    except ImportError:
-        has_ruptures = False
-    return pytest.mark.skipif(
-        not has_ruptures, reason="requires ruptures")(test)
 
 
 @requires_ruptures
