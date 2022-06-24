@@ -162,7 +162,7 @@ def detect_data_shifts(series,
     -------
     .. [1] Perry K., and Muller, M. "Automated shift detection in sensor-based
        PV power and irradiance time series", 2022 IEEE 48th Photovoltaic
-       Specialists Conference (PVSC). Submitted.
+       Specialists Conference (PVSC).
     """
     try:
         import ruptures as rpt
