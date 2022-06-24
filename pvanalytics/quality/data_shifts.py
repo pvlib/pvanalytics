@@ -154,7 +154,7 @@ def detect_data_shifts(series,
     Returns
     -------
     Pandas Series
-        Series of boolean values with a datetime index, where detected
+        Series of boolean values with the input Series' datetime index, where detected
         changepoints are labeled as True, and all other values are labeled
         as False.
 
