@@ -154,9 +154,9 @@ def detect_data_shifts(series,
     Returns
     -------
     Pandas Series
-        Series of boolean values with the input Series' datetime index, where detected
-        changepoints are labeled as True, and all other values are labeled
-        as False.
+        Series of boolean values with the input Series' datetime index, where
+        detected changepoints are labeled as True, and all other values are
+        labeled as False.
 
     References
     -------
@@ -226,7 +226,7 @@ def get_longest_shift_segment_dates(series,
     """
     Return the start and end dates of the longest serially complete time series
     segment.
-    
+
     During this process, data shift detection is performed, and the
     longest time series segment between changepoints is identified, and the
     start and end dates of that segment are returned, with a settable buffer
