@@ -225,8 +225,10 @@ def get_longest_shift_segment_dates(series,
                                     method=None, cost=None,
                                     penalty=40, buffer_day_length=7):
     """
-    Return the start and end dates of the longest continuous time series
-    segment. During this process, data shift detection is performed, and the
+    Return the start and end dates of the longest serially complete time series
+    segment.
+    
+    During this process, data shift detection is performed, and the
     longest time series segment between changepoints is identified, and the
     start and end dates of that segment are returned, with a settable buffer
     period added to the start date and subtracted from the end date,
