@@ -1,12 +1,13 @@
 """
 Data Shift Detection & Filtering
 ================================
-Identify data shifts/capacity changes in time series data
+
+Identifying data shifts/capacity changes in time series data
 """
 
 # %%
 # This example covers identifying data shifts/capacity changes in a time series
-# and filtering the longest time series segment free of these shifts, using
+# and extracting the longest time series segment free of these shifts, using
 # :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts` and
 # :py:func:`pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`.
 
@@ -41,8 +42,8 @@ for cpd in shift_list:
 plt.show()
 
 # %%
-# We filter the time series by detected changepoints, taking the longest
-# continuous segment between detected changepoints, using
+# We filter the time series by the detected changepoints, taking the longest
+# continuous segment free of data shifts, using
 # :py:func:`pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`.
 # The filtered time series is then plotted.
 
