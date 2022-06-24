@@ -115,8 +115,7 @@ def detect_data_shifts(series,
                        filtering=True, use_default_models=True,
                        method=None, cost=None, penalty=40):
     """
-    Detect data shifts in the time series, and return list of dates where these
-    data shifts occur.
+    Detect data shifts in a time series of daily values.
 
     .. warning:: If the passed time series is less than 2 years in length,
         it will not be corrected for seasonality. Data shift detection will
