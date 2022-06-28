@@ -14,11 +14,11 @@ Identifying data shifts/capacity changes in time series data
 import pvanalytics
 import pandas as pd
 import matplotlib.pyplot as plt
-from pvanalytics.quality import data_shifts as dt
+from pvanalytics.quality import data_shifts as ds
 import pathlib
 
 # %%
-# As an example, we load in a simulated PVLib AC power time series with a
+# As an example, we load in a simulated pvlib AC power time series with a
 # single changepoint, occurring on October 28, 2015.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
@@ -34,7 +34,7 @@ print("Changepoint at: " + str(df[df['label'] == 1].index[0]))
 # :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts`. We re-plot
 # the time series, with a vertical line where the detected changepoint is.
 
-shift_mask = dt.detect_data_shifts(df['value'])
+shift_mask = ds.detect_data_shifts(df['value'])
 shift_list = list(df[shift_mask].index)
 df['value'].plot()
 for cpd in shift_list:
@@ -45,8 +45,8 @@ plt.show()
 # We filter the time series by the detected changepoints, taking the longest
 # continuous segment free of data shifts, using
 # :py:func:`pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`.
-# The filtered time series is then plotted.
+# The trimmed time series is then plotted.
 
-start_date, end_date = dt.get_longest_shift_segment_dates(df['value'])
+start_date, end_date = ds.get_longest_shift_segment_dates(df['value'])
 df['value'][start_date:end_date].plot()
 plt.show()
