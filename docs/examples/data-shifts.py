@@ -31,14 +31,26 @@ print("Changepoint at: " + str(df[df['label'] == 1].index[0]))
 # %%
 # Now we run the data shift algorithm (with default parameters)
 # on the data stream, using
-# :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts`. We re-plot
-# the time series, with a vertical line where the detected changepoint is.
+# :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts`. We plot the
+# predicted time series segments, based on algorithm results.
 
 shift_mask = ds.detect_data_shifts(df['value'])
 shift_list = list(df[shift_mask].index)
-df['value'].plot()
-for cpd in shift_list:
-    plt.axvline(cpd, color="green")
+edges = [df.index[0]] + shift_list + [df.index[-1]]
+fig, ax = plt.subplots()
+for (st, ed) in zip(edges[:-1], edges[1:]):
+    ax.plot(df.loc[st:ed, "value"])
+plt.show()
+
+# We zoom in around the changepoint to more closely show the data shift. Time
+# series segments pre- and post-shift are color-coded.
+
+edges = [pd.to_datetime("10-15-2015")] + shift_list + \
+    [pd.to_datetime("11-15-2015")]
+fig, ax = plt.subplots()
+for (st, ed) in zip(edges[:-1], edges[1:]):
+    ax.plot(df.loc[st:ed, "value"])
+plt.xticks(rotation=45)
 plt.show()
 
 # %%
