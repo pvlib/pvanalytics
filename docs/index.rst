@@ -9,8 +9,11 @@ PVAnalytics
 PVAnalytics is a python library that supports analytics for PV
 systems. It provides functions for quality control, filtering, and
 feature labeling and other tools supporting the analysis of PV
-system-level data.
+system-level data. It can be used as a standalone analysis package
+and as a data cleaning "front end" for other PV analysis packages.
 
+PVAnalytics is free and open source under a
+`permissive license <https://github.com/pvlib/pvanalytics/blob/master/LICENSE>`_.
 The source code for PVAnalytics is hosted on `github
 <https://github.com/pvlib/pvanalytics>`_.
 
@@ -71,11 +74,12 @@ It supports:
   and at minimum the two latest minor versions.
 - All minor versions of numpy released in the 24 months prior to the project,
   and at minimum the last three minor versions
-- The latest release of `PVLib <https://pvlib-python.readthedocs.io>`_.
+- The latest release of `pvlib <https://pvlib-python.readthedocs.io>`_.
 
-PVAnalytics depends on the following packages:
+Additionally, PVAnalytics relies on several other packages in the open
+source scientific python ecosystem.  For details on dependencies and versions,
+see our our `setup.py <https://github.com/pvlib/pvanalytics/blob/master/setup.py>`_.
 
-.. literalinclude:: ../requirements.txt
 
 Contents
 ========
