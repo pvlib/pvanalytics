@@ -30,7 +30,7 @@ For more detailed descriptions, see our
 
 * `quality` contains submodules for different kinds of data quality
   checks.
-  * `quality.data_shifts` contains quality checks for detecting and 
+  * `data_shifts` contains quality checks for detecting and 
     isolating data shifts in PV time series data.
   * `irradiance` provides quality checks for irradiance
     measurements. 
