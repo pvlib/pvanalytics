@@ -33,9 +33,7 @@ For more detailed descriptions, see our
   * `quality.data_shifts` contains quality checks for detecting and 
     isolating data shifts in PV time series data.
   * `irradiance` provides quality checks for irradiance
-    measurements. This will initially contain an implementation of the
-    QCRad algorithm, but any other quality tests for irradiance data
-    should be added here.
+    measurements. 
   * `weather` has quality checks for weather data (for example tests
     for physically plausible values of temperature, wind speed,
     humidity, etc.)
@@ -51,11 +49,10 @@ For more detailed descriptions, see our
   * `clipping` functions for labeling inverter clipping.
   * `clearsky` functions for identifying periods of clear sky
     conditions.
-  * `daytime` functions for labeling the daytime subset of a series.
+  * `daytime` functions for for identifying periods of day and night.
   * `orientation` functions for labeling data as corresponding to
     a rotating solar tracker or a fixed tilt structure.
-  * `shading` functions to detect shadows from fixed objects in
-    irradiance data.
+  * `shading` functions for identifying shadows.
 * `system` identification of PV system characteristics from data
   (e.g. nameplate power, orientation, azimuth)
 * `metrics` contains functions for computing PV system-level metrics
