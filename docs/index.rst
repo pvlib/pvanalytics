@@ -40,8 +40,6 @@ library status.
   - :py:mod:`quality.util` general purpose quality functions (e.g. simple
     range checks).
 
-- :py:mod:`filtering` as the name implies, contains functions for data
-  filtering.
 - :py:mod:`features` contains submodules with different methods for
   identifying and labeling salient features.
 
@@ -59,15 +57,8 @@ library status.
 
 - :py:mod:`system` identification of PV system characteristics from data
   (e.g. nameplate power, tilt, azimuth)
-- :py:mod:`translate` contains functions for translating data to other
-  conditions (e.g. IV curve translators, temperature adjustment,
-  irradiance adjustment)
 - :py:mod:`metrics` contains functions for computing PV system-level metrics
   (e.g. performance ratio)
-- :py:mod:`fitting` contains submodules for different types of models that can
-  be fit to data (e.g.  temperature models)
-- :py:mod:`dataclasses` contains classes for normalizing data (e.g. an
-  ``IVCurve`` class)
 
 Dependencies
 ------------
