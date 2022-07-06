@@ -30,6 +30,8 @@ For more detailed descriptions, see our
 
 * `quality` contains submodules for different kinds of data quality
   checks.
+  * `quality.data_shifts` contains quality checks for detecting and 
+    isolating data shifts in PV time series data.
   * `irradiance` provides quality checks for irradiance
     measurements. This will initially contain an implementation of the
     QCRad algorithm, but any other quality tests for irradiance data
@@ -42,8 +44,6 @@ For more detailed descriptions, see our
   * `gaps` contains functions for identifying gaps in the data
     (i.e. missing values, stuck values, and interpolation).
   * `time` quality checks related to time (e.g. timestamp spacing)
-  * `data_shifts` contains functions for identifying abrupt magnitude
-    shifts in data time series.
   * `util` general purpose quality functions.
 
 * `features` contains submodules with different methods for
