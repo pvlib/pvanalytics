@@ -44,6 +44,11 @@ Documentation
   :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`,
   and :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
   (:issue:`133`, :pull:`140`)
+* Added examples for the pvanalytics.system module,
+  including :py:func:`pvanalytics.system.is_tracking_envelope`,
+  :py:func:`pvanalytics.system.infer_orientation_daily_peak`,
+  and :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts`
+  (:issue:`133`, :pull:`146`)
 
 
 Contributors
