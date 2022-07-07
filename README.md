@@ -23,8 +23,8 @@ Documentation and example usage is available at
 The functions provided by PVAnalytics are organized in modules based
 on their anticipated use.  The structure/organization below is likely
 to change as use cases are identified and refined and as package
-content evolves.  The functions in `quality`, `filtering`, and
-`features` will take a series of data and return a series of booleans.
+content evolves.  The functions in `quality` and
+`features` take a series of data and return a series of booleans.
 For more detailed descriptions, see our
 [API Reference](https://pvanalytics.readthedocs.io/en/stable/api.html).
 
