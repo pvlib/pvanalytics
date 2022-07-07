@@ -3,6 +3,9 @@
 0.1.2 (TBD)
 -------------------------
 
+* Removed empty modules ``pvanalytics.filtering`` and ``pvanalytics.fitting``
+  until the relevant functionality is added to the package. (:pull:`145`)
+
 Enhancements
 ~~~~~~~~~~~~
 * Detect data shifts in daily summed time series with 
@@ -52,3 +55,5 @@ Contributors
 ~~~~~~~~~~~~
 
 * Kirsten Perry (:ghuser:`kperrynrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
