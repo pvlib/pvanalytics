@@ -17,7 +17,6 @@ Identifying if a system is tracking or fixed tilt
 from pvanalytics.system import is_tracking_envelope
 from pvanalytics.features.clipping import geometric
 from pvanalytics.features.daytime import power_or_irradiance
-import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
 
@@ -50,4 +49,4 @@ predicted_mounting_config = is_tracking_envelope(time_series,
                                                  daytime_mask,
                                                  clipping_mask)
 
-print("Estimated mounting configuration: " + predicted_mounting_config)
+print("Estimated mounting configuration: " + predicted_mounting_config.name)
