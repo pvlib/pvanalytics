@@ -14,7 +14,6 @@ Identifying if a system is tracking or fixed tilt
 # quartic curves. The r^2 output from these fits is used to determine
 # if the system fits a tracking or fixed-tilt profile.
 
-import pvanalytics
 from pvanalytics.system import is_tracking_envelope
 from pvanalytics.features.clipping import geometric
 from pvanalytics.features.daytime import power_or_irradiance
@@ -25,15 +24,12 @@ import pathlib
 # %%
 # First, we import the AC power data stream that we are going to check the 
 # mounting configuration for. This particular data stream is associated with
-# a XXXX system.
-# This data set has a Pandas DateTime index, with the min-max normalized
-# AC power time series represented in the 'value_normalized' column.
-# The data is sampled at 15-minute intervals.
+# a tracked system.
 
-pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'ac_power_inv_2173_stale_data.csv'
-data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data.asfreq("15T")
+dataframe = pd.read_csv("C:/Users/kperry/Documents/Wells Fargo/code/50.csv")
+dataframe.index = pd.to_datetime(dataframe['measured_on'])
+time_series = dataframe['ac_power__752']
+time_series = time_series.asfreq('T')
 
 # %%
 # Run the clipping and the daytime filters on the time series. 
@@ -42,13 +38,16 @@ data = data.asfreq("15T")
 
 # Generate the daylight mask for the AC power time series
 daytime_mask = power_or_irradiance(time_series)
-# Get the sunny days associated with the system
-sunny_days = fixed_nrel(time_series,
-                        daytime_mask, r2_min=0.94,
-                        min_hours=5, peak_min=None)
+
+# Generate the clipping mask for the time series
+clipping_mask = geometric(time_series)
 
 # %%
 # Now, we use :py:func:`pvanalytics.system.is_tracking_envelope` to
 # identify if the data stream is associated with a tracking system.
 
-is_tracking_envelope(series, daytime, clipping)
+predicted_mounting_config = is_tracking_envelope(time_series,
+                                                 daytime_mask,
+                                                 clipping_mask)
+
+print("Estimated mounting configuration: " + predicted_mounting_config)
