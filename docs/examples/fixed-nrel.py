@@ -33,7 +33,7 @@ data = data[pd.to_datetime('2016-08-10'): pd.to_datetime('2016-08-16')]
 # %%
 # First, mask day-night periods using the
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
-# Then apply :py:func:`pvanalytics.features.oreitnation.tracking_nrel`
+# Then apply :py:func:`pvanalytics.features.orientation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 
