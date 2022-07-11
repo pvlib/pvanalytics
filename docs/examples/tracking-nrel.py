@@ -11,6 +11,9 @@ Flag sunny days for a single-axis tracking PV system.
 # data. For this example we will use data from the single-axis tracking
 # NREL Mesa system located on the NREL campus in Colorado, USA, and generate
 # a sunny day mask.
+# This data set is publicly available via the PVDAQ database in the
+# DOE Open Energy Data Initiative (OEDI)
+# (https://data.openei.org/submissions/4568). This data is timezone-localized.
 
 import pvanalytics
 from pvanalytics.features import daytime as day
@@ -21,19 +24,19 @@ import pathlib
 
 # %%
 # First, read in data from the NREL Mesa 1-axis tracking system. This data
-# set contains
+# set contains 15-minute interval AC power data. 
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_1axis_tracker_mesa_ac_power.csv" #pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
-data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
-# Make the datetime index tz-aware.
-data.index = data.index.tz_localize("America/Denver")
+file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_1axis_tracker_mesa_ac_power.csv" #pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
+data = pd.read_csv(file, index_col=0, parse_dates=True)
 data = data.dropna()
 df_freq = '15T'
 data = data.resample(df_freq).median()
 
 # %%
-# First, mask day-night periods using xxx. Then apply XXX
+# First, mask day-night periods using the
+#:py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
+# Then apply :py:func:`pvanalytics.features.oreitnation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 

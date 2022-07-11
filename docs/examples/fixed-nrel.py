@@ -10,6 +10,9 @@ Flag sunny days for a fixed-tilt PV system.
 # when performing future analyses that require filtered clearsky data.
 # For this example we will use data from the fixed-tilt NREL SERF East system 
 # located on the NREL campus in Colorado, USA, and generate a sunny day mask.
+# This data set is publicly available via the PVDAQ database in the
+# DOE Open Energy Data Initiative (OEDI)
+# (https://data.openei.org/submissions/4568). This data is timezone-localized.
 
 import pvanalytics
 from pvanalytics.features import daytime as day
@@ -19,18 +22,18 @@ import pandas as pd
 import pathlib
 
 # %%
-# First, read in data from the RMIS NREL system. This data set contains
-# 5-minute right-aligned data. It includes POA, GHI,
-# DNI, DHI, and GNI measurements.
+# First, read in data from the NREL SERF East fixed-tilt system. This data
+# set contains 15-minute interval AC power data.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
-data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
-# Make the datetime index tz-aware.
-data.index = data.index.tz_localize("Etc/GMT+7")
+file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_AC_power_system_estimate.csv" # pvanalytics_dir / 'data' / 'serf_east_AC_power_system_estimate.csv'
+data = pd.read_csv(file, index_col=0, parse_dates=True)
+data = data[pd.to_datetime('2016-08-10'): pd.to_datetime('2016-08-16')]
 
 # %%
-# First, mask day-night periods using xxx. Then apply XXX
+# First, mask day-night periods using the
+#:py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
+# Then apply :py:func:`pvanalytics.features.oreitnation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 
