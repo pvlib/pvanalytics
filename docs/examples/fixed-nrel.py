@@ -26,7 +26,7 @@ import pathlib
 # set contains 15-minute interval AC power data.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_AC_power_system_estimate.csv" # pvanalytics_dir / 'data' / 'serf_east_AC_power_system_estimate.csv'
+file = pvanalytics_dir / 'data' / 'serf_east_AC_power_system_estimate.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 data = data[pd.to_datetime('2016-08-10'): pd.to_datetime('2016-08-16')]
 

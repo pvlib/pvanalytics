@@ -27,7 +27,7 @@ import pathlib
 # set contains 15-minute interval AC power data. 
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_1axis_tracker_mesa_ac_power.csv" #pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
+file = pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 data = data.dropna()
 df_freq = '15T'
