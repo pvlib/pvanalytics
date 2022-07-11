@@ -9,39 +9,44 @@ Flag sunny days for a single-axis tracking PV system.
 # Identifying and masking sunny days for a single-axis tracking system is
 # important when performing future analyses that require filtered clearsky
 # data. For this example we will use data from the single-axis tracking
-# XXX system located on the NREL campus in Colorado, USA, and generate
+# NREL Mesa system located on the NREL campus in Colorado, USA, and generate
 # a sunny day mask.
 
 import pvanalytics
+from pvanalytics.features import daytime as day
 from pvanalytics.features.orientation import tracking_nrel
-import pvlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
 
 # %%
-# First, read in data from the RMIS NREL system. This data set contains
-# 5-minute right-aligned data. It includes POA, GHI,
-# DNI, DHI, and GNI measurements.
+# First, read in data from the NREL Mesa 1-axis tracking system. This data
+# set contains
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
+rmis_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_1axis_tracker_mesa_ac_power.csv" #pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 # Make the datetime index tz-aware.
-data.index = data.index.tz_localize("Etc/GMT+7")
+data.index = data.index.tz_localize("America/Denver")
+data = data.dropna()
+df_freq = '15T'
+data = data.resample(df_freq).median()
 
 # %%
-# Apply the tracking_nrel mask to the AC power stream and mask the sunny daysd.
+# First, mask day-night periods using xxx. Then apply XXX
+# to the AC power stream and mask the sunny days in the time series.
+daytime_mask = day.power_or_irradiance(data['ac_power'])
+
+tracking_sunny_days = tracking_nrel(power_or_irradiance = data['ac_power'],
+                                    daytime = daytime_mask)
 
 # %%
 # Plot a subset pf AC power stream with the sunny day mask applied to it.
-data['irradiance_ghi__7981'].plot()
-clearsky['ghi'].plot()
-data.loc[daily_insolation_mask, 'irradiance_ghi__7981'].plot(ls='', marker='.')
-plt.legend(labels=["RMIS GHI", "Clearsky GHI",
-                   "Within Daily Insolation Limit"],
+data['ac_power'].plot()
+data.loc[tracking_sunny_days, 'ac_power'].plot(ls='', marker='.')
+plt.legend(labels=["AC Power", "Sunny Day"],
            loc="upper left")
 plt.xlabel("Date")
-plt.ylabel("GHI (W/m^2)")
+plt.ylabel("AC Power (kW)")
 plt.tight_layout()
 plt.show()
