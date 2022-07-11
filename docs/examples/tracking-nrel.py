@@ -24,7 +24,7 @@ import pathlib
 
 # %%
 # First, read in data from the NREL Mesa 1-axis tracking system. This data
-# set contains 15-minute interval AC power data. 
+# set contains 15-minute interval AC power data.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
@@ -35,13 +35,13 @@ data = data.resample(df_freq).median()
 
 # %%
 # First, mask day-night periods using the
-#:py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
+# :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
 # Then apply :py:func:`pvanalytics.features.oreitnation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 
-tracking_sunny_days = tracking_nrel(power_or_irradiance = data['ac_power'],
-                                    daytime = daytime_mask)
+tracking_sunny_days = tracking_nrel(data['ac_power'],
+                                    daytime_mask)
 
 # %%
 # Plot a subset pf AC power stream with the sunny day mask applied to it.
