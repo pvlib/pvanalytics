@@ -29,7 +29,6 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data.dropna()
 df_freq = '15T'
 data = data.resample(df_freq).median()
 
