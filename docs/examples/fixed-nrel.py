@@ -28,20 +28,23 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'serf_east_AC_power_system_estimate.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data[pd.to_datetime('2016-08-10'): pd.to_datetime('2016-08-16')]
+data = data[pd.to_datetime('2016-08-10 00:00:00-0700'):
+            pd.to_datetime('2016-08-16 00:00:00-0700')]
 
 # %%
-# First, mask day-night periods using the
+# Mask day-night periods using the
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
 # Then apply :py:func:`pvanalytics.features.orientation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
+
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 
 fixed_sunny_days = fixed_nrel(data['ac_power'],
                               daytime_mask)
 
 # %%
-# Plot a subset pf AC power stream with the sunny day mask applied to it.
+# Plot the AC power stream with the sunny day mask applied to it.
+
 data['ac_power'].plot()
 data.loc[fixed_sunny_days, 'ac_power'].plot(ls='', marker='.')
 plt.legend(labels=["AC Power", "Sunny Day"],

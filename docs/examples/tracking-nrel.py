@@ -31,17 +31,19 @@ file = pvanalytics_dir / 'data' / 'nrel_1axis_tracker_mesa_ac_power.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 
 # %%
-# First, mask day-night periods using the
+# Mask day-night periods using the
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
 # Then apply :py:func:`pvanalytics.features.orientation.tracking_nrel`
 # to the AC power stream and mask the sunny days in the time series.
+
 daytime_mask = day.power_or_irradiance(data['ac_power'])
 
 tracking_sunny_days = tracking_nrel(data['ac_power'],
                                     daytime_mask)
 
 # %%
-# Plot a subset pf AC power stream with the sunny day mask applied to it.
+# Plot the AC power stream with the sunny day mask applied to it.
+
 data['ac_power'].plot()
 data.loc[tracking_sunny_days, 'ac_power'].plot(ls='', marker='.')
 plt.legend(labels=["AC Power", "Sunny Day"],
