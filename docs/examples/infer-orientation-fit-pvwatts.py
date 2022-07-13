@@ -14,15 +14,13 @@ Infer the azimuth and tilt of a system using PVWatts data
 # coordinates and an associated AC power time series.
 
 import pvanalytics
-from pvanalytics.features.daytime import power_or_irradiance
-from pvanalytics.features.orientation import fixed_nrel
 from pvanalytics import system as sys
 import pandas as pd
 import pathlib
 import pvlib
 
 # %%
-# First, we import the AC power data stream from the SERF East site located at
+# First, we import an AC power data stream from the SERF East site located at
 # NREL. This data set is publicly available via the PVDAQ database in the
 # DOE Open Energy Data Initiative (OEDI)
 # (https://data.openei.org/submissions/4568). This data is timezone-localized.
@@ -35,50 +33,52 @@ data = data.sort_index()
 time_series = data['ac_power']
 time_series = time_series.asfreq('15T')
 
-# Outline the ground truth metadata associated with the SERF East system
+# Outline the ground truth metadata associated with the system
 latitude = 39.742
 longitude = -105.1727
 actual_azimuth = 158
 actual_tilt = 45
 
 # %%
-# Run the daytime and sunny day filters on the time series.
-# Both of these masks will be used as inputs to the
-# :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts` function.
+# Next, we import the PSM3 data generated via the
+# :py:func:`pvlib.iotools.get_psm3` function, using
+# site latitude-longitude coordinates. To generate the
+# PSM3 data, you must first register for NREL's NSDRB API at the
+# following link: https://developer.nrel.gov/signup/.
+# Then refer to the following documentation for generating PSM3 data:
+# https://pvlib-python.readthedocs.io/en/latest/reference/generated/pvlib.iotools.get_psm3.html.
+# The PSM3 data has been resampled to 15 minute intervals, to match the AC
+# power data.
 
-# Generate the daylight mask for the AC power time series
-daytime_mask = power_or_irradiance(time_series)
+pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+psm3_file = pvanalytics_dir / 'data' / 'serf_east_psm3_data.csv'
+psm3 = pd.read_csv(psm3_file, index_col=0, parse_dates=True)
 
-# Get the sunny days associated with the system (it is fixed-tilt so use
-# :py:func:`pvanalytics.features.orientation.fixed_nrel`)
-sunny_days = fixed_nrel(time_series,
-                        daytime_mask)
-
-# Filter the time series to only include data on clearsky days
-time_series_clearsky = time_series[sunny_days]
+# %%
+# Filter the PSM3 data to only include clearsky periods
+is_clear = (psm3.ghi_clear == psm3.ghi)
+is_daytime = (psm3.ghi > 0)
+time_series_clearsky = time_series[is_clear & is_daytime]
 time_series_clearsky = time_series_clearsky.dropna()
+psm3_clearsky = psm3.loc[time_series_clearsky.index]
 
 # Get solar azimuth + zenith + ghi + dhi + dni from pvlib, based on
 # lat-long coords
-sun = pvlib.solarposition.get_solarposition(time_series_clearsky.index,
-                                            latitude,
-                                            longitude)
-
-# Get clear sky irradiance for the time series index
-loc = pvlib.location.Location(latitude,
-                              longitude)
-CS = loc.get_clearsky(time_series_clearsky.index)
+solpos_clearsky = pvlib.solarposition.get_solarposition(
+    time_series_clearsky.index, latitude, longitude)
 
 # %%
 # Run the pvlib data and the sensor-based time series data through
 # the :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts` function.
 best_tilt, best_azimuth, r2 = sys.infer_orientation_fit_pvwatts(
     time_series_clearsky,
-    CS.ghi,
-    CS.dhi,
-    CS.dni,
-    sun.zenith,
-    sun.azimuth)
+    psm3_clearsky.ghi_clear,
+    psm3_clearsky.dhi_clear,
+    psm3_clearsky.dni_clear,
+    solpos_clearsky.zenith,
+    solpos_clearsky.azimuth,
+    temperature=psm3_clearsky.temp_air,
+)
 
 # Compare actual system azimuth and tilt to predicted azimuth and tilt
 print("Actual Azimuth: " + str(actual_azimuth))
