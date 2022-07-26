@@ -10,7 +10,7 @@ Infer the azimuth and tilt of a system using its daily peak value
 # system is important, as these values must be correct for future degradation
 # and system yield analysis. This example shows how to use
 # :py:func:`pvanalytics.system.infer_orientation_daily_peak` to estimate
-# a system's azimuth and tilt, using the system's known latitude-longitude
+# a fixed-tilt system's azimuth and tilt, using the system's known latitude-longitude
 # coordinates and an associated AC power time series.
 
 import pvanalytics
