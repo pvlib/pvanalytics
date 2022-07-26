@@ -12,7 +12,8 @@ Flag sunny days for a fixed-tilt PV system.
 # located on the NREL campus in Colorado, USA, and generate a sunny day mask.
 # This data set is publicly available via the PVDAQ database in the
 # DOE Open Energy Data Initiative (OEDI)
-# (https://data.openei.org/submissions/4568). This data is timezone-localized.
+# (https://data.openei.org/submissions/4568), as system ID 50.
+# This data is timezone-localized.
 
 import pvanalytics
 from pvanalytics.features import daytime as day
