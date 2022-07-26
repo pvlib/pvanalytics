@@ -46,8 +46,7 @@ actual_tilt = 45
 # site latitude-longitude coordinates. To generate the
 # PSM3 data, you must first register for NREL's NSDRB API at the
 # following link: https://developer.nrel.gov/signup/.
-# Then refer to the following documentation for generating PSM3 data:
-# https://pvlib-python.readthedocs.io/en/latest/reference/generated/pvlib.iotools.get_psm3.html.
+# PSM3 data can then be retrieved using :py:func:`pvlib.iotools.get_psm3`.
 # The PSM3 data has been resampled to 15 minute intervals, to match the AC
 # power data.
 
