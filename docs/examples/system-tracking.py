@@ -28,7 +28,7 @@ import pathlib
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / \
-    'serf_east_AC_power_system_estimate.csv'
+    'serf_east_15min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 time_series = data['ac_power']
