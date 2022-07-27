@@ -1,6 +1,6 @@
 """
-Infer System Orientation (Azimuth & Tilt) using PVWatts
-=======================================================
+Infer Array Tilt/Azimuth - PVWatts
+==================================
 
 Infer the azimuth and tilt of a system using PVWatts data
 """
@@ -9,12 +9,12 @@ Infer the azimuth and tilt of a system using PVWatts data
 # Identifing and/or validating  the azimuth and tilt information for a
 # system is important, as these values must be correct for future degradation
 # and system yield analysis. This example shows how to use
-# :py:func:`pvanalytics.system.infer_orientation_daily_peak` to estimate
+# :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts` to estimate
 # a system's azimuth and tilt, using the system's known latitude-longitude
 # coordinates and an associated AC power time series.
 
 import pvanalytics
-from pvanalytics import system as sys
+from pvanalytics import system
 import pandas as pd
 import pathlib
 import pvlib
@@ -28,7 +28,7 @@ import pvlib
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / \
-    'serf_east_AC_power_system_estimate.csv'
+    'serf_east_15min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 time_series = data['ac_power']
@@ -70,7 +70,7 @@ solpos_clearsky = pvlib.solarposition.get_solarposition(
 # %%
 # Run the pvlib data and the sensor-based time series data through
 # the :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts` function.
-best_tilt, best_azimuth, r2 = sys.infer_orientation_fit_pvwatts(
+best_tilt, best_azimuth, r2 = system.infer_orientation_fit_pvwatts(
     time_series_clearsky,
     psm3_clearsky.ghi_clear,
     psm3_clearsky.dhi_clear,
