@@ -62,6 +62,7 @@ def test_detect_data_shifts(generate_series):
     assert (len(shift_index_param.index) == len(signal_datetime_index.index))
 
 
+@requires_ruptures
 def test_get_longest_shift_segment_dates(generate_series):
     """
     Unit test that the longest interval between data shifts is selected for
