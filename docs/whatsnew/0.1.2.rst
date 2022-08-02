@@ -46,6 +46,8 @@ Documentation
   :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`,
   and :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
   (:issue:`133`, :pull:`140`)
+* Added an example for
+  :py:func:`pvanalytics.quality.data_shifts` routine  (:pull:`131`)
 
 
 Contributors
