@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 from pvanalytics.quality import data_shifts as dt
 from ..conftest import DATA_DIR, requires_ruptures
-import ruptures
 
 
 test_file_1 = DATA_DIR / "pvlib_data_shift.csv"
@@ -28,6 +27,7 @@ def test_detect_data_shifts(generate_series):
     Unit test that data shifts are correctly identified in the simulated time
     series.
     """
+    import ruptures
     signal_no_index, signal_datetime_index, df_weekly_resample, \
         changepoint_date = generate_series
     # Test that an error is thrown when a Pandas series with no datetime
