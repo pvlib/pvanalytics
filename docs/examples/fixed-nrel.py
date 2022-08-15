@@ -7,7 +7,7 @@ Flag sunny days for a fixed-tilt PV system.
 
 # %%
 # Identifying and masking sunny days for a fixed-tilt system is important
-# when performing future analyses that require filtered clearsky data.
+# when performing future analyses that require filtered sunny day data.
 # For this example we will use data from the fixed-tilt NREL SERF East system
 # located on the NREL campus in Colorado, USA, and generate a sunny day mask.
 # This data set is publicly available via the PVDAQ database in the
@@ -29,8 +29,6 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'serf_east_15min_ac_power.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data[pd.to_datetime('2016-08-10 00:00:00-0700'):
-            pd.to_datetime('2016-08-16 00:00:00-0700')]
 
 # %%
 # Mask day-night periods using the

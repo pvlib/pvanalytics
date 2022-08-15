@@ -7,7 +7,7 @@ Flag sunny days for a single-axis tracking PV system.
 
 # %%
 # Identifying and masking sunny days for a single-axis tracking system is
-# important when performing future analyses that require filtered clearsky
+# important when performing future analyses that require filtered sunny day
 # data. For this example we will use data from the single-axis tracking
 # NREL Mesa system located on the NREL campus in Colorado, USA, and generate
 # a sunny day mask.
