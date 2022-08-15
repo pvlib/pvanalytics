@@ -30,6 +30,7 @@ pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'serf_east_15min_ac_power.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 
+
 # %%
 # Mask day-night periods using the
 # :py:func:`pvanalytics.features.daytime.power_or_irradiance` function.
