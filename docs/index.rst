@@ -82,9 +82,6 @@ It supports:
   and at minimum the last three minor versions
 - The latest release of `PVLib <https://pvlib-python.readthedocs.io>`_.
 
-PVAnalytics depends on the following packages:
-
-.. literalinclude:: ../requirements.txt
 
 Contents
 ========
