@@ -46,9 +46,12 @@ Documentation
   :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`,
   and :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
   (:issue:`133`, :pull:`140`)
+* Added examples for the pvanalytics.features.orientation module,
+  including :py:func:`pvanalytics.features.orientation.fixed_nrel`,
+  and :py:func:`pvanalytics.quality.features.orientation.tracking_nrel`
+  (:issue:`133`, :pull:`148`)
 * Added an example for
   :py:func:`pvanalytics.quality.data_shifts` routine  (:pull:`131`)
-
 
 Contributors
 ~~~~~~~~~~~~
