@@ -10,7 +10,12 @@ systems. It provides functions for quality control, filtering, and
 feature labeling and other tools supporting the analysis of PV
 system-level data.
 
-Documentation is available at 
+PVAnalytics is available at [PyPI](https://pypi.org/project/pvanalytics/)
+and can be installed using `pip`:
+
+    pip install pvanalytics
+
+Documentation and example usage is available at 
 [pvanalytics.readthedocs.io](https://pvanalytics.readthedocs.io).
 
 ## Library Overview
@@ -18,14 +23,17 @@ Documentation is available at
 The functions provided by PVAnalytics are organized in modules based
 on their anticipated use.  The structure/organization below is likely
 to change as use cases are identified and refined and as package
-content evolves.  The functions in `quality`, `filtering`, and
-`features` will take a series of data and return a series of booleans.
+content evolves.  The functions in `quality` and
+`features` take a series of data and return a series of booleans.
+For more detailed descriptions, see our
+[API Reference](https://pvanalytics.readthedocs.io/en/stable/api.html).
+
 * `quality` contains submodules for different kinds of data quality
   checks.
+  * `data_shifts` contains quality checks for detecting and 
+    isolating data shifts in PV time series data.
   * `irradiance` provides quality checks for irradiance
-    measurements. This will initially contain an implementation of the
-    QCRad algorithm, but any other quality tests for irradiance data
-    should be added here.
+    measurements. 
   * `weather` has quality checks for weather data (for example tests
     for physically plausible values of temperature, wind speed,
     humidity, etc.)
@@ -36,22 +44,15 @@ content evolves.  The functions in `quality`, `filtering`, and
   * `time` quality checks related to time (e.g. timestamp spacing)
   * `util` general purpose quality functions.
 
-  Other quality checks such as detecting timestamp errors will also be
-  included in `quality`.
-* `filtering` as the name implies, contains functions for data
-  filtering (e.g. day/night or solar position)
 * `features` contains submodules with different methods for
   identifying and labeling salient features.
   * `clipping` functions for labeling inverter clipping.
   * `clearsky` functions for identifying periods of clear sky
     conditions.
+  * `daytime` functions for for identifying periods of day and night.
+  * `orientation` functions for labeling data as corresponding to
+    a rotating solar tracker or a fixed tilt structure.
+  * `shading` functions for identifying shadows.
 * `system` identification of PV system characteristics from data
   (e.g. nameplate power, orientation, azimuth)
-* `translate` contains functions for translating data to other
-  conditions (e.g. IV curve translators, temperature adjustment,
-  irradiance adjustment)
 * `metrics` contains functions for computing PV system-level metrics
-* `fitting` contains submodules for different types of models that can
-  be fit to data (e.g.  temperature models)
-* `dataclasses` contains classes for normalizing data (e.g. an
-  `IVCurve` class)
