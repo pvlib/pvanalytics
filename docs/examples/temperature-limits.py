@@ -31,12 +31,13 @@ print(data.head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.temperature_limits`
-# to identify any air temperature values that are not within an 
+# to identify any air temperature values that are not within an
 # acceptable range. We can then filter any of these values out of the time
-# series. 
+# series.
 temperature_limit_mask = temperature_limits(data['Ambient Temperature'])
 data['Ambient Temperature'].plot()
-data.loc[~temperature_limit_mask, 'Ambient Temperature'].plot(ls='', marker='o')
+data.loc[~temperature_limit_mask, 'Ambient Temperature'].plot(ls='',
+                                                              marker='o')
 plt.legend(labels=["Ambient Temperature", "Detected Outlier"])
 plt.xlabel("Date")
 plt.ylabel("Ambient Temperature (deg C)")
