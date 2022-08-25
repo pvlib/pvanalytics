@@ -17,8 +17,16 @@ Requirements
 
 Documentation
 ~~~~~~~~~~~~~
+Added 4 new gallery example pages:
 
+* ``pvanalytics.quality.weather`` (:issue:`133`, :pull:`151`):
+
+  * :py:func:`~pvanalytics.quality.weather.temperature_limits`
+  * :py:func:`~pvanalytics.quality.weather.relative_humidity_limits`
+  * :py:func:`~pvanalytics.quality.weather.wind_limits`
+  * :py:func:`~pvanalytics.quality.weather.module_temperature_check`
 
 Contributors
 ~~~~~~~~~~~~
 
+* Kirsten Perry (:ghuser:`kperrynrel`)
