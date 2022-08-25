@@ -25,7 +25,7 @@ import pathlib
 # 'Ambient Temperature'. This data set contains 5-minute right-aligned
 # measurements.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = vanalytics_dir / 'data' / 'rmis_weather_data.csv'
+ac_power_file = pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 print(data.head(10))
 
