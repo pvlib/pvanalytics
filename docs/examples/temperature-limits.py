@@ -25,7 +25,7 @@ import pathlib
 # 'Ambient Temperature'. This data set contains 5-minute right-aligned
 # measurements.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/rmis_weather_data.csv" #pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
+ac_power_file = vanalytics_dir / 'data' / 'rmis_weather_data.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 print(data.head(10))
 
@@ -35,10 +35,10 @@ print(data.head(10))
 # acceptable range. We can then filter any of these values out of the time
 # series. 
 temperature_limit_mask = temperature_limits(data['Ambient Temperature'])
-data['value_normalized'].plot()
-data.loc[zscore_outlier_mask, 'value_normalized'].plot(ls='', marker='o')
-plt.legend(labels=["AC Power", "Detected Outlier"])
+data['Ambient Temperature'].plot()
+data.loc[~temperature_limit_mask, 'Ambient Temperature'].plot(ls='', marker='o')
+plt.legend(labels=["Ambient Temperature", "Detected Outlier"])
 plt.xlabel("Date")
-plt.ylabel("Normalized AC Power")
+plt.ylabel("Ambient Temperature (deg C)")
 plt.tight_layout()
 plt.show()
