@@ -39,7 +39,7 @@ print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 # relationships meets the minimum correlation coefficient criteria.
 corr_coeff_bool = module_temperature_check(data['module_temp_1__781'],
                                            data['poa_irradiance__771'])
-print("Passes R^2 threshold? " + str(corr_coeff_bool))
+print("Passes correlation coeff threshold? " + str(corr_coeff_bool))
 
 # %%
 # Plot module temperature against irradiance to illustrate the relationship
@@ -47,10 +47,10 @@ data.plot(x='module_temp_1__781',
           y='poa_irradiance__771',
           style='o', legend=None)
 data_reg = data[['module_temp_1__781', 'poa_irradiance__771']].dropna()
+# Add the linear regression line
 reg = linregress(data_reg['module_temp_1__781'].values,
                  data_reg['poa_irradiance__771'].values)
 plt.axline(xy1=(0, reg.intercept), slope=reg.slope, linestyle="--", color="k")
-# Add the linear regression line with R^2
 plt.xlabel("Module Temperature (deg C)")
 plt.ylabel("POA irradiance (W/m^2)")
 plt.tight_layout()

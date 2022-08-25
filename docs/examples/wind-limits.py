@@ -30,7 +30,7 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 print(data['Wind Speed'].head(10))
 
 # %%
-# We then use :py:func:`pvanalytics.quality.weather.temperature_limits`
+# We then use :py:func:`pvanalytics.quality.weather.wind_limits`
 # to identify any air temperature values that are not within an
 # acceptable range. We can then filter any of these values out of the time
 # series.
