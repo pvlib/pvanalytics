@@ -31,7 +31,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 serf_east_file = pvanalytics_dir / 'data' / 'serf_west_1min.csv'
 data = pd.read_csv(serf_east_file, index_col=0, parse_dates=True)
-print(data.head(10))
+print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.module_temperature_check`

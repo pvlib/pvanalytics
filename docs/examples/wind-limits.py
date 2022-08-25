@@ -27,7 +27,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 rmis_file = pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
-print(data.head(10))
+print(data['Wind Speed'].head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.temperature_limits`
