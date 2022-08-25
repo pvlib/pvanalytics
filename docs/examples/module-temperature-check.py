@@ -11,10 +11,10 @@ Test whether the module temperature is correlated with irradiance.
 # temperature sensor.
 # In this example, we demonstrate how to use
 # :py:func:`pvanalytics.quality.weather.module_temperature_check`, which
-# runs a linear regression model for module temperature vs irradiance. The
-# model  is then assessed by correlation coefficient. If it meets a minimum
-# threshold, function outputs a True boolean. If not, it outputs a False
-# boolean.
+# runs a linear regression model of module temperature vs. irradiance. Model
+# performance is then assessed by correlation coefficient. If it meets a
+# minimum threshold, function outputs a True boolean. If not, it outputs a
+# False boolean.
 
 import pvanalytics
 from pvanalytics.quality.weather import module_temperature_check
@@ -36,13 +36,14 @@ print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.module_temperature_check`
 # to regress module temperature against irradiance POA, and check if the
-# relationships meets the minimum correlation coefficient criteria.
+# relationship meets the minimum correlation coefficient criteria.
 corr_coeff_bool = module_temperature_check(data['module_temp_1__781'],
                                            data['poa_irradiance__771'])
 print("Passes correlation coeff threshold? " + str(corr_coeff_bool))
 
 # %%
-# Plot module temperature against irradiance to illustrate the relationship
+# We then plot module temperature against irradiance to illustrate the
+# relationship.
 data.plot(x='module_temp_1__781',
           y='poa_irradiance__771',
           style='o', legend=None)
