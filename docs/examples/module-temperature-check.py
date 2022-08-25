@@ -24,28 +24,31 @@ from scipy.stats import linregress
 import pathlib
 
 # %%
-# First, we read in the NREL RMIS weather station example, which contains
-# data for module temperature and irradiance under the '' and '' columns,
-# respectively. This data set contains 5-minute right-aligned measurements.
+# First, we read in the NREL SERF West system example, which contains
+# data for module temperature and irradiance under the 'module_temp_1__781'
+# and 'poa_irradiance__771' columns, respectively. This data set contains
+# 1-minute measurements.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
-data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
+serf_east_file = pvanalytics_dir / 'data' / 'serf_west_1min.csv'
+data = pd.read_csv(serf_east_file, index_col=0, parse_dates=True)
 print(data.head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.module_temperature_check`
 # to regress module temperature against irradiance POA, and check if the
 # relationships meets the minimum correlation coefficient criteria.
-corr_coeff_bool = module_temperature_check(data['Ambient Temperature'],
-                                           data['TC Pad Temp 5cm Depth'])
+corr_coeff_bool = module_temperature_check(data['module_temp_1__781'],
+                                           data['poa_irradiance__771'])
 print("Passes R^2 threshold? " + str(corr_coeff_bool))
 
 # %%
 # Plot module temperature against irradiance to illustrate the relationship
-data.plot(x='Ambient Temperature', y='Plane of array', style='o', legend=None)
-data_reg = data[['Ambient Temperature', 'Plane of array']].dropna()
-reg = linregress(data_reg['Ambient Temperature'].values,
-                 data_reg['Plane of array'].values)
+data.plot(x='module_temp_1__781',
+          y='poa_irradiance__771',
+          style='o', legend=None)
+data_reg = data[['module_temp_1__781', 'poa_irradiance__771']].dropna()
+reg = linregress(data_reg['module_temp_1__781'].values,
+                 data_reg['poa_irradiance__771'].values)
 plt.axline(xy1=(0, reg.intercept), slope=reg.slope, linestyle="--", color="k")
 # Add the linear regression line with R^2
 plt.xlabel("Module Temperature (deg C)")

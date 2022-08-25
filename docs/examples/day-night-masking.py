@@ -33,6 +33,8 @@ pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
+
+data = data.tz_localize('Etc/GMT+7')
 # This is the known frequency of the time series. You may need to infer
 # the frequency or set the frequency with your AC power time series.
 freq = "1T"

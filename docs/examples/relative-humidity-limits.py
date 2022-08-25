@@ -26,8 +26,8 @@ import pathlib
 # 'Relative Humidity'. This data set contains 5-minute right-aligned
 # measurements.
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
-data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
+rmis_file = pvanalytics_dir / 'data' / 'rmis_weather_data.csv'
+data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 print(data.head(10))
 
 # %%
