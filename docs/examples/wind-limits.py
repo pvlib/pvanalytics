@@ -31,7 +31,7 @@ print(data['Wind Speed'].head(10))
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.wind_limits`
-# to identify any air temperature values that are not within an
+# to identify any wind speed values that are not within an
 # acceptable range. We can then filter any of these values out of the
 # time series.
 wind_limit_mask = wind_limits(data['Wind Speed'])

@@ -24,7 +24,7 @@ from scipy.stats import linregress
 import pathlib
 
 # %%
-# First, we read in the NREL SERF West system example, which contains
+# First, we read in example data from the NREL SERF West system, which contains
 # data for module temperature and irradiance under the 'module_temp_1__781'
 # and 'poa_irradiance__771' columns, respectively. This data set contains
 # 1-minute measurements.
