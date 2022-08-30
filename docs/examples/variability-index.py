@@ -40,7 +40,8 @@ location = pvlib.location.Location(39.7407, -105.1686)
 clearsky = location.get_clearsky(data.index)
 
 # %%
-# Calculate the variability index for the system GHI data stream
+# Calculate the variability index for the system GHI data stream using
+# the :py:func:`pvanalytics.metrics.variability_index` function.
 variability_index_series = variability_index(data['irradiance_ghi__7981'],
                                              clearsky['ghi'],
                                              freq='5T')

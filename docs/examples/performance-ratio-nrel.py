@@ -6,7 +6,7 @@ Calculate the NREL Performance Ratio for a system.
 """
 
 # %%
-# Identifying the NREL performance ratio
+# Identifying the NREL performance ratio (PR)
 
 import pvanalytics
 from pvanalytics.metrics import performance_ratio_nrel
@@ -26,8 +26,10 @@ data = pd.read_csv(file, index_col=0, parse_dates=True)
 # %%
 # Calculate the NREL performance ratio for the system, using the
 # POA, ambient temperature, wind speed, and AC power fields, using the
-# :py:func:`pvanalytics.features.metrics` function.
-pr_time_series = performance_ratio_nrel(poa_global, temp_air, wind_speed,
+# :py:func:`pvanalytics.metrics.performance_ratio_nrel` function.
+pr_time_series = performance_ratio_nrel(poa_global,
+                                        temp_air,
+                                        wind_speed,
                                         pac, pdc0) 
 
 # %%
@@ -35,7 +37,7 @@ pr_time_series = performance_ratio_nrel(poa_global, temp_air, wind_speed,
 
 pr_time_series.plot()
 plt.xlabel("Date")
-plt.ylabel("NREL Performance Ratio")
+plt.ylabel("NREL PR")
 plt.tight_layout()
 plt.show()
 
