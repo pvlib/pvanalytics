@@ -6,7 +6,7 @@ Calculate the Variability Index for a GHI time series.
 """
 
 # %%
-# The variability index provides a measure of variability for comparing
+# The variability index (VI) provides a measure of variability for comparing
 # solar sites and defining temporal patterns. This example uses GHI
 # data collected from the NREL RMIS system to calculate the variability
 # index as a time series.
@@ -41,15 +41,21 @@ clearsky = location.get_clearsky(data.index)
 
 # %%
 # Calculate the variability index for the system GHI data stream using
-# the :py:func:`pvanalytics.metrics.variability_index` function.
+# the :py:func:`pvanalytics.metrics.variability_index` function, using
+# an hourly frequency.
 variability_index_series = variability_index(data['irradiance_ghi__7981'],
                                              clearsky['ghi'],
-                                             freq='5T')
+                                             freq='1H')
 
 # %%
-# Plot the 5-minute interval variability index for the RMIS system.
-variability_index_series.plot()
-plt.xlabel("Date")
-plt.ylabel("Variability Index")
-plt.tight_layout()
+# Plot the calculated VI against the underlying GHI measurements, for the
+# purpose of comparison.
+fig, axes = plt.subplots(2, 1, sharex=True)
+data['irradiance_ghi__7981'].plot(ax=axes[0], label='measured')
+clearsky['ghi'].plot(ax=axes[0], label='clear-sky')
+variability_index_series.plot(ax=axes[1], drawstyle='steps-post')
+axes[0].legend()
+axes[0].set_ylabel("GHI [W/m2]")
+axes[1].set_ylabel("Variability Index")
+fig.tight_layout()
 plt.show()
