@@ -17,7 +17,7 @@ Requirements
 
 Documentation
 ~~~~~~~~~~~~~
-Added 4 new gallery example pages:
+Added 2 new gallery example pages:
 
 * ``pvanalytics.quality.weather`` (:issue:`133`, :pull:`151`):
 
