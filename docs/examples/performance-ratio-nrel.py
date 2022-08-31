@@ -67,7 +67,8 @@ daily_pr_df = pd.DataFrame(daily_pr_list)
 
 # Plot the PR time series to visualize it
 daily_pr_df.set_index('date').plot()
-plt.xticks(rotation=45)
+plt.xticks(rotation=25)
 plt.ylabel('NREL PR')
 plt.xlabel('Date')
+plt.tight_layout()
 plt.show()
