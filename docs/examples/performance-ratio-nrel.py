@@ -40,8 +40,8 @@ data = pd.read_csv(file, index_col=0, parse_dates=True)
 pr = performance_ratio_nrel(data['poa_irradiance__1055'],
                             data['ambient_temp__1053'],
                             data['wind_speed__1051'],
-                            data['ac_power__1137'],
-                            408.24)
+                            data['inv2_ac_power_w__1047'],
+                            204120)
 
 print("RSF II, PR for the whole time series:")
 print(pr)
@@ -58,8 +58,8 @@ for date in dates:
     pr = performance_ratio_nrel(data_subset['poa_irradiance__1055'],
                                 data_subset['ambient_temp__1053'],
                                 data_subset['wind_speed__1051'],
-                                data_subset['ac_power__1137'],
-                                408.24)
+                                data_subset['inv2_ac_power_w__1047'],
+                                204120)
     daily_pr_list.append({"date": date,
                           "PR": pr})
 
