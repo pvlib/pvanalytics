@@ -27,9 +27,11 @@ import pathlib
 # First, we read in example data from the NREL SERF West system, which contains
 # data for module temperature and irradiance under the 'module_temp_1__781'
 # and 'poa_irradiance__771' columns, respectively. This data set contains
-# 1-minute measurements.
+# 15-minute averaged measurements, and is available via the NREL PVDAQ database
+# as system 51.
+
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-serf_east_file = pvanalytics_dir / 'data' / 'serf_west_1min.csv'
+serf_east_file = pvanalytics_dir / 'data' / 'serf_west_15min.csv'
 data = pd.read_csv(serf_east_file, index_col=0, parse_dates=True)
 print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 
