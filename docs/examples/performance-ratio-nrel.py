@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 # %%
 # First, we read in data from the NREL RSF II system. This data
-# set contains 5-minute interval data for AC power, POA irradiance, ambient
+# set contains 15-minute interval data for AC power, POA irradiance, ambient
 # temperature, and wind speed, among others. The complete data set for the
 # NREL RSF II installation is available in the PVDAQ database, under system
 # ID 1283.
