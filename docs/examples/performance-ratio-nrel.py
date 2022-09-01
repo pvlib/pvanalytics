@@ -39,6 +39,8 @@ data = pd.read_csv(file, index_col=0, parse_dates=True)
 # POA, ambient temperature, wind speed, and AC power fields. We use this
 # data as parameters in the
 # :py:func:`pvanalytics.metrics.performance_ratio_nrel` function.
+# In this example we are calculating PR for a single inverter connected
+# to a 204.12 kW PV array.
 pr_whole_series = performance_ratio_nrel(data['poa_irradiance__1055'],
                                          data['ambient_temp__1053'],
                                          data['wind_speed__1051'],
