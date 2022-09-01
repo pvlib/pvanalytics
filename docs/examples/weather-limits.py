@@ -44,6 +44,7 @@ data.loc[~wind_limit_mask, 'Wind Speed'].plot(ls='', marker='o')
 plt.legend(labels=["Wind Speed", "Detected Outlier"])
 plt.xlabel("Date")
 plt.ylabel("Wind Speed (m/s)")
+plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()
 
@@ -51,14 +52,17 @@ plt.show()
 # Next, we use :py:func:`pvanalytics.quality.weather.temperature_limits`
 # to identify any air temperature values that are not within an
 # acceptable range. We can then filter any of these values out of the time
-# series.
-temperature_limit_mask = temperature_limits(data['Ambient Temperature'])
+# series. Here, we set the temperature limits to (-15,10), illustrating how
+# to use the limits parameter.
+temperature_limit_mask = temperature_limits(data['Ambient Temperature'],
+                                            limits=(-15, 10))
 data['Ambient Temperature'].plot()
 data.loc[~temperature_limit_mask, 'Ambient Temperature'].plot(ls='',
                                                               marker='o')
 plt.legend(labels=["Ambient Temperature", "Detected Outlier"])
 plt.xlabel("Date")
 plt.ylabel("Ambient Temperature (deg C)")
+plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()
 
@@ -74,5 +78,6 @@ data.loc[~rh_limit_mask, 'Relative Humidity'].plot(ls='', marker='o')
 plt.legend(labels=['Relative Humidity', "Detected Outlier"])
 plt.xlabel("Date")
 plt.ylabel('Relative Humidity (%)')
+plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()

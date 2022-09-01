@@ -12,9 +12,9 @@ Test whether the module temperature is correlated with irradiance.
 # In this example, we demonstrate how to use
 # :py:func:`pvanalytics.quality.weather.module_temperature_check`, which
 # runs a linear regression model of module temperature vs. irradiance. Model
-# performance is then assessed by correlation coefficient. If it meets a
-# minimum threshold, function outputs a True boolean. If not, it outputs a
-# False boolean.
+# performance is then assessed by the Pearson correlation coefficient.
+# If it meets a minimum threshold, function outputs a True boolean.
+# If not, it outputs a False boolean.
 
 import pvanalytics
 from pvanalytics.quality.weather import module_temperature_check
@@ -35,10 +35,26 @@ serf_east_file = pvanalytics_dir / 'data' / 'serf_west_15min.csv'
 data = pd.read_csv(serf_east_file, index_col=0, parse_dates=True)
 print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 
+# Plot the module temperature and the POA irradiance
+data['module_temp_1__781'].plot()
+plt.xlabel("Date")
+plt.ylabel("Module Temperature (deg C)")
+plt.xticks(rotation=25)
+plt.tight_layout()
+plt.show()
+
+data['poa_irradiance__771'].plot()
+plt.xlabel("Date")
+plt.ylabel("POA irradiance (W/m^2)")
+plt.xticks(rotation=25)
+plt.tight_layout()
+plt.show()
+
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.module_temperature_check`
 # to regress module temperature against irradiance POA, and check if the
 # relationship meets the minimum correlation coefficient criteria.
+
 corr_coeff_bool = module_temperature_check(data['module_temp_1__781'],
                                            data['poa_irradiance__771'])
 print("Passes correlation coeff threshold? " + str(corr_coeff_bool))
@@ -56,5 +72,10 @@ reg = linregress(data_reg['module_temp_1__781'].values,
 plt.axline(xy1=(0, reg.intercept), slope=reg.slope, linestyle="--", color="k")
 plt.xlabel("Module Temperature (deg C)")
 plt.ylabel("POA irradiance (W/m^2)")
+plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()
+
+# Print the Pearson correlation coefficient associated with the regression.
+print("Pearson Correlation Coefficient: ")
+print(reg.rvalue)
