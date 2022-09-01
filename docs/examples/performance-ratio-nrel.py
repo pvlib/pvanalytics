@@ -6,11 +6,13 @@ Calculate the NREL Performance Ratio for a system.
 """
 
 # %%
-# Identifying the NREL performance ratio (PR) is a simple way to communicate
-# how the system is performing, in terms of both system quality and weather.
-# The PR is the ratio of the actual electricity generated to the electricity
-# that would be generated if the plant consistently converted sunlight to
-# electricty at the level of the DC nameplate rating. In this example, we
+# When evaluating PV system performance it is often desirable to distinguish
+# uncontrollable effects like weather variation from controllable effects
+# like soiling and hardware issues. The NREL Performance Ratio
+# (or "Weather-Corrected Performance Ratio") is a unitless metric that
+# normalizes system output for variation in irradiance and temperature,
+# making it insensitive to uncontrollable weather variation and more
+# reflective of system health. In this example, we
 # show how to calculate the NREL PR at two different frequencies: for a
 # complete time series, and at daily intervals. We use the
 # :py:func:`pvanalytics.metrics.performance_ratio_nrel` function.
@@ -29,7 +31,7 @@ import matplotlib.pyplot as plt
 # ID 1283.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'nrel_RSF_II.csv'
+file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_RSF_II.csv"#pvanalytics_dir / 'data' / 'nrel_RSF_II.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 
 # %%
@@ -37,14 +39,14 @@ data = pd.read_csv(file, index_col=0, parse_dates=True)
 # POA, ambient temperature, wind speed, and AC power fields. We use this
 # data as parameters in the
 # :py:func:`pvanalytics.metrics.performance_ratio_nrel` function.
-pr = performance_ratio_nrel(data['poa_irradiance__1055'],
-                            data['ambient_temp__1053'],
-                            data['wind_speed__1051'],
-                            data['inv2_ac_power_w__1047'],
-                            204120)
+pr_whole_series = performance_ratio_nrel(data['poa_irradiance__1055'],
+                                         data['ambient_temp__1053'],
+                                         data['wind_speed__1051'],
+                                         data['inv2_ac_power_w__1047']/1000,
+                                         204.12)
 
 print("RSF II, PR for the whole time series:")
-print(pr)
+print(pr_whole_series)
 
 # %%
 # Next, we recalculate the PR on a daily basis. We separate the time
@@ -58,8 +60,8 @@ for date in dates:
     pr = performance_ratio_nrel(data_subset['poa_irradiance__1055'],
                                 data_subset['ambient_temp__1053'],
                                 data_subset['wind_speed__1051'],
-                                data_subset['inv2_ac_power_w__1047'],
-                                204120)
+                                data_subset['inv2_ac_power_w__1047']/1000,
+                                204.12)
     daily_pr_list.append({"date": date,
                           "PR": pr})
 
@@ -67,6 +69,7 @@ daily_pr_df = pd.DataFrame(daily_pr_list)
 
 # Plot the PR time series to visualize it
 daily_pr_df.set_index('date').plot()
+plt.axhline(pr_whole_series)
 plt.xticks(rotation=25)
 plt.ylabel('NREL PR')
 plt.xlabel('Date')

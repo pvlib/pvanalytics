@@ -6,10 +6,18 @@ Calculate the Variability Index for a GHI time series.
 """
 
 # %%
-# The variability index (VI) provides a measure of variability for comparing
-# solar sites and defining temporal patterns. This example uses GHI
-# data collected from the NREL RMIS system to calculate the variability
-# index as a time series.
+# Highly variable irradiance can cause mismatch between irradiance and
+# power measurements and result in noisy performance metrics. As such,
+# identifying and removing highly variable conditions is useful in
+# certain analyses. Identification and quantification of highly variable
+# conditions are also of interest in grid integration and hourly modeling
+# error contexts. The variability index (VI) is one way of quantifying the
+# variability or jaggedness of an irradiance signal relative to a
+# corresponding reference clear-sky irradiance profile. Note that
+# quantifying variability is related to but distinct from clear-sky
+# detection. For example, both clear and overcast skies have low VI. This
+# example uses GHI data collected from the NREL RMIS system to calculate
+# the variability index as a time series.
 
 import pvanalytics
 from pvanalytics.metrics import variability_index
