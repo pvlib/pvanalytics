@@ -37,7 +37,7 @@ print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 
 
 # %%
-# Plot the module temperature
+# Plot the module temperature to visualize it.
 data['module_temp_1__781'].plot()
 plt.xlabel("Date")
 plt.ylabel("Module Temperature (deg C)")
@@ -47,7 +47,7 @@ plt.show()
 
 
 # %%
-# Plot the POA irradiance
+# Plot the POA irradiance to visualize it.
 data['poa_irradiance__771'].plot()
 plt.xlabel("Date")
 plt.ylabel("POA irradiance (W/m^2)")

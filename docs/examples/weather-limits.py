@@ -55,7 +55,7 @@ plt.show()
 # series. Here, we set the temperature limits to (-15,10), illustrating how
 # to use the limits parameter.
 temperature_limit_mask = temperature_limits(data['Ambient Temperature'],
-                                            limits=(-15, 10))
+                                            limits=(-10, 10))
 data['Ambient Temperature'].plot()
 data.loc[~temperature_limit_mask, 'Ambient Temperature'].plot(ls='',
                                                               marker='o')
