@@ -51,6 +51,8 @@ print(pr_whole_series)
 # %%
 # Next, we recalculate the PR on a daily basis. We separate the time
 # series into daily intervals, and calculate the PR for each day.
+# Note that this inverter was offline for the last day in this
+# dataset, resulting in a PR value of zero for that day.
 dates = list(pd.Series(data.index.date).drop_duplicates())
 
 daily_pr_list = list()
