@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 # ID 1283.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/nrel_RSF_II.csv"#pvanalytics_dir / 'data' / 'nrel_RSF_II.csv'
+file = pvanalytics_dir / 'data' / 'nrel_RSF_II.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
 
 # %%
