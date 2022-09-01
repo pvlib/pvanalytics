@@ -52,7 +52,7 @@ plt.show()
 # Next, we use :py:func:`pvanalytics.quality.weather.temperature_limits`
 # to identify any air temperature values that are not within an
 # acceptable range. We can then filter any of these values out of the time
-# series. Here, we set the temperature limits to (-15,10), illustrating how
+# series. Here, we set the temperature limits to (-10,10), illustrating how
 # to use the limits parameter.
 temperature_limit_mask = temperature_limits(data['Ambient Temperature'],
                                             limits=(-10, 10))
