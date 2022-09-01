@@ -35,7 +35,9 @@ serf_east_file = pvanalytics_dir / 'data' / 'serf_west_15min.csv'
 data = pd.read_csv(serf_east_file, index_col=0, parse_dates=True)
 print(data[['module_temp_1__781', 'poa_irradiance__771']].head(10))
 
-# Plot the module temperature and the POA irradiance
+
+# %%
+# Plot the module temperature
 data['module_temp_1__781'].plot()
 plt.xlabel("Date")
 plt.ylabel("Module Temperature (deg C)")
@@ -43,6 +45,9 @@ plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()
 
+
+# %%
+# Plot the POA irradiance
 data['poa_irradiance__771'].plot()
 plt.xlabel("Date")
 plt.ylabel("POA irradiance (W/m^2)")
