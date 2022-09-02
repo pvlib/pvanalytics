@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Clipping
+--------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying clipping in AC power time series.

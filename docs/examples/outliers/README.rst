@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Outliers
+--------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying outliers in time series data.

@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Orientation
+-----------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying the orientation of a system (fixed-tilt, tracking) using time series data.

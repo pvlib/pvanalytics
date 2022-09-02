@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Day-Night Masking
+-----------------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying day-night periods in time series data.

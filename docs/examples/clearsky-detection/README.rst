@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Clearsky Detection
+------------------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying clearsky periods in time series data.

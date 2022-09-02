@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Irradiance-Quality
+------------------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for running irradiance quality checks on irradiance time series data.

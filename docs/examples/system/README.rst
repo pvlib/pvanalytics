@@ -1,4 +1,4 @@
-Example Gallery
-===============
+System
+------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying system characteristics, such as azimuth and tilt.

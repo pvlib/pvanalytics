@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Metrics
+-------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for quantifying system time series metrics, including variability index (VI) and NREL performance ratio (PR).

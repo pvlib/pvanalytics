@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Data Shifts
+-----------
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying data/capacity shifts in time series data.

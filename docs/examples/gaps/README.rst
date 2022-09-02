@@ -1,4 +1,4 @@
-Example Gallery
-===============
+Gaps
+----
 
-This gallery shows examples of pvanalytics functionality.  Community contributions are welcome!
+This includes examples for identifying gaps and other related issues in time series data, including interpolated periods and stale data periods.
