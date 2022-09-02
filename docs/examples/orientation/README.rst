@@ -1,4 +1,4 @@
 Orientation
 -----------
 
-This includes examples for identifying the orientation of a system (fixed-tilt, tracking) using time series data.
+This includes examples related to the orientation of a system (fixed-tilt, tracking).
