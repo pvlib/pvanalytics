@@ -18,6 +18,7 @@ Test whether the module temperature is correlated with irradiance.
 
 import pvanalytics
 from pvanalytics.quality.weather import module_temperature_check
+from pvanalytics.features.daytime import power_or_irradiance
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.stats import linregress
@@ -54,6 +55,15 @@ plt.ylabel("POA irradiance (W/m^2)")
 plt.xticks(rotation=25)
 plt.tight_layout()
 plt.show()
+
+
+# %%
+# We mask the irradiance time series into day-night periods, and remove
+# any nighttime data to clean up the future regression.
+predicted_day_night_mask = power_or_irradiance(
+    series=data['poa_irradiance__771'], freq='15T')
+# Filter out nighttime periods
+data = data[predicted_day_night_mask]
 
 # %%
 # We then use :py:func:`pvanalytics.quality.weather.module_temperature_check`
