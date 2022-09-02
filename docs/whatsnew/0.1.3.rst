@@ -17,8 +17,14 @@ Requirements
 
 Documentation
 ~~~~~~~~~~~~~
+Added 2 new gallery example pages:
 
+* ``pvanalytics.metrics`` (:issue:`133`, :pull:`153`):
+
+  * :py:func:`~pvanalytics.metrics.performance_ratio_nrel`
+  * :py:func:`~pvanalytics.metrics.variability_index`
 
 Contributors
 ~~~~~~~~~~~~
 
+* Kirsten Perry (:ghuser:`kperrynrel`)
