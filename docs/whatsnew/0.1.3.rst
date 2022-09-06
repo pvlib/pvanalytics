@@ -24,6 +24,10 @@ Added 2 new gallery example pages:
   * :py:func:`~pvanalytics.metrics.performance_ratio_nrel`
   * :py:func:`~pvanalytics.metrics.variability_index`
 
+
+Restructured the example gallery by separating the examples into categories
+and adding README's (:issue:`154`, :pull:`155`).  
+
 Contributors
 ~~~~~~~~~~~~
 
