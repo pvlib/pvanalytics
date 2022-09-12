@@ -119,7 +119,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
-    return mark(flags, window, mark)
+    return _mark(flags, window, mark)
 
 
 def stale_values_round(x, window=6, decimals=3, mark='tail'):
