@@ -12,7 +12,6 @@ from pvanalytics import util
 
 def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     """Test if all values in x are close to x[0].
-
     Parameters
     ----------
     x : array
@@ -20,14 +19,11 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
         Tolerance for detecting a change relative to x[0].
     atol : float, default 1e-8
         Absolute tolerance for detecting a change from x[0].
-
     Parameters rtol and atol have the same meaning as in
     numpy.allclose.
-
     Returns
     -------
     Boolean
-
     Notes
     -----
     Copyright (c) 2019 SolarArbiter. See the file
@@ -35,7 +31,6 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     of this distribution and at `<https://github.com/pvlib/
     pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
     for more information.
-
     """
     return np.allclose(a=x, b=x[0], rtol=rtol, atol=atol)
 
@@ -119,13 +114,12 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """
     if window < 2:
         raise ValueError('window set to {}, must be at least 2'.format(window))
-
     flags = x.rolling(window=window).apply(
         _all_close_to_first,
         raw=True,
         kwargs={'rtol': rtol, 'atol': atol}
     ).fillna(False).astype(bool)
-    return _mark(flags, window, mark)
+    return mark(flags, window, mark)
 
 
 def stale_values_round(x, window=6, decimals=3, mark='tail'):
@@ -173,10 +167,11 @@ def stale_values_round(x, window=6, decimals=3, mark='tail'):
     (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
-    rounded_diff = x.round(decimals=decimals).diff()
-    endpoints = rounded_diff.rolling(window=window-1).apply(
-        lambda xs: len(xs[xs == 0]) == window-1
-    ).fillna(False).astype(bool)
+    rounded_x = x.round(decimals=decimals)
+    consecutive_val_counts = rounded_x.groupby((rounded_x !=
+                                                rounded_x.shift())
+                                               .cumsum()).cumcount()
+    endpoints = (~(consecutive_val_counts < window-1)) & ~(rounded_x.isna())
     return _mark(endpoints, window, mark)
 
 
