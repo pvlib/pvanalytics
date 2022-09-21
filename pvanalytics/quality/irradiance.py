@@ -471,3 +471,129 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
         lower_bound=daily_min
     )
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
+
+
+def calculate_ghi_component(dni, dhi, sza, szalimit,
+                            fillvalue, fillnightoption):
+    '''
+    Computes GHI from component sum equation
+    ghi = dni * Cos(sza) + dhi
+
+    Inputs: 
+    dni is an array of floats
+    dhi is an array of floats (Must be same units as DNI)
+    sza is an array of floats (degrees)
+    
+    szalimit: float (degrees) SZA boundary between night and day. SZA values greater than the limit are filled with a constant
+        default: 90
+        
+    fillvalue: float. The value that is used to fill in nighttime values.
+        default: NA
+    
+    fillnightoption: 
+        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
+        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
+        Other: do nothing to the nighttimie values. compute them as they are. 
+
+    Returns: GHI: array of floats, (same units as DNI)
+    '''               
+    # Not sure if we want to do a test to make sure the DNI, DHI, SZA are valid values.
+    # Specifically are they floats. I don't think we would want to test if they are reasonable..
+    # Compute the GHI value from the component sum equation
+    ghi = dni * np.cos(sza * np.pi / 180) + dhi
+    # Decide what you are going to do with the nighttime values
+    if (fillnightoption == 1) |(fillnightoption == 2):
+        # Find the locations where the sun is below the sza limit. 
+        mask = (szalimit <= sza) 
+    if (fillnightoption == 1):    
+        # Replace the nighttime values with a fill value
+        ghi[mask] = fillvalue
+    elif fillnightoption == 2:
+        # Replace the nighttime values with the DHI values. 
+        # This will put 
+        ghi[mask] =dhi[mask]
+    return ghi
+
+
+def calculate_dhi_component(dni, dhi, sza, szalimit,
+                            fillvalue, fillnightoption):
+    '''
+    Computes GHI from component sum equation
+    ghi = dni * Cos(sza) + dhi
+
+    Inputs: 
+    dni is an array of floats
+    dhi is an array of floats (Must be same units as DNI)
+    sza is an array of floats (degrees)
+    
+    szalimit: float (degrees) SZA boundary between night and day. SZA values greater than the limit are filled with a constant
+        default: 90
+        
+    fillvalue: float. The value that is used to fill in nighttime values.
+        default: NA
+    
+    fillnightoption: 
+        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
+        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
+        Other: do nothing to the nighttimie values. compute them as they are. 
+
+    Returns: GHI: array of floats, (same units as DNI)
+    '''               
+    # Not sure if we want to do a test to make sure the DNI, DHI, SZA are valid values.
+    # Specifically are they floats. I don't think we would want to test if they are reasonable..
+    # Compute the GHI value from the component sum equation
+    ghi = dni * np.cos(sza * np.pi / 180) + dhi
+    # Decide what you are going to do with the nighttime values
+    if (fillnightoption == 1) |(fillnightoption == 2):
+        # Find the locations where the sun is below the sza limit. 
+        mask = (szalimit <= sza) 
+    if (fillnightoption == 1):    
+        # Replace the nighttime values with a fill value
+        ghi[mask] = fillvalue
+    elif fillnightoption == 2:
+        # Replace the nighttime values with the DHI values. 
+        # This will put 
+        ghi[mask] =dhi[mask]
+    return ghi
+
+
+def calculate_dni_component(dni, dhi, sza, szalimit,
+                            fillvalue, fillnightoption):
+    '''
+    Computes GHI from component sum equation
+    ghi = dni * Cos(sza) + dhi
+
+    Inputs: 
+    dni is an array of floats
+    dhi is an array of floats (Must be same units as DNI)
+    sza is an array of floats (degrees)
+    
+    szalimit: float (degrees) SZA boundary between night and day. SZA values greater than the limit are filled with a constant
+        default: 90
+        
+    fillvalue: float. The value that is used to fill in nighttime values.
+        default: NA
+    
+    fillnightoption: 
+        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
+        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
+        Other: do nothing to the nighttimie values. compute them as they are. 
+
+    Returns: GHI: array of floats, (same units as DNI)
+    '''               
+    # Not sure if we want to do a test to make sure the DNI, DHI, SZA are valid values.
+    # Specifically are they floats. I don't think we would want to test if they are reasonable..
+    # Compute the GHI value from the component sum equation
+    ghi = dni * np.cos(sza * np.pi / 180) + dhi
+    # Decide what you are going to do with the nighttime values
+    if (fillnightoption == 1) |(fillnightoption == 2):
+        # Find the locations where the sun is below the sza limit. 
+        mask = (szalimit <= sza) 
+    if (fillnightoption == 1):    
+        # Replace the nighttime values with a fill value
+        ghi[mask] = fillvalue
+    elif fillnightoption == 2:
+        # Replace the nighttime values with the DHI values. 
+        # This will put 
+        ghi[mask] =dhi[mask]
+    return ghi
