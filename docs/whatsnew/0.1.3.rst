@@ -9,7 +9,7 @@ Enhancements
 
 Bug Fixes
 ~~~~~~~~~
-* Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas groupby() functionality, lead to the same results with a 300X speedup.
+* Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas groupby() functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
 
 
 Requirements
