@@ -12,6 +12,7 @@ from pvanalytics import util
 
 def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     """Test if all values in x are close to x[0].
+
     Parameters
     ----------
     x : array
@@ -19,11 +20,14 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
         Tolerance for detecting a change relative to x[0].
     atol : float, default 1e-8
         Absolute tolerance for detecting a change from x[0].
+
     Parameters rtol and atol have the same meaning as in
     numpy.allclose.
+
     Returns
     -------
     Boolean
+
     Notes
     -----
     Copyright (c) 2019 SolarArbiter. See the file
@@ -31,6 +35,7 @@ def _all_close_to_first(x, rtol=1e-5, atol=1e-8):
     of this distribution and at `<https://github.com/pvlib/
     pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
     for more information.
+
     """
     return np.allclose(a=x, b=x[0], rtol=rtol, atol=atol)
 
@@ -114,6 +119,7 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """
     if window < 2:
         raise ValueError('window set to {}, must be at least 2'.format(window))
+
     flags = x.rolling(window=window).apply(
         _all_close_to_first,
         raw=True,
