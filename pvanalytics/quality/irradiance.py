@@ -473,10 +473,27 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
 
 
-def calculate_ghi_component(dni, dhi, sza, szalimit,
-                            fillvalue, fillnightoption):
+def _fill_nighttime(series, fill_nighttime, fill_value,
+                    sza, sza_limit):
+    # Logic for filling in nighttime values for a 
+    # component sum series.
+    if (fill_nighttime == 1) |(fill_nighttime == 2):
+        # Find the locations where the sun is below the sza limit. 
+        mask = (sza_limit <= sza) 
+    if (fill_nighttime == 1):    
+        # Replace the nighttime values with a fill value
+        series[mask] = fill_value
+    elif fill_nighttime == 2:
+        # Replace the nighttime values with the DHI values. 
+        # This will put 
+        series[mask] =dhi[mask]
+    return series
+
+
+def calculate_ghi_component(dni, dhi, sza, sza_limit,
+                            fill_value, fill_nighttime):
     '''
-    Computes GHI from component sum equation
+    Computes GHI from the component sum equation
     ghi = dni * np.cos(sza * np.pi / 180) + dhi
 
     Parameters
@@ -489,14 +506,14 @@ def calculate_ghi_component(dni, dhi, sza, szalimit,
             units are the DHI series.
         sza: Series
             Pandas series of degree values.
-        sza_limit:
-            float (degrees) SZA boundary between night and day.
+        sza_limit: Float
+            SZA boundary between night and day, in degrees.
             SZA values greater than the limit are filled with a
-            constant default: 90
-        fill_value:
-            float. The value that is used to fill in nighttime values.
-            default: NA
-        fill_night_option:
+            constant default of 90.
+        fill_value: Float.
+            The value that is used to fill in nighttime values
+            
+        fill_nighttime:
         1: fill the nighttime value with the fill value (NA, 0, -99 etc)
         2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
         Other: do nothing to the nighttimie values. compute them as they are. 
@@ -511,24 +528,14 @@ def calculate_ghi_component(dni, dhi, sza, szalimit,
     '''               
     # Compute the GHI value from the component sum equation
     ghi = dni * np.cos(sza * np.pi / 180) + dhi
-    # Decide what you are going to do with the nighttime values
-    if (fillnightoption == 1) |(fillnightoption == 2):
-        # Find the locations where the sun is below the sza limit. 
-        mask = (szalimit <= sza) 
-    if (fillnightoption == 1):    
-        # Replace the nighttime values with a fill value
-        ghi[mask] = fillvalue
-    elif fillnightoption == 2:
-        # Replace the nighttime values with the DHI values. 
-        # This will put 
-        ghi[mask] =dhi[mask]
-    return ghi
+    return _fill_nighttime(ghi, fill_nighttime, fill_value,
+                           sza, sza_limit)
 
 
-def calculate_dhi_component(ghi, dni, sza, szalimit,
-                            fillvalue, fillnightoption):
+def calculate_dhi_component(ghi, dni, sza, sza_limit,
+                            fill_value, fill_nighttime):
     '''
-    Computes DHI from component sum equation
+    Computes DHI from the component sum equation
     dhi = ghi - (dni * np.cos(sza * np.pi / 180))
 
     Parameters
@@ -548,7 +555,7 @@ def calculate_dhi_component(ghi, dni, sza, szalimit,
         fill_value:
             float. The value that is used to fill in nighttime values.
             default: NA
-        fill_night_option:
+        fill_nighttime:
         1: fill the nighttime value with the fill value (NA, 0, -99 etc)
         2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
         Other: do nothing to the nighttimie values. compute them as they are. 
@@ -563,23 +570,15 @@ def calculate_dhi_component(ghi, dni, sza, szalimit,
     '''               
     # Compute the DHI value from the component sum equation
     dhi = ghi - (dni * np.cos(sza * np.pi / 180))
-    # Decide what you are going to do with the nighttime values
-    if (fillnightoption == 1) |(fillnightoption == 2):
-        # Find the locations where the sun is below the sza limit. 
-        mask = (szalimit <= sza) 
-    if (fillnightoption == 1):    
-        # Replace the nighttime values with a fill value
-        dhi[mask] = fillvalue
-    elif fillnightoption == 2:
-        # Replace the nighttime values with the DHI values. 
-        dhi[mask] =dhi[mask]
-    return dhi
+    return _fill_nighttime(dhi, fill_nighttime, fill_value,
+                           sza, sza_limit)
 
 
-def calculate_dni_component(ghi, dhi, sza, szalimit,
-                            fillvalue, fillnightoption):
+
+def calculate_dni_component(ghi, dhi, sza, sza_limit,
+                            fill_value, fill_nighttime):
     '''
-    Computes DNI from component sum equation:
+    Computes DNI from the component sum equation:
     dni = (ghi - dhi) / np.cos(sza * np.pi / 180) 
 
     Parameters
@@ -597,9 +596,8 @@ def calculate_dni_component(ghi, dhi, sza, szalimit,
             SZA values greater than the limit are filled with a
             constant default: 90
         fill_value:
-            float. The value that is used to fill in nighttime values.
-            default: NA
-        fill_night_option:
+            float. The value that is used to fill in nighttime values
+        fill_nighttime:
         1: fill the nighttime value with the fill value (NA, 0, -99 etc)
         2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
         Other: do nothing to the nighttimie values. compute them as they are. 
@@ -614,14 +612,5 @@ def calculate_dni_component(ghi, dhi, sza, szalimit,
     '''               
     # Compute the DNI value from the component sum equation
     dni = (ghi - dhi) / np.cos(sza * np.pi / 180) 
-    # Decide what you are going to do with the nighttime values
-    if (fillnightoption == 1) |(fillnightoption == 2):
-        # Find the locations where the sun is below the sza limit. 
-        mask = (szalimit <= sza) 
-    if (fillnightoption == 1):    
-        # Replace the nighttime values with a fill value
-        dni[mask] = fillvalue
-    elif fillnightoption == 2:
-        # Replace the nighttime values with the DHI values.
-        dni[mask] =dhi[mask]
-    return dni
+    return _fill_nighttime(dni, fill_nighttime, fill_value,
+                           sza, sza_limit)
