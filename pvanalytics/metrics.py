@@ -41,9 +41,7 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
 
     pdc0 : float
         Power of the modules at 1000 W/m2 and cell reference temperature [kW].
-        This is otherwise referred to as the DC capacity of the 'array unit'
-        that is associated with the AC power stream, where the array unit could
-        be an inverter or similar.
+        Otherwise referred to as the PV array STC nameplate rating [kW].
 
     a : float
         Parameter :math:`a` in SAPM model [unitless].
