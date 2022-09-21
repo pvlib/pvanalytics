@@ -36,11 +36,14 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
     wind_speed : numeric
         Wind speed at a height of 10 meters [m/s].
 
-    pac : float
+    pac : numeric
         AC power [kW].
 
     pdc0 : float
         Power of the modules at 1000 W/m2 and cell reference temperature [kW].
+        This is otherwise referred to as the DC capacity of the 'array unit'
+        that is associated with the AC power stream, where the array unit could
+        be an inverter or similar.
 
     a : float
         Parameter :math:`a` in SAPM model [unitless].
