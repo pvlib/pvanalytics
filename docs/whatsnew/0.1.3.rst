@@ -24,9 +24,17 @@ Added 2 new gallery example pages:
   * :py:func:`~pvanalytics.metrics.performance_ratio_nrel`
   * :py:func:`~pvanalytics.metrics.variability_index`
 
-* Updated the docstrings associated with the pdc0 and pac fields in :py:func:`~pvanalytics.metrics.performance_ratio_nrel` to make them clearer (:issue:`152`, :pull:`162`). 
+Updated the docstrings associated with the pdc0 and pac fields in 
+:py:func:`~pvanalytics.metrics.performance_ratio_nrel` to make them clearer
+(:issue:`152`, :pull:`162`). 
+
+Restructured the example gallery by separating the examples into categories
+and adding README's (:issue:`154`, :pull:`155`).  
+
+Revised the pull request template (:issue:`159`, :pull:`160`).
 
 Contributors
 ~~~~~~~~~~~~
 
 * Kirsten Perry (:ghuser:`kperrynrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
