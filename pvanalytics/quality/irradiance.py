@@ -473,25 +473,40 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
 
 
-def _fill_nighttime(series, fill_nighttime, fill_value,
-                    sza, sza_limit):
-    # Logic for filling in nighttime values for a 
+def _fill_nighttime(component, ghi, dhi, dni,
+                    fill_nighttime, fill_value, sza, sza_limit):
+    # Set the series based on the component.
+    if component == 'GHI':
+        series = ghi
+    elif component == 'DHI':
+        series = dhi
+    else:
+        series = dni
+    # Logic for filling in nighttime values for a
     # component sum series.
-    if (fill_nighttime == 1) |(fill_nighttime == 2):
-        # Find the locations where the sun is below the sza limit. 
-        mask = (sza_limit <= sza) 
-    if (fill_nighttime == 1):    
+    if fill_nighttime is not None:
+        # Find the locations where the sun is below the sza limit.
+        mask = (sza_limit <= sza)
+    if fill_nighttime == 'fill_value':
         # Replace the nighttime values with a fill value
         series[mask] = fill_value
-    elif fill_nighttime == 2:
-        # Replace the nighttime values with the DHI values. 
-        # This will put 
-        series[mask] =dhi[mask]
+    if fill_nighttime == 'equation':
+        # Use the nighttime equation GHI = 0 + DHI, which translates as:
+        # GHI_Calc (at night) = DHI_measured
+        # DHI_Calc (at night) = GHI_measured
+        # DNI_Calc (at night) = 0
+        if component == 'GHI':
+            series[mask] = dhi[mask]
+        elif component == 'DHI':
+            series[mask] = ghi[mask]
+        else:
+            series[mask] = 0
     return series
 
 
 def calculate_ghi_component(dni, dhi, sza, sza_limit,
-                            fill_value, fill_nighttime):
+                            fill_value=np.nan,
+                            fill_nighttime=None):
     '''
     Computes GHI from the component sum equation
     ghi = dni * np.cos(sza * np.pi / 180) + dhi
@@ -510,26 +525,29 @@ def calculate_ghi_component(dni, dhi, sza, sza_limit,
             SZA boundary between night and day, in degrees.
             SZA values greater than the limit are filled with a
             constant default of 90.
-        fill_value: Float.
-            The value that is used to fill in nighttime values
-            
-        fill_nighttime:
-        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
-        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
-        Other: do nothing to the nighttimie values. compute them as they are. 
-      
+        fill_value: Float, default np.nan
+            The value that is used to fill in nighttime value
+        fill_nighttime: String, default None
+            Options include 'fill_value', 'equation', None. This is the
+            fill value for nighttime periods.
+            If 'fill_value' is selected, then nighttime values are
+            filled using the fill_value parameter.
+            If 'equation' is used, nighttime fill periods are based on the
+            component sum equation for night (where DNI is 0):
+                GHI = 0 + DHI
+            If None is selected, then the computed nighttime values based on
+            the component sum equation are returned.
+
     Returns
     -------
-    GHI: array of floats, (same units as DNI)
-
-    Notes
-    -----
- 
-    '''               
+    Series
+        Pandas series of calculated GHI values, based on the component sum
+        equation.
+    '''
     # Compute the GHI value from the component sum equation
     ghi = dni * np.cos(sza * np.pi / 180) + dhi
-    return _fill_nighttime(ghi, fill_nighttime, fill_value,
-                           sza, sza_limit)
+    return _fill_nighttime('GHI', ghi, dhi, dni,
+                           fill_nighttime, fill_value, sza, sza_limit)
 
 
 def calculate_dhi_component(ghi, dni, sza, sza_limit,
@@ -548,38 +566,40 @@ def calculate_dhi_component(ghi, dni, sza, sza_limit,
             units are the DHI series.
         sza: Series
             Pandas series of degree values.
-        sza_limit:
-            float (degrees) SZA boundary between night and day.
+        sza_limit: Float
+            SZA boundary between night and day, in degrees.
             SZA values greater than the limit are filled with a
-            constant default: 90
-        fill_value:
-            float. The value that is used to fill in nighttime values.
-            default: NA
-        fill_nighttime:
-        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
-        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
-        Other: do nothing to the nighttimie values. compute them as they are. 
-      
+            constant default of 90.
+        fill_value: Float, default np.nan
+            The value that is used to fill in nighttime value
+        fill_nighttime: String, default None
+            Options include 'fill_value', 'equation', None. This is the
+            fill value for nighttime periods.
+            If 'fill_value' is selected, then nighttime values are
+            filled using the fill_value parameter.
+            If 'equation' is used, nighttime fill periods are based on the
+            component sum equation for night (where DNI is 0):
+                GHI = 0 + DHI
+            If None is selected, then the computed nighttime values based on
+            the component sum equation are returned.
+
     Returns
     -------
-    GHI: array of floats, (same units as DNI)
-
-    Notes
-    -----
- 
-    '''               
+    Series
+        Pandas series of calculated DHI values, based on the component sum
+        equation.
+    '''
     # Compute the DHI value from the component sum equation
     dhi = ghi - (dni * np.cos(sza * np.pi / 180))
-    return _fill_nighttime(dhi, fill_nighttime, fill_value,
-                           sza, sza_limit)
-
+    return _fill_nighttime('DHI', ghi, dhi, dni,
+                           fill_nighttime, fill_value, sza, sza_limit)
 
 
 def calculate_dni_component(ghi, dhi, sza, sza_limit,
                             fill_value, fill_nighttime):
     '''
     Computes DNI from the component sum equation:
-    dni = (ghi - dhi) / np.cos(sza * np.pi / 180) 
+    dni = (ghi - dhi) / np.cos(sza * np.pi / 180)
 
     Parameters
     ----------
@@ -591,26 +611,30 @@ def calculate_dni_component(ghi, dhi, sza, sza_limit,
             units are the DHI series.
         sza: Series
             Pandas series of degree values.
-        sza_limit:
-            float (degrees) SZA boundary between night and day.
+        sza_limit: Float
+            SZA boundary between night and day, in degrees.
             SZA values greater than the limit are filled with a
-            constant default: 90
-        fill_value:
-            float. The value that is used to fill in nighttime values
-        fill_nighttime:
-        1: fill the nighttime value with the fill value (NA, 0, -99 etc)
-        2: fill the nighttime value with the DHI value such that at night (GHI == DHI)
-        Other: do nothing to the nighttimie values. compute them as they are. 
-      
+            constant default of 90.
+        fill_value: Float, default np.nan
+            The value that is used to fill in nighttime value
+        fill_nighttime: String, default None
+            Options include 'fill_value', 'equation', None. This is the
+            fill value for nighttime periods.
+            If 'fill_value' is selected, then nighttime values are
+            filled using the fill_value parameter.
+            If 'equation' is used, nighttime fill periods are based on the
+            component sum equation for night (where DNI is 0):
+                GHI = 0 + DHI
+            If None is selected, then the computed nighttime values based on
+            the component sum equation are returned.
+
     Returns
     -------
-    GHI: array of floats, (same units as DNI)
-
-    Notes
-    -----
- 
-    '''               
+    Series
+        Pandas series of calculated DNI values, based on the component sum
+        equation.
+    '''
     # Compute the DNI value from the component sum equation
-    dni = (ghi - dhi) / np.cos(sza * np.pi / 180) 
-    return _fill_nighttime(dni, fill_nighttime, fill_value,
-                           sza, sza_limit)
+    dni = (ghi - dhi) / np.cos(sza * np.pi / 180)
+    return _fill_nighttime('DNI', ghi, dhi, dni,
+                           fill_nighttime, fill_value, sza, sza_limit)
