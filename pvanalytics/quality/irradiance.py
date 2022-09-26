@@ -475,6 +475,8 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
 
 def _fill_nighttime(component, ghi, dhi, dni,
                     fill_nighttime, fill_value, sza, sza_limit):
+    # This function is used to fill in nighttime values for the computed
+    # irradiance time series (GHI, DHI, DNI).
     # Set the series based on the component.
     if component == 'GHI':
         series = ghi
@@ -484,9 +486,8 @@ def _fill_nighttime(component, ghi, dhi, dni,
         series = dni
     # Logic for filling in nighttime values for a
     # component sum series.
-    if fill_nighttime is not None:
-        # Find the locations where the sun is below the sza limit.
-        mask = (sza_limit <= sza)
+    # Find the locations where the sun is below the sza limit.
+    mask = (sza_limit <= sza)
     if fill_nighttime == 'fill_value':
         # Replace the nighttime values with a fill value
         series[mask] = fill_value
@@ -504,7 +505,8 @@ def _fill_nighttime(component, ghi, dhi, dni,
     return series
 
 
-def calculate_ghi_component(dni, dhi, sza, sza_limit,
+def calculate_ghi_component(dni, dhi, sza,
+                            sza_limit=90,
                             fill_value=np.nan,
                             fill_nighttime=None):
     '''
@@ -550,8 +552,10 @@ def calculate_ghi_component(dni, dhi, sza, sza_limit,
                            fill_nighttime, fill_value, sza, sza_limit)
 
 
-def calculate_dhi_component(ghi, dni, sza, sza_limit,
-                            fill_value, fill_nighttime):
+def calculate_dhi_component(ghi, dni, sza,
+                            sza_limit=90,
+                            fill_value=np.nan,
+                            fill_nighttime=None):
     '''
     Computes DHI from the component sum equation
     dhi = ghi - (dni * np.cos(sza * np.pi / 180))
@@ -595,8 +599,10 @@ def calculate_dhi_component(ghi, dni, sza, sza_limit,
                            fill_nighttime, fill_value, sza, sza_limit)
 
 
-def calculate_dni_component(ghi, dhi, sza, sza_limit,
-                            fill_value, fill_nighttime):
+def calculate_dni_component(ghi, dhi, sza,
+                            sza_limit=90,
+                            fill_value=np.nan,
+                            fill_nighttime=None):
     '''
     Computes DNI from the component sum equation:
     dni = (ghi - dhi) / np.cos(sza * np.pi / 180)

@@ -3,11 +3,25 @@ from datetime import datetime
 import pytz
 import pandas as pd
 import numpy as np
-
 import pytest
 from pandas.util.testing import assert_series_equal
-
 from pvanalytics.quality import irradiance
+from ..conftest import DATA_DIR
+
+
+test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#DATA_DIR / "irradiance_RMIS_NREL.csv"
+
+
+@pytest.fixture
+def generate_RMIS_irradiance_series():
+    # Pull down the saved PVLib dataframe and process it
+    df = pd.read_csv(test_file_1, index_col=0, parse_dates=True)
+    # Get the GHI, DHI, and DNI series
+    dni_series = df['irradiance_dni__7982']
+    dhi_series = df['irradiance_dhi__7983']
+    ghi_series = df['irradiance_ghi__7981']
+    sza = df['pvlib_zenith']
+    return (dhi_series, dni_series, ghi_series, sza)
 
 
 @pytest.fixture
@@ -314,3 +328,62 @@ def test_daily_insolation_limits_uneven(albuquerque):
         pd.Series(True, index=ghi.index),
         check_names=False
     )
+
+
+def test_calculate_ghi_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_ghi_component() function.
+    """
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, sza_series = \
+        generate_RMIS_irradiance_series
+    # Run with fill_nighttime = 'fill_value'
+    ghi_series_fill_value = irradiance.calculate_ghi_component(
+        dni=dni_series, dhi=dhi_series, sza=sza_series, sza_limit=90,
+        fill_value=np.nan, fill_nighttime='fill_value')
+    # Make sure that periods where sza>90 are marked as NaN
+    assert all(ghi_series_fill_value[sza_series > 90].isna())
+    # Run with fill_nighttime = 'equation'
+    ghi_series_equation = irradiance.calculate_ghi_component(
+        dni=dni_series, dhi=dhi_series, sza=sza_series, sza_limit=90,
+        fill_value=np.nan, fill_nighttime='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(ghi_series_equation[sza_series > 90].dropna() ==
+               dhi_series[sza_series > 90].dropna())
+    # Run with fill_nighttime = None
+    ghi_series_none = irradiance.calculate_ghi_component(
+        dni=dni_series, dhi=dhi_series, sza=sza_series,
+        sza_limit=90, fill_value=np.nan, fill_nighttime=None)
+    ghi_test = dni_series * np.cos(sza_series * np.pi / 180) + dhi_series
+    assert all(ghi_test.dropna() == ghi_series_none.dropna())
+
+
+def test_calculate_dhi_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_dhi_component() function.
+    """
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, sza_series = \
+        generate_RMIS_irradiance_series
+    # Test with equation used
+    dhi_series_equation = irradiance.calculate_dhi_component(
+            ghi=ghi_series, dni=dni_series, sza=sza_series,
+            sza_limit=90, fill_nighttime='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(dhi_series_equation[sza_series > 90].dropna() ==
+               ghi_series[sza_series > 90].dropna())
+
+
+def test_calculate_dni_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_dni_component() function.
+    """
+
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, sza_series = \
+        generate_RMIS_irradiance_series
+    dni_series_equation = irradiance.calculate_dni_component(
+                ghi=ghi_series, dni=dni_series, sza=sza_series,
+                sza_limit=90, fill_nighttime='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(dni_series_equation[sza_series > 90].dropna() == 0)
