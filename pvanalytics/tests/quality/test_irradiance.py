@@ -9,7 +9,7 @@ from pvanalytics.quality import irradiance
 from ..conftest import DATA_DIR
 
 
-test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/irradiance_RMIS_NREL.csv"#DATA_DIR / "irradiance_RMIS_NREL.csv"
+test_file_1 = DATA_DIR / "irradiance_RMIS_NREL.csv"
 
 
 @pytest.fixture
