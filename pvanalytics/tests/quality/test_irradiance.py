@@ -383,7 +383,7 @@ def test_calculate_dni_component(generate_RMIS_irradiance_series):
     dhi_series, dni_series, ghi_series, sza_series = \
         generate_RMIS_irradiance_series
     dni_series_equation = irradiance.calculate_dni_component(
-                ghi=ghi_series, dni=dni_series, sza=sza_series,
+                ghi=ghi_series, dhi=dhi_series, sza=sza_series,
                 sza_limit=90, fill_nighttime='equation')
     # Make sure that periods where sza>90 are equal equal to GHI values
     assert all(dni_series_equation[sza_series > 90].dropna() == 0)
