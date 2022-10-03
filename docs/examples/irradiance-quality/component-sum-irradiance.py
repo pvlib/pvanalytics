@@ -11,7 +11,7 @@ Estimate GHI, DHI, and DNI using the component sum equations.
 # physical data stream.
 
 import pvanalytics
-from pvanalytics.quality.irradiance import (calculate_ghi_component, 
+from pvanalytics.quality.irradiance import (calculate_ghi_component,
                                             calculate_dhi_component,
                                             calculate_dni_component)
 import pvlib
@@ -106,6 +106,3 @@ plt.xlabel("Date")
 plt.ylabel("DNI (W/m^2)")
 plt.tight_layout()
 plt.show()
-
-
-
