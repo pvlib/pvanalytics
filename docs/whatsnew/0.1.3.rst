@@ -5,7 +5,10 @@
 
 Enhancements
 ~~~~~~~~~~~~
-
+* Added functions for calculating the component sum value of GHI, DHI, and DNI, respectively (:issue:`157`, :pull:`163`):
+  * ``pvanalytics.quality.irradiance.calculate_ghi_component``
+  * ``pvanalytics.quality.irradiance.calculate_dhi_component``
+  * ``pvanalytics.quality.irradiance.calculate_dni_component``
 
 Bug Fixes
 ~~~~~~~~~
