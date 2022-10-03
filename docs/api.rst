@@ -65,6 +65,18 @@ clearsky insolation for the same day.
 
    quality.irradiance.daily_insolation_limits
 
+There are three separate functions for calculating the component sum for GHI, DHI,
+and DNI. Using these functions, we can estimate one irradiance field using the
+two other irradiance fields. This can be useful for comparison, as well as to
+calculate missing data fields. 
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.calculate_ghi_component
+   quality.irradiance.calculate_dhi_component
+   quality.irradiance.calculate_dni_component
+
 Gaps
 ----
 
