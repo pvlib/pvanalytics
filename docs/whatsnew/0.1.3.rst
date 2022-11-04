@@ -5,6 +5,7 @@
 
 Enhancements
 ~~~~~~~~~~~~
+* Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
 
 
 Bug Fixes
