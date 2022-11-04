@@ -12,7 +12,7 @@ nighttime corrections.
 # physical data stream.
 
 import pvanalytics
-#from pvanalytics.quality.irradiance import calculate_component_sum_series
+from pvanalytics.quality.irradiance import calculate_component_sum_series
 import pvlib
 import matplotlib.pyplot as plt
 import pandas as pd
