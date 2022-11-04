@@ -504,6 +504,7 @@ def _fill_nighttime(component, component_sum_df,
             series[mask] = 0
     return series
 
+
 def _complete_irradiance(solar_zenith,
                          ghi=None,
                          dhi=None,
@@ -513,7 +514,7 @@ def _complete_irradiance(solar_zenith,
     TODO: This method exists in the pvlib-python library. Once a new PVLib
     release or pre-release is cut, this private function can be deleted and
     the associated PVLib function can be directly leveraged.
-    
+
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
     dni) is passed as None, and the other associated series passed are used to
@@ -566,7 +567,8 @@ def _complete_irradiance(solar_zenith,
                                      'dni': dni})
     return component_sum_df
 
-def calculate_component_sum_series(solar_zenith, 
+
+def calculate_component_sum_series(solar_zenith,
                                    ghi=None,
                                    dhi=None,
                                    dni=None,
@@ -581,12 +583,12 @@ def calculate_component_sum_series(solar_zenith,
     calculate the missing series value. After calculation, the series is
     run through a nighttime routine, where nighttime values are set based on
     the fill_value and fill_nighttime parameters.
-    
+
     The "component sum" or "closure" equation relates the three
     primary irradiance components as follows:
     .. math::
        GHI = DHI + DNI \cos(\theta_z)
-    
+
     Parameters
     ----------
     solar_zenith : Series
