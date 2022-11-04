@@ -119,7 +119,6 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """
     if window < 2:
         raise ValueError('window set to {}, must be at least 2'.format(window))
-
     flags = x.rolling(window=window).apply(
         _all_close_to_first,
         raw=True,
@@ -173,11 +172,8 @@ def stale_values_round(x, window=6, decimals=3, mark='tail'):
     (c) 2020 Alliance for Sustainable Energy, LLC.
 
     """
-    rounded_x = x.round(decimals=decimals)
-    consecutive_val_counts = rounded_x.groupby((rounded_x !=
-                                                rounded_x.shift())
-                                               .cumsum()).cumcount()
-    endpoints = (~(consecutive_val_counts < window-1)) & ~(rounded_x.isna())
+    rounded_diff = x.round(decimals=decimals).diff()
+    endpoints = (rounded_diff == 0).rolling(window=window-1).sum() == window-1
     return _mark(endpoints, window, mark)
 
 
