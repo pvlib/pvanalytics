@@ -522,7 +522,7 @@ def _complete_irradiance(solar_zenith,
     The "component sum" or "closure" equation relates the three
     primary irradiance components as follows:
     .. math::
-       GHI = DHI + DNI \cos(\theta_z)
+       GHI = DHI + DNI * cos(theta_z)
     Parameters
     ----------
     solar_zenith : Series
