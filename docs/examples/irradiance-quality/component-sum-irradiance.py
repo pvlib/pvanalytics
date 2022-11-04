@@ -12,7 +12,7 @@ nighttime corrections.
 # physical data stream.
 
 import pvanalytics
-from pvanalytics.quality.irradiance import calculate_component_sum_series
+#from pvanalytics.quality.irradiance import calculate_component_sum_series
 import pvlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -35,6 +35,7 @@ data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
 latitude = 39.742
 longitude = -105.18
 time_zone = "Etc/GMT+7"
+data = data.tz_localize(time_zone)
 solar_position = pvlib.solarposition.get_solarposition(data.index,
                                                        latitude,
                                                        longitude)

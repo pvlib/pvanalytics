@@ -16,6 +16,7 @@ test_file_1 = DATA_DIR / "irradiance_RMIS_NREL.csv"
 def generate_RMIS_irradiance_series():
     # Pull down the saved PVLib dataframe and process it
     df = pd.read_csv(test_file_1, index_col=0, parse_dates=True)
+    df = df.tz_localize("Etc/GMT+7")
     # Get the GHI, DHI, and DNI series
     dni_series = df['irradiance_dni__7982']
     dhi_series = df['irradiance_dhi__7983']
