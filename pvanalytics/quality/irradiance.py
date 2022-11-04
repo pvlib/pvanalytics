@@ -580,7 +580,7 @@ def calculate_component_sum_series(solar_zenith,
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
     dni) is passed as None, and the other associated series passed are used to
-    calculate the missing series value. After calculation, the series is
+    calculate the missing series. After calculation, the series is
     run through a nighttime routine, where nighttime values are set based on
     the fill_value and fill_nighttime parameters.
 
