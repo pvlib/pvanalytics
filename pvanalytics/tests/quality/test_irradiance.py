@@ -334,7 +334,7 @@ def test_daily_insolation_limits_uneven(albuquerque):
 
 def test_calculate_ghi_component(generate_RMIS_irradiance_series):
     """
-    Test calculate_ghi_component() function.
+    Test calculate_component_sum_series() function on GHI calculation.
     """
     # Pull down RMIS data to test on
     dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
@@ -373,7 +373,7 @@ def test_calculate_ghi_component(generate_RMIS_irradiance_series):
 
 def test_calculate_dhi_component(generate_RMIS_irradiance_series):
     """
-    Test calculate_dhi_component() function.
+    Test calculate_component_sum_series() function on DHI calculation.
     """
     # Pull down RMIS data to test on
     dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
@@ -385,9 +385,6 @@ def test_calculate_dhi_component(generate_RMIS_irradiance_series):
         dni=dni_series,
         zenith_limit=90,
         fill_nighttime='equation')
-    irradiance.calculate_dhi_component(
-        ghi=ghi_series, dni=dni_series, sza=sza_series,
-        sza_limit=90, fill_nighttime='equation')
     # Make sure that periods where sza>90 are equal equal to GHI values
     assert all(dhi_series_equation[sza_series > 90].dropna() ==
                ghi_series[sza_series > 90].dropna())
@@ -395,7 +392,7 @@ def test_calculate_dhi_component(generate_RMIS_irradiance_series):
 
 def test_calculate_dni_component(generate_RMIS_irradiance_series):
     """
-    Test calculate_dni_component() function.
+    Test calculate_component_sum_series() function on DNI calculation.
     """
 
     # Pull down RMIS data to test on
