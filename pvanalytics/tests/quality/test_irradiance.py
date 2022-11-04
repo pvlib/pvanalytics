@@ -21,8 +21,9 @@ def generate_RMIS_irradiance_series():
     dni_series = df['irradiance_dni__7982']
     dhi_series = df['irradiance_dhi__7983']
     ghi_series = df['irradiance_ghi__7981']
+    dni_clear_series = df['pvlib_clearsky_dni']
     sza = df['pvlib_zenith']
-    return (dhi_series, dni_series, ghi_series, sza)
+    return (dhi_series, dni_series, ghi_series, dni_clear_series, sza)
 
 
 @pytest.fixture
@@ -336,25 +337,36 @@ def test_calculate_ghi_component(generate_RMIS_irradiance_series):
     Test calculate_ghi_component() function.
     """
     # Pull down RMIS data to test on
-    dhi_series, dni_series, ghi_series, sza_series = \
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
         generate_RMIS_irradiance_series
     # Run with fill_nighttime = 'fill_value'
-    ghi_series_fill_value = irradiance.calculate_ghi_component(
-        dni=dni_series, dhi=dhi_series, sza=sza_series, sza_limit=90,
-        fill_value=np.nan, fill_nighttime='fill_value')
+    ghi_series_fill_value = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series, 
+        dhi=dhi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_value=np.nan,
+        fill_nighttime='fill_value')
     # Make sure that periods where sza>90 are marked as NaN
     assert all(ghi_series_fill_value[sza_series > 90].isna())
     # Run with fill_nighttime = 'equation'
-    ghi_series_equation = irradiance.calculate_ghi_component(
-        dni=dni_series, dhi=dhi_series, sza=sza_series, sza_limit=90,
-        fill_value=np.nan, fill_nighttime='equation')
+    ghi_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series, 
+        dhi=dhi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_nighttime='equation')
     # Make sure that periods where sza>90 are equal equal to GHI values
     assert all(ghi_series_equation[sza_series > 90].dropna() ==
                dhi_series[sza_series > 90].dropna())
     # Run with fill_nighttime = None
-    ghi_series_none = irradiance.calculate_ghi_component(
-        dni=dni_series, dhi=dhi_series, sza=sza_series,
-        sza_limit=90, fill_value=np.nan, fill_nighttime=None)
+    ghi_series_none = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series, 
+        dhi=dhi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_value=np.nan,
+        fill_nighttime=None) 
     ghi_test = dni_series * np.cos(sza_series * np.pi / 180) + dhi_series
     assert all(ghi_test.dropna() == ghi_series_none.dropna())
 
@@ -364,10 +376,16 @@ def test_calculate_dhi_component(generate_RMIS_irradiance_series):
     Test calculate_dhi_component() function.
     """
     # Pull down RMIS data to test on
-    dhi_series, dni_series, ghi_series, sza_series = \
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
         generate_RMIS_irradiance_series
     # Test with equation used
-    dhi_series_equation = irradiance.calculate_dhi_component(
+    dhi_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series, 
+        ghi=ghi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_nighttime='equation')
+    irradiance.calculate_dhi_component(
             ghi=ghi_series, dni=dni_series, sza=sza_series,
             sza_limit=90, fill_nighttime='equation')
     # Make sure that periods where sza>90 are equal equal to GHI values
@@ -381,10 +399,14 @@ def test_calculate_dni_component(generate_RMIS_irradiance_series):
     """
 
     # Pull down RMIS data to test on
-    dhi_series, dni_series, ghi_series, sza_series = \
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
         generate_RMIS_irradiance_series
-    dni_series_equation = irradiance.calculate_dni_component(
-                ghi=ghi_series, dhi=dhi_series, sza=sza_series,
-                sza_limit=90, fill_nighttime='equation')
+    dni_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series, 
+        ghi=ghi_series,
+        dhi=dhi_series,
+        dni_clear=dni_clear_series,
+        zenith_limit=90,
+        fill_nighttime='equation')
     # Make sure that periods where sza>90 are equal equal to GHI values
     assert all(dni_series_equation[sza_series > 90].dropna() == 0)

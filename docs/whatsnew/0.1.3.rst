@@ -5,10 +5,7 @@
 
 Enhancements
 ~~~~~~~~~~~~
-* Added functions for calculating the component sum value of GHI, DHI, and DNI, respectively (:issue:`157`, :pull:`163`):
-  * ``pvanalytics.quality.irradiance.calculate_ghi_component``
-  * ``pvanalytics.quality.irradiance.calculate_dhi_component``
-  * ``pvanalytics.quality.irradiance.calculate_dni_component``
+* Added function ``pvanalytics.quality.irradiance.calculate_component_sum_series`` for calculating the component sum values of GHI, DHI, and DNI, and performing nighttime corrections (:issue:`157`, :pull:`163`)
 * Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
 
 Bug Fixes
@@ -22,7 +19,7 @@ Requirements
 Documentation
 ~~~~~~~~~~~~~
 
-Added 4 new gallery example pages:
+Added new gallery example pages:
 
 * ``pvanalytics.metrics`` (:issue:`133`, :pull:`153`):
 
@@ -35,6 +32,8 @@ Added 4 new gallery example pages:
   * :py:func:`~pvanalytics.quality.weather.relative_humidity_limits`
   * :py:func:`~pvanalytics.quality.weather.wind_limits`
   * :py:func:`~pvanalytics.quality.weather.module_temperature_check`
+
+* ``pvanalytics.quality.irradiance.calculate_component_sum_series``(:issue:`157`, :pull:`163`)
 
 Restructured the example gallery by separating the examples into categories
 and adding README's (:issue:`154`, :pull:`155`).  
