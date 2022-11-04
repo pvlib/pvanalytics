@@ -610,8 +610,8 @@ def calculate_component_sum_series(solar_zenith,
         :py:func:`dni` for details.
     zenith_limit: Float
         Solar zenith boundary between night and day, in degrees.
-        Zenith values greater than the limit are filled with a
-        constant default of 90.
+        For calculation of the component sum, solar_zenith is set to 90 where
+        solar_zenith > zenith_limit.
     fill_value: Float, default np.nan
         The value that is used to fill in nighttime value
     fill_nighttime: String, default None
