@@ -368,7 +368,7 @@ def test_calculate_ghi_component(generate_RMIS_irradiance_series):
         fill_value=np.nan,
         fill_nighttime=None)
     ghi_test = dni_series * np.cos(sza_series * np.pi / 180) + dhi_series
-    assert all(ghi_test.dropna() == ghi_series_none.dropna())
+    assert all(ghi_test.round(5).dropna() == ghi_series_none.round(5).dropna())
 
 
 def test_calculate_dhi_component(generate_RMIS_irradiance_series):
