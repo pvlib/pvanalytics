@@ -579,8 +579,8 @@ def calculate_component_sum_series(solar_zenith,
     '''
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
-    dni) is passed as None, and the other associated series passed are used to
-    calculate the missing series value. After calculation, the series is
+    dni) is passed as None, and the two series are used to
+    calculate the missing series. After calculation, the series is
     run through a nighttime routine, where nighttime values are set based on
     the fill_value and fill_nighttime parameters.
 
@@ -596,8 +596,8 @@ def calculate_component_sum_series(solar_zenith,
         Angles must be >=0 and <=180. Must have the same datetime index
         as ghi, dhi, and dni series, when available.
     ghi : Series, optional
-        Pandas series of dni data, with datetime index. Must have the same
-        datetime index as dni, dhi, and zenith series, when available.
+        Pandas series of GHI data, with datetime index. Must have the same
+        datetime index as dni, dhi, and solar_zenith series, when available.
     dhi : Series, optional
         Pandas series of dni data, with datetime index. Must have the same
         datetime index as ghi, dni, and zenith series, when available.
@@ -610,8 +610,8 @@ def calculate_component_sum_series(solar_zenith,
         :py:func:`dni` for details.
     zenith_limit: Float
         Solar zenith boundary between night and day, in degrees.
-        Zenith values greater than the limit are filled with a
-        constant default of 90.
+        For calculation of the component sum, solar_zenith is set to 90 where
+        solar_zenith > zenith_limit.
     fill_value: Float, default np.nan
         The value that is used to fill in nighttime value
     fill_nighttime: String, default None
