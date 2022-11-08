@@ -57,7 +57,7 @@ component_sum_ghi = calculate_component_sum_series(
     dhi=data['irradiance_dhi__7983'],
     dni=data['irradiance_dni__7982'],
     zenith_limit=90,
-    fill_value='equation')
+    fill_night_value='equation')
 
 # %%
 # Plot the 'irradiance_ghi__7981' data stream against the estimated component
@@ -80,7 +80,7 @@ component_sum_dhi = calculate_component_sum_series(
     dni=data['irradiance_dni__7982'],
     ghi=data['irradiance_ghi__7981'],
     zenith_limit=90,
-    fill_value='equation')
+    fill_night_value='equation')
 
 # %%
 # Plot the 'irradiance_dhi__7983' data stream against the estimated component
@@ -104,7 +104,7 @@ component_sum_dni = calculate_component_sum_series(
     ghi=data['irradiance_ghi__7981'],
     dni_clear=clearsky['dni'],
     zenith_limit=90,
-    fill_value='equation')
+    fill_night_value='equation')
 
 # %%
 # Plot the 'irradiance_dni__7982' data stream against the estimated component
