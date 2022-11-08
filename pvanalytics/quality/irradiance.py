@@ -581,7 +581,7 @@ def calculate_component_sum_series(solar_zenith,
     dni) is passed as None, and the two series are used to
     calculate the missing series. After calculation, the series is
     run through a nighttime routine, where nighttime values are set based on
-    the fill_value and fill_nighttime parameters.
+    the fill_night_value parameter.
 
     The "component sum" or "closure" equation relates the three
     primary irradiance components as follows:
@@ -612,15 +612,16 @@ def calculate_component_sum_series(solar_zenith,
         For calculation of the component sum, solar_zenith is set to 90 where
         solar_zenith > zenith_limit.
     fill_night_value: String or float or int, default np.nan
-        Options include 'equation', float or int fill value (np.nan, 0, etc.).
+        Options include 'equation', float or int values (np.nan, 0, etc.).
         This is the fill value for nighttime periods.
         If a float or int value is passed (np.nan, 0 , -.5, etc.), then
-        nighttime values are filled using the fill_value parameter.
+        nighttime values are filled using the fill_night_value parameter.
         If 'equation' is used, nighttime fill periods are based on the
         component sum equation for night (where DNI is 0):
             GHI = 0 + DHI
         If neither of the above options are chosen, then the computed
-        nighttime values based of the component sum equation are returned.
+        nighttime values based of the component sum equation outpus are
+        returned.
 
     Returns
     -------
