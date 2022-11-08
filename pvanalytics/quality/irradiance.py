@@ -473,7 +473,7 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
 
 
-def _fill_nighttime(component, component_sum_df, fill_value,
+def _fill_nighttime(component, component_sum_df, fill_night_value,
                     solar_zenith, zenith_limit):
     # This function is used to fill in nighttime values for the computed
     # irradiance time series (GHI, DHI, DNI).
@@ -488,10 +488,10 @@ def _fill_nighttime(component, component_sum_df, fill_value,
     # component sum series.
     # Find the locations where the sun is below the sza limit.
     mask = (zenith_limit <= solar_zenith)
-    if isinstance(fill_value, float) | isinstance(fill_value, int):
+    if isinstance(fill_night_value, float) | isinstance(fill_night_value, int):
         # Replace the nighttime values with a fill value
-        series[mask] = fill_value
-    elif fill_value == 'equation':
+        series[mask] = fill_night_value
+    elif fill_night_value == 'equation':
         # Use the nighttime equation GHI = 0 + DHI, which translates as:
         # GHI_Calc (at night) = DHI_measured
         # DHI_Calc (at night) = GHI_measured
@@ -574,7 +574,7 @@ def calculate_component_sum_series(solar_zenith,
                                    dni=None,
                                    dni_clear=None,
                                    zenith_limit=90,
-                                   fill_value=np.nan):
+                                   fill_night_value=np.nan):
     '''
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
@@ -611,7 +611,7 @@ def calculate_component_sum_series(solar_zenith,
         Solar zenith boundary between night and day, in degrees.
         For calculation of the component sum, solar_zenith is set to 90 where
         solar_zenith > zenith_limit.
-    fill_value: String or float or int, default np.nan
+    fill_night_value: String or float or int, default np.nan
         Options include 'equation', float or int fill value (np.nan, 0, etc.).
         This is the fill value for nighttime periods.
         If a float or int value is passed (np.nan, 0 , -.5, etc.), then
@@ -642,5 +642,5 @@ def calculate_component_sum_series(solar_zenith,
             "is set to None"
         )
     return _fill_nighttime(component, component_sum_df,
-                           fill_value,
+                           fill_night_value,
                            solar_zenith, zenith_limit)
