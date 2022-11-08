@@ -637,8 +637,13 @@ def calculate_component_sum_series(solar_zenith,
         component = 'GHI'
     elif dhi is None:
         component = 'DHI'
-    else:
+    elif dni is None:
         component = 'DNI'
+    else:
+        raise ValueError(
+            "Please check that exactly one of ghi, dhi and dni parameters "
+            "is set to None"
+        )
     return _fill_nighttime(component, component_sum_df,
                            fill_nighttime, fill_value,
                            solar_zenith, zenith_limit)
