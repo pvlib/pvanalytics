@@ -366,6 +366,14 @@ def test_calculate_ghi_component(generate_RMIS_irradiance_series):
         fill_night_value=None)
     ghi_test = dni_series * np.cos(sza_series * np.pi / 180) + dhi_series
     assert all(ghi_test.round(5).dropna() == ghi_series_none.round(5).dropna())
+    # Throw an error if int/float, None, or 'equation' aren't passed in
+    # fill_night_value parameter
+    with pytest.raises(ValueError):
+        irradiance.calculate_component_sum_series(solar_zenith=sza_series,
+                                                  dhi=dhi_series,
+                                                  dni=dni_series,
+                                                  zenith_limit=90,
+                                                  fill_night_value='random')
 
 
 def test_calculate_dhi_component(generate_RMIS_irradiance_series):

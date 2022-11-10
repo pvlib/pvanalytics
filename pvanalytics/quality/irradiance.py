@@ -489,7 +489,8 @@ def _fill_nighttime(component, component_sum_df, fill_night_value,
     # Find the locations where the sun is below the sza limit.
     mask = (zenith_limit <= solar_zenith)
     if isinstance(fill_night_value, float) | isinstance(fill_night_value, int):
-        # Replace the nighttime values with a fill value
+        # Replace the nighttime values with a fill value--this can be np.nan,
+        # which is a float
         series[mask] = fill_night_value
     elif fill_night_value == 'equation':
         # Use the nighttime equation GHI = 0 + DHI, which translates as:
@@ -502,6 +503,12 @@ def _fill_nighttime(component, component_sum_df, fill_night_value,
             series[mask] = component_sum_df['ghi'][mask]
         else:
             series[mask] = 0
+    elif fill_night_value is None:
+        pass
+    else:
+        raise ValueError("The fill_night_value variable must be None,"
+                         " float or int, or 'equation'. Please change "
+                         "the variable fill_night_value value.")
     return series
 
 
@@ -574,7 +581,7 @@ def calculate_component_sum_series(solar_zenith,
                                    dni=None,
                                    dni_clear=None,
                                    zenith_limit=90,
-                                   fill_night_value=np.nan):
+                                   fill_night_value=None):
     '''
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
@@ -611,8 +618,9 @@ def calculate_component_sum_series(solar_zenith,
         Solar zenith boundary between night and day, in degrees.
         For calculation of the component sum, solar_zenith is set to 90 where
         solar_zenith > zenith_limit.
-    fill_night_value: String or float or int, default np.nan
-        Options include 'equation', float or int values (np.nan, 0, etc.).
+    fill_night_value: String or float or int, default None
+        Options include 'equation', float or int values (np.nan, 0, etc.), or
+        None.
         This is the fill value for nighttime periods.
         If a float or int value is passed (np.nan, 0 , -.5, etc.), then
         nighttime values are filled using the fill_night_value parameter.
