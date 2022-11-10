@@ -399,7 +399,6 @@ def test_calculate_dni_component(generate_RMIS_irradiance_series):
     """
     Test calculate_component_sum_series() function on DNI calculation.
     """
-
     # Pull down RMIS data to test on
     dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
         generate_RMIS_irradiance_series
