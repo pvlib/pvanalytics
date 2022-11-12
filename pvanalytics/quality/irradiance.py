@@ -471,3 +471,135 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
         lower_bound=daily_min
     )
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
+
+
+def _upper_gti_limit_lorenz(aoi, solar_zenith, dni_extra):
+    r"""Function to calculate the upper limit of GTI
+    """
+    # Changing aoi to 90 degrees when solar zenith is greater than 90 (sun
+    # below horizon) or aoi is greater than 90 (which is not realistic).
+    aoi = aoi.mask(solar_zenith > 90, 90)
+    aoi = aoi.clip(lower=0, upper=90)
+
+    # Determining the upper limit
+    upper_limit = 0.9 * dni_extra * (cosd(aoi))**1.2 + 300
+
+    # Setting upper limit as 0 when solar zenith is > 90 (night time)
+    upper_limit[solar_zenith > 90] = 0
+
+    # Setting upper limit as undefined where solar_zenith is not available
+    upper_limit[solar_zenith.isna()] = np.nan
+    return(upper_limit)
+
+
+def _lower_gti_limit_lorenz(solar_zenith, dni_extra):
+    r"""Function to calculate the lower limit of GTI
+    """
+    # Setting the lower_limit at 0.
+    lower_limit = pd.Series(np.zeros(len(solar_zenith)),
+                            index=solar_zenith.index)
+
+    # Determining the lower limit when solar zenith is < 75
+    lower_limit = lower_limit.mask(solar_zenith < 75,
+                                   0.01 * dni_extra * cosd(solar_zenith))
+
+    # Setting upper limit as undefined where solar_zenith is not available
+    lower_limit[solar_zenith.isna()] = np.nan
+
+    return(lower_limit)
+
+
+def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
+    r"""Test for limits on POA global using the equations described in
+    Section 6.1 of [1]_
+
+    Criteria from [1]_ are used to determine physically plausible
+    lower and upper bounds. Each value is tested and a value passes if
+    value > lower bound and value < upper bound. Lower bounds are
+    constant for all tests. Upper bounds are calculated as
+
+    .. math::
+        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
+
+    .. note:: If any of `ghi`, `dhi`, or `dni` are None, the
+       corresponding element of the returned tuple will also be None.
+
+    Parameters
+    ----------
+    poa_global : Series
+        Global tilted irradiance in :math:`W/m^2`
+    solar_zenith : Series
+        Solar zenith angle in degrees
+    aoi : Series
+        Direct normal irradiance in :math:`W/m^2`
+
+    Returns
+    -------
+    poa_global_limit_bool_flag : Series
+        True for each value that is physically possible.
+    poa_global_limit_int_flag : Series
+        Series of integers representing the flag numbers described in the
+        literature _[1]
+
+    Notes
+    -----
+    The upper limit for `poa_global` is set to 0 when `solar_zenith` is greater
+    than 90 degrees. Missing values of `poa_global`, `solar_zenith` and/or
+    `aoi` will result in a `False` flag.
+
+    References
+    ----------
+    .. [1] Elke Lorenz et. al
+    High resolution measurement network of global horizontal and tilted solar
+    irradiance in southern Germany with a new quality control scheme,
+    Solar Energy,
+    Volume 231,
+    2022,
+    Pages 593-606,
+    ISSN 0038-092X,
+    https://doi.org/10.1016/j.solener.2021.11.023.
+    """
+    # Defining the normal irradiance at the top of atmosphere in W/m^2
+    dni_extra = 1367
+
+    # Making sure that the input are in series
+    poa_global = pd.Series(poa_global)
+    aoi = pd.Series(aoi)
+    solar_zenith = pd.Series(solar_zenith)
+
+    # Finding the upper and lower limit
+    upper_limit = _upper_gti_limit_lorenz(aoi, solar_zenith, dni_extra)
+    lower_limit = _lower_gti_limit_lorenz(solar_zenith, dni_extra)
+
+    # Initiating a poa_global_limit_int_flag series
+    poa_global_limit_int_flag = \
+        pd.Series(np.zeros(len(solar_zenith)).astype(np.int64),
+                  index=solar_zenith.index)
+
+    # Initiating a poa_global_limit_bool_flag series
+    poa_global_limit_bool_flag = \
+        pd.Series(np.full(len(solar_zenith), True, dtype=bool),
+                  index=solar_zenith.index)
+
+    # Changing the poa_global_flag to 3 when poa_global is above upper
+    # limit or below lower limit
+    poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
+        ((poa_global > upper_limit) |
+         (poa_global < lower_limit)),
+        3
+    )
+
+    # Changing the poa_global_flag to 1 when poa_global is not available
+    poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
+        ((poa_global.isna()) |
+         (upper_limit.isna()) |
+         (lower_limit.isna())),
+        1
+    )
+
+    # poa_global_limit_flag
+    poa_global_limit_bool_flag = poa_global_limit_bool_flag.mask(
+        cond=poa_global_limit_int_flag != 0,
+        other=False)
+
+    return(poa_global_limit_bool_flag, poa_global_limit_int_flag)

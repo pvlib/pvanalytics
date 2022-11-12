@@ -8,6 +8,7 @@ import pytest
 from pandas.util.testing import assert_series_equal
 
 from pvanalytics.quality import irradiance
+from ..conftest import DATA_DIR
 
 
 @pytest.fixture
@@ -314,3 +315,30 @@ def test_daily_insolation_limits_uneven(albuquerque):
         pd.Series(True, index=ghi.index),
         check_names=False
     )
+
+
+def test_check_poa_global_limits_lorenz():
+    """Testing the function 'test_check_poa_global_limits_lorenz'"""
+
+    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+
+    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+
+    expected_bool_flag = test_data['poa_global_limit_bool_flag']
+    expected_int_flag = test_data['poa_global_limit_int_flag']
+
+    poa_global = test_data['poa_global']
+    solar_zenith = test_data['solar_zenith']
+    aoi = test_data['aoi']
+
+    poa_global_limit_bool_flag, poa_global_limit_int_flag = \
+        irradiance.check_poa_global_limits_lorenz(poa_global, solar_zenith,
+                                                  aoi)
+
+    assert_series_equal(expected_int_flag,
+                        poa_global_limit_int_flag,
+                        check_names=False)
+
+    assert_series_equal(poa_global_limit_bool_flag,
+                        expected_bool_flag,
+                        check_names=False)
