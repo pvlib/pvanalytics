@@ -526,9 +526,6 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     .. math::
         ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
 
-    .. note:: If any of `ghi`, `dhi`, or `dni` are None, the
-       corresponding element of the returned tuple will also be None.
-
     Parameters
     ----------
     poa_global : Series
