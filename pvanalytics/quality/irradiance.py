@@ -473,7 +473,7 @@ def daily_insolation_limits(irrad, clearsky, daily_min=0.4, daily_max=1.25):
     return good_days.reindex(irrad.index, method='pad', fill_value=False)
 
 
-def _upper_gti_limit_lorenz(aoi, solar_zenith, dni_extra):
+def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     r"""Function to calculate the upper limit of GTI
     """
     # Changing aoi to 90 degrees when solar zenith is greater than 90 (sun
@@ -489,10 +489,13 @@ def _upper_gti_limit_lorenz(aoi, solar_zenith, dni_extra):
 
     # Setting upper limit as undefined where solar_zenith is not available
     upper_limit[solar_zenith.isna()] = np.nan
+
+    # Renaming upper_limit series to 'upper_limit'
+    upper_limit.rename('upper_limit')
     return(upper_limit)
 
 
-def _lower_gti_limit_lorenz(solar_zenith, dni_extra):
+def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
     r"""Function to calculate the lower limit of GTI
     """
     # Setting the lower_limit at 0.
@@ -506,6 +509,8 @@ def _lower_gti_limit_lorenz(solar_zenith, dni_extra):
     # Setting upper limit as undefined where solar_zenith is not available
     lower_limit[solar_zenith.isna()] = np.nan
 
+    # Renaming upper_limit series to 'upper_limit'
+    lower_limit.rename('lower_limit')
     return(lower_limit)
 
 
@@ -568,8 +573,8 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     solar_zenith = pd.Series(solar_zenith)
 
     # Finding the upper and lower limit
-    upper_limit = _upper_gti_limit_lorenz(aoi, solar_zenith, dni_extra)
-    lower_limit = _lower_gti_limit_lorenz(solar_zenith, dni_extra)
+    upper_limit = _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra)
+    lower_limit = _lower_poa_global_limit_lorenz(solar_zenith, dni_extra)
 
     # Initiating a poa_global_limit_int_flag series
     poa_global_limit_int_flag = \

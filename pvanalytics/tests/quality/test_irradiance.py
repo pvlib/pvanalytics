@@ -342,3 +342,45 @@ def test_check_poa_global_limits_lorenz():
     assert_series_equal(poa_global_limit_bool_flag,
                         expected_bool_flag,
                         check_names=False)
+
+
+def test__upper_poa_global_limit_lorenz():
+    """Testing upper poa global limit defined by Lorenz et. al"""
+
+    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+
+    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+
+    expected_upper_limit = test_data['upper_limit']
+
+    dni_extra = 1367
+    solar_zenith = test_data['solar_zenith']
+    aoi = test_data['aoi']
+
+    test_upper_limit = irradiance._upper_poa_global_limit_lorenz(aoi,
+                                                                 solar_zenith,
+                                                                 dni_extra)
+
+    assert_series_equal(expected_upper_limit,
+                        test_upper_limit,
+                        check_names=False)
+
+
+def test__lower_poa_global_limit_lorenz():
+    """Testing lower poa global limit defined by Lorenz et. al"""
+
+    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+
+    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+
+    expected_lower_limit = test_data['lower_limit']
+
+    dni_extra = 1367
+    solar_zenith = test_data['solar_zenith']
+
+    test_lower_limit = irradiance._lower_poa_global_limit_lorenz(solar_zenith,
+                                                                 dni_extra)
+
+    assert_series_equal(expected_lower_limit,
+                        test_lower_limit,
+                        check_names=False)
