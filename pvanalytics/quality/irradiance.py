@@ -583,7 +583,7 @@ def calculate_component_sum_series(solar_zenith,
                                    dni_clear=None,
                                    zenith_limit=90,
                                    fill_night_value=None):
-    '''
+    r'''
     Use the component sum equations to calculate the missing series, using
     the other available time series. One of the three parameters (ghi, dhi,
     dni) is passed as None, and the two series are used to
