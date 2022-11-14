@@ -613,7 +613,7 @@ def calculate_component_sum_series(solar_zenith,
         datetime index as ghi, dhi, and zenith series, when available.
     dni_clear : Series, optional
         Pandas series of clearsky dni data. Must have the same datetime index
-        as ghi, dhi, dni, and zenith series, when available. See
+        as `ghi`, `dhi`, `dni`, and `solar_zenith`, when available. See
         pvlib-python's 
         [dni](https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni) for details.
     zenith_limit: Float
