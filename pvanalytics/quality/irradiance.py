@@ -598,7 +598,6 @@ def calculate_component_sum_series(solar_zenith,
     primary irradiance components as follows:
 
     .. math::
-   
        GHI = DHI + DNI * \cos(\theta_z)
 
     Parameters
