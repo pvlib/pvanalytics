@@ -610,7 +610,7 @@ def calculate_component_sum_series(solar_zenith,
         datetime index as ghi, dni, and zenith series, when available.
     dni : Series, optional
         Pandas series of dni data, with datetime index. Must have the same
-        datetime index as ghi, dhi, and zenith series, when available.
+        datetime index as `ghi`, `dhi`, and `solar_zenith`, when available.
     dni_clear : Series, optional
         Pandas series of clearsky dni data. Must have the same datetime index
         as `ghi`, `dhi`, `dni`, and `solar_zenith`, when available. See
