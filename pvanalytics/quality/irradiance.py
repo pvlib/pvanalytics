@@ -552,6 +552,7 @@ def _complete_irradiance(solar_zenith,
         Pandas series of clearsky dni data. Must have the same datetime index
         as `ghi`, `dhi`, `dni`, and `solar_zenith` series, when available. See pvlib-python's 
         [dni](https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni) for details.
+
     Returns
     -------
     component_sum_df : Dataframe
