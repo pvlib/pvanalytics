@@ -601,7 +601,7 @@ def calculate_component_sum_series(solar_zenith,
     solar_zenith : Series
         Zenith angles in decimal degrees, with datetime index.
         Angles must be >=0 and <=180. Must have the same datetime index
-        as ghi, dhi, and dni series, when available.
+        as `dni`, `dhi`, and `dni`, when available.
     ghi : Series, optional
         Pandas series of GHI data, with datetime index. Must have the same
         datetime index as dni, dhi, and solar_zenith series, when available.
