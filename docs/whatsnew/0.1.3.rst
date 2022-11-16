@@ -6,6 +6,8 @@
 Enhancements
 ~~~~~~~~~~~~
 
+Added a function to check global plane of array irradiance using the paper
+described in (:issue:`123`, :pull:`167`).
 
 Bug Fixes
 ~~~~~~~~~
@@ -42,3 +44,4 @@ Contributors
 
 * Kirsten Perry (:ghuser:`kperrynrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
+* Abhishek Parikh (:ghuser:`abhisheksparikh`)

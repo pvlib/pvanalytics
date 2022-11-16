@@ -492,7 +492,7 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
 
     # Renaming upper_limit series to 'upper_limit'
     upper_limit.rename('upper_limit')
-    return(upper_limit)
+    return (upper_limit)
 
 
 def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
@@ -511,14 +511,14 @@ def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
 
     # Renaming upper_limit series to 'upper_limit'
     lower_limit.rename('lower_limit')
-    return(lower_limit)
+    return (lower_limit)
 
 
 def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     r"""Test for limits on POA global using the equations described in
     Section 6.1 of [1]_
 
-    Criteria from [1]_ are used to determine physically plausible
+    Criteria from [1] are used to determine physically plausible
     lower and upper bounds. Each value is tested and a value passes if
     value > lower bound and value < upper bound. Lower bounds are
     constant for all tests. Upper bounds are calculated as
@@ -541,25 +541,21 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
         True for each value that is physically possible.
     poa_global_limit_int_flag : Series
         Series of integers representing the flag numbers described in the
-        literature _[1]
+        literature [1]
 
     Notes
     -----
     The upper limit for `poa_global` is set to 0 when `solar_zenith` is greater
-    than 90 degrees. Missing values of `poa_global`, `solar_zenith` and/or
-    `aoi` will result in a `False` flag.
+    than 90 degrees. Missing values of `poa_global`, `solar_zenith`
+    and/or `aoi` will result in a `False` flag.
 
     References
     ----------
-    .. [1] Elke Lorenz et. al
-    High resolution measurement network of global horizontal and tilted solar
-    irradiance in southern Germany with a new quality control scheme,
-    Solar Energy,
-    Volume 231,
-    2022,
-    Pages 593-606,
-    ISSN 0038-092X,
-    https://doi.org/10.1016/j.solener.2021.11.023.
+    .. [1] Elke Lorenz et. al, High resolution measurement network of global
+           horizontal and tilted solar irradiance in southern Germany with a
+           new quality control scheme, Solar Energy, Volume 231, 2022,
+           Pages 593-606, ISSN 0038-092X,
+           https://doi.org/10.1016/j.solener.2021.11.023.
     """
     # Defining the normal irradiance at the top of atmosphere in W/m^2
     dni_extra = 1367
@@ -604,4 +600,4 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
         cond=poa_global_limit_int_flag != 0,
         other=False)
 
-    return(poa_global_limit_bool_flag, poa_global_limit_int_flag)
+    return (poa_global_limit_bool_flag, poa_global_limit_int_flag)
