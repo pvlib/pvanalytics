@@ -32,8 +32,11 @@ Added new gallery example pages:
   * :py:func:`~pvanalytics.quality.weather.relative_humidity_limits`
   * :py:func:`~pvanalytics.quality.weather.wind_limits`
   * :py:func:`~pvanalytics.quality.weather.module_temperature_check`
-
+  
 * ``pvanalytics.quality.irradiance.calculate_component_sum_series``(:issue:`157`, :pull:`163`)
+
+Updated the docstrings associated with the pdc0 and pac fields in :py:func:`~pvanalytics.metrics.performance_ratio_nrel`
+to make them clearer (:issue:`152`, :pull:`162`). 
 
 Restructured the example gallery by separating the examples into categories
 and adding README's (:issue:`154`, :pull:`155`).  
