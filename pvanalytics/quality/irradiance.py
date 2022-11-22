@@ -623,7 +623,7 @@ def calculate_component_sum_series(solar_zenith,
         Pandas series of clearsky dni data. Must have the same datetime index
         as `ghi`, `dhi`, `dni`, and `solar_zenith`, when available.
         See pvlib-python's
-        [dni](https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni)
+        `dni <https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni>`_
         for details.
     zenith_limit: Float
         Solar zenith boundary between night and day, in degrees.
