@@ -517,7 +517,7 @@ def _complete_irradiance(solar_zenith,
                          dhi=None,
                          dni=None,
                          dni_clear=None):
-    r"""
+    """
     TODO: This method exists in the pvlib-python library. Once a new PVLib
     release or pre-release is cut, this private function can be deleted and
     the associated PVLib function can be directly leveraged.
