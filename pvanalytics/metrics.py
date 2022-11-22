@@ -40,8 +40,8 @@ def performance_ratio_nrel(poa_global, temp_air, wind_speed, pac, pdc0,
         AC power [kW].
 
     pdc0 : float
-        Power of the modules at 1000 W/m2 and cell reference temperature [kW].
-        Otherwise referred to as the PV array STC nameplate rating [kW].
+        Power of the modules at 1000 W/m2 and cell reference temperature,
+        otherwise referred to as the PV array STC nameplate rating [kW].
 
     a : float
         Parameter :math:`a` in SAPM model [unitless].
