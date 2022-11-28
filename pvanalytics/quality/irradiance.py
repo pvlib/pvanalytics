@@ -492,7 +492,7 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
 
     # Renaming upper_limit series to 'upper_limit'
     upper_limit.rename('upper_limit')
-    return (upper_limit)
+    return upper_limit
 
 
 def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
