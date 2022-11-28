@@ -573,9 +573,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
 
     # Initiating a poa_global_limit_bool_flag series
-    poa_global_limit_bool_flag = \
-        pd.Series(np.full(len(solar_zenith), True, dtype=bool),
-                  index=solar_zenith.index)
+    poa_global_limit_bool_flag = pd.Series(True, index=solar_zenith.index)
 
     # Changing the poa_global_flag to 3 when poa_global is above upper
     # limit or below lower limit
