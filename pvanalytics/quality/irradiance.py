@@ -570,9 +570,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     lower_limit = _lower_poa_global_limit_lorenz(solar_zenith, dni_extra)
 
     # Initiating a poa_global_limit_int_flag series
-    poa_global_limit_int_flag = \
-        pd.Series(np.zeros(len(solar_zenith)).astype(np.int64),
-                  index=solar_zenith.index)
+    poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
 
     # Initiating a poa_global_limit_bool_flag series
     poa_global_limit_bool_flag = \
