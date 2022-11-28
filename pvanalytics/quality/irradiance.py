@@ -517,7 +517,7 @@ def _complete_irradiance(solar_zenith,
                          dhi=None,
                          dni=None,
                          dni_clear=None):
-    """
+    r"""
     TODO: This method exists in the pvlib-python library. Once a new PVLib
     release or pre-release is cut, this private function can be deleted and
     the associated PVLib function can be directly leveraged.
@@ -550,14 +550,14 @@ def _complete_irradiance(solar_zenith,
         datetime index as ghi, dhi, and zenith series, when available.
     dni_clear : Series, optional
         Pandas series of clearsky dni data. Must have the same datetime index
-        as `ghi`, `dhi`, `dni`, and `solar_zenith` series, when available. See pvlib-python's 
+        as `ghi`, `dhi`, `dni`, and `solar_zenith` series, when available. See pvlib-python's
         [dni](https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni) for details.
 
     Returns
     -------
     component_sum_df : Dataframe
         Pandas series of 'ghi', 'dhi', and 'dni' columns with datetime index
-    """
+    """  # noqa: E501
     if ghi is not None and dhi is not None and dni is None:
         dni = pvlib.irradiance.dni(ghi, dhi, solar_zenith,
                                    clearsky_dni=dni_clear,
@@ -620,7 +620,7 @@ def calculate_component_sum_series(solar_zenith,
     dni_clear : Series, optional
         Pandas series of clearsky dni data. Must have the same datetime index
         as `ghi`, `dhi`, `dni`, and `solar_zenith`, when available. See
-        pvlib-python's 
+        pvlib-python's
         `dni <https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni>`_ for details.
     zenith_limit: Float
         Solar zenith boundary between night and day, in degrees.
@@ -643,7 +643,7 @@ def calculate_component_sum_series(solar_zenith,
     Series
         Pandas series of the calculated values, based on the component sum
         equation and corrected for nighttime periods.
-    '''
+    '''  # noqa: E501
     component_sum_df = _complete_irradiance(solar_zenith, ghi,
                                             dhi, dni, dni_clear)
     if ghi is None:
