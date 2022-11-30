@@ -18,14 +18,12 @@ def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
         Pandas Series of zenith angles corresponding to the irradiance time
         series.
     sza_night_limit : float, optional
-        Solar zenith angle boundary limit (periods with zenith angles greater
-        or equal are used to compute the nighttime offset). The default is 100.
+        Solar zenith angle boundary limit. The default is 100.
     label : {'right', 'left'}, optional
-        Whether the timestamps correspond to the start/left or end/right of the
-        interval. The default is 'right'.
+        Whether the right/start or left/end of the interval is used to label
+        the interval. The default is 'right'.
     midnight_method : {'zenith', 'time'}, optional
-        Method for determining midnight. The default is 'zenith', which
-        assumes midnight occurs when the zenith angle is at the maximum.
+        Method for determining midnight. The default is 'zenith'.
     aggregation_method : {'median', 'mean'}, optional
         Method for calculating nighttime offset. The default is 'median'.
 
@@ -57,9 +55,13 @@ def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
         raise ValueError("midnight_method must be 'zenith' or 'time'.")
 
     # Create Pandas Series only containing nighttime irradiance
-    nighttime_irradiance = irradiance[zenith >= sza_night_limit]
+    # (daytime values are set to nan)
+    nighttime_irradiance = irradiance.copy()
+    nighttime_irradiance[zenith < sza_night_limit] = np.nan
     # Calculate nighttime offset
     nighttime_offset = nighttime_irradiance.groupby(grouping_category).transform(aggregation_method)
+    # In case nighttime offset cannot be determined (nan), set it to zero
+    nighttime_offset = nighttime_offset.fillna(0)
     # Calculate corrected irradiance time series
     corrected_irradiance = irradiance - nighttime_offset
     return corrected_irradiance
