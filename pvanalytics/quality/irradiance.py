@@ -88,7 +88,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     return ghi_limit_flag
 
 
-def chec_ghi_lower_limit_nollas(ghi, solar_zenith):
+def check_ghi_lower_limit_nollas(ghi, solar_zenith):
     r"""Test for lower limit on GHI using empirical limit from Nollas (2023).
 
     Test is applied to each GHI value. A GHI value passes if value >
