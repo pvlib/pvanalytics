@@ -478,7 +478,6 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     """
     # Changing aoi to 90 degrees when solar zenith is greater than 90 (sun
     # below horizon) or aoi is greater than 90 (which is not realistic).
-    aoi = aoi.mask(solar_zenith > 90, 90)
     aoi = aoi.clip(lower=0, upper=90)
 
     # Determining the upper limit
@@ -490,8 +489,9 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     # Setting upper limit as undefined where solar_zenith is not available
     upper_limit[solar_zenith.isna()] = np.nan
 
-    # Renaming upper_limit series to 'upper_limit'
-    upper_limit.rename('upper_limit')
+    # Setting upper limit as undefined where aoi is not available
+    upper_limit[aoi.isna()] = np.nan
+
     return upper_limit
 
 
@@ -506,15 +506,14 @@ def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
     lower_limit = lower_limit.mask(solar_zenith < 75,
                                    0.01 * dni_extra * cosd(solar_zenith))
 
-    # Setting upper limit as undefined where solar_zenith is not available
+    # Setting lower limit as undefined where solar_zenith is not available
     lower_limit[solar_zenith.isna()] = np.nan
 
-    # Renaming upper_limit series to 'upper_limit'
-    lower_limit.rename('lower_limit')
     return (lower_limit)
 
 
-def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
+def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
+                                   dni_extra=1367):
     r"""Test for limits on POA global using the equations described in
     Section 6.1 of [1]_
 
@@ -524,7 +523,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
     constant for all tests. Upper bounds are calculated as
 
     .. math::
-        ub = min + mult * dni\_extra * cos( solar\_zenith)^{exp}
+        upper_limit = 0.9 * dni\_extra * cos(aoi)^{1.2} + 300
 
     Parameters
     ----------
@@ -534,6 +533,8 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
         Solar zenith angle in degrees
     aoi : Series
         Direct normal irradiance in :math:`W/m^2`
+    dni_extra : float
+        normal irradiance at the top of atmosphere in W/m^2
 
     Returns
     -------
@@ -557,9 +558,6 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi):
            Pages 593-606, ISSN 0038-092X,
            https://doi.org/10.1016/j.solener.2021.11.023.
     """
-    # Defining the normal irradiance at the top of atmosphere in W/m^2
-    dni_extra = 1367
-
     # Making sure that the input are in series
     poa_global = pd.Series(poa_global)
     aoi = pd.Series(aoi)
