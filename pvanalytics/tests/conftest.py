@@ -5,8 +5,11 @@ import pandas as pd
 import pvlib
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-
+from pathlib import Path
 from pkg_resources import Requirement, parse_version
+
+TEST_DIR = Path(__file__).parent
+DATA_DIR = TEST_DIR.parent / 'data'
 
 
 def pytest_addoption(parser):
@@ -49,6 +52,17 @@ def requires_pvlib(versionspec, reason=''):
     if reason:
         message += f'({reason})'
     return pytest.mark.skipif(not is_satisfied, reason=message)
+
+
+def requires_ruptures(test):
+    """Skip `test` if ruptures is not installed."""
+    try:
+        import ruptures  # noqa: F401
+        has_ruptures = True
+    except ImportError:
+        has_ruptures = False
+    return pytest.mark.skipif(
+        not has_ruptures, reason="requires ruptures")(test)
 
 
 @pytest.fixture

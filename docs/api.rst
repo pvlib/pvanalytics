@@ -7,6 +7,19 @@ API Reference
 Quality
 =======
 
+Data Shifts
+-----------
+
+Functions for identifying shifts in data values in time series
+and for identifying periods with data shifts. For functions
+that identify shifts in time, see ``quality.time``
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.data_shifts.detect_data_shifts
+   quality.data_shifts.get_longest_shift_segment_dates
+
 Irradiance
 ----------
 
@@ -51,6 +64,17 @@ clearsky insolation for the same day.
    :toctree: generated/
 
    quality.irradiance.daily_insolation_limits
+
+There is function for calculating the component sum for GHI, DHI,
+and DNI, and correcting for nighttime periods. Using this function, we can
+estimate one irradiance field using the two other irradiance fields.
+This can be useful for comparison, as well as to
+calculate missing data fields. 
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.calculate_component_sum_series
 
 Gaps
 ----

@@ -1,57 +1,68 @@
 .. _whatsnew_012:
 
-0.1.2 (TBD)
--------------------------
+0.1.2 (August 18, 2022)
+-----------------------
 
 Enhancements
 ~~~~~~~~~~~~
-
+* Detect data shifts in daily summed time series with 
+  :py:func:`pvanalytics.quality.data_shifts.detect_data_shifts`
+  and :py:func:`pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`. (:pull:`142`)
 
 Bug Fixes
 ~~~~~~~~~
-
-* Updated the outliers routine for z-score, where the NaN mask is assigned the time
+* Fix :py:func:`pvanalytics.quality.outliers.zscore` so that the NaN mask is assigned the time
   series index (:pull:`138`)
-
-Requirements
-~~~~~~~~~~~~
-
 
 Documentation
 ~~~~~~~~~~~~~
+Added fifteen new gallery example pages:
 
-* Added an example for
-  :py:func:`pvanalytics.features.clipping.geometric`  (:issue:`133`, :pull:`134`)
-* Added examples for the quality.data_gaps module, including
-  :py:func:`pvanalytics.quality.gaps.stale_values_diff`,
-  :py:func:`pvanalytics.quality.gaps.stale_values_round`,
-  :py:func:`pvanalytics.quality.gaps.interpolation_diff`,
-  :py:func:`pvanalytics.quality.gaps.completeness_score`,
-  :py:func:`pvanalytics.quality.gaps.complete`, and
-  :py:func:`pvanalytics.quality.gaps.trim_incomplete`
-  (:issue:`133`, :pull:`135`)
-* Added examples for the quality.outliers module, including
-  :py:func:`pvanalytics.quality.outliers.tukey`,
-  :py:func:`pvanalytics.quality.outliers.zscore`,
-  :py:func:`pvanalytics.quality.outliers.hampel`
-  (:issue:`133`, :pull:`138`)
-* Added examples for the pvanalytics.features.daytime module,
-  including :py:func:`pvanalytics.features.daytime.power_or_irradiance`
-  (:issue:`133`, :pull:`139`)
-* Added examples for the pvanalytics.quality.irradiance module,
-  including :py:func:`pvanalytics.quality.irradiance.clearsky_limits`,
-  :py:func:`pvanalytics.quality.irradiance.daily_insolation_limits`,
-  :py:func:`pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`,
-  and :py:func:`pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
-  (:issue:`133`, :pull:`140`)
-* Added examples for the pvanalytics.system module,
-  including :py:func:`pvanalytics.system.is_tracking_envelope`,
-  :py:func:`pvanalytics.system.infer_orientation_daily_peak`,
-  and :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts`
-  (:issue:`133`, :pull:`146`)
+* ``pvanalytics.features.clipping`` (:issue:`133`, :pull:`134`):
+
+  * :py:func:`~pvanalytics.features.clipping.geometric`
+
+* ``pvanalytics.quality.gaps`` (:issue:`133`, :pull:`135`):
+
+  * :py:func:`~pvanalytics.quality.gaps.stale_values_diff`
+  * :py:func:`~pvanalytics.quality.gaps.stale_values_round`
+  * :py:func:`~pvanalytics.quality.gaps.interpolation_diff`
+  * :py:func:`~pvanalytics.quality.gaps.completeness_score`
+  * :py:func:`~pvanalytics.quality.gaps.complete`
+  * :py:func:`~pvanalytics.quality.gaps.trim_incomplete`
+
+* ``pvanalytics.quality.outliers`` (:issue:`133`, :pull:`138`):
+
+  * :py:func:`~pvanalytics.quality.outliers.tukey`
+  * :py:func:`~pvanalytics.quality.outliers.zscore`
+  * :py:func:`~pvanalytics.quality.outliers.hampel`
+
+* ``pvanalytics.features.daytime`` (:issue:`133`, :pull:`139`):
+
+  * :py:func:`~pvanalytics.features.daytime.power_or_irradiance`
+
+* ``pvanalytics.quality.irradiance`` (:issue:`133`, :pull:`140`):
+
+  * :py:func:`~pvanalytics.quality.irradiance.clearsky_limits`
+  * :py:func:`~pvanalytics.quality.irradiance.daily_insolation_limits`
+  * :py:func:`~pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`
+  * :py:func:`~pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`
+
+* ``pvanalytics.features.orientation`` (:issue:`133`, :pull:`148`):
+
+  * :py:func:`~pvanalytics.features.orientation.fixed_nrel`
+  * :py:func:`~pvanalytics.features.orientation.tracking_nrel`
+  
+* ``pvanalytics.quality.data_shifts`` (:pull:`131`):
+
+  * :py:func:`~pvanalytics.quality.data_shifts.detect_data_shifts`
+  * :py:func:`~pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`  
 
 
 Contributors
 ~~~~~~~~~~~~
 
 * Kirsten Perry (:ghuser:`kperrynrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Will Vining (:ghuser:`wfvining`)
