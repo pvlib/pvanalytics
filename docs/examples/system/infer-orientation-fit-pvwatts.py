@@ -14,6 +14,7 @@ Infer the azimuth and tilt of a system using PVWatts-based methods
 # latitude-longitude coordinates and an associated AC power time series.
 
 import pvanalytics
+import matplotlib.pyplot as plt
 from pvanalytics import system
 import pandas as pd
 import pathlib
@@ -27,12 +28,15 @@ import pvlib
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-ac_power_file = pvanalytics_dir / 'data' / \
-    'serf_east_15min_ac_power.csv'
+ac_power_file = pvanalytics_dir / 'data' / 'serf_east_15min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 time_series = data['ac_power']
 time_series = time_series.asfreq('15T')
+
+# Plot the first few days of the time series to visualize it
+time_series[:pd.to_datetime("2016-07-06 00:00:00-07:00")].plot()
+plt.show() 
 
 # Outline the ground truth metadata associated with the system
 latitude = 39.742

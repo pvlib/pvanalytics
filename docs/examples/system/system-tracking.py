@@ -38,6 +38,10 @@ data = data.sort_index()
 time_series = data['ac_power']
 time_series = time_series.asfreq('15T')
 
+# Plot the first few days of the time series to visualize it
+time_series[:pd.to_datetime("2016-07-06 00:00:00-07:00")].plot()
+plt.show() 
+
 # %%
 # Run the clipping and the daytime filters on the time series.
 # Both of these masks will be used as inputs to the
