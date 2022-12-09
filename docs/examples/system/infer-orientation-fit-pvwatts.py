@@ -50,7 +50,6 @@ actual_tilt = 45
 # The PSM3 data has been resampled to 15 minute intervals, to match the AC
 # power data.
 
-pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 psm3_file = pvanalytics_dir / 'data' / 'serf_east_psm3_data.csv'
 psm3 = pd.read_csv(psm3_file, index_col=0, parse_dates=True)
 
