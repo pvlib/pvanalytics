@@ -20,6 +20,7 @@ from pvanalytics.features.clipping import geometric
 from pvanalytics.features.daytime import power_or_irradiance
 import pandas as pd
 import pathlib
+import matplotlib.pyplot as plt
 
 # %%
 # First, we import an AC power data stream from the SERF East site located at
@@ -28,7 +29,6 @@ import pathlib
 # (https://data.openei.org/submissions/4568), under system ID 50.
 # This data is timezone-localized. This particular data stream is associated
 # with a fixed-tilt system.
-
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / \
@@ -55,7 +55,8 @@ clipping_mask = geometric(time_series)
 
 # %%
 # Now, we use :py:func:`pvanalytics.system.is_tracking_envelope` to
-# identify if the data stream is associated with a tracking system.
+# identify if the data stream is associated with a tracking or fixed-tilt
+# system.
 
 predicted_mounting_config = is_tracking_envelope(time_series,
                                                  daytime_mask,
