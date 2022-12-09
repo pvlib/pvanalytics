@@ -22,9 +22,13 @@ import pandas as pd
 import pathlib
 
 # %%
-# First, we import the AC power data stream that we are going to check the
-# mounting configuration for. This particular data stream is associated with
-# a fixed-tilt system.
+# First, we import an AC power data stream from the SERF East site located at
+# NREL. This data set is publicly available via the PVDAQ database in the
+# DOE Open Energy Data Initiative (OEDI)
+# (https://data.openei.org/submissions/4568), under system ID 50.
+# This data is timezone-localized. This particular data stream is associated
+# with a fixed-tilt system.
+
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / \
