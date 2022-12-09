@@ -62,7 +62,7 @@ time_series_clearsky = time_series[is_clear & is_daytime]
 time_series_clearsky = time_series_clearsky.dropna()
 psm3_clearsky = psm3.loc[time_series_clearsky.index]
 
-# Get solar azimuth + zenith + ghi + dhi + dni from pvlib, based on
+# Get solar azimuth and zenith from pvlib, based on
 # lat-long coords
 solpos_clearsky = pvlib.solarposition.get_solarposition(
     time_series_clearsky.index, latitude, longitude)
