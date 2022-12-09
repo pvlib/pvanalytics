@@ -36,7 +36,7 @@ time_series = time_series.asfreq('15T')
 
 # Plot the first few days of the time series to visualize it
 time_series[:pd.to_datetime("2016-07-06 00:00:00-07:00")].plot()
-plt.show() 
+plt.show()
 
 # Outline the ground truth metadata associated with the system
 latitude = 39.742
