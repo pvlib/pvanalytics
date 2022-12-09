@@ -1,8 +1,8 @@
 """
-Infer Array Tilt/Azimuth - PVWatts
-==================================
+Infer Array Tilt/Azimuth - PVWatts Method
+=========================================
 
-Infer the azimuth and tilt of a system using PVWatts data
+Infer the azimuth and tilt of a system using PVWatts-based methods
 """
 
 # %%
