@@ -32,6 +32,11 @@ Added new gallery example pages:
   * :py:func:`~pvanalytics.quality.weather.relative_humidity_limits`
   * :py:func:`~pvanalytics.quality.weather.wind_limits`
   * :py:func:`~pvanalytics.quality.weather.module_temperature_check`
+
+* ``pvanalytics.system`` (:issue:`133`, :pull:`146`):
+
+  * :py:func:`~pvanalytics.system.infer_orientation_fit_pvwatts`
+  * :py:func:`~pvanalytics.system.is_tracking_envelope`
   
 * ``pvanalytics.quality.irradiance.calculate_component_sum_series``(:issue:`157`, :pull:`163`)
 
