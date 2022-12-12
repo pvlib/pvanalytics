@@ -8,7 +8,6 @@ import pytest
 from pandas.util.testing import assert_series_equal
 
 from pvanalytics.quality import irradiance
-from ..conftest import DATA_DIR
 
 
 @pytest.fixture
@@ -317,23 +316,73 @@ def test_daily_insolation_limits_uneven(albuquerque):
     )
 
 
-def test_check_poa_global_limits_lorenz():
-    """Testing the function 'test_check_poa_global_limits_lorenz'"""
+@pytest.fixture
+def lorenz_test_data():
 
-    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+    data = pd.DataFrame(
+        columns=['ghi', 'poa_global', 'solar_zenith', 'azimuth', 'aoi',
+                 'lower_limit_poa', 'upper_limit_poa',
+                 'poa_global_limit_int_flag', 'poa_global_limit_bool_flag',
+                 'lower_limit_ghi', 'upper_limit_flag2_ghi',
+                 'upper_limit_flag3_ghi', 'ghi_limit_int_flag',
+                 'ghi_limit_bool_flag'],
+        data=np.array([[400, 730, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [500, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [880, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 2, 0],
+                       [1000, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 3, 0],
+                       [6, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 3, 0],
+                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [100, 1152, 60, 205, 30, 6.835, 1335.256062, 3, 0,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 3, 0,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [500, 830, np.nan, 205, 30, np.nan, np.nan, 1, 0,
+                        np.nan, np.nan, np.nan, 1, 0],
+                       [500, 830, 60, 205, np.nan, 6.835, np.nan, 1, 0,
+                        6.835, 870.2, 992.531965, 0, 1]]))
 
-    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+    dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
+              'float64', 'float64',
+              'int64', 'bool',
+              'float64', 'float64',
+              'float64', 'int64',
+              'bool']
 
-    expected_bool_flag = test_data['poa_global_limit_bool_flag']
-    expected_int_flag = test_data['poa_global_limit_int_flag']
+    for (col, typ) in zip(data.columns, dtypes):
+        data[col] = data[col].astype(typ)
 
-    poa_global = test_data['poa_global']
-    solar_zenith = test_data['solar_zenith']
-    aoi = test_data['aoi']
+    return(data)
 
+
+def test_check_poa_global_limits_lorenz(lorenz_test_data):
+    """Testing the function 'check_poa_global_limits_lorenz'"""
+
+    data = lorenz_test_data
+
+    # Expected boolean and integer flags
+    expected_bool_flag = data['poa_global_limit_bool_flag']
+    expected_int_flag = data['poa_global_limit_int_flag']
+
+    # Setting up inputs
+    dni_extra = 1367
+    poa_global = data['poa_global']
+    solar_zenith = data['solar_zenith']
+    aoi = data['aoi']
+
+    # Calling the functions
     poa_global_limit_bool_flag, poa_global_limit_int_flag = \
         irradiance.check_poa_global_limits_lorenz(poa_global, solar_zenith,
-                                                  aoi)
+                                                  aoi, dni_extra)
 
     assert_series_equal(expected_int_flag,
                         poa_global_limit_int_flag,
@@ -344,19 +393,20 @@ def test_check_poa_global_limits_lorenz():
                         check_names=False)
 
 
-def test__upper_poa_global_limit_lorenz():
+def test__upper_poa_global_limit_lorenz(lorenz_test_data):
     """Testing upper poa global limit defined by Lorenz et. al"""
 
-    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+    data = lorenz_test_data
 
-    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+    # Expected upper limit
+    expected_upper_limit = data['upper_limit_poa']
 
-    expected_upper_limit = test_data['upper_limit']
-
+    # Setting up inputs
     dni_extra = 1367
-    solar_zenith = test_data['solar_zenith']
-    aoi = test_data['aoi']
+    solar_zenith = data['solar_zenith']
+    aoi = data['aoi']
 
+    # Testing upper limit
     test_upper_limit = irradiance._upper_poa_global_limit_lorenz(aoi,
                                                                  solar_zenith,
                                                                  dni_extra)
@@ -366,21 +416,111 @@ def test__upper_poa_global_limit_lorenz():
                         check_names=False)
 
 
-def test__lower_poa_global_limit_lorenz():
+def test__lower_poa_global_limit_lorenz(lorenz_test_data):
     """Testing lower poa global limit defined by Lorenz et. al"""
 
-    test_file = DATA_DIR / "lorenz_poa_test_dataset.csv"
+    data = lorenz_test_data
 
-    test_data = pd.read_csv(test_file, index_col=0, parse_dates=True)
+    # Expected upper limit
+    expected_lower_limit = data['lower_limit_poa']
 
-    expected_lower_limit = test_data['lower_limit']
-
+    # Setting up inputs
     dni_extra = 1367
-    solar_zenith = test_data['solar_zenith']
+    solar_zenith = data['solar_zenith']
 
     test_lower_limit = irradiance._lower_poa_global_limit_lorenz(solar_zenith,
                                                                  dni_extra)
 
     assert_series_equal(expected_lower_limit,
                         test_lower_limit,
+                        check_names=False)
+
+
+def test__upper_ghi_limit_lorenz_flag2(lorenz_test_data):
+    """Testing upper ghi limit for flag 2 defined by Lorenz et. al"""
+
+    data = lorenz_test_data
+
+    # Expected upper limit
+    expected_upper_limit = data['upper_limit_flag2_ghi']
+
+    # Setting up inputs
+    dni_extra = 1367
+    solar_zenith = data['solar_zenith']
+
+    # Testing upper limit
+    test_upper_limit = irradiance._upper_ghi_limit_lorenz_flag2(solar_zenith,
+                                                                dni_extra)
+
+    assert_series_equal(expected_upper_limit,
+                        test_upper_limit,
+                        check_names=False)
+
+
+def test__upper_ghi_limit_lorenz_flag3(lorenz_test_data):
+    """Testing upper ghi limit for flag 3 defined by Lorenz et. al"""
+
+    data = lorenz_test_data
+
+    # Expected upper limit
+    expected_upper_limit = data['upper_limit_flag3_ghi']
+
+    # Setting up inputs
+    dni_extra = 1367
+    solar_zenith = data['solar_zenith']
+
+    # Testing upper limit
+    test_upper_limit = irradiance._upper_ghi_limit_lorenz_flag3(solar_zenith,
+                                                                dni_extra)
+
+    assert_series_equal(expected_upper_limit,
+                        test_upper_limit,
+                        check_names=False)
+
+
+def test__lower_ghi_limit_lorenz(lorenz_test_data):
+    """Testing lower ghi limit defined by Lorenz et. al"""
+
+    data = lorenz_test_data
+
+    # Expected upper limit
+    expected_upper_limit = data['lower_limit_ghi']
+
+    # Setting up inputs
+    dni_extra = 1367
+    solar_zenith = data['solar_zenith']
+
+    # Testing upper limit
+    test_upper_limit = irradiance._lower_ghi_limit_lorenz(solar_zenith,
+                                                          dni_extra)
+
+    assert_series_equal(expected_upper_limit,
+                        test_upper_limit,
+                        check_names=False)
+
+
+def test_check_ghi_limits_lorenz(lorenz_test_data):
+    """Testing the function 'check_ghi_limits_lorenz'"""
+
+    data = lorenz_test_data
+
+    # Expected boolean and integer flags
+    expected_bool_flag = data['ghi_limit_bool_flag']
+    expected_int_flag = data['ghi_limit_int_flag']
+
+    # Setting up inputs
+    dni_extra = 1367
+    ghi = data['ghi']
+    solar_zenith = data['solar_zenith']
+
+    # Calling the functions
+    ghi_limit_bool_flag, ghi_limit_int_flag = \
+        irradiance.check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra)
+
+    assert_series_equal(expected_int_flag,
+                        ghi_limit_int_flag,
+                        check_names=False)
+
+    assert_series_equal(ghi_limit_bool_flag,
+                        expected_bool_flag,
                         check_names=False)

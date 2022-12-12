@@ -73,6 +73,14 @@ irradiance measurements that are outside the limits described in [2]_.
 
    quality.irradiance.check_poa_global_limits_lorenz
 
+The ``check_ghi_limits_lorenz`` function flags the global horizontal irradiance
+measurements that are outside the limits described in [2]_.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.check_ghi_limits_lorenz
+
 Gaps
 ----
 

@@ -6,8 +6,7 @@
 Enhancements
 ~~~~~~~~~~~~
 
-Added a function to check global plane of array irradiance using the paper
-described in (:issue:`123`, :pull:`167`).
+* Added a function to check global plane of array irradiance and global horizontal irradiance using the paper described in (:issue:`123`, :pull:`167`).
 
 Bug Fixes
 ~~~~~~~~~
