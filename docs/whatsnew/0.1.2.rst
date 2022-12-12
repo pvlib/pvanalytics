@@ -63,7 +63,6 @@ Other
 * Removed empty modules ``pvanalytics.filtering`` and ``pvanalytics.fitting``
   until the relevant functionality is added to the package. (:pull:`145`)
 
-
 Contributors
 ~~~~~~~~~~~~
 
