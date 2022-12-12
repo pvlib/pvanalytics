@@ -707,7 +707,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     r"""Test for limits on POA global using the equations described in
     Section 6.1 of [1]_
 
-    Criteria from [1] are used to determine physically plausible
+    Criteria from [1]_ are used to determine physically plausible
     lower and upper bounds. Each value is tested and a value passes if
     value > lower bound and value < upper bound. Also, steps with
     change in magnitude of more than 1000 W/m2 are flagged. Lower bounds are
