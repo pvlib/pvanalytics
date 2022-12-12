@@ -1,7 +1,6 @@
 """Quality control functions for irradiance data."""
 
 import numpy as np
-import datetime as dt
 
 
 def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
@@ -44,22 +43,19 @@ def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
     # Assign unique number to each day
     day_number_zenith = midnight_zenith.cumsum()
 
-    # Choose grouping parameter based on the midnight_method
-    if midnight_method == 'zenith':
-        grouping_category = day_number_zenith
-    elif midnight_method == 'time':
-        grouping_category = irradiance.index.date
-        if label == 'right':
-            grouping_category[irradiance.index.time == dt.time(0)] += -dt.timedelta(days=1)
-    else:
-        raise ValueError("midnight_method must be 'zenith' or 'time'.")
-
     # Create Pandas Series only containing nighttime irradiance
     # (daytime values are set to nan)
     nighttime_irradiance = irradiance.copy()
     nighttime_irradiance[zenith < sza_night_limit] = np.nan
-    # Calculate nighttime offset
-    nighttime_offset = nighttime_irradiance.groupby(grouping_category).transform(aggregation_method)
+
+    # Calculate nighttime offset (method depends on midnight_method)
+    if midnight_method == 'zenith':
+        nighttime_offset = nighttime_irradiance.groupby(day_number_zenith).transform(aggregation_method)
+    elif midnight_method == 'time':
+        nighttime_offset = nighttime_irradiance.resample('1d', label=label, closed=label).transform(aggregation_method)
+    else:
+        raise ValueError("midnight_method must be 'zenith' or 'time'.")
+
     # In case nighttime offset cannot be determined (nan), set it to zero
     nighttime_offset = nighttime_offset.fillna(0)
     # Calculate corrected irradiance time series
