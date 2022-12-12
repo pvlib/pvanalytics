@@ -58,6 +58,10 @@ Added fifteen new gallery example pages:
   * :py:func:`~pvanalytics.quality.data_shifts.detect_data_shifts`
   * :py:func:`~pvanalytics.quality.data_shifts.get_longest_shift_segment_dates`  
 
+Other
+~~~~~
+* Removed empty modules ``pvanalytics.filtering`` and ``pvanalytics.fitting``
+  until the relevant functionality is added to the package. (:pull:`145`)
 
 Contributors
 ~~~~~~~~~~~~
