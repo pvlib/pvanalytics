@@ -7,7 +7,7 @@ Enhancements
 ~~~~~~~~~~~~
 * Added function ``pvanalytics.quality.irradiance.calculate_component_sum_series`` for calculating the component sum values of GHI, DHI, and DNI, and performing nighttime corrections (:issue:`157`, :pull:`163`)
 * Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
-* Added a function to check global plane of array irradiance and global horizontal irradiance using the paper described in (:issue:`123`, :pull:`167`).
+* Added a function to check global plane of array irradiance and global horizontal irradiance using a method of E. Lorenze et al. (2022) (:issue:`123`, :pull:`167`).
 
 Bug Fixes
 ~~~~~~~~~
