@@ -65,6 +65,17 @@ clearsky insolation for the same day.
 
    quality.irradiance.daily_insolation_limits
 
+There is function for calculating the component sum for GHI, DHI,
+and DNI, and correcting for nighttime periods. Using this function, we can
+estimate one irradiance field using the two other irradiance fields.
+This can be useful for comparison, as well as to
+calculate missing data fields.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.calculate_component_sum_series
+
 The ``check_poa_global_limits_lorenz`` function flags the global plane of array
 irradiance measurements that are outside the limits described in [2]_.
 
