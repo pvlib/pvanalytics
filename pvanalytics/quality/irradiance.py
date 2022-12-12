@@ -725,7 +725,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     aoi : Series
         Direct normal irradiance in :math:`W/m^2`
     dni_extra : float
-        normal irradiance at the top of atmosphere in W/m^2
+        normal irradiance at the top of atmosphere in :math:`W/m^2`
 
     Returns
     -------
