@@ -7,7 +7,7 @@ Infer the azimuth and tilt of a system using PVWatts-based methods
 
 # %%
 # Identifing and/or validating  the azimuth and tilt information for a
-# system is important, as these values must be correct for future degradation
+# system is important, as these values must be correct for degradation
 # and system yield analysis. This example shows how to use
 # :py:func:`pvanalytics.system.infer_orientation_fit_pvwatts` to estimate
 # a fixed-tilt system's azimuth and tilt, using the system's known
