@@ -491,7 +491,7 @@ def test_check_poa_global_limits_lorenz(lorenz_test_data):
 
 
 def test__upper_poa_global_limit_lorenz(lorenz_test_data):
-    """Testing upper poa global limit defined by Lorenz et. al"""
+    """Testing upper poa global limit defined by Lorenz et al."""
 
     data = lorenz_test_data
 
