@@ -880,7 +880,7 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
         True for each value that is physically possible.
     ghi_limit_int_flag : Series
         Series of integers representing the flag numbers described in the
-        literature [1]
+        literature. [1]_
 
     Notes
     -----
