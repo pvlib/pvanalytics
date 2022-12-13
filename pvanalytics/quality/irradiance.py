@@ -685,8 +685,8 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     return upper_limit
 
 
-def _lower_poa_global_limit_lorenz(solar_zenith, dni_extra):
-    r"""Function to calculate the lower limit of GTI
+def _lower_limit_lorenz(solar_zenith, dni_extra):
+    r"""Function to calculate the lower limit of poa_global and ghi
     """
     # Setting the lower_limit at 0.
     lower_limit = pd.Series(np.zeros(len(solar_zenith)),
@@ -751,7 +751,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     """
     # Finding the upper and lower limit
     upper_limit = _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra)
-    lower_limit = _lower_poa_global_limit_lorenz(solar_zenith, dni_extra)
+    lower_limit = _lower_limit_lorenz(solar_zenith, dni_extra)
 
     # Initiating a poa_global_limit_int_flag series
     poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
@@ -823,23 +823,6 @@ def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
     return upper_limit_flag3
 
 
-def _lower_ghi_limit_lorenz(solar_zenith, dni_extra):
-    r"""Function to calculate the lower limit of ghi
-    """
-    # Setting the lower_limit at 0
-    lower_limit = pd.Series(np.zeros(len(solar_zenith)),
-                            index=solar_zenith.index)
-
-    # Determining the lower limit when solar zenith is < 75
-    lower_limit = lower_limit.mask(solar_zenith < 75,
-                                   0.01 * dni_extra * cosd(solar_zenith))
-
-    # Setting lower limit as undefined where solar_zenith is not available
-    lower_limit[solar_zenith.isna()] = np.nan
-
-    return (lower_limit)
-
-
 def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     r"""Test for limits on global horizontal irradiance using the equations
     described in Section 6.1 of [1]_
@@ -901,7 +884,7 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     upper_limit_flag3 = _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra)
 
     # Finding the lower limit for flag 3
-    lower_limit = _lower_ghi_limit_lorenz(solar_zenith, dni_extra)
+    lower_limit = _lower_limit_lorenz(solar_zenith, dni_extra)
 
     # Initiating a ghi_limit_int_flag series
     ghi_limit_int_flag = pd.Series(0, index=solar_zenith.index)

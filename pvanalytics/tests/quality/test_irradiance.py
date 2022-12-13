@@ -446,7 +446,13 @@ def lorenz_test_data():
                        [500, 830, np.nan, 205, 30, np.nan, np.nan, 1, 0,
                         np.nan, np.nan, np.nan, 1, 0],
                        [500, 830, 60, 205, np.nan, 6.835, np.nan, 1, 0,
-                        6.835, 870.2, 992.531965, 0, 1]]))
+                        6.835, 870.2, 992.531965, 0, 1],
+                       [500, 830, -45, 205, 30, 9.66615, 1335.256062, 0, 1,
+                        9.66615, 1209.937964, 1452.825486, 0, 1],
+                       [500, 830, 45, 205, -30, 9.66615, 1530.300000, 0, 1,
+                        9.66615, 1209.937964, 1452.825486, 0, 1],
+                       [500, 830, -45, 205, -30, 9.66615, 1530.300000, 0, 1,
+                        9.66615, 1209.937964, 1452.825486, 0, 1]]))
 
     dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
               'float64', 'float64',
@@ -458,7 +464,7 @@ def lorenz_test_data():
     for (col, typ) in zip(data.columns, dtypes):
         data[col] = data[col].astype(typ)
 
-    return(data)
+    return (data)
 
 
 def test_check_poa_global_limits_lorenz(lorenz_test_data):
@@ -513,26 +519,6 @@ def test__upper_poa_global_limit_lorenz(lorenz_test_data):
                         check_names=False)
 
 
-def test__lower_poa_global_limit_lorenz(lorenz_test_data):
-    """Testing lower poa global limit defined by Lorenz et al."""
-
-    data = lorenz_test_data
-
-    # Expected upper limit
-    expected_lower_limit = data['lower_limit_poa']
-
-    # Setting up inputs
-    dni_extra = 1367
-    solar_zenith = data['solar_zenith']
-
-    test_lower_limit = irradiance._lower_poa_global_limit_lorenz(solar_zenith,
-                                                                 dni_extra)
-
-    assert_series_equal(expected_lower_limit,
-                        test_lower_limit,
-                        check_names=False)
-
-
 def test__upper_ghi_limit_lorenz_flag2(lorenz_test_data):
     """Testing upper ghi limit for flag 2 defined by Lorenz et al."""
 
@@ -575,7 +561,7 @@ def test__upper_ghi_limit_lorenz_flag3(lorenz_test_data):
                         check_names=False)
 
 
-def test__lower_ghi_limit_lorenz(lorenz_test_data):
+def test__lower_limit_lorenz(lorenz_test_data):
     """Testing lower ghi limit defined by Lorenz et al."""
 
     data = lorenz_test_data
@@ -588,8 +574,8 @@ def test__lower_ghi_limit_lorenz(lorenz_test_data):
     solar_zenith = data['solar_zenith']
 
     # Testing upper limit
-    test_upper_limit = irradiance._lower_ghi_limit_lorenz(solar_zenith,
-                                                          dni_extra)
+    test_upper_limit = irradiance._lower_limit_lorenz(solar_zenith,
+                                                      dni_extra)
 
     assert_series_equal(expected_upper_limit,
                         test_upper_limit,
