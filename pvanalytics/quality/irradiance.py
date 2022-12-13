@@ -844,7 +844,7 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     r"""Test for limits on global horizontal irradiance using the equations
     described in Section 6.1 of [1]_
 
-    Criteria from [1] are used to determine physically plausible
+    Criteria from [1]_ are used to determine physically plausible
     lower, upper bounds and step change. Each value is tested and a value
     passes if value > lower bound and value < upper bound. Also, steps with
     change in magnitude of more than :math:`1000 W/m^{2}` are flagged. Lower
