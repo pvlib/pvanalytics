@@ -555,7 +555,7 @@ def test__upper_ghi_limit_lorenz_flag2(lorenz_test_data):
 
 
 def test__upper_ghi_limit_lorenz_flag3(lorenz_test_data):
-    """Testing upper ghi limit for flag 3 defined by Lorenz et. al"""
+    """Testing upper ghi limit for flag 3 defined by Lorenz et al."""
 
     data = lorenz_test_data
 
