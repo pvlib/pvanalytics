@@ -890,7 +890,7 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
 
     References
     ----------
-    .. [1] Elke Lorenz et. al, High resolution measurement network of global
+    .. [1] Elke Lorenz et al., High resolution measurement network of global
            horizontal and tilted solar irradiance in southern Germany with a
            new quality control scheme, Solar Energy, Volume 231, 2022,
            Pages 593-606, ISSN 0038-092X,
