@@ -47,4 +47,7 @@ Contributors
 ~~~~~~~~~~~~
 * Kirsten Perry (:ghuser:`kperrynrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
+* Josh Peterson (:ghuser:`PetersonUOregon`)
+* Adam R. Jensen (:ghuser:`adamrjensen`)
+* Will Holmgren (:ghuser:`wholmgren`)
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
