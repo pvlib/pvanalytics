@@ -851,11 +851,11 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     Parameters
     ----------
     ghi : Series
-        Global tilted irradiance in :math:`W/m^2`
+        Global horizontal irradiance [W/m^2]
     solar_zenith : Series
-        Solar zenith angle in degrees
-    dni_extra : float
-        normal irradiance at the top of atmosphere in :math:`W/m^2`
+        Solar zenith angle [degrees]
+    dni_extra : float, default 1367
+        normal irradiance at the top of atmosphere [W/m^2]
 
     Returns
     -------
