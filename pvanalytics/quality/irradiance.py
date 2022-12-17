@@ -770,7 +770,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     # Changing the poa_global_flag to 3 when the step change in poa values is
     # more than 1000 W/m2
     poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
-        (abs(poa_global - poa_global.shift(1)) > 1000),
+        poa_global.diff().abs() > 1000,
         3
     )
 
