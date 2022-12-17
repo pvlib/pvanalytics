@@ -784,9 +784,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
 
     # Changing the poa_global_limit_bool_flag depending on
     # poa_global_limit_int_flag
-    poa_global_limit_bool_flag = poa_global_limit_bool_flag.mask(
-        cond=poa_global_limit_int_flag != 0,
-        other=False)
+    poa_global_limit_bool_flag = poa_global_limit_int_flag == 0
 
     return (poa_global_limit_bool_flag, poa_global_limit_int_flag)
 
@@ -923,8 +921,6 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     )
 
     # Changing the ghi_limit_bool_flag depending on ghi_limit_int_flag
-    ghi_limit_bool_flag = ghi_limit_bool_flag.mask(
-        cond=ghi_limit_int_flag != 0,
-        other=False)
+    ghi_limit_bool_flag = ghi_limit_int_flag == 0
 
     return (ghi_limit_bool_flag, ghi_limit_int_flag)

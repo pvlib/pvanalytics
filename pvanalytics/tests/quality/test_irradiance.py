@@ -416,46 +416,47 @@ def test_calculate_dni_component(generate_RMIS_irradiance_series):
 @pytest.fixture
 def lorenz_test_data():
 
+    # poa_global and ghi share the same values of 'lower_limit'
     data = pd.DataFrame(
         columns=['ghi', 'poa_global', 'solar_zenith', 'azimuth', 'aoi',
-                 'lower_limit_poa', 'upper_limit_poa',
+                 'upper_limit_poa',
                  'poa_global_limit_int_flag', 'poa_global_limit_bool_flag',
-                 'lower_limit_ghi', 'upper_limit_flag2_ghi',
+                 'lower_limit', 'upper_limit_flag2_ghi',
                  'upper_limit_flag3_ghi', 'ghi_limit_int_flag',
                  'ghi_limit_bool_flag'],
-        data=np.array([[400, 730, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+        data=np.array([[400, 730, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [500, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [500, 830, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [880, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [880, 830, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 2, 0],
-                       [1000, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [1000, 830, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 3, 0],
-                       [6, 830, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [6, 830, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 3, 0],
-                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [100, 150, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [100, 150, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [100, 1152, 60, 205, 30, 6.835, 1335.256062, 3, 0,
+                       [100, 1152, 60, 205, 30, 1335.256062, 3, 0,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 3, 0,
+                       [100, 150, 60, 205, 30, 1335.256062, 3, 0,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [100, 150, 60, 205, 30, 6.835, 1335.256062, 0, 1,
+                       [100, 150, 60, 205, 30, 1335.256062, 0, 1,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [500, 830, np.nan, 205, 30, np.nan, np.nan, 1, 0,
+                       [500, 830, np.nan, 205, 30, np.nan, 1, 0,
                         np.nan, np.nan, np.nan, 1, 0],
-                       [500, 830, 60, 205, np.nan, 6.835, np.nan, 1, 0,
+                       [500, 830, 60, 205, np.nan, np.nan, 1, 0,
                         6.835, 870.2, 992.531965, 0, 1],
-                       [500, 830, -45, 205, 30, 9.66615, 1335.256062, 0, 1,
+                       [500, 830, -45, 205, 30, 1335.256062, 0, 1,
                         9.66615, 1209.937964, 1452.825486, 0, 1],
-                       [500, 830, 45, 205, -30, 9.66615, 1530.300000, 0, 1,
+                       [500, 830, 45, 205, -30, 1530.300000, 0, 1,
                         9.66615, 1209.937964, 1452.825486, 0, 1],
-                       [500, 830, -45, 205, -30, 9.66615, 1530.300000, 0, 1,
+                       [500, 830, -45, 205, -30, 1530.300000, 0, 1,
                         9.66615, 1209.937964, 1452.825486, 0, 1]]))
 
     dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
-              'float64', 'float64',
+              'float64',
               'int64', 'bool',
               'float64', 'float64',
               'float64', 'int64',
@@ -562,23 +563,23 @@ def test__upper_ghi_limit_lorenz_flag3(lorenz_test_data):
 
 
 def test__lower_limit_lorenz(lorenz_test_data):
-    """Testing lower ghi limit defined by Lorenz et al."""
+    """Testing lower limit defined by Lorenz et al."""
 
     data = lorenz_test_data
 
-    # Expected upper limit
-    expected_upper_limit = data['lower_limit_ghi']
+    # Expected lower limit (lower limit for ghi and poa_global is the same)
+    expected_lower_limit = data['lower_limit']
 
     # Setting up inputs
     dni_extra = 1367
     solar_zenith = data['solar_zenith']
 
-    # Testing upper limit
-    test_upper_limit = irradiance._lower_limit_lorenz(solar_zenith,
+    # Testing lower limit
+    test_lower_limit = irradiance._lower_limit_lorenz(solar_zenith,
                                                       dni_extra)
 
-    assert_series_equal(expected_upper_limit,
-                        test_upper_limit,
+    assert_series_equal(expected_lower_limit,
+                        test_lower_limit,
                         check_names=False)
 
 
