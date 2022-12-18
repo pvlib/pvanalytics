@@ -13,7 +13,7 @@ system-level data. It can be used as a standalone analysis package
 and as a data cleaning "front end" for other PV analysis packages.
 
 PVAnalytics is free and open source under a
-`permissive license <https://github.com/pvlib/pvanalytics/blob/master/LICENSE>`_.
+`permissive license <https://github.com/pvlib/pvanalytics/blob/main/LICENSE>`_.
 The source code for PVAnalytics is hosted on `github
 <https://github.com/pvlib/pvanalytics>`_.
 

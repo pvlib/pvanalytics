@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PVAnalytics'
-copyright = '2020, pvlib'
+copyright = '2020-2022, pvlib'
 author = 'pvlib'
 
 

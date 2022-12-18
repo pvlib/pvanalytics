@@ -1,25 +1,18 @@
 .. _whatsnew_013:
 
-0.1.3 (TBD)
+0.1.3 (December 16, 2022)
 -------------------------
 
 Enhancements
 ~~~~~~~~~~~~
-* Added function ``pvanalytics.quality.irradiance.calculate_component_sum_series`` for calculating the component sum values of GHI, DHI, and DNI, and performing nighttime corrections (:issue:`157`, :pull:`163`)
-* Updated the :py:func:`~pvanalytics.gaps.stale_values_round` function with pandas functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
-* Added a function to check global plane of array irradiance and global horizontal irradiance using a method of E. Lorenze et al. (2022) (:issue:`123`, :pull:`167`).
-
-Bug Fixes
-~~~~~~~~~
-
-
-Requirements
-~~~~~~~~~~~~
-
+* Added function :py:func:`~pvanalytics.quality.irradiance.calculate_component_sum_series`
+  for calculating the component sum values of GHI, DHI, and DNI, and performing nighttime
+  corrections (:issue:`157`, :pull:`163`)
+* Updated the :py:func:`~pvanalytics.quality.gaps.stale_values_round` function with pandas
+  functionality, leading to the same results with a 300X speedup. (:issue:`156`, :pull:`158`)
 
 Documentation
 ~~~~~~~~~~~~~
-
 Added new gallery example pages:
 
 * ``pvanalytics.metrics`` (:issue:`133`, :pull:`153`):
@@ -33,20 +26,28 @@ Added new gallery example pages:
   * :py:func:`~pvanalytics.quality.weather.relative_humidity_limits`
   * :py:func:`~pvanalytics.quality.weather.wind_limits`
   * :py:func:`~pvanalytics.quality.weather.module_temperature_check`
+
+* ``pvanalytics.quality.irradiance`` (:issue:`157`, :pull:`163`)
+
+  * :py:func:`~pvanalytics.quality.irradiance.calculate_component_sum_series`
+
+* ``pvanalytics.system`` (:issue:`133`, :pull:`146`):
+
+  * :py:func:`~pvanalytics.system.infer_orientation_fit_pvwatts`
+  * :py:func:`~pvanalytics.system.is_tracking_envelope`
   
-* ``pvanalytics.quality.irradiance.calculate_component_sum_series``(:issue:`157`, :pull:`163`)
 
-Updated the docstrings associated with the pdc0 and pac fields in :py:func:`~pvanalytics.metrics.performance_ratio_nrel`
-to make them clearer (:issue:`152`, :pull:`162`). 
-
-Restructured the example gallery by separating the examples into categories
-and adding README's (:issue:`154`, :pull:`155`).  
-
-Revised the pull request template (:issue:`159`, :pull:`160`).
+* Clarified parameter descriptions for ``pdc0`` and ``pac`` in
+  :py:func:`~pvanalytics.metrics.performance_ratio_nrel` (:issue:`152`, :pull:`162`). 
+* Restructured the example gallery by separating the examples into categories
+  and adding README's (:issue:`154`, :pull:`155`).  
+* Revised the pull request template (:issue:`159`, :pull:`160`).
 
 Contributors
 ~~~~~~~~~~~~
-
 * Kirsten Perry (:ghuser:`kperrynrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
-* Abhishek Parikh (:ghuser:`abhisheksparikh`)
+* Josh Peterson (:ghuser:`PetersonUOregon`)
+* Adam R. Jensen (:ghuser:`adamrjensen`)
+* Will Holmgren (:ghuser:`wholmgren`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
