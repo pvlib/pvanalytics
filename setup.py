@@ -41,7 +41,7 @@ INSTALL_REQUIRES = [
 ]
 
 DOCS_REQUIRE = [
-    'sphinx == 4.3.1',
+    'sphinx == 4.5.0',
     'pydata-sphinx-theme == 0.8.1',
     'sphinx-gallery',
     'matplotlib',
