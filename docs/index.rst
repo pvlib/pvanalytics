@@ -80,20 +80,11 @@ Additionally, PVAnalytics relies on several other packages in the open
 source scientific python ecosystem.  For details on dependencies and versions,
 see our `setup.py <https://github.com/pvlib/pvanalytics/blob/main/setup.py>`_.
 
-Contents
-========
 
 .. toctree::
-   :maxdepth: 3
+   :hidden:
    :caption: Contents:
 
    api
    generated/gallery/index
    whatsnew/index
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
