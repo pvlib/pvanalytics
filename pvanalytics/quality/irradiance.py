@@ -633,8 +633,7 @@ def calculate_component_sum_series(solar_zenith,
         If a float or int value is passed (np.nan, 0 , -.5, etc.), then
         nighttime values are filled using the fill_night_value parameter.
         If 'equation' is used, nighttime periods are filled using the
-        component sum equation with DNI=0:
-            GHI = 0 + DHI
+        component sum equation with DNI=0: ``GHI = 0 + DHI``
         If None, then the nighttime values are based on the component sum
         equation.
 
