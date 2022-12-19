@@ -100,7 +100,6 @@ intersphinx_mapping = {
 # settings for sphinx-gallery
 sphinx_gallery_conf = {
     'examples_dirs': ['examples'],  # location of gallery scripts
-    'nested_sections': False,
     'gallery_dirs': ['generated/gallery'],  # location of generated output
     # sphinx-gallery only shows plots from plot_*.py files by default:
     'filename_pattern': re.escape(os.sep),
