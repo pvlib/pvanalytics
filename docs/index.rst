@@ -78,7 +78,7 @@ It supports:
 
 Additionally, PVAnalytics relies on several other packages in the open
 source scientific python ecosystem.  For details on dependencies and versions,
-see our `setup.py <https://github.com/pvlib/pvanalytics/blob/master/setup.py>`_.
+see our `setup.py <https://github.com/pvlib/pvanalytics/blob/main/setup.py>`_.
 
 Contents
 ========
