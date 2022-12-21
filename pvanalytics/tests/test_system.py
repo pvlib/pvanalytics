@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 import numpy as np
 import pvlib
-from pvlib import location, pvsystem, tracking, modelchain, irradiance
+from pvlib import location, pvsystem, modelchain, irradiance
 from pvanalytics import system
 
 
