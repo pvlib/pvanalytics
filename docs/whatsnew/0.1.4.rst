@@ -12,7 +12,7 @@ Bug Fixes
 
 Requirements
 ~~~~~~~~~~~~
-
+* Advance ``pvlib`` requirement to 0.9.4 (:pull:`179`)
 
 Documentation
 ~~~~~~~~~~~~~
