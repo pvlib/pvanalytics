@@ -35,7 +35,7 @@ INSTALL_REQUIRES = [
     'numpy >= 1.16.0',
     'pandas >= 0.24.0, != 1.1.*',
     'pvlib >= 0.9.4',
-    'scipy >= 1.2.0',
+    'scipy >= 1.4.0',
     'statsmodels >= 0.9.0',
     'scikit-image >= 0.16.0'
 ]
