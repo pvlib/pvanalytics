@@ -1,5 +1,5 @@
 numpy~=1.16.0
-pandas~=0.24.0
+pandas~=0.25.0
 pvlib~=0.9.4
 scipy~=1.4.0
 statsmodels~=0.9.0
