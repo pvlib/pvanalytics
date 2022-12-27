@@ -454,7 +454,7 @@ def _power_residuals_from_clearsky(system_params,
         Extraterrestrial radiation at the same times as data in `power_ac`.
         Required for the running the Perez model in
         :py:func:`pvlib.irradiance.get_total_irradiance`
-    
+
     Returns
     -------
     Series
@@ -477,8 +477,8 @@ def _power_residuals_from_clearsky(system_params,
         solar_zenith,
         solar_azimuth,
         dni, ghi, dhi,
-        dni_extra = dni_extra,
-        airmass = relative_airmass,
+        dni_extra=dni_extra,
+        airmass=relative_airmass,
         model='perez'
     )
     # Get AOI
@@ -488,7 +488,7 @@ def _power_residuals_from_clearsky(system_params,
     # Run IAM model
     iam = pvlib.iam.physical(aoi)
     # Apply IAM to direct POA component only
-    poa_transmitted = poa['poa_direct'] * iam + poa['poa_diffuse'] 
+    poa_transmitted = poa['poa_direct'] * iam + poa['poa_diffuse']
     temp_cell = pvlib.temperature.sapm_cell(
         poa['poa_global'],
         temperature,
