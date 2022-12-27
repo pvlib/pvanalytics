@@ -518,7 +518,9 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
                                   solar_zenith, solar_azimuth,
                                   temperature=25, wind_speed=0,
                                   temperature_coefficient=-0.004,
-                                  temperature_model_parameters=None):
+                                  temperature_model_parameters=None,
+                                  azimuth_min=0,
+                                  azimuth_max=360):
     """Get the tilt and azimuth that give PVWatts output that most closely
     fits the data in `power_ac`.
 
@@ -572,6 +574,10 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
         ``pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][
         'open_rack_glass_glass']`` is used. See
         :py:func:`pvlib.temperature.sapm_cell` for more information.
+    azimuth_min: Float, default 0
+        Minimum possible azimuth (bounds) for the least squares search problem.
+    azimuth_max: Float, default 360
+        Maximum possible azimuth (bounds) for the least squares search problem.
 
     Returns
     -------
@@ -611,8 +617,8 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     fit_result = scipy.optimize.least_squares(
         _power_residuals_from_clearsky,
         [initial_tilt, initial_azimuth, initial_dc_capacity, initial_dc_limit],
-        bounds=([0, 0, power_ac.max()*0.5, power_ac.max()*0.5],
-                [90, 360, power_ac.max()*2, power_ac.max()*3]),
+        bounds=([0, azimuth_min, power_ac.max()*0.5, power_ac.max()*0.5],
+                [90, azimuth_max, power_ac.max()*2, power_ac.max()*3]),
         kwargs={
             'ghi': ghi,
             'dhi': dhi,
