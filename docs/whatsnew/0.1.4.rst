@@ -5,6 +5,12 @@
 
 Enhancements
 ~~~~~~~~~~~~
+* Updated function :py:func:`~pvanalytics.system.infer_orientation_fit_pvwatts`
+  to more closely align with the PVWatts v5 methodology. This includes incorporating
+  relative airmass and extraterrestrial irradiance into the Perez total irradiance model,
+  accounting for array incidence loss (IAM), and including losses in the PVWatts
+  inverter model.
+
 
 Bug Fixes
 ~~~~~~~~~
@@ -20,4 +26,4 @@ Documentation
 
 Contributors
 ~~~~~~~~~~~~
-
+* Kirsten Perry (:ghuser:`kperrynrel`)
