@@ -15,7 +15,8 @@ Infer the azimuth and tilt of a system using PVWatts-based methods
 
 import pvanalytics
 import matplotlib.pyplot as plt
-from pvanalytics import system
+#from pvanalytics import system
+import system
 import pandas as pd
 import pathlib
 import pvlib
@@ -65,10 +66,13 @@ time_series_clearsky = time_series[is_clear & is_daytime]
 time_series_clearsky = time_series_clearsky.dropna()
 psm3_clearsky = psm3.loc[time_series_clearsky.index]
 
+# Create a location object to get solar position and air mass
+location = pvlib.location.Location(latitude, longitude)
+
 # Get solar azimuth and zenith from pvlib, based on
 # lat-long coords
-solpos_clearsky = pvlib.solarposition.get_solarposition(
-    time_series_clearsky.index, latitude, longitude)
+solpos_clearsky = location.get_solarposition(
+    time_series_clearsky.index, temperature=25)
 
 # %%
 # Run the pvlib data and the sensor-based time series data through
