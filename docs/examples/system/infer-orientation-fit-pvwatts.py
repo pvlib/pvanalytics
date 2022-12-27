@@ -15,8 +15,7 @@ Infer the azimuth and tilt of a system using PVWatts-based methods
 
 import pvanalytics
 import matplotlib.pyplot as plt
-#from pvanalytics import system
-import system
+from pvanalytics import system
 import pandas as pd
 import pathlib
 import pvlib
