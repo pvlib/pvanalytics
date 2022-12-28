@@ -17,6 +17,8 @@ Requirements
 
 Documentation
 ~~~~~~~~~~~~~
+* Online docs now use ``pydata-sphinx-theme`` instead of the built-in
+  ``alabaster`` theme. (:issue:`176`, :pull:`178`)
 
 
 Contributors
