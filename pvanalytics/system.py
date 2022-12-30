@@ -460,12 +460,6 @@ def _power_residuals_from_clearsky(system_params,
     Series
         Difference between `power_ac` and the PVWatts output with the
         given parameters.
-
-    Notes
-    ------
-    Uses the defaults in :py:func:`pvlib.irradiance.get_total_irradiance` to
-    calculated plane-of-array irradiance, i.e., the isotropic model for sky
-    diffuse irradiance, and the Perez irradiance transposition model.
     """
     tilt = system_params[0]
     azimuth = system_params[1]
@@ -520,8 +514,10 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
                                   temperature_coefficient=-0.004,
                                   temperature_model_parameters=None,
                                   azimuth_min=0,
-                                  azimuth_max=360):
-    """Get the tilt and azimuth that give PVWatts output that most closely
+                                  azimuth_max=360,
+                                  tilt_min=0,
+                                  tilt_max=90):
+    """Get the tilt and azimuth that give PVWatts v5 output that most closely
     fits the data in `power_ac`.
 
     Input data `power_ac`, `ghi`, `dhi`, `dni` should reflect clear-sky
@@ -576,8 +572,16 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
         :py:func:`pvlib.temperature.sapm_cell` for more information.
     azimuth_min: Float, default 0
         Minimum possible azimuth (bounds) for the least squares search problem.
+        [degrees]
     azimuth_max: Float, default 360
         Maximum possible azimuth (bounds) for the least squares search problem.
+        [degrees]
+    tilt_min: Float, default 0
+        Minimum possible tilt (bounds) for the least squares search problem.
+        [degrees]
+    tilt_max: Float, default 90
+        Maximum possible tilt (bounds) for the least squares search problem.
+        [degrees]
 
     Returns
     -------
@@ -592,6 +596,18 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     ------
     ValueError
         If any input passed as a Series contains undefined values (i.e. NaNs).
+
+    Notes
+    -----
+    To prevent significant slowdown, this function uses the SAPM
+    thermal model (:py:func:`~pvlib.temperature.sapm_cell`) instead of
+    the model specified in the PVWatts v5 reference [1]_
+    (:py:func:`~pvlib.temperature.fuentes`).
+
+    References
+    ----------
+    .. [1] Aron Dobos, "PVWatts Version 5 Manual", NREL/TP-6A20-62641 (2014).
+           :doi:`10.2172/1158421`
     """
     if power_ac.hasnans:
         raise ValueError("power_ac must not contain undefined values")
@@ -617,8 +633,10 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     fit_result = scipy.optimize.least_squares(
         _power_residuals_from_clearsky,
         [initial_tilt, initial_azimuth, initial_dc_capacity, initial_dc_limit],
-        bounds=([0, azimuth_min, power_ac.max()*0.5, power_ac.max()*0.5],
-                [90, azimuth_max, power_ac.max()*2, power_ac.max()*3]),
+        bounds=([tilt_min, azimuth_min,
+                 power_ac.max()*0.5, power_ac.max()*0.5],
+                [tilt_max, azimuth_max,
+                 power_ac.max()*2, power_ac.max()*3]),
         kwargs={
             'ghi': ghi,
             'dhi': dhi,
