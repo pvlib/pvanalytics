@@ -480,7 +480,7 @@ def _power_residuals_from_clearsky(system_params,
                                solar_zenith,
                                solar_azimuth)
     # Run IAM model
-    iam = pvlib.iam.physical(aoi)
+    iam = pvlib.iam.physical(aoi, n=1.5)
     # Apply IAM to direct POA component only
     poa_transmitted = poa['poa_direct'] * iam + poa['poa_diffuse']
     temp_cell = pvlib.temperature.sapm_cell(
@@ -511,7 +511,7 @@ def _rsquared(data, residuals):
 def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
                                   solar_zenith, solar_azimuth,
                                   temperature=25, wind_speed=0,
-                                  temperature_coefficient=-0.004,
+                                  temperature_coefficient=-0.0047,
                                   temperature_model_parameters=None,
                                   azimuth_min=0,
                                   azimuth_max=360,
