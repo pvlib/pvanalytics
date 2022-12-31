@@ -810,7 +810,7 @@ def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
     # Determining the upper limit
     upper_limit_flag3 = np.minimum(
         pd.Series(1.2 * dni_extra, index=solar_zenith.index),
-        1.5 * dni_extra * (cosd(solar_zenith))**1.2 + 100)
+        1.5 * dni_extra * cosd(solar_zenith))**1.2 + 100
 
     # Setting upper limit as 0 when solar zenith is > 90 (night time)
     upper_limit_flag3[solar_zenith > 90] = 0
