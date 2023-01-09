@@ -676,11 +676,9 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     # Setting upper limit as 0 when solar zenith is > 90 (night time)
     upper_limit[solar_zenith > 90] = 0
 
-    # Setting upper limit as undefined where solar_zenith is not available
-    upper_limit[solar_zenith.isna()] = np.nan
-
-    # Setting upper limit as undefined where aoi is not available
-    upper_limit[aoi.isna()] = np.nan
+    # Setting upper limit as undefined where solar_zenith or aoi is not
+    # available
+    upper_limit[(solar_zenith.isna()) | (aoi.isna())] = np.nan
 
     return upper_limit
 
@@ -689,8 +687,7 @@ def _lower_limit_lorenz(solar_zenith, dni_extra):
     r"""Function to calculate the lower limit of poa_global and ghi
     """
     # Setting the lower_limit at 0.
-    lower_limit = pd.Series(np.zeros(len(solar_zenith)),
-                            index=solar_zenith.index)
+    lower_limit = pd.Series(0., index=solar_zenith.index)
 
     # Determining the lower limit when solar zenith is < 75
     lower_limit = lower_limit.mask(solar_zenith < 75,
@@ -699,17 +696,16 @@ def _lower_limit_lorenz(solar_zenith, dni_extra):
     # Setting lower limit as undefined where solar_zenith is not available
     lower_limit[solar_zenith.isna()] = np.nan
 
-    return (lower_limit)
+    return lower_limit
 
 
 def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
-                                   dni_extra=1367):
-    r"""Test for limits on POA global using the equations described in
-    Section 6.1 of [1]_
+                                   dni_extra=1367.):
+    r"""Test for limits on POA global with Lorenz algorithm.
 
-    Criteria from [1]_ are used to determine physically plausible
-    lower and upper bounds. Each value is tested and a value passes if
-    value > lower bound and value < upper bound. Also, steps with
+    Criteria from Section 6.1 of [1]_ are used to determine physically
+    plausible lower and upper bounds. Each value is tested and a value passes
+    if value > lower bound and value < upper bound. Also, steps with
     change in magnitude of more than 1000 W/m2 are flagged. Lower bounds are
     constant for all tests. Upper bounds are calculated as
 
@@ -724,7 +720,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
         Solar zenith angle [degrees]
     aoi : Series
         angle of incidence [degrees]
-    dni_extra : float, default 1367
+    dni_extra : float, default 1367.
         normal irradiance at the top of atmosphere [W/m^2]
 
     Returns
@@ -739,7 +735,8 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     -----
     The upper limit for `poa_global` is set to 0 when `solar_zenith` is greater
     than 90 degrees. Missing values of `poa_global`, `solar_zenith`
-    and/or `aoi` will result in a `False` flag.
+    and/or `aoi` will result in a `False` flag.  Also, [1]_ mentions that the
+    proposed limits are for silicon sensors with a tilt of 25°.
 
     References
     ----------
@@ -755,9 +752,6 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
 
     # Initiating a poa_global_limit_int_flag series
     poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
-
-    # Initiating a poa_global_limit_bool_flag series
-    poa_global_limit_bool_flag = pd.Series(True, index=solar_zenith.index)
 
     # Changing the poa_global_flag to 3 when poa_global is above upper
     # limit or below lower limit
@@ -786,7 +780,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     # poa_global_limit_int_flag
     poa_global_limit_bool_flag = poa_global_limit_int_flag == 0
 
-    return (poa_global_limit_bool_flag, poa_global_limit_int_flag)
+    return poa_global_limit_bool_flag, poa_global_limit_int_flag
 
 
 def _upper_ghi_limit_lorenz_flag2(solar_zenith, dni_extra):
@@ -810,7 +804,8 @@ def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
     # Determining the upper limit
     upper_limit_flag3 = np.minimum(
         pd.Series(1.2 * dni_extra, index=solar_zenith.index),
-        1.5 * dni_extra * cosd(solar_zenith))**1.2 + 100
+        1.5 * dni_extra * (cosd(solar_zenith))**1.2 + 100
+        )
 
     # Setting upper limit as 0 when solar zenith is > 90 (night time)
     upper_limit_flag3[solar_zenith > 90] = 0
@@ -821,9 +816,8 @@ def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
     return upper_limit_flag3
 
 
-def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
-    r"""Test for limits on global horizontal irradiance using the equations
-    described in Section 6.1 of [1]_
+def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367.):
+    r"""Test for limits on GHI with Lorenz algorithm.
 
     Criteria from [1]_ are used to determine physically plausible
     lower, upper bounds and step change. Each value is tested and a value
@@ -831,8 +825,9 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     change in magnitude of more than :math:`1000 W/m^{2}` are flagged. Lower
     bounds are constant for all tests. As defined in the paper, there are
     two values of upper bounds calculated:
-    (1) Rare values - Flag 2
-    (2) Extreme values - Flag 3
+
+      #. Rare values - Flag 2
+      #. Extreme values - Flag 3
 
     For Flag 2
 
@@ -867,7 +862,8 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     -----
     The upper limit for `ghi` is set to 0 when `solar_zenith` is greater
     than 90 degrees. Missing values of `ghi` and/or `solar_zenith` will result
-    in a `False` flag.
+    in a `False` flag. Also, [1]_ mentions that the proposed limits are for
+    silicon sensors with a tilt of 25°.
 
     References
     ----------
@@ -887,9 +883,6 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     # Initiating a ghi_limit_int_flag series
     ghi_limit_int_flag = pd.Series(0, index=solar_zenith.index)
 
-    # Initiating a ghi_limit_bool_flag series
-    ghi_limit_bool_flag = pd.Series(True, index=solar_zenith.index)
-
     # Changing the ghi_limit_int_flag to 2 when ghi is above upper_limit_flag2
     ghi_limit_int_flag = ghi_limit_int_flag.mask(
         (ghi > upper_limit_flag2),
@@ -907,7 +900,7 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     # Changing the ghi_limit_int_flag to 3 when the step change in ghi values
     # is more than 1000 W/m2
     ghi_limit_int_flag = ghi_limit_int_flag.mask(
-        (abs(ghi - ghi.shift(1)) > 1000),
+        (ghi.diff().abs() > 1000),
         3
     )
 
@@ -923,4 +916,4 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367):
     # Changing the ghi_limit_bool_flag depending on ghi_limit_int_flag
     ghi_limit_bool_flag = ghi_limit_int_flag == 0
 
-    return (ghi_limit_bool_flag, ghi_limit_int_flag)
+    return ghi_limit_bool_flag, ghi_limit_int_flag
