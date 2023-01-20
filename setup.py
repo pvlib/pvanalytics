@@ -37,7 +37,8 @@ INSTALL_REQUIRES = [
     'pvlib >= 0.9.4',
     'scipy >= 1.4.0',
     'statsmodels >= 0.9.0',
-    'scikit-image >= 0.16.0'
+    'scikit-image >= 0.16.0',
+    'importlib-metadata; python_version < "3.8"',
 ]
 
 DOCS_REQUIRE = [

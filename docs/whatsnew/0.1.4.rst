@@ -15,7 +15,8 @@ Enhancements
 
 Bug Fixes
 ~~~~~~~~~
-
+* ``pvanalytics.__version__`` now correctly reports the version string instead
+  of raising ``AttributeError``. (:pull:`181`)
 
 Requirements
 ~~~~~~~~~~~~
