@@ -1,16 +1,20 @@
-.. _whatsnew_014:
+.. _whatsnew_020:
 
-0.1.4 (TBD)
--------------------------
+0.2.0 (anticipated March 2023)
+------------------------------
 
-Enhancements
-~~~~~~~~~~~~
+Breaking Changes
+~~~~~~~~~~~~~~~~
 * Updated function :py:func:`~pvanalytics.system.infer_orientation_fit_pvwatts`
   to more closely align with the PVWatts v5 methodology. This includes incorporating
   relative airmass and extraterrestrial irradiance into the Perez total irradiance model,
   accounting for array incidence loss (IAM), and including losses in the PVWatts
   inverter model. Additionally, added optional arguments for bounding the azimuth range in
   during least squares optimization. (:issue:`147`, :pull:`180`)
+
+
+Enhancements
+~~~~~~~~~~~~
 
 
 Bug Fixes
@@ -32,3 +36,5 @@ Documentation
 Contributors
 ~~~~~~~~~~~~
 * Kirsten Perry (:ghuser:`kperrynrel`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
