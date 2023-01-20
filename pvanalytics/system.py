@@ -473,6 +473,7 @@ def _power_residuals_from_clearsky(system_params,
         dni, ghi, dhi,
         dni_extra=dni_extra,
         airmass=relative_airmass,
+        albedo=0.2,
         model='perez'
     )
     # Get AOI
