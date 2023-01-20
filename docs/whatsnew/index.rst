@@ -7,7 +7,7 @@ These are the bug-fixes, new features, and improvements for each release.
 .. toctree::
    :maxdepth: 2
 
-   0.1.4
+   0.2.0
    0.1.3
    0.1.2
    0.1.1
