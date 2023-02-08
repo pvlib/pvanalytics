@@ -229,13 +229,16 @@ def power_or_irradiance(series, outliers=None,
     )
     return ~night_corrected_edges
 
-def get_sunrise_series(series, daytime_mask):
+def get_sunrise_series(daytime_mask):
     """
-    Calculate sunrise for each day in the time series
+    Calculate sunrise for each day in the time series, based on the daytime
+    mask output of :py:func:`pvanalytics.features.daytime.power_or_irradiance`.
+    These sunrise values can later be compared to simulated sunrise/sunset
+    data at a particular location to determine the presence of time shifts
+    in the time series.
+    
     Parameters
     ----------
-    time_series: Pandas datetime series of measured data (can be irradiance,
-                                                          power, or energy)
     daytime_mask: Pandas series of boolean masks for day/night periods.
         Same datetime index as time_series object.
 
@@ -252,21 +255,25 @@ def get_sunrise_series(series, daytime_mask):
     """
     day_night_changes = daytime_mask.groupby(
         daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
-    #Get the first 'day' mask for each day in the series; proxy for sunrise
+    # Get the first 'day' mask for each day in the series, which acts as a
+    # proxy for sunrise
     sunrise_series = pd.Series(daytime_mask[(daytime_mask) &
                                             (day_night_changes)].index)
-    sunrise_series = pd.Series(sunrise_series.groupby(sunrise_series.dt.date).min(),
-                              index= sunrise_series.dt.date).drop_duplicates()
+    sunrise_series = pd.Series(sunrise_series.groupby(
+        sunrise_series.dt.date).min(),
+        index= sunrise_series.dt.date).drop_duplicates()
     return sunrise_series
 
-def get_sunset_series(series, daytime_mask):
+def get_sunset_series(daytime_mask):
     """
-    Calculate sunset for each day in the time series
+    Calculate sunset for each day in the time series, based on the daytime
+    mask output of :py:func:`pvanalytics.features.daytime.power_or_irradiance`.
+    These sunset values can later be compared to simulated sunrise/sunset
+    data at a particular location to determine the presence of time shifts
+    in the time series.
     
     Parameters
     ----------
-    time_series: Pandas datetime series of measured data (can be irradiance,
-                                                          power, or energy)
     daytime_mask: Pandas series of boolean masks for day/night periods.
         Same datetime index as time_series object.
 
@@ -283,8 +290,7 @@ def get_sunset_series(series, daytime_mask):
     """
     day_night_changes = daytime_mask.groupby(
         daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
-    # Get the sunset value for each day; this is the first nighttime period
-    # after sunrise  
+    # Calculate sunset as the first nighttime period after sunrise  
     sunset_series = pd.Series(daytime_mask[~(daytime_mask) &
                                            (day_night_changes)].index)
     sunset_series = pd.Series(sunset_series.groupby(
