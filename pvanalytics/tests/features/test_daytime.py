@@ -182,3 +182,11 @@ def test_daytime_variable(clearsky_january):
         clearsky_january['ghi'],
         daytime.power_or_irradiance(ghi)
     )
+
+
+def test_get_sunset_series():
+    pass
+
+
+def test_get_sunrise_series():
+    pass
