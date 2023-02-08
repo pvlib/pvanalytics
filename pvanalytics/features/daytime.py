@@ -228,3 +228,66 @@ def power_or_irradiance(series, outliers=None,
         correction_window
     )
     return ~night_corrected_edges
+
+def get_sunrise_series(series, daytime_mask):
+    """
+    Calculate sunrise for each day in the time series
+    Parameters
+    ----------
+    time_series: Pandas datetime series of measured data (can be irradiance,
+                                                          power, or energy)
+    daytime_mask: Pandas series of boolean masks for day/night periods.
+        Same datetime index as time_series object.
+
+    Returns
+    -------
+    sunrise_series: Pandas series of the sunrise datetimes for each day
+        in the time series.
+
+    Notes
+    -----
+
+    Derived from the PVFleets QA Analysis project.
+
+    """
+    day_night_changes = daytime_mask.groupby(
+        daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
+    #Get the first 'day' mask for each day in the series; proxy for sunrise
+    sunrise_series = pd.Series(daytime_mask[(daytime_mask) &
+                                            (day_night_changes)].index)
+    sunrise_series = pd.Series(sunrise_series.groupby(sunrise_series.dt.date).min(),
+                              index= sunrise_series.dt.date).drop_duplicates()
+    return sunrise_series
+
+def get_sunset_series(series, daytime_mask):
+    """
+    Calculate sunset for each day in the time series
+    
+    Parameters
+    ----------
+    time_series: Pandas datetime series of measured data (can be irradiance,
+                                                          power, or energy)
+    daytime_mask: Pandas series of boolean masks for day/night periods.
+        Same datetime index as time_series object.
+
+    Returns
+    -------
+    sunset_series: Pandas series of the sunset datetimes for each day in
+        the time series.
+
+    Notes
+    -----
+
+    Derived from the PVFleets QA Analysis project.
+
+    """
+    day_night_changes = daytime_mask.groupby(
+        daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
+    # Get the sunset value for each day; this is the first nighttime period
+    # after sunrise  
+    sunset_series = pd.Series(daytime_mask[~(daytime_mask) &
+                                           (day_night_changes)].index)
+    sunset_series = pd.Series(sunset_series.groupby(
+        sunset_series.dt.date).max(), index=
+        sunset_series.dt.date).drop_duplicates()
+    return sunset_series
