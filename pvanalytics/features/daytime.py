@@ -113,7 +113,8 @@ def power_or_irradiance(series, outliers=None,
                         clipping=None, freq=None,
                         correction_window=31, hours_min=5,
                         day_length_difference_max=30,
-                        day_length_window=14):
+                        day_length_window=14,
+                        nullify_repeat_count=None):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, a time is
@@ -174,6 +175,10 @@ def power_or_irradiance(series, outliers=None,
         The length of the rolling window used for calculating the
         median length of the day when correcting errors in the morning
         or afternoon. [days]
+    nullify_repeat_count : int, default None
+        The cutoff number of repeat subsequent readings in a day-night
+        masking sequence, where sequences containing a lower repeat value
+        count are nullified and forward-filled day-night mask sequence.
 
     Returns
     -------
@@ -212,6 +217,17 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
+    # Nullify cases where the classification lasts less than 10 minutes or 
+    # lasts only two subsequent values (whichever is the smallest time period)
+    night_duplicates = _run_lengths(night)
+    if nullify_repeat_count is None:
+        if minutes_per_value<5:
+            nullify_repeat_count = 10
+        else:
+            nullify_repeat_count = 2
+    night.loc[night_duplicates <= nullify_repeat_count] = np.nan
+    # Forward fill NaN's
+    night = night.ffill()
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
@@ -228,72 +244,3 @@ def power_or_irradiance(series, outliers=None,
         correction_window
     )
     return ~night_corrected_edges
-
-def get_sunrise_series(daytime_mask):
-    """
-    Calculate sunrise for each day in the time series, based on the daytime
-    mask output of :py:func:`pvanalytics.features.daytime.power_or_irradiance`.
-    These sunrise values can later be compared to simulated sunrise/sunset
-    data at a particular location to determine the presence of time shifts
-    in the time series.
-    
-    Parameters
-    ----------
-    daytime_mask: Pandas series of boolean masks for day/night periods.
-        Same datetime index as time_series object.
-
-    Returns
-    -------
-    sunrise_series: Pandas series of the sunrise datetimes for each day
-        in the time series.
-
-    Notes
-    -----
-
-    Derived from the PVFleets QA Analysis project.
-
-    """
-    day_night_changes = daytime_mask.groupby(
-        daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
-    # Get the first 'day' mask for each day in the series, which acts as a
-    # proxy for sunrise
-    sunrise_series = pd.Series(daytime_mask[(daytime_mask) &
-                                            (day_night_changes)].index)
-    sunrise_series = pd.Series(sunrise_series.groupby(
-        sunrise_series.dt.date).min(),
-        index= sunrise_series.dt.date).drop_duplicates()
-    return sunrise_series
-
-def get_sunset_series(daytime_mask):
-    """
-    Calculate sunset for each day in the time series, based on the daytime
-    mask output of :py:func:`pvanalytics.features.daytime.power_or_irradiance`.
-    These sunset values can later be compared to simulated sunrise/sunset
-    data at a particular location to determine the presence of time shifts
-    in the time series.
-    
-    Parameters
-    ----------
-    daytime_mask: Pandas series of boolean masks for day/night periods.
-        Same datetime index as time_series object.
-
-    Returns
-    -------
-    sunset_series: Pandas series of the sunset datetimes for each day in
-        the time series.
-
-    Notes
-    -----
-
-    Derived from the PVFleets QA Analysis project.
-
-    """
-    day_night_changes = daytime_mask.groupby(
-        daytime_mask.index.date).apply(lambda x: x.ne(x.shift().ffill()))
-    # Calculate sunset as the first nighttime period after sunrise  
-    sunset_series = pd.Series(daytime_mask[~(daytime_mask) &
-                                           (day_night_changes)].index)
-    sunset_series = pd.Series(sunset_series.groupby(
-        sunset_series.dt.date).max(), index=
-        sunset_series.dt.date).drop_duplicates()
-    return sunset_series
