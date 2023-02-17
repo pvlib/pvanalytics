@@ -76,9 +76,13 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # the day/night boundary at one end of the day - sunrise or sunset
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
-    day_length = night.groupby(night.cumsum()).transform(
-        lambda x: len(x) * minutes_per_value
-    )
+    # day_length = night.groupby(night.cumsum()).transform(
+    #     lambda x: len(x) * minutes_per_value
+    # )
+    day_periods = (~night).astype(int)
+    day_length = day_periods.groupby(
+        day_periods.index.date).transform('sum') * minutes_per_value
+     
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
@@ -221,7 +225,7 @@ def power_or_irradiance(series, outliers=None,
     # lasts only two subsequent values (whichever is the smallest time period)
     night_duplicates = _run_lengths(night)
     if nullify_repeat_count is None:
-        if minutes_per_value<5:
+        if minutes_per_value < 5:
             nullify_repeat_count = 10
         else:
             nullify_repeat_count = 2
