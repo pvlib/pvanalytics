@@ -21,11 +21,12 @@ Bug Fixes
 ~~~~~~~~~
 * ``pvanalytics.__version__`` now correctly reports the version string instead
   of raising ``AttributeError``. (:pull:`181`)
+* Compatibility with pandas 2.0.0 (:pull:`185`)
 
 Requirements
 ~~~~~~~~~~~~
 * Advance minimum ``pvlib`` to 0.9.4, ``numpy`` to 0.16.0,
-  ``pandas`` to 0.25.0, and ``scipy`` to 1.4.0. (:pull:`179`)
+  ``pandas`` to 1.0.0, and ``scipy`` to 1.4.0. (:pull:`179`, :pull:`185`)
 
 Documentation
 ~~~~~~~~~~~~~
@@ -38,3 +39,4 @@ Contributors
 * Kirsten Perry (:ghuser:`kperrynrel`)
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
+* Abhishek Parikh (:ghuser:`abhisheksparikh`)
