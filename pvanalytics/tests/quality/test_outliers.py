@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import outliers
 
 

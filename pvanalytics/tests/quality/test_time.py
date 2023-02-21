@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 import pytest
 import pandas as pd
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import time
 from ..conftest import requires_ruptures
 
