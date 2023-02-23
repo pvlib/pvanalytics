@@ -228,3 +228,78 @@ def power_or_irradiance(series, outliers=None,
         correction_window
     )
     return ~night_corrected_edges
+
+
+def get_sunrise(daytime_mask_series, data_alignment='L'):
+    """
+    Using the outputs of power_or_irradiance(), derive sunrise values for
+    each day in the associated time series.
+    
+    Parameters
+    ----------
+    daytime_mask_series  : Series
+        Boolean series delineating night periods from day periods, where
+        day is True and night is False.
+    
+    data_alignment  : String, default 'L'
+        The data alignment of the series (left-aligned or right-aligned). Data
+        alignment affects the value selected as sunrise. Options are 'L' (left-
+        aligned) or 'R' (right-aligned)
+
+    Returns
+    -------
+    Series
+
+    Notes
+    -----
+    
+    """
+    day_night_changes = daytime_mask_series.groupby(
+        daytime_mask_series.index.date).apply(lambda x:
+                                              x.ne(x.shift().ffill()))
+    #Get the first 'day' mask for each day in the series; proxy for sunrise
+    sunrise_series = pd.Series(daytime_mask_series[(daytime_mask_series) &
+                                            (day_night_changes)].index)
+    sunrise_series = pd.Series(
+        sunrise_series.groupby(sunrise_series.dt.date).min(),
+        index= sunrise_series.dt.date).drop_duplicates()
+    return sunrise_series
+
+
+
+def get_sunset(daytime_mask_series, data_alignment='L'):
+    """
+    Using the outputs of power_or_irradiance(), derive sunset values for
+    each day in the associated time series.
+    
+    Parameters
+    ----------
+    daytime_mask_series  : Series
+        Boolean series delineating night periods from day periods, where
+        day is True and night is False.
+
+    data_alignment  : String, default 'L'
+        The data alignment of the series (left-aligned or right-aligned). Data
+        alignment affects the value selected as sunrise. Options are 'L' (left-
+        aligned) or 'R' (right-aligned)
+
+    Returns
+    -------
+    Series
+
+    Notes
+    -----    
+    """
+    day_night_changes = daytime_mask_series.groupby(
+        daytime_mask_series.index.date).apply(lambda x:
+                                              x.ne(x.shift().ffill()))
+    # Get the sunset value for each day; this is the first nighttime period
+    # after sunrise  
+    sunset_series = pd.Series(daytime_mask_series[~(daytime_mask_series) &
+                                           (day_night_changes)].index)
+    sunset_series = pd.Series(sunset_series.groupby(
+        sunset_series.dt.date).max(),
+        index= sunset_series.dt.date).drop_duplicates()
+    return sunset_series
+    
+
