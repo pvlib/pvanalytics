@@ -257,13 +257,21 @@ def get_sunrise(daytime_mask_series, data_alignment='L'):
     day_night_changes = daytime_mask_series.groupby(
         daytime_mask_series.index.date).apply(lambda x:
                                               x.ne(x.shift().ffill()))
-    #Get the first 'day' mask for each day in the series; proxy for sunrise
-    sunrise_series = pd.Series(daytime_mask_series[(daytime_mask_series) &
-                                            (day_night_changes)].index)
-    sunrise_series = pd.Series(
-        sunrise_series.groupby(sunrise_series.dt.date).min(),
-        index= sunrise_series.dt.date).drop_duplicates()
-    return sunrise_series
+    #For left-aligned data, we want the first 'day' mask for each day in
+    # the series; this will act as a proxy for sunrise
+    if data_alignment == 'L':
+        sunrise_series = pd.Series(
+            daytime_mask_series[(daytime_mask_series) &
+                                (day_night_changes)].index)
+        sunrise_series = pd.Series(
+            sunrise_series.groupby(sunrise_series.dt.date).min(),
+            index= sunrise_series.dt.date).drop_duplicates()
+        return sunrise_series
+    elif data_alignment == 'R':
+        pass
+    else:
+        # Throw an error if right or left-alignment are not declared
+        pass
 
 
 
@@ -293,13 +301,19 @@ def get_sunset(daytime_mask_series, data_alignment='L'):
     day_night_changes = daytime_mask_series.groupby(
         daytime_mask_series.index.date).apply(lambda x:
                                               x.ne(x.shift().ffill()))
-    # Get the sunset value for each day; this is the first nighttime period
-    # after sunrise  
-    sunset_series = pd.Series(daytime_mask_series[~(daytime_mask_series) &
-                                           (day_night_changes)].index)
-    sunset_series = pd.Series(sunset_series.groupby(
-        sunset_series.dt.date).max(),
-        index= sunset_series.dt.date).drop_duplicates()
-    return sunset_series
+    # Get the sunset value for each day. For left-aligned data, this is the
+    # first nighttime period after sunrise  
+    if data_alignment == 'L':
+        sunset_series = pd.Series(daytime_mask_series[~(daytime_mask_series) &
+                                               (day_night_changes)].index)
+        sunset_series = pd.Series(sunset_series.groupby(
+            sunset_series.dt.date).max(),
+            index= sunset_series.dt.date).drop_duplicates()
+        return sunset_series
+    elif data_alignment == 'R':
+        pass
+    else:
+        # Throw an error if right or left-alignment are not declared
+        pass
     
 
