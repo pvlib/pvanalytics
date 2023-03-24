@@ -82,7 +82,7 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     day_periods = (~night).astype(int)
     day_length = day_periods.groupby(
         day_periods.index.date).transform('sum') * minutes_per_value
-     
+
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
@@ -221,7 +221,7 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
-    # Nullify cases where the classification lasts less than 10 minutes or 
+    # Nullify cases where the classification lasts less than 10 minutes or
     # lasts only two subsequent values (whichever is the smallest time period)
     night_duplicates = _run_lengths(night)
     if nullify_repeat_count is None:
