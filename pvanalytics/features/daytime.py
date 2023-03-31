@@ -218,17 +218,13 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
-    # Nullify cases where the classification lasts less than 10 minutes or
-    # lasts only two subsequent values (whichever is the smallest time period)
+    # Nullify cases where the classification lasts 30 minutes or less
     night_duplicates = _run_lengths(night)
     if nullify_repeat_count is None:
-        if minutes_per_value < 5:
-            nullify_repeat_count = 10
-        else:
-            nullify_repeat_count = 2
+        nullify_repeat_count = int(30 / minutes_per_value) 
     night.loc[night_duplicates <= nullify_repeat_count] = np.nan
-    # Forward fill NaN's
-    night = night.ffill()
+    # Forward fill and then back fill NaN's
+    night = night.ffill().bfill()
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
