@@ -76,9 +76,6 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # the day/night boundary at one end of the day - sunrise or sunset
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
-    # day_length = night.groupby(night.cumsum()).transform(
-    #     lambda x: len(x) * minutes_per_value
-    # )
     day_periods = (~night).astype(int)
     day_length = day_periods.groupby(
         day_periods.index.date).transform('sum') * minutes_per_value
