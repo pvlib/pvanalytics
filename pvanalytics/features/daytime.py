@@ -108,7 +108,7 @@ def _freqstr_to_minutes(freqstr):
 
 
 def power_or_irradiance(series, outliers=None,
-                        low_value_threshold=0.003,
+                        low_value_threshold=0.005,
                         low_median_threshold=0.0015,
                         low_diff_threshold=0.0005, median_days=7,
                         clipping=None, freq=None,
@@ -143,7 +143,7 @@ def power_or_irradiance(series, outliers=None,
     outliers : Series, optional
         Boolean time series with True for values in `series` that are
         outliers.
-    low_value_threshold : float, default 0.003
+    low_value_threshold : float, default 0.005
         Maximum normalized power or irradiance value for a time to be
         considered night.
     low_median_threshold : float, default 0.0015
@@ -206,7 +206,6 @@ def power_or_irradiance(series, outliers=None,
         days=median_days,
         f=pd.core.window.RollingGroupby.median
     )
-
     # Night-time if two of the following are satisfied:
     # - Near-zero value
     # - Near-zero first-order derivative
