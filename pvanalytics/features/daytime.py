@@ -77,9 +77,8 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
     day_periods = (~night).astype(int)
-    day_length = day_periods.groupby(
-        day_periods.index.date).transform('sum') * minutes_per_value
-
+    day_length = 1 + day_periods.groupby(
+        night.cumsum()).transform('sum') * minutes_per_value
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
@@ -222,7 +221,7 @@ def power_or_irradiance(series, outliers=None,
     if nullify_repeat_count is None:
         nullify_repeat_count = int(30 / minutes_per_value)
     night.loc[night_duplicates <= nullify_repeat_count] = np.nan
-    # Forward fill and then back fill NaN's
+    # Forward fill NaN's
     night = night.ffill()
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
