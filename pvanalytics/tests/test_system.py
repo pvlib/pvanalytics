@@ -12,9 +12,8 @@ def summer_times():
     """One hour time stamps from May 1 through September 30, 2020 in GMT+7"""
     return pd.date_range(
         start='2020-5-1',
-        end='2020-10-1',
+        end='2020-09-30 23:00',
         freq='H',
-        closed='left',
         tz='Etc/GMT+7'
     )
 
