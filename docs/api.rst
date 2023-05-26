@@ -213,9 +213,9 @@ the quality check.
         Algorithm for Surface Radiation Measurements, The Open Atmospheric
         Science Journal 2, pp. 23-37, 2008.
 
-.. [2]  Elke Lorenz et al., High resolution measurement network of global 
+.. [2]  E. Lorenz et al., High resolution measurement network of global 
         horizontal and tilted solar irradiance in southern Germany with a new
-        quality control scheme, Solar Energy, Volume 231, 2022, Pages 593-606,
+        quality control scheme, Solar Energy, Volume 231, pp. 593-606, 2022.
         ISSN 0038-092X, https://doi.org/10.1016/j.solener.2021.11.023.
 
 Features
