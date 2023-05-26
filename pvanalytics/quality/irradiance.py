@@ -749,7 +749,7 @@ def _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra):
 
 
 def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
-    r"""Test for limits on GHI with Lorenz algorithm.
+    r"""Test for limits on GHI with pvlive algorithm.
 
     Criteria from [1]_ are used to determine physically plausible
     lower, upper bounds and step change. Each value is tested and a value
