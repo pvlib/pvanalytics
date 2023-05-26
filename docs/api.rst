@@ -76,21 +76,21 @@ calculate missing data fields.
 
    quality.irradiance.calculate_component_sum_series
 
-The ``check_poa_global_limits_lorenz`` function flags the global plane of array
+The ``check_poa_global_limits_pvlive`` function flags the global plane of array
 irradiance measurements that are outside the limits described in [2]_.
 
 .. autosummary::
    :toctree: generated/
 
-   quality.irradiance.check_poa_global_limits_lorenz
+   quality.irradiance.check_poa_global_limits_pvlive
 
-The ``check_ghi_limits_lorenz`` function flags the global horizontal irradiance
+The ``check_ghi_limits_pvlive`` function flags the global horizontal irradiance
 measurements that are outside the limits described in [2]_.
 
 .. autosummary::
    :toctree: generated/
 
-   quality.irradiance.check_ghi_limits_lorenz
+   quality.irradiance.check_ghi_limits_pvlive
 
 Gaps
 ----

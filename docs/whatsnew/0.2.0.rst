@@ -15,7 +15,8 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
-
+* Added function :py:func:`~pvanalytics.quality.irradiance.check_poa_global_limits_pvlive`
+  to test for limits on POA global and GHI with pvlive algorithm (:issue:`123`, :pull:`167`)
 
 Bug Fixes
 ~~~~~~~~~

@@ -594,7 +594,7 @@ def calculate_component_sum_series(solar_zenith,
                            solar_zenith, zenith_limit)
 
 
-def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
+def _upper_poa_global_limit_pvlive(aoi, solar_zenith, dni_extra):
     r"""Function to calculate the upper limit of poa_global
     """
     # Changing aoi to 90 degrees when solar zenith is greater than 90 (sun
@@ -615,7 +615,7 @@ def _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra):
     return upper_limit
 
 
-def _lower_limit_lorenz(solar_zenith, dni_extra):
+def _lower_limit_pvlive(solar_zenith, dni_extra):
     r"""Function to calculate the lower limit of poa_global and ghi
     """
     # Setting the lower_limit at 0.
@@ -631,7 +631,7 @@ def _lower_limit_lorenz(solar_zenith, dni_extra):
     return lower_limit
 
 
-def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
+def check_poa_global_limits_pvlive(poa_global, solar_zenith, aoi,
                                    dni_extra=1367.):
     r"""Test for limits on POA global with Lorenz algorithm.
 
@@ -679,8 +679,8 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
            https://doi.org/10.1016/j.solener.2021.11.023.
     """
     # Finding the upper and lower limit
-    upper_limit = _upper_poa_global_limit_lorenz(aoi, solar_zenith, dni_extra)
-    lower_limit = _lower_limit_lorenz(solar_zenith, dni_extra)
+    upper_limit = _upper_poa_global_limit_pvlive(aoi, solar_zenith, dni_extra)
+    lower_limit = _lower_limit_pvlive(solar_zenith, dni_extra)
 
     # Initiating a poa_global_limit_int_flag series
     poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
@@ -715,7 +715,7 @@ def check_poa_global_limits_lorenz(poa_global, solar_zenith, aoi,
     return poa_global_limit_bool_flag, poa_global_limit_int_flag
 
 
-def _upper_ghi_limit_lorenz_flag2(solar_zenith, dni_extra):
+def _upper_ghi_limit_pvlive_flag2(solar_zenith, dni_extra):
     r"""Function to calculate the upper limit of ghi for Flag 2
     """
     # Determining the upper limit
@@ -730,7 +730,7 @@ def _upper_ghi_limit_lorenz_flag2(solar_zenith, dni_extra):
     return upper_limit_flag2
 
 
-def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
+def _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra):
     r"""Function to calculate the upper limit of ghi for Flag 3
     """
     # Determining the upper limit
@@ -748,7 +748,7 @@ def _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra):
     return upper_limit_flag3
 
 
-def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367.):
+def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
     r"""Test for limits on GHI with Lorenz algorithm.
 
     Criteria from [1]_ are used to determine physically plausible
@@ -806,11 +806,11 @@ def check_ghi_limits_lorenz(ghi, solar_zenith, dni_extra=1367.):
            https://doi.org/10.1016/j.solener.2021.11.023.
     """
     # Finding the upper limit for flag 2 and flag 3
-    upper_limit_flag2 = _upper_ghi_limit_lorenz_flag2(solar_zenith, dni_extra)
-    upper_limit_flag3 = _upper_ghi_limit_lorenz_flag3(solar_zenith, dni_extra)
+    upper_limit_flag2 = _upper_ghi_limit_pvlive_flag2(solar_zenith, dni_extra)
+    upper_limit_flag3 = _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra)
 
     # Finding the lower limit for flag 3
-    lower_limit = _lower_limit_lorenz(solar_zenith, dni_extra)
+    lower_limit = _lower_limit_pvlive(solar_zenith, dni_extra)
 
     # Initiating a ghi_limit_int_flag series
     ghi_limit_int_flag = pd.Series(0, index=solar_zenith.index)
