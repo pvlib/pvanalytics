@@ -53,7 +53,23 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'examples']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'pydata_sphinx_theme'
+
+html_theme_options = {
+    "github_url": "https://github.com/pvlib/pvanalytics",
+    "icon_links": [
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/pvanalytics/",
+            "icon": "fab fa-python",
+        },
+    ],
+    # "use_edit_page_button": True,
+    "show_toc_level": 1,
+    "footer_items": ["copyright", "sphinx-version", "sidebar-ethical-ads"],
+    "left_sidebar_end": [],
+}
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -84,7 +100,6 @@ intersphinx_mapping = {
 # settings for sphinx-gallery
 sphinx_gallery_conf = {
     'examples_dirs': ['examples'],  # location of gallery scripts
-    'nested_sections': False,
     'gallery_dirs': ['generated/gallery'],  # location of generated output
     # sphinx-gallery only shows plots from plot_*.py files by default:
     'filename_pattern': re.escape(os.sep),
