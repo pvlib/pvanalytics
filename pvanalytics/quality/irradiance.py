@@ -633,7 +633,7 @@ def _lower_limit_pvlive(solar_zenith, dni_extra):
 
 def check_poa_global_limits_pvlive(poa_global, solar_zenith, aoi,
                                    dni_extra=1367.):
-    r"""Test for limits on POA global with Lorenz algorithm.
+    r"""Test for limits on POA global with pvlive algorithm.
 
     Criteria from Section 6.1 of [1]_ are used to determine physically
     plausible lower and upper bounds. Each value is tested and a value passes
