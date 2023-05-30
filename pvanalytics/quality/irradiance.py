@@ -651,9 +651,9 @@ def check_poa_global_limits_pvlive(poa_global, solar_zenith, aoi,
     solar_zenith : Series
         Solar zenith angle [degrees]
     aoi : Series
-        angle of incidence [degrees]
+        Angle of incidence [degrees]
     dni_extra : float, default 1367.
-        normal irradiance at the top of atmosphere [W/m^2]
+        Normal irradiance at the top of atmosphere [W/m^2]
 
     Returns
     -------
