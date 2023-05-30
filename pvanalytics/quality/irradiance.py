@@ -661,7 +661,7 @@ def check_poa_global_limits_pvlive(poa_global, solar_zenith, aoi,
         True for each value that is physically possible.
     poa_global_limit_int_flag : Series
         Series of integers representing the flag numbers described in the
-        literature. [1]_
+        [1]_.
 
     Notes
     -----
