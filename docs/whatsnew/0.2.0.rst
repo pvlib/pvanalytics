@@ -33,6 +33,8 @@ Documentation
 ~~~~~~~~~~~~~
 * Online docs now use ``pydata-sphinx-theme`` instead of the built-in
   ``alabaster`` theme. (:issue:`176`, :pull:`178`)
+* Added a gallery page for :py:func:`~pvanalytics.quality.time.shifts_ruptures`.
+  (:pull:`192`)
 
 Testing
 ~~~~~~~
