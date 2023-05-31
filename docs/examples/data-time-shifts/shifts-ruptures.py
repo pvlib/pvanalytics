@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Typically this process would be applied to measured data with possibly
 # untrustworthy timestamps.  However, for instructional purposes here,
 # we'll create an artificial example dataset that contains a time shift
-# due to DST.  
+# due to DST.
 
 # use a time zone (US/Eastern) that is affected by DST.
 # Etc/GMT+5 is the corresponding local standard time zone.
@@ -51,11 +51,15 @@ grouper = daytime_timestamps.resample('d')
 sunrise_timestamps = grouper.first()
 sunset_timestamps = grouper.last()
 
+
 def ts_to_minutes(ts):
     # convert timestamps to minutes since midnight
     return ts.dt.hour * 60 + ts.dt.minute + ts.dt.second / 60
 
-midday_minutes = (ts_to_minutes(sunrise_timestamps) + ts_to_minutes(sunset_timestamps)) / 2
+
+midday_minutes = (
+    ts_to_minutes(sunrise_timestamps) + ts_to_minutes(sunset_timestamps)
+) / 2
 
 # %%
 # Now, calculate the expected timing of solar noon at this location for each
@@ -70,7 +74,7 @@ transit_minutes = ts_to_minutes(sp['transit'])
 # %%
 # Finally, ask ruptures if it sees any change points in the difference between
 # these two daily event timings, and visualize the result:
-    
+
 is_shifted, shift_amount = shifts_ruptures(midday_minutes, transit_minutes)
 
 fig, axes = plt.subplots(2, 1, sharex=True)
