@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import gaps
 
 
@@ -431,7 +431,7 @@ def test_trim_incomplete_empty():
 def test_trim_daily_index():
     """trim works when data has a daily index."""
     data = pd.Series(True, index=pd.date_range(
-        start='1/1/2020', end='3/1/2020', freq='D', closed='left'))
+        start='1/1/2020', end='2/29/2020', freq='D'))
     assert gaps.trim(data).all()
     data.iloc[0:8] = False
     data.iloc[9] = False
@@ -533,9 +533,7 @@ def test_completeness_score_reindex():
     keep_index=True"""
     data = pd.Series(
         1,
-        index=pd.date_range(
-            start='1/1/2020', freq='15T', end='1/4/2020', closed='left'
-        )
+        index=pd.date_range(start='1/1/2020', freq='15T', end='1/3/2020 23:45')
     )
     data.loc[pd.date_range(start='1/1/2020', freq='30T', periods=48)] = np.nan
     data.loc[pd.date_range(start='1/3/2020', freq='1H', periods=24)] = np.nan
@@ -553,14 +551,13 @@ def test_completeness_score_reindex():
 def test_complete_threshold_zero():
     """minimum_completeness of 0 returns all True regardless of data."""
     ten_days = pd.date_range(
-        start='01/01/2020', freq='15T', end='1/10/2020', closed='left')
+        start='01/01/2020', freq='15T', end='1/09/2020 23:45')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(True, index=data.index),
         gaps.complete(data, minimum_completeness=0)
     )
-    data[pd.date_range(
-        start='01/01/2020', freq='1D', end='1/10/2020', closed='left')] = 1.0
+    data[pd.date_range(start='01/01/2020', freq='1D', end='1/09/2020')] = 1.0
     data.dropna()
     assert_series_equal(
         pd.Series(True, index=data.index),
@@ -577,7 +574,7 @@ def test_complete_threshold_one():
     """If minimum_completeness=1 then any missing data on a day means all
     data for the day is flagged False."""
     ten_days = pd.date_range(
-        start='01/01/2020', freq='15T', end='01/10/2020', closed='left')
+        start='01/01/2020', freq='15T', end='01/09/2020 23:45')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(False, index=data.index),
@@ -589,8 +586,7 @@ def test_complete_threshold_one():
         gaps.complete(data, minimum_completeness=1.0)
     )
     # remove one data-point per day
-    days = pd.date_range(
-        start='1/1/2020', freq='1D', end='1/10/2020', closed='left')
+    days = pd.date_range(start='1/1/2020', freq='1D', end='1/09/2020')
     data.loc[days] = np.nan
     assert_series_equal(
         pd.Series(False, index=data.index),
@@ -613,17 +609,17 @@ def test_complete_threshold_one():
 def test_complete():
     """Test gaps.complete with varying amounts of missing data."""
     ten_days = pd.date_range(
-        start='1/1/2020', freq='H', end='1/10/2020', closed='left')
+        start='1/1/2020', freq='H', end='1/10/2020 23:00')
     data = pd.Series(index=ten_days, dtype='float64')
     data.loc['1/1/2020'] = 1.0
     day_two_values = pd.date_range(
-        start='1/2/2020', freq='2H', end='1/3/2020', closed='left')
+        start='1/2/2020', freq='2H', end='1/2/2020 23:00')
     data.loc[day_two_values] = 2.0
     day_three_values = pd.date_range(
-        start='1/3/2020', freq='3H', end='1/4/2020', closed='left')
+        start='1/3/2020', freq='3H', end='1/3/2020 23:00')
     data.loc[day_three_values] = 3.0
     day_four_values = pd.date_range(
-        start='1/4/2020', freq='4H', end='1/5/2020', closed='left')
+        start='1/4/2020', freq='4H', end='1/4/2020 23:00')
     data.loc[day_four_values] = 4.0
     data.loc['1/5/2020':] = 5.0
 

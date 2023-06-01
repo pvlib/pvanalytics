@@ -7,7 +7,7 @@ You are free to strikethrough any checklist items that do not apply or to add ad
 - [ ] Added new API functions to `docs/api.rst`.
 - [ ] Non-API functions clearly documented with docstrings or comments as necessary.
 - [ ] Adds description and name entries in the appropriate "what's new" file 
-      in [`docs/whatsnew`](https://github.com/pvlib/pvanalytics/tree/master/docs/whatsnew) 
+      in [`docs/whatsnew`](https://github.com/pvlib/pvanalytics/tree/main/docs/whatsnew) 
       for all changes. Includes link to the GitHub Issue with `` :issue:`num` `` 
       or this Pull Request with `` :pull:`num` ``. Includes contributor name 
       and/or GitHub username (link with `` :ghuser:`user` ``).

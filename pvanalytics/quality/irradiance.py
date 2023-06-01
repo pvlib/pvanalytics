@@ -550,73 +550,6 @@ def _fill_nighttime(component, component_sum_df, fill_night_value,
     return series
 
 
-def _complete_irradiance(solar_zenith,
-                         ghi=None,
-                         dhi=None,
-                         dni=None,
-                         dni_clear=None):
-    r"""
-    TODO: This method exists in the pvlib-python library. Once a new PVLib
-    release or pre-release is cut, this private function can be deleted and
-    the associated PVLib function can be directly leveraged.
-
-    Use the component sum equations to calculate the missing series, using
-    the other available time series. One of the three parameters (ghi, dhi,
-    dni) is passed as None, and the other associated series passed are used to
-    calculate the missing series value.
-    The "component sum" or "closure" equation relates the three
-    primary irradiance components as follows:
-
-    .. math::
-
-          GHI = DHI + DNI * \cos(\theta_z)
-
-    Parameters
-    ----------
-    solar_zenith : Series
-        Zenith angles in decimal degrees, with datetime index.
-        Angles must be >=0 and <=180. Must have the same datetime index
-        as ghi, dhi, and dni series, when available.
-    ghi : Series, optional
-        Pandas series of dni data, with datetime index. Must have the same
-        datetime index as dni, dhi, and zenith series, when available.
-    dhi : Series, optional
-        Pandas series of dni data, with datetime index. Must have the same
-        datetime index as ghi, dni, and zenith series, when available.
-    dni : Series, optional
-        Pandas series of dni data, with datetime index. Must have the same
-        datetime index as ghi, dhi, and zenith series, when available.
-    dni_clear : Series, optional
-        Pandas series of clearsky dni data. Must have the same datetime index
-        as `ghi`, `dhi`, `dni`, and `solar_zenith` series, when available. See pvlib-python's
-        [dni](https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni) for details.
-
-    Returns
-    -------
-    component_sum_df : Dataframe
-        Pandas series of 'ghi', 'dhi', and 'dni' columns with datetime index
-    """  # noqa: E501
-    if ghi is not None and dhi is not None and dni is None:
-        dni = pvlib.irradiance.dni(ghi, dhi, solar_zenith,
-                                   clearsky_dni=dni_clear,
-                                   clearsky_tolerance=1.1)
-    elif dni is not None and dhi is not None and ghi is None:
-        ghi = (dhi + dni * cosd(solar_zenith))
-    elif dni is not None and ghi is not None and dhi is None:
-        dhi = (ghi - dni * cosd(solar_zenith))
-    else:
-        raise ValueError(
-            "Please check that exactly one of ghi, dhi and dni parameters "
-            "is set to None"
-        )
-    # Merge the outputs into a master dataframe containing 'ghi', 'dhi',
-    # and 'dni' columns
-    component_sum_df = pd.DataFrame({'ghi': ghi,
-                                     'dhi': dhi,
-                                     'dni': dni})
-    return component_sum_df
-
-
 def calculate_component_sum_series(solar_zenith,
                                    ghi=None,
                                    dhi=None,
@@ -658,8 +591,7 @@ def calculate_component_sum_series(solar_zenith,
     dni_clear : Series, optional
         Pandas series of clearsky dni data. Must have the same datetime index
         as `ghi`, `dhi`, `dni`, and `solar_zenith`, when available. See
-        pvlib-python's
-        `dni <https://pvlib-python.readthedocs.io/en/stable/reference/generated/pvlib.irradiance.dni.html#pvlib.irradiance.dni>`_ for details.
+        pvlib-python's :py:func:`pvlib.irradiance.dni` for details.
     zenith_limit: Float
         Solar zenith boundary between night and day, in degrees.
         For calculation of the component sum, `solar_zenith` is set to 90 where
@@ -671,8 +603,7 @@ def calculate_component_sum_series(solar_zenith,
         If a float or int value is passed (np.nan, 0 , -.5, etc.), then
         nighttime values are filled using the fill_night_value parameter.
         If 'equation' is used, nighttime periods are filled using the
-        component sum equation with DNI=0:
-            GHI = 0 + DHI
+        component sum equation with DNI=0: ``GHI = 0 + DHI``
         If None, then the nighttime values are based on the component sum
         equation.
 
@@ -682,8 +613,9 @@ def calculate_component_sum_series(solar_zenith,
         Pandas series of the calculated values, based on the component sum
         equation and corrected for nighttime periods.
     '''  # noqa: E501
-    component_sum_df = _complete_irradiance(solar_zenith, ghi,
-                                            dhi, dni, dni_clear)
+    component_sum_df = pvlib.irradiance.complete_irradiance(solar_zenith, ghi,
+                                                            dhi, dni,
+                                                            dni_clear)
     if ghi is None:
         component = 'GHI'
     elif dhi is None:

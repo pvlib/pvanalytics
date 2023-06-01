@@ -16,7 +16,7 @@ def generate_series():
     df.index = pd.to_datetime(df['timestamp'])
     signal_datetime_index = df['value']
     changepoint_date = df[df['label'] == 1].index[0]
-    df_weekly_resample = df.resample('W').median()['value']
+    df_weekly_resample = df['value'].resample('W').median()
     return (signal_no_index, signal_datetime_index,
             df_weekly_resample, changepoint_date)
 

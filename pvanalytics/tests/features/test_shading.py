@@ -8,8 +8,7 @@ from pvanalytics.features import shading
 def times():
     return pd.date_range(
         start='1/1/2020',
-        end='12/31/2020',
-        closed='left',
+        end='12/31/2020 23:59',
         freq='T',
         tz='MST'
     )

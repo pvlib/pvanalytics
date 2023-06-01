@@ -1,6 +1,6 @@
 """Tests for features.clipping"""
 import pytest
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 import numpy as np
 import pandas as pd
 from pvlib import irradiance, temperature, pvsystem, inverter
@@ -320,7 +320,6 @@ def test_geometric_clipping_midday_clouds(power_pvwatts):
     power = power_pvwatts.resample('15T').asfreq()
     power.loc[power.between_time(
         start_time='17:30', end_time='19:30',
-        include_start=True, include_end=True
     ).index] = list(range(30, 39)) * 31
     clipped = clipping.geometric(power)
     expected = power == power.max()
