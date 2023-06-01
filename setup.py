@@ -79,7 +79,7 @@ setup(
     ext_modules=[],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    maintainer=MAINTAINER,
+    author=AUTHOR,
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     classifiers=CLASSIFIERS,
