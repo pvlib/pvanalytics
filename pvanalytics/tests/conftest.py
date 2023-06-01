@@ -80,8 +80,7 @@ def quadratic():
 def one_year_hourly():
     return pd.date_range(
         start='03/01/2020',
-        end='03/01/2021',
-        closed='left',
+        end='02/28/2021 23:00',
         freq='H',
         tz='Etc/GMT+7'
     )
@@ -92,8 +91,7 @@ def three_days_hourly():
     """Three days with one hour timestamp spacing in Etc/GMT+7"""
     return pd.date_range(
         start='03/01/2020',
-        end='03/04/2020',
-        closed='left',
+        end='03/03/2020 23:00',
         freq='H',
         tz='Etc/GMT+7'
     )

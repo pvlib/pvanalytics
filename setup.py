@@ -32,16 +32,20 @@ TESTS_REQUIRE = [
 ]
 
 INSTALL_REQUIRES = [
-    'numpy >= 1.15.0',
-    'pandas >= 0.24.0, != 1.1.*',
-    'pvlib >= 0.8.0',
-    'scipy >= 1.2.0',
+    'numpy >= 1.16.0',
+    'pandas >= 1.0.0, != 1.1.*',
+    'pvlib >= 0.9.4',
+    'scipy >= 1.4.0',
     'statsmodels >= 0.9.0',
-    'scikit-image >= 0.16.0'
+    'scikit-image >= 0.16.0',
+    'importlib-metadata; python_version < "3.8"',
 ]
 
 DOCS_REQUIRE = [
-    'sphinx == 4.3.1', 'sphinx-gallery', 'matplotlib',
+    'sphinx == 4.5.0',
+    'pydata-sphinx-theme == 0.8.1',
+    'sphinx-gallery',
+    'matplotlib',
 ]
 
 EXTRAS_REQUIRE = {
