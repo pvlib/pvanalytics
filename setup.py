@@ -21,7 +21,7 @@ Source code: https://github.com/pvlib/pvanalytics
 """
 
 DISTNAME = 'pvanalytics'
-AUTHOR = 'PVAnalytics Developers'
+AUTHOR = 'pvanalytics Contributors'
 MAINTAINER_EMAIL = 'pvlib-admin@googlegroups.com'
 LICENSE = 'MIT'
 URL = 'https://github.com/pvlib/pvanalytics'
