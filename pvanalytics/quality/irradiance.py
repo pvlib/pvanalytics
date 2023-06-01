@@ -88,44 +88,6 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     return ghi_limit_flag
 
 
-def check_ghi_lower_limit_nollas(ghi, solar_zenith):
-    r"""Test for lower limit on GHI using empirical limit from Nollas (2023).
-
-    Test is applied to each GHI value. A GHI value passes if value >
-    lower bound. The lower bound is from [1]_ and calculated as:
-
-    .. math::
-        lb = (6.5331 - 0.065502 * solar\_zenith + 0.00018312 * solar\_zenith^{2}) /
-             (1 + 0.01113*solar\_zenith)
-
-    Parameters
-    ----------
-    ghi : Series
-        Global horizontal irradiance in :math:`W/m^2`
-    solar_zenith : Series
-        Solar zenith angle in degrees
-
-    Returns
-    -------
-    Series
-        True where value passes limits test.
-
-    References
-    ----------
-    .. [1] `F. M. Nollas, G. A. Salazar, and C. A. Gueymard, Quality control
-       procedure for 1-minute pyranometric measurements of global and
-       shadowband-based diffuse solar irradiance, Renewable Energy, 202,
-       pp. 40-55, 2023.
-       <https://doi.org/10.1016/j.renene.2022.11.056>`_
-    """
-    ghi_lb = ((6.5331-0.065502*solar_zenith + 0.00018312*solar_zenith**2) /
-              (1 + 0.01113*solar_zenith))
-
-    ghi_lower_limit_flag = quality.util.check_limits(value=ghi, lower_bound=ghi_lb)
-
-    return ghi_lower_limit_flag
-
-
 def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     r"""Test for physical limits on DHI using the QCRad criteria.
 
@@ -393,6 +355,83 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
                              bounds=bounds['low_zenith']))
 
     return consistent_components, diffuse_ratio_limit
+
+
+def _ghi_lower_limit_nollas(solar_zenith):
+    r"""Calculate lower limit for GHI according to Nollas et al.
+
+    See [1]_ for further information.
+
+    .. math::
+        ghi_min = (6.5331 - 0.065502 * solar\_zenith + 0.00018312 * solar\_zenith^{2}) /
+                   (1 + 0.01113*solar\_zenith)
+
+    Parameters
+    ----------
+    solar_zenith : Series
+        Solar zenith angle in degrees
+
+    Returns
+    -------
+    Series
+        Minimum possible GHI in :math:`W/m^2`
+
+    References
+    ----------
+    .. [1] F. M. Nollas, G. A. Salazar, and C. A. Gueymard, Quality control
+       procedure for 1-minute pyranometric measurements of global and
+       shadowband-based diffuse solar irradiance, Renewable Energy, 202,
+       pp. 40-55, 2023.
+       :doi:`10.1016/j.renene.2022.11.056`
+    """  # noqa: E501
+    ghi_min = ((6.5331-0.065502*solar_zenith + 0.00018312*solar_zenith**2) /
+               (1 + 0.01113*solar_zenith))
+
+    # Set limit to nan when the sun is below the horizon
+    ghi_min[solar_zenith >= 90] = np.nan
+
+    return ghi_min
+
+
+def check_ghi_lower_limit_nollas(ghi, solar_zenith):
+    r"""Test for lower limit on GHI using empirical limit from Nollas (2023).
+
+    Test is applied to each GHI value. A GHI value passes if value >
+    lower bound. The lower bound is from [1]_ and calculated as:
+
+    .. math::
+        lb = (6.5331 - 0.065502 * solar\_zenith + 0.00018312 * solar\_zenith^{2}) /
+             (1 + 0.01113*solar\_zenith)
+
+    Parameters
+    ----------
+    ghi : Series
+        Global horizontal irradiance in :math:`W/m^2`
+    solar_zenith : Series
+        Solar zenith angle in degrees
+
+    Returns
+    -------
+    Series
+        False where valuez are below the minimum limit.
+
+    References
+    ----------
+    .. [1] F. M. Nollas, G. A. Salazar, and C. A. Gueymard, Quality control
+       procedure for 1-minute pyranometric measurements of global and
+       shadowband-based diffuse solar irradiance, Renewable Energy, 202,
+       pp. 40-55, 2023.
+       :doi:`10.1016/j.renene.2022.11.056`
+    """  # noqa: E501
+    ghi_lb = _ghi_lower_limit_nollas(solar_zenith)
+
+    ghi_lower_limit_flag = quality.util.check_limits(
+        ghi, lower_bound=ghi_lb, inclusive_lower=False)
+
+    # Set flags to True when ghi_lb is nan (e.g., when solar_zenith>=90)
+    ghi_lower_limit_flag[np.isnan(ghi_lb)] = True
+
+    return ghi_lower_limit_flag
 
 
 def clearsky_limits(measured, clearsky, csi_max=1.1):
