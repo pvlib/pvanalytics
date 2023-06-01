@@ -47,6 +47,14 @@ Irradiance measurements can also be checked for consistency.
 
    quality.irradiance.check_irradiance_consistency_qcrad
 
+The validity of daytime GHI and DHI measurements can also be checked using
+a more restrictive lower limit provided in [2]_.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.check_ghi_lower_limit_nollas
+
 GHI and POA irradiance can be validated against clearsky values to
 eliminate data that is unrealistically high.
 
@@ -196,6 +204,12 @@ the quality check.
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
         Algorithm for Surface Radiation Measurements, The Open Atmospheric
         Science Journal 2, pp. 23-37, 2008.
+        :doi:`10.2174/1874282300802010023`
+.. [2] F. M. Nollas, G. A. Salazar, and C. A. Gueymard, Quality control
+       procedure for 1-minute pyranometric measurements of global and
+       shadowband-based diffuse solar irradiance, Renewable Energy, 202,
+       pp. 40-55, 2023.
+       :doi:`10.1016/j.renene.2022.11.056`
 
 Features
 ========

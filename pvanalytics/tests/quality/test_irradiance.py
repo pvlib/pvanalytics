@@ -179,6 +179,26 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
                         check_names=False)
 
 
+def test_ghi_lower_limit_nollas(irradiance_qcrad):
+    """Test thet minimum GHI is correctly calculated using Nollas equation."""
+    data = irradiance_qcrad
+    actual_ghi = irradiance._ghi_lower_limit_nollas(data['solar_zenith'])
+    expected_ghi = pd.Series([3.548128, 3.548128, 3.548128, 6.5331, 4.7917837,
+                              1.9559971, 1.3039082, np.nan, 6.5331, 6.5331,
+                              1.9559971, 1.3039082, 1.3039082, np.nan])
+    assert_series_equal(actual_ghi, expected_ghi, check_names=False)
+
+
+def test_check_ghi_lower_limit_nollas(irradiance_qcrad):
+    """Test that min GHI is checked correctly."""
+    data = irradiance_qcrad
+    actual_flags = irradiance.check_ghi_lower_limit_nollas(
+        data['ghi'], data['solar_zenith'])
+    expected_flags = pd.Series([0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               dtype=bool)
+    assert_series_equal(actual_flags, expected_flags, check_names=False)
+
+
 @pytest.fixture
 def times():
     """One hour of times at 10 minute frequency.
