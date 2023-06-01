@@ -5,15 +5,15 @@ import numpy as np
 
 def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
                                 label='right', midnight_method='zenith',
-                                aggregation_method='median'):
+                                aggregation_method='median', na_value=0):
     """
-    Apply nighttime correction to irradiance time series.
+    Apply nighttime offset correction to irradiance time series.
 
     Parameters
     ----------
-    irradiance : pd.Series
+    irradiance : Series
         Pandas Series of irradiance data.
-    zenith : pd.Series
+    zenith : Series
         Pandas Series of zenith angles corresponding to the irradiance time
         series.
     sza_night_limit : float, optional
@@ -22,14 +22,17 @@ def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
         Whether the right/start or left/end of the interval is used to label
         the interval. The default is 'right'.
     midnight_method : {'zenith', 'time'}, optional
-        Method for determining midnight. The default is 'zenith'.
+        Method for determining midnight. The default is 'zenith', which assumes
+        midnight corresponds to when zenith angle is at its maximum.
     aggregation_method : {'median', 'mean'}, optional
         Method for calculating nighttime offset. The default is 'median'.
+    fillna : float, optional
+        Offset correction to apply if offset cannot be determined.
 
     Returns
     -------
-    corrected_irradiance : pd.Series
-        Pandas Series of nighttime corrected irradiance.
+    corrected_irradiance : Series
+        Nighttime corrected irradiance.
     """
     # Raise an error if arguments are incorrect
     if label not in ['right', 'left']:
@@ -50,14 +53,14 @@ def nighttime_offset_correction(irradiance, zenith, sza_night_limit=100,
 
     # Calculate nighttime offset (method depends on midnight_method)
     if midnight_method == 'zenith':
-        nighttime_offset = nighttime_irradiance.groupby(day_number_zenith).transform(aggregation_method)
+        nighttime_offset = nighttime_irradiance.groupby(day_number_zenith).transform(aggregation_method)  # noqa:E501
     elif midnight_method == 'time':
-        nighttime_offset = nighttime_irradiance.resample('1d', label=label, closed=label).transform(aggregation_method)
+        nighttime_offset = nighttime_irradiance.resample('1d', label=label, closed=label).transform(aggregation_method)  # noqa:E501
     else:
         raise ValueError("midnight_method must be 'zenith' or 'time'.")
 
     # In case nighttime offset cannot be determined (nan), set it to zero
-    nighttime_offset = nighttime_offset.fillna(0)
+    nighttime_offset = nighttime_offset.fillna(na_value)
     # Calculate corrected irradiance time series
     corrected_irradiance = irradiance - nighttime_offset
     return corrected_irradiance
