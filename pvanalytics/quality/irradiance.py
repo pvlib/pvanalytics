@@ -798,9 +798,9 @@ def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
 
     Notes
     -----
-    The upper limit for `ghi` is set to 0 when `solar_zenith` is greater
+    The upper limits for `ghi` are set to 0 at night when `solar_zenith` is greater
     than 90 degrees. Missing values of `ghi` and/or `solar_zenith` will result
-    in a `False` flag. Also, [1]_ mentions that the proposed limits are for
+    in a `False` plausible value flag. Also, [1]_ mentions that the proposed limits are for
     silicon sensors with a tilt of 25°.
 
     References
