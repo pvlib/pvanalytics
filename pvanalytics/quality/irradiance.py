@@ -760,16 +760,14 @@ def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
      * the step change to the next GHI value is less than the step change limit
         of :math:`1000 W/m^{2}` 
 
-      #. Rare values - Flag 2
-      #. Extreme values - Flag 3
 
-    For Flag 2
+    The upper limit for rare values is
 
     .. math::
         upper\_limit_{\mathbf{Flag\_2}} = 1.2 * dni\_extra * cos(solar\_zenith)
         + 50
 
-    For Flag 3
+    The upper limit for extreme values is
 
     .. math::
         upper\_limit_{\mathbf{Flag\_3}} = min(1.2 * dni\_extra,
