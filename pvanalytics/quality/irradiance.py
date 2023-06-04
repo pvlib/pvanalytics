@@ -751,12 +751,14 @@ def _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra):
 def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
     r"""Test for limits on GHI with pvlive algorithm.
 
-    Criteria from [1]_ are used to determine physically plausible
-    lower, upper bounds and step change. Each value is tested and a value
-    passes if value > lower bound and value < upper bound. Also, steps with
-    change in magnitude of more than :math:`1000 W/m^{2}` are flagged. Lower
-    bounds are constant for all tests. As defined in the paper, there are
-    two values of upper bounds calculated:
+    The pvlive algorithm [1]_ defines a lower bound, two upper bounds (rare and extreme),
+    and a limit on the change between successive GHI values. A value is physically plausible
+    if:
+    
+     * the value is greater than the lower bound
+     * the value is less than both the rare and extreme upper bounds
+     * the step change to the next GHI value is less than the step change limit
+        of :math:`1000 W/m^{2}` 
 
       #. Rare values - Flag 2
       #. Extreme values - Flag 3
