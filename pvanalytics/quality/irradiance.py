@@ -788,7 +788,13 @@ def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
         True for each value that is physically possible.
     ghi_limit_int_flag : Series
         Series of integers representing the flag numbers described in the
-        literature. [1]_
+        literature. [1]_:
+
+        * 0 the value is physically plausible
+        * 1 the value is missing
+        * 2 the value exceeds the rare value upper limit
+        * 3 the value is less than the lower limit, exceeds the extreme value upper limit,
+          or has a step change greater than the step change limit. 
 
     Notes
     -----
