@@ -142,7 +142,7 @@ def power_or_irradiance(series, outliers=None,
     outliers : Series, optional
         Boolean time series with True for values in `series` that are
         outliers.
-    low_value_threshold : float, default 0.005
+    low_value_threshold : float, default 0.003
         Maximum normalized power or irradiance value for a time to be
         considered night.
     low_median_threshold : float, default 0.0015
@@ -178,7 +178,10 @@ def power_or_irradiance(series, outliers=None,
     nullify_repeat_count : int, default None
         The cutoff number of repeat subsequent readings in a day-night
         masking sequence, where sequences containing a lower repeat value
-        count are nullified and forward-filled day-night mask sequence.
+        count are nullified and forward-filled day-night mask sequence. This
+        is done specifically to prevent erroneously labeled periods.
+        If None is passed, the logic nullifies periods where the classification
+        lasts 30 minutes or less.
 
     Returns
     -------
