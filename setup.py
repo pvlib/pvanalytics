@@ -33,7 +33,7 @@ TESTS_REQUIRE = [
 
 INSTALL_REQUIRES = [
     'numpy >= 1.16.0',
-    'pandas >= 0.25.0, != 1.1.*',
+    'pandas >= 1.0.0, != 1.1.*',
     'pvlib >= 0.9.4',
     'scipy >= 1.4.0',
     'statsmodels >= 0.9.0',

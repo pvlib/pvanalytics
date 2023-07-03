@@ -1,5 +1,5 @@
 import pytest
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 import pandas as pd
 from pvlib import pvsystem, modelchain, irradiance
 from pvanalytics.features import orientation

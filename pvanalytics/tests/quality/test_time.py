@@ -3,7 +3,8 @@ from datetime import datetime
 import pytz
 import pytest
 import pandas as pd
-from pandas.util.testing import assert_series_equal
+import numpy as np
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import time
 from ..conftest import requires_ruptures
 
@@ -195,7 +196,7 @@ def test_has_dst_no_dst_in_date_range(albuquerque):
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
         pd.date_range(
-            start='1/1/2020', end='3/1/2020', closed='left',
+            start='1/1/2020', end='2/29/2020 23:59',
             tz='MST', freq=request.param
         )
     )
@@ -207,7 +208,7 @@ def midday(request, albuquerque):
     )
     mid_day = mid_day.dt.hour * 60 + mid_day.dt.minute
     mid_day.index = pd.DatetimeIndex(mid_day.index, tz='MST')
-    return mid_day
+    return mid_day.astype(np.int64)
 
 
 @requires_ruptures
