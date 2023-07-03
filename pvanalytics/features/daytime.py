@@ -76,9 +76,24 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # the day/night boundary at one end of the day - sunrise or sunset
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
-    day_periods = (~night).astype(int)
-    day_length = 1 + day_periods.groupby(
-        night.cumsum()).transform('sum') * minutes_per_value
+    # day_periods = (~night).astype(int)
+    # day_length = 1 + day_periods.groupby(
+    #     night.cumsum()).transform('sum') * minutes_per_value
+    # # remove night time values so they don't interfere with the median
+    # # day length.
+    # day_length.loc[night] = np.nan
+    # day_length_median = day_length.rolling(
+    #     window=str(day_length_window) + 'D'
+    # ).median()
+    # # flag days that are more than 30 minutes shorter than the median
+    # short_days = day_length < (day_length_median - day_length_difference_max)
+    # invalid = short_days.groupby(short_days.index.date).transform(
+    #     lambda day: any(day)
+    # )
+    # return _correct_if_invalid(night, invalid, correction_window)
+    day_length = night.groupby(night.cumsum()).transform(
+        lambda x: len(x) * minutes_per_value
+    )
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
@@ -219,13 +234,13 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
-    # # Nullify cases where the classification lasts 30 minutes or less
-    # night_duplicates = _run_lengths(night)
-    # if nullify_repeat_count is None:
-    #     nullify_repeat_count = int(30 / minutes_per_value)
-    # night.loc[night_duplicates <= nullify_repeat_count] = np.nan
-    # # Forward fill NaN's
-    # night = night.ffill()
+    # Nullify cases where the classification lasts 30 minutes or less
+    night_duplicates = _run_lengths(night)
+    if nullify_repeat_count is None:
+        nullify_repeat_count = int(30 / minutes_per_value)
+    night.loc[night_duplicates <= nullify_repeat_count] = np.nan
+    # Forward fill NaN's
+    night = night.ffill()
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
