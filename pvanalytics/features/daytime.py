@@ -76,24 +76,9 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # the day/night boundary at one end of the day - sunrise or sunset
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
-    # day_periods = (~night).astype(int)
-    # day_length = 1 + day_periods.groupby(
-    #     night.cumsum()).transform('sum') * minutes_per_value
-    # # remove night time values so they don't interfere with the median
-    # # day length.
-    # day_length.loc[night] = np.nan
-    # day_length_median = day_length.rolling(
-    #     window=str(day_length_window) + 'D'
-    # ).median()
-    # # flag days that are more than 30 minutes shorter than the median
-    # short_days = day_length < (day_length_median - day_length_difference_max)
-    # invalid = short_days.groupby(short_days.index.date).transform(
-    #     lambda day: any(day)
-    # )
-    # return _correct_if_invalid(night, invalid, correction_window)
-    day_length = night.groupby(night.cumsum()).transform(
-        lambda x: len(x) * minutes_per_value
-    )
+    day_periods = (~night).astype(int)
+    day_length = 1 + day_periods.groupby(
+        night.cumsum()).transform('sum') * minutes_per_value
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
