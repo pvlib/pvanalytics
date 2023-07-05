@@ -251,6 +251,8 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     Returns
     -------
     Series
+        Series of daily sunrise times, based on the daytime_mask series.
+        This series has the same index as the passed daytime_mask series.
 
     Notes
     -----
@@ -304,6 +306,8 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     Returns
     -------
     Series
+        Series of daily sunset times, based on the daytime_mask series.
+        This series has the same index as the passed daytime_mask series.
 
     Notes
     -----
