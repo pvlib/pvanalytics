@@ -2,7 +2,7 @@
 import warnings
 import pandas as pd
 import numpy as np
-from scipy import stats
+
 
 def spacing(times, freq):
     """Check that the spacing between `times` conforms to `freq`.
