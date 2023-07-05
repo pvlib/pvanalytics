@@ -4,7 +4,7 @@ import pytz
 import pandas as pd
 import numpy as np
 import pytest
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import irradiance
 from ..conftest import DATA_DIR
 
@@ -276,8 +276,7 @@ def test_daily_insolation_limits(albuquerque):
     """Daily insolation limits works with uniform timestamp spacing."""
     three_days = pd.date_range(
         start='1/1/2020',
-        end='1/4/2020',
-        closed='left',
+        end='1/3/2020 23:00',
         freq='H'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
@@ -305,8 +304,7 @@ def test_daily_insolation_limits_uneven(albuquerque):
     """daily_insolation_limits works with uneven timestamp spacing."""
     three_days = pd.date_range(
         start='1/1/2020',
-        end='1/4/2020',
-        closed='left',
+        end='1/3/2020 23:45',
         freq='15T'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')

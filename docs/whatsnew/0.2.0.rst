@@ -1,7 +1,7 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated March 2023)
-------------------------------
+0.2.0 (anticipated June 2023)
+-----------------------------
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
@@ -21,16 +21,21 @@ Bug Fixes
 ~~~~~~~~~
 * ``pvanalytics.__version__`` now correctly reports the version string instead
   of raising ``AttributeError``. (:pull:`181`)
+* Compatibility with pandas 2.0.0 (:pull:`185`)
 
 Requirements
 ~~~~~~~~~~~~
 * Advance minimum ``pvlib`` to 0.9.4, ``numpy`` to 0.16.0,
-  ``pandas`` to 0.25.0, and ``scipy`` to 1.4.0. (:pull:`179`)
+  ``pandas`` to 1.0.0, and ``scipy`` to 1.4.0. (:pull:`179`, :pull:`185`)
 
 Documentation
 ~~~~~~~~~~~~~
 * Online docs now use ``pydata-sphinx-theme`` instead of the built-in
   ``alabaster`` theme. (:issue:`176`, :pull:`178`)
+
+Testing
+~~~~~~~
+* Added testing for python 3.11. (:pull:`189`)
 
 
 Contributors
@@ -38,3 +43,4 @@ Contributors
 * Kirsten Perry (:ghuser:`kperrynrel`)
 * Kevin Anderson (:ghuser:`kanderso-nrel`)
 * Cliff Hansen (:ghuser:`cwhanse`)
+* Abhishek Parikh (:ghuser:`abhisheksparikh`)
