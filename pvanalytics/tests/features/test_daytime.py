@@ -184,25 +184,49 @@ def test_daytime_variable(clearsky_january):
     )
 
 
-def test_get_sunrise_left_alignment():
-    pass
+def test_get_sunrise_left_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='L')
 
 
-def test_get_sunrise_center_alignment():
-    pass
+def test_get_sunrise_center_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='C')
 
 
-def test_get_sunrise_right_alignment():
-    pass
+def test_get_sunrise_right_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='R')
 
 
-def test_get_sunset_left_alignment():
-    pass
+def test_get_sunset_left_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='L')
 
 
-def test_get_sunset_center_alignment():
-    pass
+def test_get_sunset_center_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='C')
 
 
-def test_get_sunset_right_alignment():
-    pass
+def test_get_sunset_right_alignment(clearsky_january):
+    ghi = clearsky_january['ghi'].copy()
+    data_freq = pd.infer_freq(clearsky_january.index)
+    daytime_mask = daytime.power_or_irradiance(ghi,
+                                               freq=data_freq)
+    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='R')
