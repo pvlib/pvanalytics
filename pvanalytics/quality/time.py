@@ -178,7 +178,7 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
             duplicates='drop'
         )
     ).transform(
-        lambda shifted_period: stats.mode(shifted_period, keepdims=False).mode
+        lambda shifted_period: shifted_period.mode().values[0]
     )
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
