@@ -9,6 +9,7 @@ from ..conftest import DATA_DIR
 
 test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
 
+
 @pytest.fixture(scope='module',
                 params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
 def clearsky_january(request, albuquerque):
@@ -28,7 +29,7 @@ def ac_power_series():
     # Pull down the saved PVLib dataframe and process it
     time_series = pd.read_csv(test_file_1,
                               parse_dates=True,
-                              index_col = 0).squeeze()
+                              index_col=0).squeeze()
     return time_series
 
 
@@ -42,8 +43,8 @@ def modeled_midday_series(ac_power_series):
     # Calculate the midday point between sunrise and sunset for each day
     # in the modeled irradiance series
     modeled_midday_series = modeled_sunrise_sunset_df['sunrise'] + \
-                            (modeled_sunrise_sunset_df['sunset'] - \
-                             modeled_sunrise_sunset_df['sunrise']) / 2
+        (modeled_sunrise_sunset_df['sunset'] -
+         modeled_sunrise_sunset_df['sunrise']) / 2
     return modeled_midday_series
 
 
@@ -78,7 +79,7 @@ def daytime_mask_center_aligned(ac_power_series):
     daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
                                                freq=data_freq)
     return daytime_mask
-                    
+
 
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
@@ -247,7 +248,7 @@ def test_daytime_variable(clearsky_january):
 def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
     daytime.get_sunrise(daytime_mask_left_aligned,
                         data_alignment='L')
-    
+
 
 def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
     daytime.get_sunrise(daytime_mask_center_aligned,
@@ -285,7 +286,7 @@ def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
     right_sunset = daytime.get_sunset(daytime_mask_right_aligned,
                                       data_alignment='R')
     right_sunrise = daytime.get_sunrise(daytime_mask_right_aligned,
-                                        data_alignment='R')    
+                                        data_alignment='R')
     midday_series_right = right_sunrise + ((right_sunset - right_sunrise)/2)
     midday_series_right.index = midday_series_right.index.date
     midday_diff_right = (modeled_midday_series -
@@ -294,20 +295,20 @@ def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
     left_sunset = daytime.get_sunset(daytime_mask_left_aligned,
                                      data_alignment='L')
     left_sunrise = daytime.get_sunrise(daytime_mask_left_aligned,
-                                        data_alignment='L')    
+                                       data_alignment='L')
     midday_series_left = left_sunrise + ((left_sunset - left_sunrise)/2)
     midday_series_left.index = midday_series_left.index.date
     midday_diff_left = (modeled_midday_series -
-                         midday_series_left.drop_duplicates())
+                        midday_series_left.drop_duplicates())
     # Center-aligned data
     center_sunset = daytime.get_sunset(daytime_mask_center_aligned,
-                                     data_alignment='C')
+                                       data_alignment='C')
     center_sunrise = daytime.get_sunrise(daytime_mask_center_aligned,
-                                        data_alignment='C')    
+                                         data_alignment='C')
     midday_series_center = center_sunrise + ((center_sunset -
                                               center_sunrise)/2)
-    midday_series_center.index = midday_series_center.index.date 
+    midday_series_center.index = midday_series_center.index.date
     midday_diff_center = (modeled_midday_series -
-                         midday_series_center.drop_duplicates())
-    assert (midday_diff_right.equals(midday_diff_left) & 
+                          midday_series_center.drop_duplicates())
+    assert (midday_diff_right.equals(midday_diff_left) &
             midday_diff_center.equals(midday_diff_right))
