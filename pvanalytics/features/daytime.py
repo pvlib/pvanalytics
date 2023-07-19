@@ -258,6 +258,9 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         daytime_mask].to_series().resample("d").first(),
                                index=daytime_mask.index)
     sunrise_series = sunrise_series.ffill()
+    # If there's no frequency value, infer it from the daytime_mask series
+    if not freq:
+        freq = pd.infer_freq(daytime_mask.index)
     # For left-aligned data, we want the first 'day' mask for
     # each day in the series; this will act as a proxy for sunrise.
     # Because of this, we will just return the sunrise_series with
@@ -268,12 +271,12 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     # mask and the first day mask. To do this, we subtract freq / 2 from
     # each sunrise time in the sunrise_series.
     elif data_alignment == 'C':
-        return (sunrise_series - (freq / 2))
+        return (sunrise_series - (pd.Timedelta(freq) / 2))
     # For right-aligned data, get the last nighttime mask datetime
     # before the first 'day' mask in the series. To do this, we subtract freq
     # from each sunrise time in the sunrise_series.
     elif data_alignment == 'R':
-        return (sunrise_series - freq)
+        return (sunrise_series - pd.Timedelta(freq))
     else:
         # Throw an error if right,left, or center-alignment are not declared
         raise ValueError("No valid data alignment given. Please pass 'L'"
@@ -309,16 +312,19 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
         daytime_mask].to_series().resample("d").last(),
         index=daytime_mask.index)
     sunset_series = sunset_series.ffill()
+    # If there's no frequency value, infer it from the daytime_mask series
+    if not freq:
+        freq = pd.infer_freq(daytime_mask.index)
     #  For left-aligned data, sunset is the first nighttime period
     # after the day mask. To get this, we add freq to each sunset time in
     # the sunset time series.
     if data_alignment == 'L':
-        return (sunset_series + freq)
+        return (sunset_series + pd.Timedelta(freq))
     # For center-aligned data, sunset is the midpoint between the last day
     # mask and the first nighttime mask. We calculate this by adding (freq / 2)
     # to each sunset time in the sunset_series.
     elif data_alignment == 'C':
-        return (sunset_series + (freq / 2))
+        return (sunset_series + (pd.Timedelta(freq) / 2))
     # For right-aligned data, the last 'day' mask time stamp is sunset.
     elif data_alignment == 'R':
         return sunset_series
