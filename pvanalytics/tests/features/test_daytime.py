@@ -2,6 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
+import pvlib
 from pvlib.location import Location
 from pvanalytics.features import daytime
 from ..conftest import DATA_DIR
@@ -21,6 +22,7 @@ def clearsky_january(request, albuquerque):
         model='simplified_solis'
     )
 
+
 @pytest.fixture
 def ac_power_series():
     # Pull down the saved PVLib dataframe and process it
@@ -28,6 +30,55 @@ def ac_power_series():
                               parse_dates=True,
                               index_col = 0).squeeze()
     return time_series
+
+
+@pytest.fixture
+def modeled_midday_series(ac_power_series):
+    # Get the modeled sunrise and sunset for the location
+    modeled_sunrise_sunset_df = pvlib.solarposition.sun_rise_set_transit_spa(
+        ac_power_series.index, 39.742, -105.1727)
+    modeled_sunrise_sunset_df.index = modeled_sunrise_sunset_df.index.date
+    modeled_sunrise_sunset_df = modeled_sunrise_sunset_df.drop_duplicates()
+    # Calculate the midday point between sunrise and sunset for each day
+    # in the modeled irradiance series
+    modeled_midday_series = modeled_sunrise_sunset_df['sunrise'] + \
+                            (modeled_sunrise_sunset_df['sunset'] - \
+                             modeled_sunrise_sunset_df['sunrise']) / 2
+    return modeled_midday_series
+
+
+@pytest.fixture
+def daytime_mask_left_aligned(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_left = ac_power_series.resample('15T',
+                                                    label='left').mean()
+    data_freq = pd.infer_freq(ac_power_series_left.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
+                                               freq=data_freq)
+    return daytime_mask
+
+
+@pytest.fixture
+def daytime_mask_right_aligned(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_right = ac_power_series.resample('15T',
+                                                     label='right').mean()
+    data_freq = pd.infer_freq(ac_power_series_right.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
+                                               freq=data_freq)
+    return daytime_mask
+
+
+@pytest.fixture
+def daytime_mask_center_aligned(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_center = ac_power_series.shift(
+        0.5, freq='15T').resample('15T').mean()
+    data_freq = pd.infer_freq(ac_power_series_center.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
+                                               freq=data_freq)
+    return daytime_mask
+                    
 
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
@@ -193,61 +244,73 @@ def test_daytime_variable(clearsky_january):
     )
 
 
-def test_get_sunrise_left_alignment(ac_power_series):
-    # Resample the time series to 15-minute left aligned intervals
-    ac_power_series_left = ac_power_series.resample('15T',
-                                                    label='left').mean()
-    data_freq = pd.infer_freq(ac_power_series_left.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
-                                               freq=data_freq)
-    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='L')
+def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
+    daytime.get_sunrise(daytime_mask_left_aligned,
+                        data_alignment='L')
 
 
-def test_get_sunrise_center_alignment(ac_power_series):
-    # Resample the time series to 15-minute center-aligned intervals
-    ac_power_series_center = ac_power_series.shift(
-        0.5, freq='15T').resample('15T').mean()
-    data_freq = pd.infer_freq(ac_power_series_center.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
-                                               freq=data_freq)
-    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='C')
+def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
+    daytime.get_sunrise(daytime_mask_center_aligned,
+                        data_alignment='C')
 
 
-def test_get_sunrise_right_alignment(ac_power_series):
-    # Resample the time series to 15-minute left aligned intervals
-    ac_power_series_right = ac_power_series.resample('15T',
-                                                     label='right').mean()
-    data_freq = pd.infer_freq(ac_power_series_right.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
-                                               freq=data_freq)
-    daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='R')
+def test_get_sunrise_right_alignment(daytime_mask_right_aligned):
+    daytime.get_sunrise(daytime_mask_right_aligned,
+                        data_alignment='R')
 
 
-def test_get_sunset_left_alignment(ac_power_series):
-    # Resample the time series to 15-minute left aligned intervals
-    ac_power_series_left = ac_power_series.resample('15T',
-                                                    label='left').mean()
-    data_freq = pd.infer_freq(ac_power_series_left.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
-                                               freq=data_freq)
-    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='L')
+def test_get_sunset_left_alignment(daytime_mask_left_aligned):
+    daytime.get_sunset(daytime_mask_left_aligned,
+                       data_alignment='L')
 
 
-def test_get_sunset_center_alignment(ac_power_series):
-    # Resample the time series to 15-minute center-aligned intervals
-    ac_power_series_center = ac_power_series.shift(
-        0.5, freq='15T').resample('15T').mean()
-    data_freq = pd.infer_freq(ac_power_series_center.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
-                                               freq=data_freq)
-    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='C')
+def test_get_sunset_center_alignment(daytime_mask_center_aligned):
+    daytime.get_sunset(daytime_mask_center_aligned,
+                       data_alignment='C')
 
 
-def test_get_sunset_right_alignment(ac_power_series):
-    # Resample the time series to 15-minute left aligned intervals
-    ac_power_series_right = ac_power_series.resample('15T',
-                                                     label='right').mean()
-    data_freq = pd.infer_freq(ac_power_series_right.index)
-    daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
-                                               freq=data_freq)
-    daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='R')
+def test_get_sunset_right_alignment(daytime_mask_right_aligned):
+    daytime.get_sunset(daytime_mask_right_aligned,
+                       data_alignment='R')
+
+
+def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
+                                          daytime_mask_left_aligned,
+                                          daytime_mask_center_aligned,
+                                          modeled_midday_series):
+    # Get sunrise and sunset times for each time series (left, right, center),
+    # calculate the midday point, compared to modeled midday,
+    # and compare that it's consistent across all three series
+    # Right-aligned data
+    right_sunset = daytime.get_sunset(daytime_mask_right_aligned,
+                                      data_alignment='R')
+    right_sunrise = daytime.get_sunrise(daytime_mask_right_aligned,
+                                        data_alignment='R')    
+    midday_series_right = right_sunrise + ((right_sunset - right_sunrise)/2)
+    midday_diff_right = (modeled_midday_series -
+                         midday_series_right).dt.total_seconds()
+    # Left-aligned data
+    left_sunset = daytime.get_sunset(daytime_mask_left_aligned,
+                                     data_alignment='L')
+    left_sunrise = daytime.get_sunrise(daytime_mask_left_aligned,
+                                        data_alignment='L')    
+    midday_series_left = left_sunrise + ((left_sunset - left_sunrise)/2)
+    midday_diff_left = (modeled_midday_series -
+                         midday_series_left).dt.total_seconds()
+    # Center-aligned data
+    center_sunset = daytime.get_sunset(daytime_mask_center_aligned,
+                                     data_alignment='C')
+    center_sunrise = daytime.get_sunrise(daytime_mask_center_aligned,
+                                        data_alignment='C')    
+    midday_series_center = center_sunrise + ((center_sunset -
+                                              center_sunrise)/2)
+    midday_diff_center = (modeled_midday_series -
+                         midday_series_center).dt.total_seconds()
+    # Assert that the midday difference series is consistent for the left-,
+    # right- and center-aligned data
+    intersect_idx = midday_diff_left.intersection(
+        midday_diff_center.index.intersection(midday_diff_left.index))
+    assert ((midday_diff_center[intersect_idx] ==
+            midday_diff_left[intersect_idx]) & 
+            (midday_diff_center[intersect_idx] ==
+            midday_diff_right[intersect_idx]))
