@@ -4,7 +4,9 @@ import pandas as pd
 import numpy as np
 from pvlib.location import Location
 from pvanalytics.features import daytime
+from ..conftest import DATA_DIR
 
+test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
 
 @pytest.fixture(scope='module',
                 params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
@@ -19,6 +21,13 @@ def clearsky_january(request, albuquerque):
         model='simplified_solis'
     )
 
+@pytest.fixture
+def ac_power_series():
+    # Pull down the saved PVLib dataframe and process it
+    time_series = pd.read_csv(test_file_1,
+                              parse_dates=True,
+                              index_col = 0).squeeze()
+    return time_series
 
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
@@ -184,49 +193,61 @@ def test_daytime_variable(clearsky_january):
     )
 
 
-def test_get_sunrise_left_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunrise_left_alignment(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_left = ac_power_series.resample('15T',
+                                                    label='left').mean()
+    data_freq = pd.infer_freq(ac_power_series_left.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
                                                freq=data_freq)
     daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='L')
 
 
-def test_get_sunrise_center_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunrise_center_alignment(ac_power_series):
+    # Resample the time series to 15-minute center-aligned intervals
+    ac_power_series_center = ac_power_series.shift(
+        0.5, freq='15T').resample('15T').mean()
+    data_freq = pd.infer_freq(ac_power_series_center.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
                                                freq=data_freq)
     daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='C')
 
 
-def test_get_sunrise_right_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunrise_right_alignment(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_right = ac_power_series.resample('15T',
+                                                     label='right').mean()
+    data_freq = pd.infer_freq(ac_power_series_right.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
                                                freq=data_freq)
     daytime.get_sunrise(daytime_mask, freq=data_freq, data_alignment='R')
 
 
-def test_get_sunset_left_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunset_left_alignment(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_left = ac_power_series.resample('15T',
+                                                    label='left').mean()
+    data_freq = pd.infer_freq(ac_power_series_left.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
                                                freq=data_freq)
     daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='L')
 
 
-def test_get_sunset_center_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunset_center_alignment(ac_power_series):
+    # Resample the time series to 15-minute center-aligned intervals
+    ac_power_series_center = ac_power_series.shift(
+        0.5, freq='15T').resample('15T').mean()
+    data_freq = pd.infer_freq(ac_power_series_center.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
                                                freq=data_freq)
     daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='C')
 
 
-def test_get_sunset_right_alignment(clearsky_january):
-    ghi = clearsky_january['ghi'].copy()
-    data_freq = pd.infer_freq(clearsky_january.index)
-    daytime_mask = daytime.power_or_irradiance(ghi,
+def test_get_sunset_right_alignment(ac_power_series):
+    # Resample the time series to 15-minute left aligned intervals
+    ac_power_series_right = ac_power_series.resample('15T',
+                                                     label='right').mean()
+    data_freq = pd.infer_freq(ac_power_series_right.index)
+    daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
                                                freq=data_freq)
     daytime.get_sunset(daytime_mask, freq=data_freq, data_alignment='R')
