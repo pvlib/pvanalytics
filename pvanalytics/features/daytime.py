@@ -97,6 +97,10 @@ def _ffill_short_periods(night, minutes_per_value, hours_min):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
+    # Throw out anything on the first or last day, as only part of the day
+    # may be represented.
+    invalid.loc[invalid.index.date == invalid.index.date.min()] = False
+    invalid.loc[invalid.index.date == invalid.index.date.max()] = False
     # Set those invalid periods to NaN, and then forward fill them.
     # This is a final step for picking up any cases that weren't caught
     # in _correct_midday_errors() or _correct_edge_of_day_errors()
@@ -240,7 +244,9 @@ def power_or_irradiance(series, outliers=None,
     )
     # Perform any corrections for repeat periods less than hours_min that
     # weren't caught by _correct_midday_errors() or
-    # _correct_edge_of_day_errors()
+    # _correct_edge_of_day_errors(). Only do this for periods that are not
+    # the first or last day, as the data may cutoff or start in the middle
+    # of the night.
     night_corrected_edges = _ffill_short_periods(night_corrected_edges,
                                                  minutes_per_value, hours_min)
     return ~night_corrected_edges
