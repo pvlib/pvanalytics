@@ -98,7 +98,8 @@ def _ffill_short_periods(night, minutes_per_value, hours_min):
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
     # Throw out anything on the first or last 2 day period, as only part of
-    # this period may be represented.
+    # this period may be represented. 2 days is used here as the first or
+    # last day may only have one timestamp present (which is not uncommon)
     invalid.loc[invalid.index.date <= (invalid.index.date.min() +
                                        pd.Timedelta(days=1))] = False
     invalid.loc[invalid.index.date >= (invalid.index.date.max() -
