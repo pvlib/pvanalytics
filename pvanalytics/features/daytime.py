@@ -59,12 +59,6 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    # Forward-fill the data for these too-short periods
-    night[invalid] = np.nan
-    # Forward fill NaN's
-    night = night.ffill()
-    # Perform a secondary check
-    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
     return _correct_if_invalid(night, invalid, correction_window)
 
 
@@ -97,6 +91,17 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
         lambda day: any(day)
     )
     return _correct_if_invalid(night, invalid, correction_window)
+
+
+def _ffill_short_periods(night, minutes_per_value, hours_min):
+    # identify periods of time that appear to switch from night to day
+    # (or day to night) on too short a time scale to be reasonable.
+    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
+    # Set those invalid periods to NaN, and then forward fill them.
+    # This is a final step for picking up any cases that weren't caught
+    # in _correct_midday_errors() or _correct_edge_of_day_errors()
+    night[invalid] = np.nan
+    return night.ffill()
 
 
 def _filter_and_normalize(series, outliers):
@@ -233,4 +238,9 @@ def power_or_irradiance(series, outliers=None,
         day_length_window,
         correction_window
     )
+    # Perform any corrections for repeat periods less than hours_min that
+    # weren't caught by _correct_midday_errors() or
+    # _correct_edge_of_day_errors()
+    night_corrected_edges = _ffill_short_periods(night_corrected_edges,
+                                                 minutes_per_value, hours_min)
     return ~night_corrected_edges
