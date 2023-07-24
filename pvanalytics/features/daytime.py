@@ -64,7 +64,7 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     night =  night.ffill()
     # Perform a secondary check
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    return  _correct_if_invalid(night, invalid, correction_window)
+    return _correct_if_invalid(night, invalid, correction_window)
 
 
 def _correct_edge_of_day_errors(night, minutes_per_value,
