@@ -61,7 +61,7 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
     # Forward-fill the data for these too-short periods
     night[invalid] = np.nan
-    # Forward fill NaN's 
+    # Forward fill NaN's
     night = night.ffill()
     # Perform a secondary check
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
