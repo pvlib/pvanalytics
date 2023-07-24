@@ -59,7 +59,17 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    return _correct_if_invalid(night, invalid, correction_window)
+    invalid_correction = _correct_if_invalid(night, invalid, correction_window)
+    # After performing the correction based on surrounding days, perform
+    # a secondary check that ensures any periods that are less than hours_min
+    # are corrected (this can happen in cases where the surrounding days are
+    # very different from the current day. For example, when the current day
+    # is experiencing an outage and all other surrounding days are not.)
+    invalid = _run_lengths(
+        invalid_correction)*minutes_per_value <= hours_min*60
+    invalid_correction[invalid] = np.nan
+    # Forward fill NaN's and return the final corrected series
+    return invalid_correction.ffill()
 
 
 def _correct_edge_of_day_errors(night, minutes_per_value,
@@ -113,8 +123,7 @@ def power_or_irradiance(series, outliers=None,
                         clipping=None, freq=None,
                         correction_window=31, hours_min=5,
                         day_length_difference_max=30,
-                        day_length_window=14,
-                        nullify_repeat_count=None):
+                        day_length_window=14):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, a time is
@@ -175,13 +184,7 @@ def power_or_irradiance(series, outliers=None,
         The length of the rolling window used for calculating the
         median length of the day when correcting errors in the morning
         or afternoon. [days]
-    nullify_repeat_count : int, default None
-        The cutoff number of repeat subsequent readings in a day-night
-        masking sequence, where sequences containing a lower repeat value
-        count are nullified and forward-filled day-night mask sequence. This
-        is done specifically to prevent erroneously labeled periods.
-        If None is passed, the logic nullifies periods where the classification
-        lasts 30 minutes or less.
+
 
     Returns
     -------
@@ -219,13 +222,6 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
-    # Nullify cases where the classification lasts 30 minutes or less
-    night_duplicates = _run_lengths(night)
-    if nullify_repeat_count is None:
-        nullify_repeat_count = int(30 / minutes_per_value)
-    night.loc[night_duplicates <= nullify_repeat_count] = np.nan
-    # Forward fill NaN's
-    night = night.ffill()
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
