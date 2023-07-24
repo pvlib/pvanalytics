@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from pvlib.location import Location
-import daytime
+from pvanalytics.features import daytime
 
 
 @pytest.fixture(scope='module',
