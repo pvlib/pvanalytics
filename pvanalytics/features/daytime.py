@@ -97,10 +97,12 @@ def _ffill_short_periods(night, minutes_per_value, hours_min):
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    # Throw out anything on the first or last day, as only part of the day
-    # may be represented.
-    invalid.loc[invalid.index.date == invalid.index.date.min()] = False
-    invalid.loc[invalid.index.date == invalid.index.date.max()] = False
+    # Throw out anything on the first or last 2 day period, as only part of
+    # this period may be represented.
+    invalid.loc[invalid.index.date <= (invalid.index.date.min() + 
+                                       pd.Timedelta(days=1))] = False
+    invalid.loc[invalid.index.date >= (invalid.index.date.max() - 
+                                       pd.Timedelta(days=1))] = False
     # Set those invalid periods to NaN, and then forward fill them.
     # This is a final step for picking up any cases that weren't caught
     # in _correct_midday_errors() or _correct_edge_of_day_errors()
