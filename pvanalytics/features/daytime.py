@@ -59,17 +59,12 @@ def _correct_midday_errors(night, minutes_per_value, hours_min,
     # identify periods of time that appear to switch from night to day
     # (or day to night) on too short a time scale to be reasonable.
     invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    invalid_correction = _correct_if_invalid(night, invalid, correction_window)
-    # After performing the correction based on surrounding days, perform
-    # a secondary check that ensures any periods that are less than hours_min
-    # are corrected (this can happen in cases where the surrounding days are
-    # very different from the current day. For example, when the current day
-    # is experiencing an outage and all other surrounding days are not.)
-    invalid = _run_lengths(
-        invalid_correction)*minutes_per_value <= hours_min*60
-    invalid_correction[invalid] = np.nan
+    night[invalid] = np.nan
     # Forward fill NaN's and return the final corrected series
-    return invalid_correction.ffill()
+    night =  night.ffill()
+    # Perform a secondary check
+    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
+    return  _correct_if_invalid(night, invalid, correction_window)
 
 
 def _correct_edge_of_day_errors(night, minutes_per_value,
