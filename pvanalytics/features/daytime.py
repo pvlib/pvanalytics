@@ -245,11 +245,11 @@ def power_or_irradiance(series, outliers=None,
         day_length_window,
         correction_window
     )
-    # Perform any corrections for repeat periods less than hours_min that
-    # weren't caught by _correct_midday_errors() or
-    # _correct_edge_of_day_errors(). Only do this for periods that are not
-    # the first or last day, as the data may cutoff or start in the middle
-    # of the night.
-    night_corrected_edges = _ffill_short_periods(night_corrected_edges,
-                                                 minutes_per_value, hours_min)
+    # # Perform any corrections for repeat periods less than hours_min that
+    # # weren't caught by _correct_midday_errors() or
+    # # _correct_edge_of_day_errors(). Only do this for periods that are not
+    # # the first or last day, as the data may cutoff or start in the middle
+    # # of the night.
+    # night_corrected_edges = _ffill_short_periods(night_corrected_edges,
+    #                                              minutes_per_value, hours_min)
     return ~night_corrected_edges
