@@ -231,16 +231,7 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
-    # Nullify cases where the classification lasts 30 minutes or less
-    night_duplicates = _run_lengths(night)
-    if nullify_repeat_count is None:
-        if minutes_per_value < 5:
-            nullify_repeat_count = 10
-        else:
-            nullify_repeat_count = 2
-        nullify_repeat_count = int(30 / minutes_per_value) 
-    night.loc[night_duplicates <= nullify_repeat_count] = np.nan
-    night = night.ffill().bfill()
+
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
@@ -256,11 +247,4 @@ def power_or_irradiance(series, outliers=None,
         day_length_window,
         correction_window
     )
-    # # Perform any corrections for repeat periods less than hours_min that
-    # # weren't caught by _correct_midday_errors() or
-    # # _correct_edge_of_day_errors(). Only do this for periods that are not
-    # # the first or last day, as the data may cutoff or start in the middle
-    # # of the night.
-    # night_corrected_edges = _ffill_short_periods(night_corrected_edges,
-    #                                              minutes_per_value, hours_min)
     return ~night_corrected_edges
