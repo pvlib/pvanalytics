@@ -4,11 +4,12 @@ import pandas as pd
 import numpy as np
 import pvlib
 from pvlib.location import Location
-from pvanalytics.features import daytime
-from ..conftest import DATA_DIR
+#from pvanalytics.features import daytime
+#from ..conftest import DATA_DIR
+import daytime
 
-test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
-
+#test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
+test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"
 
 @pytest.fixture(scope='module',
                 params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
@@ -246,33 +247,50 @@ def test_daytime_variable(clearsky_january):
 
 
 def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
-    daytime.get_sunrise(daytime_mask_left_aligned,
-                        data_alignment='L')
+    sunrise_left_aligned = daytime.get_sunrise(daytime_mask_left_aligned,
+                                               data_alignment='L')
+    # Assert that the output time series index is the same as the input
+    assert all(sunrise_left_aligned.index == daytime_mask_left_aligned.index)
 
 
 def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
-    daytime.get_sunrise(daytime_mask_center_aligned,
-                        data_alignment='C')
+    sunrise_center_aligned = daytime.get_sunrise(daytime_mask_center_aligned,
+                                                 data_alignment='C')
+    # Assert that the output time series index is the same as the input
+    assert all(sunrise_center_aligned.index ==
+               daytime_mask_center_aligned.index)
 
 
 def test_get_sunrise_right_alignment(daytime_mask_right_aligned):
-    daytime.get_sunrise(daytime_mask_right_aligned,
-                        data_alignment='R')
+    sunrise_right_aligned = daytime.get_sunrise(daytime_mask_right_aligned,
+                                                data_alignment='R')
+    # Assert that the output time series index is the same as the input
+    assert all(sunrise_right_aligned.index ==
+               daytime_mask_right_aligned.index)
 
 
 def test_get_sunset_left_alignment(daytime_mask_left_aligned):
-    daytime.get_sunset(daytime_mask_left_aligned,
-                       data_alignment='L')
+    sunset_left_aligned = daytime.get_sunset(daytime_mask_left_aligned,
+                                             data_alignment='L')
+    # Assert that the output time series index is the same as the input
+    assert all(sunset_left_aligned.index ==
+               daytime_mask_left_aligned.index)
 
 
 def test_get_sunset_center_alignment(daytime_mask_center_aligned):
-    daytime.get_sunset(daytime_mask_center_aligned,
-                       data_alignment='C')
+    sunset_center_aligned = daytime.get_sunset(daytime_mask_center_aligned,
+                                               data_alignment='C')
+    # Assert that the output time series index is the same as the input
+    assert all(sunset_center_aligned.index ==
+               daytime_mask_center_aligned.index)
 
 
 def test_get_sunset_right_alignment(daytime_mask_right_aligned):
-    daytime.get_sunset(daytime_mask_right_aligned,
-                       data_alignment='R')
+    sunset_right_aligned = daytime.get_sunset(daytime_mask_right_aligned,
+                                              data_alignment='R')
+    # Assert that the output time series index is the same as the input
+    assert all(sunset_right_aligned.index ==
+               daytime_mask_right_aligned.index)
 
 
 def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
