@@ -333,6 +333,26 @@ def test_get_sunset_right_alignment(daytime_mask_right_aligned):
                                                 '%Y-%m-%d %H:%M:%S%z'))
 
 
+def test_sunrise_alignment_error(daytime_mask_left_aligned):
+    with pytest.raises(ValueError,
+                       match=("No valid data alignment given. Please pass 'L'"
+                              " for left-aligned data, 'R' for "
+                              "right-aligned data, or 'C' for "
+                              "center-aligned data.")):
+        daytime.get_sunrise(daytime_mask_left_aligned,
+                            data_alignment='M')
+
+
+def test_sunset_alignment_error(daytime_mask_left_aligned):
+    with pytest.raises(ValueError,
+                       match=("No valid data alignment given. Please pass 'L'"
+                              " for left-aligned data, 'R' for "
+                              "right-aligned data, or 'C' for "
+                              "center-aligned data.")):
+        daytime.get_sunset(daytime_mask_left_aligned,
+                           data_alignment='M')
+
+
 def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
                                           daytime_mask_left_aligned,
                                           daytime_mask_center_aligned,
