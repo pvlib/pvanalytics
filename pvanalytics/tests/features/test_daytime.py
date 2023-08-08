@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import pvlib
 from pvlib.location import Location
+from datetime import datetime, date
 from pvanalytics.features import daytime
 from ..conftest import DATA_DIR
 
@@ -72,9 +73,12 @@ def daytime_mask_right_aligned(ac_power_series):
 
 @pytest.fixture
 def daytime_mask_center_aligned(ac_power_series):
-    # Resample the time series to 5-minute center aligned intervals
-    ac_power_series_center = ac_power_series.shift(
-        0.5, freq='5T').resample('5T').mean()
+    # Resample the time series to 5-minute center aligned intervals (take
+    # left alignment and shift by frequency/2)
+    ac_power_series_center = ac_power_series.resample('5T',
+                                                      label='left').mean()
+    ac_power_series_center.index = (ac_power_series_center.index +
+                                    (pd.Timedelta("5T") / 2))
     data_freq = pd.infer_freq(ac_power_series_center.index)
     daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
                                                freq=data_freq)
@@ -251,6 +255,11 @@ def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunrise_left_aligned.index == daytime_mask_left_aligned.index)
     # Check that the output matches expected
+    sunrise_3_19 = sunrise_left_aligned[sunrise_left_aligned.index.date ==
+                                        date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunrise_3_19 == datetime.strptime('2022-03-19 06:10:00-07:00',
+                                                 '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
@@ -259,6 +268,12 @@ def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunrise_center_aligned.index ==
                daytime_mask_center_aligned.index)
+    # Check that the output matches expected
+    sunrise_3_19 = sunrise_center_aligned[sunrise_center_aligned.index.date ==
+                                          date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunrise_3_19 == datetime.strptime('2022-03-19 06:10:00-07:00',
+                                                 '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_get_sunrise_right_alignment(daytime_mask_right_aligned):
@@ -267,6 +282,12 @@ def test_get_sunrise_right_alignment(daytime_mask_right_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunrise_right_aligned.index ==
                daytime_mask_right_aligned.index)
+    # Check that the output matches expected
+    sunrise_3_19 = sunrise_right_aligned[sunrise_right_aligned.index.date ==
+                                         date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunrise_3_19 == datetime.strptime('2022-03-19 06:10:00-07:00',
+                                                 '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_get_sunset_left_alignment(daytime_mask_left_aligned):
@@ -275,6 +296,12 @@ def test_get_sunset_left_alignment(daytime_mask_left_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunset_left_aligned.index ==
                daytime_mask_left_aligned.index)
+    # Check that the output matches expected
+    sunset_3_19 = sunset_left_aligned[sunset_left_aligned.index.date ==
+                                      date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunset_3_19 == datetime.strptime('2022-03-19 17:55:00-07:00',
+                                                '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_get_sunset_center_alignment(daytime_mask_center_aligned):
@@ -283,6 +310,12 @@ def test_get_sunset_center_alignment(daytime_mask_center_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunset_center_aligned.index ==
                daytime_mask_center_aligned.index)
+    # Check that the output matches expected
+    sunset_3_19 = sunset_center_aligned[sunset_center_aligned.index.date ==
+                                        date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunset_3_19 == datetime.strptime('2022-03-19 17:55:00-07:00',
+                                                '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_get_sunset_right_alignment(daytime_mask_right_aligned):
@@ -291,6 +324,12 @@ def test_get_sunset_right_alignment(daytime_mask_right_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunset_right_aligned.index ==
                daytime_mask_right_aligned.index)
+    # Check that the output matches expected
+    sunset_3_19 = sunset_right_aligned[sunset_right_aligned.index.date ==
+                                       date(2022, 3, 19)]
+    # Assert all values for the day equal '2022-03-19 06:10:00-07:00'
+    assert all(sunset_3_19 == datetime.strptime('2022-03-19 17:55:00-07:00',
+                                                '%Y-%m-%d %H:%M:%S%z'))
 
 
 def test_consistent_modeled_midday_series(daytime_mask_right_aligned,

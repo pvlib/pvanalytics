@@ -254,10 +254,12 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         Series of daily sunrise times, based on the daytime_mask series.
         This series has the same index as the passed daytime_mask series.
     """
-    sunrise_series = pd.Series(daytime_mask.index[
-        daytime_mask].to_series().resample("d").first(),
-                               index=daytime_mask.index)
-    sunrise_series = sunrise_series.ffill()
+    # Get the first day period for each day
+    sunrise_series = daytime_mask.index[daytime_mask].to_series().groupby(
+        daytime_mask[daytime_mask].index.date).transform('first').reindex(
+            daytime_mask.index)
+    sunrise_series = sunrise_series.groupby(
+        sunrise_series.index.date).ffill().bfill()
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
@@ -308,10 +310,11 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
         Series of daily sunset times, based on the daytime_mask series.
         This series has the same index as the passed daytime_mask series.
     """
-    sunset_series = pd.Series(daytime_mask.index[
-        daytime_mask].to_series().resample("d").last(),
-        index=daytime_mask.index)
-    sunset_series = sunset_series.ffill()
+    sunset_series = daytime_mask.index[daytime_mask].to_series().groupby(
+        daytime_mask[daytime_mask].index.date).transform('last').reindex(
+            daytime_mask.index)
+    sunset_series = sunset_series.groupby(
+        sunset_series.index.date).ffill().bfill()
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
