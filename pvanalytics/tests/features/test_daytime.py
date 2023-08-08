@@ -4,12 +4,11 @@ import pandas as pd
 import numpy as np
 import pvlib
 from pvlib.location import Location
-#from pvanalytics.features import daytime
-#from ..conftest import DATA_DIR
-import daytime
+from pvanalytics.features import daytime
+from ..conftest import DATA_DIR
 
-#test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
-test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"
+test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
+
 
 @pytest.fixture(scope='module',
                 params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
@@ -252,7 +251,6 @@ def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
     # Assert that the output time series index is the same as the input
     assert all(sunrise_left_aligned.index == daytime_mask_left_aligned.index)
     # Check that the output matches expected
-    
 
 
 def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
