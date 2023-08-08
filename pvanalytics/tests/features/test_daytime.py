@@ -62,9 +62,10 @@ def daytime_mask_left_aligned(ac_power_series):
 
 @pytest.fixture
 def daytime_mask_right_aligned(ac_power_series):
-    # Resample the time series to 5-minute right aligned intervals
+    # Resample the time series to 5-minute right aligned intervals. Lop off the
+    # last entry as it is moved to the next day (3/20)
     ac_power_series_right = ac_power_series.resample('5T',
-                                                     label='right').mean()
+                                                     label='right').mean()[:-1]
     data_freq = pd.infer_freq(ac_power_series_right.index)
     daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
                                                freq=data_freq)
