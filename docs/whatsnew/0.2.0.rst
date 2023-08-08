@@ -15,10 +15,7 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
-* Updated function :py:func:`~pvanalytics.features.daytime.power_or_irradiance` to more
-  accurately classify day/night periods by designating repeating subsequent values that
-  are less than a certain length as null values, as these periods are likely to be erroneous.
-  Also updated private function :py:func:`~pvanalytics.features.daytime._correct_edge_of_day_errors`
+* Updated private function :py:func:`~pvanalytics.features.daytime._correct_edge_of_day_errors`
   to be more performant by vectorization; the original logic was using a lambda call that was
   slowing the function speed down considerably. (:pull:`186`)
 
