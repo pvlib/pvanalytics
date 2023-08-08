@@ -15,6 +15,14 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunrise`
+  for calculating the daily sunrise datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunset`
+  for calculating the daily sunset datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
 
 
 Bug Fixes
