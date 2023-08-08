@@ -113,7 +113,7 @@ def power_or_irradiance(series, outliers=None,
                         clipping=None, freq=None,
                         correction_window=31, hours_min=5,
                         day_length_difference_max=30,
-                        day_length_window=14\):
+                        day_length_window=14):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, a time is
