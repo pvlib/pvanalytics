@@ -93,24 +93,6 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     return _correct_if_invalid(night, invalid, correction_window)
 
 
-def _ffill_short_periods(night, minutes_per_value, hours_min):
-    # identify periods of time that appear to switch from night to day
-    # (or day to night) on too short a time scale to be reasonable.
-    invalid = _run_lengths(night)*minutes_per_value <= hours_min*60
-    # Throw out anything on the first or last 2 day period, as only part of
-    # this period may be represented. 2 days is used here as the first or
-    # last day may only have one timestamp present (which is not uncommon)
-    invalid.loc[invalid.index.date <= (invalid.index.date.min() +
-                                       pd.Timedelta(days=1))] = False
-    invalid.loc[invalid.index.date >= (invalid.index.date.max() -
-                                       pd.Timedelta(days=1))] = False
-    # Set those invalid periods to NaN, and then forward fill them.
-    # This is a final step for picking up any cases that weren't caught
-    # in _correct_midday_errors() or _correct_edge_of_day_errors()
-    night[invalid] = np.nan
-    return night.ffill()
-
-
 def _filter_and_normalize(series, outliers):
     # filter a series by removing outliers and clamping the minimum to
     # 0. Then normalize the series by the maximum deviation.
@@ -131,8 +113,7 @@ def power_or_irradiance(series, outliers=None,
                         clipping=None, freq=None,
                         correction_window=31, hours_min=5,
                         day_length_difference_max=30,
-                        day_length_window=14,
-                        nullify_repeat_count = None):
+                        day_length_window=14\):
     """Return True for values that are during the day.
 
     After removing outliers and normalizing the data, a time is
