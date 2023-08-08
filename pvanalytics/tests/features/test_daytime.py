@@ -251,6 +251,8 @@ def test_get_sunrise_left_alignment(daytime_mask_left_aligned):
                                                data_alignment='L')
     # Assert that the output time series index is the same as the input
     assert all(sunrise_left_aligned.index == daytime_mask_left_aligned.index)
+    # Check that the output matches expected
+    
 
 
 def test_get_sunrise_center_alignment(daytime_mask_center_aligned):
