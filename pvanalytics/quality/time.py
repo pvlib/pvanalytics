@@ -1,7 +1,6 @@
 """Quality tests related to time."""
 import warnings
 import pandas as pd
-import numpy as np
 from scipy import stats
 from pvanalytics.quality.outliers import zscore
 
@@ -122,7 +121,7 @@ def shifts_ruptures(event_times, reference_times,
     transit time in time of day.
 
     Derived from the PVFleets QA project.
-    
+
     References
     -------
     .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift
@@ -144,7 +143,7 @@ def shifts_ruptures(event_times, reference_times,
                                    min_size=period_min).fit_predict(
                                        signal=time_diff.values,
                                        pen=prediction_penalty
-                                       )
+    )
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a
     # breakpoint at the beginning of the series (0) and at the end if
@@ -166,9 +165,9 @@ def shifts_ruptures(event_times, reference_times,
         segment = segment[~zscore(segment, zmax=zscore_cutoff,
                                   nan_policy='omit')]
         segment = segment[
-            (segment>=segment.quantile(bottom_quantile_threshold)) &
-            (segment<=segment.quantile(top_quantile_threshold))]
-        shift_amount.loc[idx_start: idx_end] = minute_rounding * \
+            (segment >= segment.quantile(bottom_quantile_threshold)) &
+            (segment <= segment.quantile(top_quantile_threshold))]
+        shift_amount.loc[index: index + 1] = minute_rounding * \
             round(float(segment.mean())/shift_min)
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
