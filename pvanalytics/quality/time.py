@@ -138,7 +138,7 @@ def shifts_ruptures(event_times, reference_times,
     # so the timezone is irrelevant.
     time_diff = \
         event_times.tz_localize(None) - reference_times.tz_localize(None)
-    break_points = ruptures.BinSeg(model='rbf',
+    break_points = ruptures.Binseg(model='rbf',
                                    min_size=period_min).fit_predict(
                                        signal=time_diff.values,
                                        pen=prediction_penalty
