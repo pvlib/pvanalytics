@@ -15,9 +15,9 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
-* Updated private function :py:func:`~pvanalytics.features.daytime._correct_edge_of_day_errors`
+* Updated private function :py:func:`~pvanalytics.features.daytime.power_or_irradiance`
   to be more performant by vectorization; the original logic was using a lambda call that was
-  slowing the function speed down considerably. (:pull:`186`)
+  slowing the function speed down considerably. This update resulted in a ~50X speedup. (:pull:`186`)
 
 
 Bug Fixes
