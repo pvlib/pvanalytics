@@ -166,7 +166,7 @@ def shifts_ruptures(event_times, reference_times,
         segment = segment[
             (segment >= segment.quantile(bottom_quantile_threshold)) &
             (segment <= segment.quantile(top_quantile_threshold))]
-        shift_amount.loc[index: index + 1] = shift_min * \
+        shift_amount.iloc[index: index + 1] = shift_min * \
             round(float(segment.mean())/shift_min)
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
