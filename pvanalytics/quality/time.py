@@ -2,6 +2,8 @@
 import warnings
 import pandas as pd
 import numpy as np
+from scipy import stats
+from pvanalytics.quality.outliers import zscore
 
 
 def spacing(times, freq):
@@ -37,38 +39,23 @@ def spacing(times, freq):
     return delta == freq
 
 
-def _round_multiple(x, to, up_from=None):
-    # Return `x` rounded to the nearest multiple of `to`
-    #
-    # Parameters
-    # ----------
-    # x : Series
-    # to : int
-    #     `x` is rounded to a multiple of `to`
-    # up_from : int, optional
-    #     If the remainder of `x` / `to` is greater than `up_from`
-    #     then `x` is rounded up, otherwise `x` is rounded down.
-    #     If not specified rounding will go up from `to` // 2.
-    up_from = up_from or to // 2
-    quotient, remainder = divmod(abs(x), to)
-    remainder[remainder > up_from] = to
-    remainder[remainder <= up_from] = 0
-    return np.sign(x) * (quotient*to + remainder)
-
-
-def shifts_ruptures(event_times, reference_times, period_min=2,
-                    shift_min=15, round_up_from=None,
-                    prediction_penalty=13):
+def shifts_ruptures(event_times, reference_times,
+                    period_min=15,
+                    shift_min=15,
+                    prediction_penalty=20,
+                    zscore_cutoff=2,
+                    bottom_quantile_threshold=.5,
+                    top_quantile_threshold=1):
     """Identify time shifts using the ruptures library.
 
     Compares the event time in the expected time zone (`reference_times`)
     with the actual event time in `event_times`.
 
-    The Pelt changepoint detection method is applied to the difference
-    between `event_times` and `reference_times`. For each period between
-    change points the mode of the difference is rounded to a multiple of
-    `shift_min` and returned as the time-shift for all days in that
-    period.
+    The Binary Segmentation changepoint detection method is applied to the
+    difference between `event_times` and `reference_times`. For each period
+    between change points the mode of the difference is rounded to a
+    multiple of `shift_min` and returned as the time-shift for all days in
+    that period.
 
     Parameters
     ----------
@@ -81,10 +68,9 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
         timezone. For example, passing solar transit time in a fixed offset
         time zone can be used to detect daylight savings shifts when it is
         unknown whether or not `event_times` is in a fixed offset time zone.
-    period_min : int, default 2
+    period_min : int, default 15
         Minimum number of days between shifts. Must be less than or equal to
         the number of days in `event_times`. [days]
-
         Increasing this parameter will make the result less sensitive to
         transient shifts. For example if your intent is to find and correct
         daylight savings time shifts passing `period_min=60` can give good
@@ -92,16 +78,12 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     shift_min : int, default 15
         Minimum shift amount in minutes. All shifts are rounded to a multiple
         of `shift_min`. [minutes]
-    round_up_from : int, optional
-        The number of minutes greater than a multiple of `shift_min` for a
-        shift to be rounded up. If a shift is less than `round_up_from` then
-        it will be rounded towards 0. If not specified then the shift will
-        be rounded up from `shift_min // 2`. Using a larger value will
-        effectively make the shift detection more conservative as small
-        variations will tend to be rounded to zero. [minutes]
     prediction_penalty : int, default 13
         Penalty used in assessing change points.
         See :py:meth:`ruptures.detection.Pelt.predict` for more information.
+    zscore_cutoff=2,
+    bottom_quantile_threshold=.5,
+    top_quantile_threshold=1
 
     Returns
     -------
@@ -140,7 +122,12 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     transit time in time of day.
 
     Derived from the PVFleets QA project.
-
+    
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift
+        Detection Algorithms for Measured PV Data", 2023 PV Reliability
+        Workshop (PVRW).
     """
     try:
         import ruptures
@@ -153,14 +140,11 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     # so the timezone is irrelevant.
     time_diff = \
         event_times.tz_localize(None) - reference_times.tz_localize(None)
-    break_points = ruptures.Pelt(
-        model='rbf',
-        jump=1,
-        min_size=period_min
-    ).fit_predict(
-        signal=time_diff.values,
-        pen=prediction_penalty
-    )
+    break_points = ruptures.BinSeg(model='rbf',
+                                   min_size=period_min).fit_predict(
+                                       signal=time_diff.values,
+                                       pen=prediction_penalty
+                                       )
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a
     # breakpoint at the beginning of the series (0) and at the end if
@@ -168,17 +152,24 @@ def shifts_ruptures(event_times, reference_times, period_min=2,
     break_points.insert(0, 0)
     if break_points[-1] != len(time_diff):
         break_points.append(len(time_diff))
-    time_diff = _round_multiple(time_diff, shift_min, round_up_from)
-    shift_amount = time_diff.groupby(
-        pd.cut(
-            time_diff.reset_index().index,
-            break_points,
-            include_lowest=True, right=False,
-            duplicates='drop'
-        )
-    ).transform(
-        lambda shifted_period: shifted_period.mode().values[0]
-    )
+    # Go throguh each time shift segment and perform the following steps:
+    # 1) Remove the outliers from each segment using a z-score filter
+    # 2) Remove any cases that are not within the bottom and top quantile
+    #    parameters for the segment. This helps to remove more erroneous
+    #    data.
+    # 3) Take the mean of each segment and round it to the nearest shift_min
+    #    multiplier
+    shift_amount = time_diff.copy()
+    for index in range(len(break_points) - 1):
+        segment = time_diff[break_points[index]:
+                            break_points[index + 1]]
+        segment = segment[~zscore(segment, zmax=zscore_cutoff,
+                                  nan_policy='omit')]
+        segment = segment[
+            (segment>=segment.quantile(bottom_quantile_threshold)) &
+            (segment<=segment.quantile(top_quantile_threshold))]
+        shift_amount.loc[idx_start: idx_end] = minute_rounding * \
+            round(float(segment.mean())/shift_min)
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
     return shift_amount != 0, shift_amount
