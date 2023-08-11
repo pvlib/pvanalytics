@@ -42,8 +42,8 @@ def shifts_ruptures(event_times, reference_times,
                     shift_min=15,
                     prediction_penalty=20,
                     zscore_cutoff=2,
-                    bottom_quantile_threshold=.5,
-                    top_quantile_threshold=1):
+                    bottom_quantile_threshold=0,
+                    top_quantile_threshold=.5):
     """Identify time shifts using the ruptures library.
 
     Compares the event time in the expected time zone (`reference_times`)
@@ -135,14 +135,24 @@ def shifts_ruptures(event_times, reference_times,
     if period_min > len(event_times):
         raise ValueError("period_min exceeds number of days in event_times")
     # Drop timezone information. At this point there is one value per day
-    # so the timezone is irrelevant.
+    # so the timezone is irrelevant. Get the time difference in minutes.
     time_diff = \
-        event_times.tz_localize(None) - reference_times.tz_localize(None)
+        (event_times.tz_localize(None) -
+         reference_times.tz_localize(None)).dt.total_seconds() / 60
+    # Get the index before removing NaN's
+    time_diff_orig_index = time_diff.index
+    # # Remove any outliers that may skew the results
+    # zscore_outlier_mask = zscore(time_diff, zmax=zscore_cutoff,
+    #                              nan_policy='omit')
+    # time_diff.loc[zscore_outlier_mask] = np.nan
+    # Remove NaN's from the time_diff series, because NaN's screw up the
+    # ruptures prediction
+    time_diff = time_diff.dropna()
+    # Run changepoint detection to find breaks
     break_points = ruptures.Binseg(model='rbf',
                                    min_size=period_min).fit_predict(
                                        signal=time_diff.values,
-                                       pen=prediction_penalty
-    )
+                                       pen=prediction_penalty)
     # Make sure the entire series is covered by the intervals between
     # the breakpoints that were identified above. This means adding a
     # breakpoint at the beginning of the series (0) and at the end if
@@ -166,8 +176,10 @@ def shifts_ruptures(event_times, reference_times,
         segment = segment[
             (segment >= segment.quantile(bottom_quantile_threshold)) &
             (segment <= segment.quantile(top_quantile_threshold))]
-        shift_amount.iloc[index: index + 1] = shift_min * \
-            round(float(segment.mean())/shift_min)
+        shift_amount.iloc[break_points[index]: break_points[index + 1]] = \
+            shift_min * round(float(segment.mean())/shift_min)
+    # Update the shift_amount series with the original time series
+    shift_amount = shift_amount.reindex(time_diff_orig_index).ffill()
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
     return shift_amount != 0, shift_amount
