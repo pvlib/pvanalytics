@@ -149,6 +149,8 @@ def shifts_ruptures(event_times, reference_times,
     time_diff = \
         (event_times.tz_localize(None) -
          reference_times.tz_localize(None))
+    # Get the index before removing NaN's
+    time_diff_orig_index = time_diff.index
     # Remove NaN's from the time_diff series, because NaN's screw up the
     # ruptures prediction
     time_diff = time_diff.dropna()
@@ -165,7 +167,7 @@ def shifts_ruptures(event_times, reference_times,
     break_points.insert(0, 0)
     if break_points[-1] != len(time_diff):
         break_points.append(len(time_diff))
-    # Go throguh each time shift segment and perform the following steps:
+    # Go through each time shift segment and perform the following steps:
     # 1) Remove the outliers from each segment using a z-score filter
     # 2) Remove any cases that are not within the bottom and top quantile
     #    parameters for the segment. This helps to remove more erroneous
@@ -183,7 +185,7 @@ def shifts_ruptures(event_times, reference_times,
             (segment <= segment.quantile(top_quantile_threshold))]
         shift_amount.iloc[break_points[index]: break_points[index + 1]] = \
             shift_min * round(float(segment.mean())/shift_min)
-    # Update the shift_amount series with the original time series
+    # Update the shift_amount series with the original time series index
     shift_amount = shift_amount.reindex(time_diff_orig_index).ffill()
     # localize the shift_amount series to the timezone of the input
     shift_amount = shift_amount.tz_localize(event_times.index.tz)
