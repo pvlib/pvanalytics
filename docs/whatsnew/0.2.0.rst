@@ -16,7 +16,7 @@ Breaking Changes
   for Measured PV Data"). This includes converting the changepoint detection algorithm from
   Pelt to Binary Segmentation (which runs much faster), and performing additional processing
   to each detected segment to remove outliers and filter by a quantile cutoff instead of the
-  original rounding technique.
+  original rounding technique. (:pull:`197`)
 
 
 Enhancements
