@@ -196,7 +196,7 @@ def test_has_dst_no_dst_in_date_range(albuquerque):
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
         pd.date_range(
-            start='1/1/2020', end='2/29/2020 23:59',
+            start='1/1/2020', end='3/30/2020 23:59',
             tz='MST', freq=request.param
         )
     )
@@ -233,10 +233,10 @@ def test_shift_ruptures_positive_shift(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-01-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     expected_shift_mask = pd.Series(False, index=midday.index)
-    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    expected_shift_mask['2020-01-01':'2020-03-30'] = True
     shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
@@ -251,10 +251,10 @@ def test_shift_ruptures_negative_shift(midday):
     shifted = _shift_between(
         midday, -60,
         start='2020-01-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     expected_shift_mask = pd.Series(False, index=midday.index)
-    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    expected_shift_mask['2020-01-01':'2020-03-30'] = True
     shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
@@ -294,9 +294,11 @@ def _shift_between(series, shift, start, end):
 @requires_ruptures
 def test_shift_ruptures_period_min(midday):
     no_shifts = pd.Series(0, index=midday.index, dtype='int64')
+    # period_min must be equal to length of series / 2 or less in order for
+    # binary segmentation algoritm to work.
     shift_mask, shift_amount = time.shifts_ruptures(
         midday, midday,
-        period_min=len(midday)
+        period_min=len(midday) / 2
     )
     assert not shift_mask.any()
     assert_series_equal(
@@ -344,10 +346,10 @@ def test_shifts_ruptures_shift_at_end(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-02-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
-    shift_expected['2020-02-02':'2020-02-29'] = 60
+    shift_expected['2020-02-02':'2020-03-30'] = 60
     shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
     assert_series_equal(
@@ -362,11 +364,12 @@ def test_shifts_ruptures_shift_in_middle(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-01-25',
-        end='2020-02-15'
+        end='2020-03-05'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
-    shift_expected['2020-01-26':'2020-02-15'] = 60
-    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
+    shift_expected['2020-01-26':'2020-03-05'] = 60
+    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday,
+                                                    prediction_penalty=13)
     assert_series_equal(
         shift_mask,
         shift_expected != 0,
@@ -391,7 +394,7 @@ def test_shift_ruptures_shift_min(midday):
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
-        shift_min=60, round_up_from=40
+        shift_min=60
     )
     assert not shift_mask.any()
     assert_series_equal(

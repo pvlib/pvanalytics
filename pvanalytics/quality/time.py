@@ -150,6 +150,7 @@ def shifts_ruptures(event_times, reference_times,
     time_diff = time_diff.dropna()
     # Run changepoint detection to find breaks
     break_points = ruptures.Binseg(model='rbf',
+                                   jump=1,
                                    min_size=period_min).fit_predict(
                                        signal=time_diff.values,
                                        pen=prediction_penalty)
