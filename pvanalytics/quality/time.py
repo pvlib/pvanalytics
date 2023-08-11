@@ -138,7 +138,7 @@ def shifts_ruptures(event_times, reference_times,
     # so the timezone is irrelevant. Get the time difference in minutes.
     time_diff = \
         (event_times.tz_localize(None) -
-         reference_times.tz_localize(None)).dt.total_seconds() / 60
+         reference_times.tz_localize(None))
     # Get the index before removing NaN's
     time_diff_orig_index = time_diff.index
     # # Remove any outliers that may skew the results
