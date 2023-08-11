@@ -234,7 +234,6 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunrise values for
     each day in the associated time series.
-
     Parameters
     ----------
     daytime_mask_series  : Series
@@ -247,7 +246,6 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
-
     Returns
     -------
     Series
@@ -260,6 +258,10 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
             daytime_mask.index)
     sunrise_series = sunrise_series.groupby(
         sunrise_series.index.date).ffill().bfill()
+    # Backfilling and front filling fills all NaN's, so we set cases not in
+    # the right day to NaN
+    sunrise_series.loc[sunrise_series.index.date !=
+                       sunrise_series.dt.date] = np.nan
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
@@ -273,12 +275,12 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     # mask and the first day mask. To do this, we subtract freq / 2 from
     # each sunrise time in the sunrise_series.
     elif data_alignment == 'C':
-        return (sunrise_series - (pd.Timedelta(freq) / 2))
+        return (sunrise_series - (to_offset(freq) / 2))
     # For right-aligned data, get the last nighttime mask datetime
     # before the first 'day' mask in the series. To do this, we subtract freq
     # from each sunrise time in the sunrise_series.
     elif data_alignment == 'R':
-        return (sunrise_series - pd.Timedelta(freq))
+        return (sunrise_series - to_offset(freq))
     else:
         # Throw an error if right,left, or center-alignment are not declared
         raise ValueError("No valid data alignment given. Please pass 'L'"
@@ -290,7 +292,6 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunset values for
     each day in the associated time series.
-
     Parameters
     ----------
     daytime_mask  : Series
@@ -303,7 +304,6 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
-
     Returns
     -------
     Series
@@ -315,6 +315,10 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
             daytime_mask.index)
     sunset_series = sunset_series.groupby(
         sunset_series.index.date).ffill().bfill()
+    # Backfilling and front filling fills all NaN's, so we set cases not in
+    # the right day to NaN
+    sunset_series.loc[sunset_series.index.date !=
+                      sunset_series.dt.date] = np.nan
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
@@ -322,12 +326,12 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     # after the day mask. To get this, we add freq to each sunset time in
     # the sunset time series.
     if data_alignment == 'L':
-        return (sunset_series + pd.Timedelta(freq))
+        return (sunset_series + to_offset(freq))
     # For center-aligned data, sunset is the midpoint between the last day
     # mask and the first nighttime mask. We calculate this by adding (freq / 2)
     # to each sunset time in the sunset_series.
     elif data_alignment == 'C':
-        return (sunset_series + (pd.Timedelta(freq) / 2))
+        return (sunset_series + (to_offset(freq) / 2))
     # For right-aligned data, the last 'day' mask time stamp is sunset.
     elif data_alignment == 'R':
         return sunset_series
