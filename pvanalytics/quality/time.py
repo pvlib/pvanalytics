@@ -79,9 +79,19 @@ def shifts_ruptures(event_times, reference_times,
     prediction_penalty : int, default 13
         Penalty used in assessing change points.
         See :py:meth:`ruptures.detection.Pelt.predict` for more information.
-    zscore_cutoff=2,
-    bottom_quantile_threshold=.5,
-    top_quantile_threshold=1
+    zscore_cutoff : int, default 2
+        Z-score cutoff / maximum for filtering out outliers in each identified
+        segment found via changepount detection
+    bottom_quantile_threshold : float, default 0
+        Bottom quantile threshold for each time series segment identified via
+        changepoint detection. All data below this threshold is not considered
+        when determining the mean value for the segment, which is later
+        rounded to the nearest `period_min` value
+    top_quantile_threshold : float, default 0.5
+        Top quantile threshold for each time series segment identified via
+        changepoint detection. All data above this threshold is not considered
+        when determining the mean value for the segment, which is later
+        rounded to the nearest `period_min` value
 
     Returns
     -------
@@ -139,12 +149,6 @@ def shifts_ruptures(event_times, reference_times,
     time_diff = \
         (event_times.tz_localize(None) -
          reference_times.tz_localize(None))
-    # Get the index before removing NaN's
-    time_diff_orig_index = time_diff.index
-    # # Remove any outliers that may skew the results
-    # zscore_outlier_mask = zscore(time_diff, zmax=zscore_cutoff,
-    #                              nan_policy='omit')
-    # time_diff.loc[zscore_outlier_mask] = np.nan
     # Remove NaN's from the time_diff series, because NaN's screw up the
     # ruptures prediction
     time_diff = time_diff.dropna()

@@ -11,6 +11,12 @@ Breaking Changes
   accounting for array incidence loss (IAM), and including losses in the PVWatts
   inverter model. Additionally, added optional arguments for bounding the azimuth range in
   during least squares optimization. (:issue:`147`, :pull:`180`)
+* Updated function :py:func:`~pvanalytics.quality.time.shifts_ruptures` to align with the
+  methodology tested and reported on at PVRW 2023 ("Survey of Time Shift Detection Algorithms
+  for Measured PV Data"). This includes converting the changepoint detection algorithm from
+  Pelt to Binary Segmentation (which runs much faster), and performing additional processing
+  to each detected segment to remove outliers and filter by a quantile cutoff instead of the
+  original rounding technique.
 
 
 Enhancements
