@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from pvanalytics import util
+from pandas.tseries.frequencies import to_offset
 
 
 def _rolling_by_minute(data, days, f):
