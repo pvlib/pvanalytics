@@ -485,26 +485,3 @@ def test_dst_dates(timezone, expected_dates):
         time.dst_dates(index.tz_localize(None), timezone),
         expected.tz_localize(None)
     )
-
-
-# def test_rounding():
-#     xs = pd.Series(
-#         [-10, 10, -16, 16, -28, 28, -30, 30, -8, 8, -7, 7, -3, 3, 0]
-#     )
-#     assert_series_equal(
-#         time._round_multiple(xs, 15),
-#         pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, -15, 15, 0, 0, 0, 0,
-#                     0])
-#     )
-#     assert_series_equal(
-#         time._round_multiple(xs, 15, up_from=9),
-#         pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
-#     )
-#     assert_series_equal(
-#         time._round_multiple(xs, 15, up_from=15),
-#         pd.Series([0, 0, -15, 15, -15, 15, -30, 30, 0, 0, 0, 0, 0, 0, 0])
-#     )
-#     assert_series_equal(
-#         time._round_multiple(xs, 30),
-#         pd.Series([0, 0, -30, 30, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
-#     )
