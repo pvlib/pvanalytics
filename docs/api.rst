@@ -69,12 +69,28 @@ There is function for calculating the component sum for GHI, DHI,
 and DNI, and correcting for nighttime periods. Using this function, we can
 estimate one irradiance field using the two other irradiance fields.
 This can be useful for comparison, as well as to
-calculate missing data fields. 
+calculate missing data fields.
 
 .. autosummary::
    :toctree: generated/
 
    quality.irradiance.calculate_component_sum_series
+
+The ``check_poa_global_limits_pvlive`` function flags the global plane of array
+irradiance measurements that are outside the limits described in [2]_.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.check_poa_global_limits_pvlive
+
+The ``check_ghi_limits_pvlive`` function flags the global horizontal irradiance
+measurements that are outside the limits described in [2]_.
+
+.. autosummary::
+   :toctree: generated/
+
+   quality.irradiance.check_ghi_limits_pvlive
 
 Gaps
 ----
@@ -196,6 +212,11 @@ the quality check.
 .. [1]  C. N. Long and Y. Shi, An Automated Quality Assessment and Control
         Algorithm for Surface Radiation Measurements, The Open Atmospheric
         Science Journal 2, pp. 23-37, 2008.
+
+.. [2]  E. Lorenz et al., High resolution measurement network of global 
+        horizontal and tilted solar irradiance in southern Germany with a new
+        quality control scheme, Solar Energy, Volume 231, pp. 593-606, 2022.
+        ISSN 0038-092X, https://doi.org/10.1016/j.solener.2021.11.023.
 
 Features
 ========

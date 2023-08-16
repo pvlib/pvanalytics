@@ -592,3 +592,266 @@ def calculate_component_sum_series(solar_zenith,
     return _fill_nighttime(component, component_sum_df,
                            fill_night_value,
                            solar_zenith, zenith_limit)
+
+
+def _upper_poa_global_limit_pvlive(aoi, solar_zenith, dni_extra):
+    r"""Function to calculate the upper limit of poa_global
+    """
+    # Changing aoi to 90 degrees when solar zenith is greater than 90 (sun
+    # below horizon) or aoi is greater than 90 (sun on the other side of
+    # the sensor/module's plane).
+    aoi = aoi.clip(lower=0, upper=90)
+
+    # Determining the upper limit
+    upper_limit = 0.9 * dni_extra * (cosd(aoi))**1.2 + 300
+
+    # Setting upper limit as 0 when solar zenith is > 90 (night time)
+    upper_limit[solar_zenith > 90] = 0
+
+    # Setting upper limit as undefined where solar_zenith or aoi is not
+    # available
+    upper_limit[(solar_zenith.isna()) | (aoi.isna())] = np.nan
+
+    return upper_limit
+
+
+def _lower_limit_pvlive(solar_zenith, dni_extra):
+    r"""Function to calculate the lower limit of poa_global and ghi
+    """
+    # Setting the lower_limit at 0.
+    lower_limit = pd.Series(0., index=solar_zenith.index)
+
+    # Determining the lower limit when solar zenith is < 75
+    lower_limit = lower_limit.mask(solar_zenith < 75,
+                                   0.01 * dni_extra * cosd(solar_zenith))
+
+    # Setting lower limit as undefined where solar_zenith is not available
+    lower_limit[solar_zenith.isna()] = np.nan
+
+    return lower_limit
+
+
+def check_poa_global_limits_pvlive(poa_global, solar_zenith, aoi,
+                                   dni_extra=1367.):
+    r"""Test for limits on POA global with pvlive algorithm.
+
+    Criteria from Section 6.1 of [1]_ are used to determine physically
+    plausible lower and upper bounds. Each value is tested and a value passes
+    if value > lower bound and value < upper bound. Also, steps with
+    change in magnitude of more than 1000 W/m2 are flagged. Lower bounds are
+    constant for all tests. Upper bounds are calculated as
+
+    .. math::
+        upper\_limit = 0.9 * dni\_extra * cos(aoi)^{1.2} + 300
+
+    Parameters
+    ----------
+    poa_global : Series
+        Global tilted irradiance [W/m^2]
+    solar_zenith : Series
+        Solar zenith angle [degrees]
+    aoi : Series
+        Angle of incidence [degrees]
+    dni_extra : float, default 1367.
+        Normal irradiance at the top of atmosphere [W/m^2]
+
+    Returns
+    -------
+    poa_global_limit_bool_flag : Series
+        True for each value that passes the test.
+    poa_global_limit_int_flag : Series
+        Series of integers representing the flag numbers described in the
+        [1]_.
+
+    Notes
+    -----
+    The upper limit for `poa_global` is set to 0 when `solar_zenith` is greater
+    than 90 degrees. Missing values of `poa_global`, `solar_zenith`
+    and/or `aoi` will result in a `False` flag.  Also, [1]_ mentions that the
+    proposed limits are for silicon sensors with a tilt of 25°.
+
+    References
+    ----------
+    .. [1] Elke Lorenz et al., High resolution measurement network of global
+           horizontal and tilted solar irradiance in southern Germany with a
+           new quality control scheme, Solar Energy, Volume 231, 2022,
+           Pages 593-606, ISSN 0038-092X,
+           https://doi.org/10.1016/j.solener.2021.11.023.
+    """
+    # Finding the upper and lower limit
+    upper_limit = _upper_poa_global_limit_pvlive(aoi, solar_zenith, dni_extra)
+    lower_limit = _lower_limit_pvlive(solar_zenith, dni_extra)
+
+    # Initiating a poa_global_limit_int_flag series
+    poa_global_limit_int_flag = pd.Series(0, index=solar_zenith.index)
+
+    # Changing the poa_global_flag to 3 when poa_global is above upper
+    # limit or below lower limit
+    poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
+        ((poa_global > upper_limit) |
+         (poa_global < lower_limit)),
+        3
+    )
+
+    # Changing the poa_global_flag to 3 when the step change in poa values is
+    # more than 1000 W/m2
+    poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
+        poa_global.diff().abs() > 1000,
+        3
+    )
+
+    # Changing the poa_global_flag to 1 when poa_global is not available
+    poa_global_limit_int_flag = poa_global_limit_int_flag.mask(
+        ((poa_global.isna()) |
+         (upper_limit.isna()) |
+         (lower_limit.isna())),
+        1
+    )
+
+    # Changing the poa_global_limit_bool_flag depending on
+    # poa_global_limit_int_flag
+    poa_global_limit_bool_flag = poa_global_limit_int_flag == 0
+
+    return poa_global_limit_bool_flag, poa_global_limit_int_flag
+
+
+def _upper_ghi_limit_pvlive_flag2(solar_zenith, dni_extra):
+    r"""Function to calculate the upper limit of ghi for Flag 2
+    """
+    # Determining the upper limit
+    upper_limit_flag2 = 1.2 * dni_extra * cosd(solar_zenith) + 50
+
+    # Setting upper limit as 0 when solar zenith is > 90 (night time)
+    upper_limit_flag2[solar_zenith > 90] = 0
+
+    # Setting upper limit as undefined where solar_zenith is not available
+    upper_limit_flag2[solar_zenith.isna()] = np.nan
+
+    return upper_limit_flag2
+
+
+def _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra):
+    r"""Function to calculate the upper limit of ghi for Flag 3
+    """
+    # Determining the upper limit
+    upper_limit_flag3 = np.minimum(
+        pd.Series(1.2 * dni_extra, index=solar_zenith.index),
+        1.5 * dni_extra * (cosd(solar_zenith))**1.2 + 100
+        )
+
+    # Setting upper limit as 0 when solar zenith is > 90 (night time)
+    upper_limit_flag3[solar_zenith > 90] = 0
+
+    # Setting upper limit as undefined where solar_zenith is not available
+    upper_limit_flag3[solar_zenith.isna()] = np.nan
+
+    return upper_limit_flag3
+
+
+def check_ghi_limits_pvlive(ghi, solar_zenith, dni_extra=1367.):
+    r"""Test for limits on GHI with pvlive algorithm.
+
+    The pvlive algorithm [1]_ defines a lower bound, two upper bounds (rare and extreme),
+    and a limit on the change between successive GHI values. A value is physically plausible
+    if:
+    
+     * the value is greater than the lower bound
+     * the value is less than both the rare and extreme upper bounds
+     * the step change to the next GHI value is less than the step change limit
+        of :math:`1000 W/m^{2}` 
+
+
+    The upper limit for rare values is
+
+    .. math::
+        upper\_limit_{\mathbf{Flag\_2}} = 1.2 * dni\_extra * cos(solar\_zenith)
+        + 50
+
+    The upper limit for extreme values is
+
+    .. math::
+        upper\_limit_{\mathbf{Flag\_3}} = min(1.2 * dni\_extra,
+        1.5 * dni\_extra * cos(solar\_zenith)^{1.2} + 100)
+
+    Parameters
+    ----------
+    ghi : Series
+        Global horizontal irradiance [W/m^2]
+    solar_zenith : Series
+        Solar zenith angle [degrees]
+    dni_extra : float, default 1367
+        normal irradiance at the top of atmosphere [W/m^2]
+
+    Returns
+    -------
+    ghi_limit_bool_flag : Series
+        True for each value that is physically possible.
+    ghi_limit_int_flag : Series
+        Series of integers representing the flag numbers described in the
+        literature. [1]_:
+
+        * 0 the value is physically plausible
+        * 1 the value is missing
+        * 2 the value exceeds the rare value upper limit
+        * 3 the value is less than the lower limit, exceeds the extreme value upper limit,
+          or has a step change greater than the step change limit. 
+
+    Notes
+    -----
+    The upper limits for `ghi` are set to 0 at night when `solar_zenith` is greater
+    than 90 degrees. Missing values of `ghi` and/or `solar_zenith` will result
+    in a `False` plausible value flag. Also, [1]_ mentions that the proposed limits are for
+    silicon sensors with a tilt of 25°.
+
+    References
+    ----------
+    .. [1] Elke Lorenz et al., High resolution measurement network of global
+           horizontal and tilted solar irradiance in southern Germany with a
+           new quality control scheme, Solar Energy, Volume 231, 2022,
+           Pages 593-606, ISSN 0038-092X,
+           https://doi.org/10.1016/j.solener.2021.11.023.
+    """
+    # Finding the upper limit for flag 2 and flag 3
+    upper_limit_flag2 = _upper_ghi_limit_pvlive_flag2(solar_zenith, dni_extra)
+    upper_limit_flag3 = _upper_ghi_limit_pvlive_flag3(solar_zenith, dni_extra)
+
+    # Finding the lower limit for flag 3
+    lower_limit = _lower_limit_pvlive(solar_zenith, dni_extra)
+
+    # Initiating a ghi_limit_int_flag series
+    ghi_limit_int_flag = pd.Series(0, index=solar_zenith.index)
+
+    # Changing the ghi_limit_int_flag to 2 when ghi is above upper_limit_flag2
+    ghi_limit_int_flag = ghi_limit_int_flag.mask(
+        (ghi > upper_limit_flag2),
+        2
+    )
+
+    # Changing the ghi_limit_int_flag to 3 when ghi is above upper_limit_flag3
+    # or lower than the lower_limit
+    ghi_limit_int_flag = ghi_limit_int_flag.mask(
+        (ghi > upper_limit_flag3) |
+        (ghi < lower_limit),
+        3
+    )
+
+    # Changing the ghi_limit_int_flag to 3 when the step change in ghi values
+    # is more than 1000 W/m2
+    ghi_limit_int_flag = ghi_limit_int_flag.mask(
+        (ghi.diff().abs() > 1000),
+        3
+    )
+
+    # Changing the ghi_limit_int_flag to 1 when ghi is not available
+    ghi_limit_int_flag = ghi_limit_int_flag.mask(
+        ((ghi.isna()) |
+         (upper_limit_flag2.isna()) |
+         (upper_limit_flag3.isna()) |
+         (lower_limit.isna())),
+        1
+    )
+
+    # Changing the ghi_limit_bool_flag depending on ghi_limit_int_flag
+    ghi_limit_bool_flag = ghi_limit_int_flag == 0
+
+    return ghi_limit_bool_flag, ghi_limit_int_flag
