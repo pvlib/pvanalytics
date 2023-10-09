@@ -77,8 +77,8 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
     day_periods = (~night).astype(int)
-    day_length = 1 + day_periods.groupby(
-        night.cumsum()).transform('sum') * minutes_per_value
+    day_length = (1 + day_periods.groupby(
+        night.cumsum()).transform('sum')) * minutes_per_value
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
