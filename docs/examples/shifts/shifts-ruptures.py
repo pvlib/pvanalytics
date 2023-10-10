@@ -17,7 +17,8 @@ Identifying time shifts from clock errors or uncorrected Daylight Saving Time.
 import pvlib
 import pandas as pd
 from pvanalytics.quality.time import shifts_ruptures
-from pvanalytics.features.daytime import power_or_irradiance
+from pvanalytics.features.daytime import (power_or_irradiance,
+                                          get_sunrise, get_sunset)
 import matplotlib.pyplot as plt
 
 
@@ -46,10 +47,10 @@ measured_signal = cs['ghi']
 # :py:func:`~pvanalytics.features.daytime.power_or_irradiance`.
 
 is_daytime = power_or_irradiance(measured_signal)
-daytime_timestamps = measured_signal.index[is_daytime].to_series()
-grouper = daytime_timestamps.resample('d')
-sunrise_timestamps = grouper.first()
-sunset_timestamps = grouper.last()
+sunrise_timestamps = get_sunrise(is_daytime)
+sunrise_timestamps = sunrise_timestamps.resample('d').first().dropna()
+sunset_timestamps = get_sunset(is_daytime)
+sunset_timestamps = sunset_timestamps.resample('d').first().dropna()
 
 
 def ts_to_minutes(ts):
