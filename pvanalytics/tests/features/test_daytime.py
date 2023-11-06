@@ -41,11 +41,9 @@ def modeled_midday_series(ac_power_series):
         ac_power_series.index, 39.742, -105.1727)
     modeled_sunrise_sunset_df.index = modeled_sunrise_sunset_df.index.date
     modeled_sunrise_sunset_df = modeled_sunrise_sunset_df.drop_duplicates()
-    # Calculate the midday point between sunrise and sunset for each day
-    # in the modeled irradiance series
-    modeled_midday_series = modeled_sunrise_sunset_df['sunrise'] + \
-        (modeled_sunrise_sunset_df['sunset'] -
-         modeled_sunrise_sunset_df['sunrise']) / 2
+    # Take the 'transit' column as the midday point between sunrise and
+    # sunset for each day in the modeled irradiance series
+    modeled_midday_series = modeled_sunrise_sunset_df['transit']
     return modeled_midday_series
 
 
