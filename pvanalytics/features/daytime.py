@@ -236,6 +236,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunrise values for
     each day in the associated time series.
+
     Parameters
     ----------
     daytime_mask_series  : Series
