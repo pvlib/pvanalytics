@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import pvlib
 from pvlib.location import Location
-from datetime import datetime, date
+from datetime import date
 from pvanalytics.features import daytime
 from ..conftest import DATA_DIR
 
