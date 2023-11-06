@@ -280,8 +280,8 @@ def test_get_sunrise_right_alignment(daytime_mask_right_aligned):
     sunrise_right_aligned = daytime.get_sunrise(daytime_mask_right_aligned,
                                                 data_alignment='R')
     # Assert that the output time series index is the same as the input
-    assert pd.testing.assert_index_equal(sunrise_right_aligned.index,
-                                         daytime_mask_right_aligned.index)
+    pd.testing.assert_index_equal(sunrise_right_aligned.index,
+                                  daytime_mask_right_aligned.index)
     # Check that the output matches expected
     sunrise_3_19 = sunrise_right_aligned[sunrise_right_aligned.index.date ==
                                          date(2022, 3, 19)]
