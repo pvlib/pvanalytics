@@ -21,8 +21,8 @@ Source code: https://github.com/pvlib/pvanalytics
 """
 
 DISTNAME = 'pvanalytics'
-MAINTAINER = "Will Vining"
-MAINTAINER_EMAIL = 'wfvinin@sandia.gov'
+AUTHOR = 'pvanalytics Contributors'
+MAINTAINER_EMAIL = 'pvlib-admin@googlegroups.com'
 LICENSE = 'MIT'
 URL = 'https://github.com/pvlib/pvanalytics'
 
@@ -79,7 +79,7 @@ setup(
     ext_modules=[],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    maintainer=MAINTAINER,
+    author=AUTHOR,
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     classifiers=CLASSIFIERS,

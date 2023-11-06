@@ -77,9 +77,9 @@ def _correct_edge_of_day_errors(night, minutes_per_value,
     # the day/night boundary at one end of the day - sunrise or sunset
     # - was correctly marked, it will be replaced with the rolling
     # median for that minute).
-    day_length = night.groupby(night.cumsum()).transform(
-        lambda x: len(x) * minutes_per_value
-    )
+    day_periods = (~night).astype(int)
+    day_length = (1 + day_periods.groupby(
+        night.cumsum()).transform('sum')) * minutes_per_value
     # remove night time values so they don't interfere with the median
     # day length.
     day_length.loc[night] = np.nan
@@ -176,6 +176,7 @@ def power_or_irradiance(series, outliers=None,
         median length of the day when correcting errors in the morning
         or afternoon. [days]
 
+
     Returns
     -------
     Series
@@ -201,7 +202,6 @@ def power_or_irradiance(series, outliers=None,
         days=median_days,
         f=pd.core.window.RollingGroupby.median
     )
-
     # Night-time if two of the following are satisfied:
     # - Near-zero value
     # - Near-zero first-order derivative
@@ -213,6 +213,7 @@ def power_or_irradiance(series, outliers=None,
     night = ((low_value & low_diff)
              | (low_value & low_median)
              | (low_diff & low_median))
+
     # Fix erroneous classifications (e.g. midday outages where power
     # goes to 0 and stays there for several hours, clipping classified
     # as night, and night-time periods that are too long)
@@ -235,6 +236,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunrise values for
     each day in the associated time series.
+
     Parameters
     ----------
     daytime_mask_series  : Series

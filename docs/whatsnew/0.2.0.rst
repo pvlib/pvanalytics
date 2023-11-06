@@ -1,6 +1,6 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated June 2023)
+0.2.0 (anticipated December 2023)
 -----------------------------
 
 Breaking Changes
@@ -23,6 +23,9 @@ Enhancements
   for calculating the daily sunset datetimes for a time series, based on the
   :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
   (:pull:`187`)
+* Updated function :py:func:`~pvanalytics.features.daytime.power_or_irradiance`
+  to be more performant by vectorization; the original logic was using a lambda call that was
+  slowing the function speed down considerably. This update resulted in a ~50X speedup. (:pull:`186`)
 
 
 Bug Fixes
@@ -30,6 +33,7 @@ Bug Fixes
 * ``pvanalytics.__version__`` now correctly reports the version string instead
   of raising ``AttributeError``. (:pull:`181`)
 * Compatibility with pandas 2.0.0 (:pull:`185`)
+* Compatibility with scipy 1.11 (:pull:`196`)
 
 Requirements
 ~~~~~~~~~~~~
