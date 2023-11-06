@@ -232,6 +232,19 @@ def power_or_irradiance(series, outliers=None,
     return ~night_corrected_edges
 
 
+def _get_sunrise_sunset_daily_series(daytime_mask, transform):
+    # Get the sunset/sunrise series based on getting the first or last
+    # 'day' value for each day in the time series
+    series = daytime_mask.index[daytime_mask].to_series().groupby(
+        daytime_mask[daytime_mask].index.date).transform(transform).reindex(
+            daytime_mask.index)
+    series = series.groupby(series.index.date).ffill().bfill()
+    # Backfilling and front filling fills all NaN's, so we set cases not in
+    # the right day to NaN
+    series.loc[series.index.date != series.dt.date] = np.nan
+    return series
+
+
 def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunrise values for
@@ -256,15 +269,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         This series has the same index as the passed daytime_mask series.
     """
     # Get the first day period for each day
-    sunrise_series = daytime_mask.index[daytime_mask].to_series().groupby(
-        daytime_mask[daytime_mask].index.date).transform('first').reindex(
-            daytime_mask.index)
-    sunrise_series = sunrise_series.groupby(
-        sunrise_series.index.date).ffill().bfill()
-    # Backfilling and front filling fills all NaN's, so we set cases not in
-    # the right day to NaN
-    sunrise_series.loc[sunrise_series.index.date !=
-                       sunrise_series.dt.date] = np.nan
+    sunrise_series = _get_sunrise_sunset_daily_series(daytime_mask, "first")
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
@@ -313,15 +318,8 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
         Series of daily sunset times, based on the daytime_mask series.
         This series has the same index as the passed daytime_mask series.
     """
-    sunset_series = daytime_mask.index[daytime_mask].to_series().groupby(
-        daytime_mask[daytime_mask].index.date).transform('last').reindex(
-            daytime_mask.index)
-    sunset_series = sunset_series.groupby(
-        sunset_series.index.date).ffill().bfill()
-    # Backfilling and front filling fills all NaN's, so we set cases not in
-    # the right day to NaN
-    sunset_series.loc[sunset_series.index.date !=
-                      sunset_series.dt.date] = np.nan
+    # Get the last day period for each day
+    sunset_series = _get_sunrise_sunset_daily_series(daytime_mask, "last")
     # If there's no frequency value, infer it from the daytime_mask series
     if not freq:
         freq = pd.infer_freq(daytime_mask.index)
