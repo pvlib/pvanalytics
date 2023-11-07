@@ -176,7 +176,6 @@ def power_or_irradiance(series, outliers=None,
         median length of the day when correcting errors in the morning
         or afternoon. [days]
 
-
     Returns
     -------
     Series
@@ -250,6 +249,13 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     Using the outputs of power_or_irradiance(), derive sunrise values for
     each day in the associated time series.
 
+    This function assumes that each midnight-to-midnight period
+    (according to the timezone of the input data) has one sunrise
+    followed by one sunset. In cases where this is not satisfied
+    (timezone of data is substantially different from the location's
+     local time, locations near the poles, etc), or in the case of missing
+    data, the estimated sunrise and sunset times may be invalid.
+
     Parameters
     ----------
     daytime_mask_series  : Series
@@ -262,6 +268,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
+
     Returns
     -------
     Series
@@ -300,6 +307,14 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     """
     Using the outputs of power_or_irradiance(), derive sunset values for
     each day in the associated time series.
+
+    This function assumes that each midnight-to-midnight period
+    (according to the timezone of the input data) has one sunrise
+    followed by one sunset. In cases where this is not satisfied
+    (timezone of data is substantially different from the location's
+     local time, locations near the poles, etc), or in the case of missing
+    data, the estimated sunrise and sunset times may be invalid.
+
     Parameters
     ----------
     daytime_mask  : Series
@@ -312,6 +327,7 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
+
     Returns
     -------
     Series
