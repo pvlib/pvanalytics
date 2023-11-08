@@ -246,7 +246,7 @@ def _get_sunrise_sunset_daily_series(daytime_mask, transform):
 
 def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
-    Using the outputs of power_or_irradiance(), derive sunrise values for
+    Using the outputs of :py:func:`power_or_irradiance`, derive sunrise values for
     each day in the associated time series.
 
     This function assumes that each midnight-to-midnight period
