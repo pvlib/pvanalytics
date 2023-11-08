@@ -253,8 +253,8 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     (according to the timezone of the input data) has one sunrise
     followed by one sunset. In cases where this is not satisfied
     (timezone of data is substantially different from the location's
-     local time, locations near the poles, etc), or in the case of missing
-    data, the estimated sunrise and sunset times may be invalid.
+    local time, locations near the poles, etc), or in the case of missing
+    data, the returned sunrise and sunset times may be invalid.
 
     Parameters
     ----------
