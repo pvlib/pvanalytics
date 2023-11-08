@@ -264,7 +264,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     freq : str, optional
         A pandas freqstr specifying the expected timestamp spacing for
         the series. If None, the frequency will be inferred from the index.
-    data_alignment  : String, default 'L'
+    data_alignment  : str, default 'L'
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
