@@ -258,7 +258,7 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
 
     Parameters
     ----------
-    daytime_mask_series  : Series
+    daytime_mask  : Series
         Boolean series delineating night periods from day periods, where
         day is True and night is False.
     freq : str, optional
