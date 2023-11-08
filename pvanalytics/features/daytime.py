@@ -246,8 +246,8 @@ def _get_sunrise_sunset_daily_series(daytime_mask, transform):
 
 def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     """
-    Using the outputs of :py:func:`power_or_irradiance`, derive sunrise values for
-    each day in the associated time series.
+    Using the outputs of :py:func:`power_or_irradiance`, derive sunrise values
+    for each day in the associated time series.
 
     This function assumes that each midnight-to-midnight period
     (according to the timezone of the input data) has one sunrise
@@ -263,7 +263,8 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
         day is True and night is False.
     freq : str, optional
         A pandas freqstr specifying the expected timestamp spacing for
-        the series. If None, the frequency will be inferred from the index of ``daytime_mask``.
+        the series. If None, the frequency will be inferred from the index of
+        ``daytime_mask``.
     data_alignment  : str, default 'L'
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
@@ -304,25 +305,26 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
 
 def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     """
-    Using the outputs of power_or_irradiance(), derive sunset values for
-    each day in the associated time series.
+    Using the outputs of :py:func:`power_or_irradiance`, derive sunset
+    values for each day in the associated time series.
 
     This function assumes that each midnight-to-midnight period
     (according to the timezone of the input data) has one sunrise
     followed by one sunset. In cases where this is not satisfied
     (timezone of data is substantially different from the location's
      local time, locations near the poles, etc), or in the case of missing
-    data, the estimated sunrise and sunset times may be invalid.
+    data, the returned sunrise and sunset times may be invalid.
 
     Parameters
     ----------
     daytime_mask  : Series
         Boolean series delineating night periods from day periods, where
         day is True and night is False.
-    freq : str, optional
+    freq  : str, optional
         A pandas freqstr specifying the expected timestamp spacing for
-        the series. If None, the frequency will be inferred from the index.
-    data_alignment  : String, default 'L'
+        the series. If None, the frequency will be inferred from the index
+        of ``daytime_mask``.
+    data_alignment  : str, default 'L'
         The data alignment of the series (left-aligned or right-aligned). Data
         alignment affects the value selected as sunrise. Options are 'L' (left-
         aligned), 'R' (right-aligned), or 'C' (center-aligned)
@@ -330,8 +332,7 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     Returns
     -------
     Series
-        Series of daily sunset times, based on the daytime_mask series.
-        This series has the same index as the passed daytime_mask series.
+        Series of daily sunrise times with the same index as ``daytime_mask``.
     """
     # Get the last day period for each day
     sunset_series = _get_sunrise_sunset_daily_series(daytime_mask, "last")
