@@ -187,8 +187,10 @@ def power_or_irradiance(series, outliers=None,
 
     ``NA`` values are treated like zeros.
 
-    Derived from the PVFleets QA Analysis project.
-
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
     """
     series = series.fillna(value=0)
     series_norm = _filter_and_normalize(series, outliers).fillna(value=0)
@@ -274,6 +276,11 @@ def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
     -------
     Series
         Series of daily sunrise times with the same index as ``daytime_mask``.
+
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
     """
     # Get the first day period for each day
     sunrise_series = _get_sunrise_sunset_daily_series(daytime_mask, "first")
@@ -333,6 +340,11 @@ def get_sunset(daytime_mask, freq=None, data_alignment='L'):
     -------
     Series
         Series of daily sunrise times with the same index as ``daytime_mask``.
+
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
     """
     # Get the last day period for each day
     sunset_series = _get_sunrise_sunset_daily_series(daytime_mask, "last")
