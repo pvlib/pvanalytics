@@ -6,9 +6,9 @@ import pvlib
 from pvlib.location import Location
 from datetime import date
 from pvanalytics.features import daytime
-#from ..conftest import DATA_DIR
+from ..conftest import DATA_DIR
 
-test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"#DATA_DIR / "serf_east_1min_ac_power.csv"
+test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
 
 
 @pytest.fixture(scope='module',
