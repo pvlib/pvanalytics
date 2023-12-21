@@ -78,7 +78,7 @@ def shifts_ruptures(event_times, reference_times,
         of `shift_min`. [minutes]
     prediction_penalty : int, default 13
         Penalty used in assessing change points.
-        See :py:meth:`ruptures.detection.Pelt.predict` for more information.
+        See :py:meth:`ruptures.detection.Binseg.predict` for more information.
     zscore_cutoff : int, default 2
         Z-score cutoff / maximum for filtering out outliers in each identified
         segment found via changepount detection
