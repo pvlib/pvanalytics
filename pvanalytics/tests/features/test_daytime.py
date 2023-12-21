@@ -6,9 +6,9 @@ import pvlib
 from pvlib.location import Location
 from datetime import date
 from pvanalytics.features import daytime
-from ..conftest import DATA_DIR
+#from ..conftest import DATA_DIR
 
-test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
+test_file_1 = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/serf_east_1min_ac_power.csv"#DATA_DIR / "serf_east_1min_ac_power.csv"
 
 
 @pytest.fixture(scope='module',
@@ -383,3 +383,10 @@ def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
                           midday_series_center.drop_duplicates())
     assert (midday_diff_right.equals(midday_diff_left) &
             midday_diff_center.equals(midday_diff_right))
+    # Assert that the difference between modeled midday for midday 
+    # center-aligned data (and consequently left- and right-aligned,
+    # which are asserted above as identical to center-aligned data) is less
+    # than 10 minutes/600 seconds (this threshold was generally considered
+    # noise in the time shift detection paper).
+    assert all(midday_diff_center.dt.seconds <=600)
+    
