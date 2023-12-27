@@ -388,4 +388,4 @@ def test_consistent_modeled_midday_series(daytime_mask_right_aligned,
     # which are asserted above as identical to center-aligned data) is less
     # than 10 minutes/600 seconds (this threshold was generally considered
     # noise in the time shift detection paper).
-    assert all(midday_diff_center.dt.seconds <= 600)
+    assert all(midday_diff_center.dt.total_seconds().abs() <= 600)
