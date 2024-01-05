@@ -1,6 +1,6 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated August 2023)
+0.2.0 (anticipated December 2023)
 -----------------------------
 
 Breaking Changes
@@ -21,6 +21,14 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunrise`
+  for calculating the daily sunrise datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunset`
+  for calculating the daily sunset datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
 * Updated function :py:func:`~pvanalytics.features.daytime.power_or_irradiance`
   to be more performant by vectorization; the original logic was using a lambda call that was
   slowing the function speed down considerably. This update resulted in a ~50X speedup. (:pull:`186`)

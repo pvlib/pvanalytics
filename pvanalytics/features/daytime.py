@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from pvanalytics import util
+from pandas.tseries.frequencies import to_offset
 
 
 def _rolling_by_minute(data, days, f):
@@ -175,7 +176,6 @@ def power_or_irradiance(series, outliers=None,
         median length of the day when correcting errors in the morning
         or afternoon. [days]
 
-
     Returns
     -------
     Series
@@ -187,8 +187,10 @@ def power_or_irradiance(series, outliers=None,
 
     ``NA`` values are treated like zeros.
 
-    Derived from the PVFleets QA Analysis project.
-
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
     """
     series = series.fillna(value=0)
     series_norm = _filter_and_normalize(series, outliers).fillna(value=0)
@@ -229,3 +231,141 @@ def power_or_irradiance(series, outliers=None,
         correction_window
     )
     return ~night_corrected_edges
+
+
+def _get_sunrise_sunset_daily_series(daytime_mask, transform):
+    # Get the sunset/sunrise series based on getting the first or last
+    # 'day' value for each day in the time series
+    series = daytime_mask.index[daytime_mask].to_series().groupby(
+        daytime_mask[daytime_mask].index.date).transform(transform).reindex(
+            daytime_mask.index)
+    series = series.groupby(series.index.date).ffill().bfill()
+    # Backfilling and front filling fills all NaN's, so we set cases not in
+    # the right day to NaN
+    series.loc[series.index.date != series.dt.date] = np.nan
+    return series
+
+
+def get_sunrise(daytime_mask, freq=None, data_alignment='L'):
+    """
+    Using the outputs of :py:func:`power_or_irradiance`, derive sunrise values
+    for each day in the associated time series.
+
+    This function assumes that each midnight-to-midnight period
+    (according to the timezone of the input data) has one sunrise
+    followed by one sunset. In cases where this is not satisfied
+    (timezone of data is substantially different from the location's
+    local time, locations near the poles, etc), or in the case of missing
+    data, the returned sunrise and sunset times may be invalid.
+
+    Parameters
+    ----------
+    daytime_mask  : Series
+        Boolean series delineating night periods from day periods, where
+        day is True and night is False.
+    freq : str, optional
+        A pandas freqstr specifying the expected timestamp spacing for
+        the series. If None, the frequency will be inferred from the index of
+        ``daytime_mask``.
+    data_alignment  : str, default 'L'
+        The data alignment of the series (left-aligned or right-aligned). Data
+        alignment affects the value selected as sunrise. Options are 'L' (left-
+        aligned), 'R' (right-aligned), or 'C' (center-aligned)
+
+    Returns
+    -------
+    Series
+        Series of daily sunrise times with the same index as ``daytime_mask``.
+
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
+    """
+    # Get the first day period for each day
+    sunrise_series = _get_sunrise_sunset_daily_series(daytime_mask, "first")
+    # If there's no frequency value, infer it from the daytime_mask series
+    if not freq:
+        freq = pd.infer_freq(daytime_mask.index)
+    # For left-aligned data, we want the first 'day' mask for
+    # each day in the series; this will act as a proxy for sunrise.
+    # Because of this, we will just return the sunrise_series with
+    # no modifications
+    if data_alignment == 'L':
+        return sunrise_series
+    # For center-aligned data, we want the mid-point between the last night
+    # mask and the first day mask. To do this, we subtract freq / 2 from
+    # each sunrise time in the sunrise_series.
+    elif data_alignment == 'C':
+        return (sunrise_series - (to_offset(freq) / 2))
+    # For right-aligned data, get the last nighttime mask datetime
+    # before the first 'day' mask in the series. To do this, we subtract freq
+    # from each sunrise time in the sunrise_series.
+    elif data_alignment == 'R':
+        return (sunrise_series - to_offset(freq))
+    else:
+        # Throw an error if right,left, or center-alignment are not declared
+        raise ValueError("No valid data alignment given. Please pass 'L'"
+                         " for left-aligned data, 'R' for right-aligned data,"
+                         " or 'C' for center-aligned data.")
+
+
+def get_sunset(daytime_mask, freq=None, data_alignment='L'):
+    """
+    Using the outputs of :py:func:`power_or_irradiance`, derive sunset
+    values for each day in the associated time series.
+
+    This function assumes that each midnight-to-midnight period
+    (according to the timezone of the input data) has one sunrise
+    followed by one sunset. In cases where this is not satisfied
+    (timezone of data is substantially different from the location's
+     local time, locations near the poles, etc), or in the case of missing
+    data, the returned sunrise and sunset times may be invalid.
+
+    Parameters
+    ----------
+    daytime_mask  : Series
+        Boolean series delineating night periods from day periods, where
+        day is True and night is False.
+    freq  : str, optional
+        A pandas freqstr specifying the expected timestamp spacing for
+        the series. If None, the frequency will be inferred from the index
+        of ``daytime_mask``.
+    data_alignment  : str, default 'L'
+        The data alignment of the series (left-aligned or right-aligned). Data
+        alignment affects the value selected as sunrise. Options are 'L' (left-
+        aligned), 'R' (right-aligned), or 'C' (center-aligned)
+
+    Returns
+    -------
+    Series
+        Series of daily sunrise times with the same index as ``daytime_mask``.
+
+    References
+    -------
+    .. [1] Perry K., Meyers B., and Muller, M. "Survey of Time Shift Detection
+       Algorithms for Measured PV Data", 2023 PV Reliability Workshop (PVRW).
+    """
+    # Get the last day period for each day
+    sunset_series = _get_sunrise_sunset_daily_series(daytime_mask, "last")
+    # If there's no frequency value, infer it from the daytime_mask series
+    if not freq:
+        freq = pd.infer_freq(daytime_mask.index)
+    #  For left-aligned data, sunset is the first nighttime period
+    # after the day mask. To get this, we add freq to each sunset time in
+    # the sunset time series.
+    if data_alignment == 'L':
+        return (sunset_series + to_offset(freq))
+    # For center-aligned data, sunset is the midpoint between the last day
+    # mask and the first nighttime mask. We calculate this by adding (freq / 2)
+    # to each sunset time in the sunset_series.
+    elif data_alignment == 'C':
+        return (sunset_series + (to_offset(freq) / 2))
+    # For right-aligned data, the last 'day' mask time stamp is sunset.
+    elif data_alignment == 'R':
+        return sunset_series
+    else:
+        # Throw an error if right, left, or center-alignment are not declared
+        raise ValueError("No valid data alignment given. Please pass 'L'"
+                         " for left-aligned data, 'R' for right-aligned data,"
+                         " or 'C' for center-aligned data.")
