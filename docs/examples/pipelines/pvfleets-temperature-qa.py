@@ -14,17 +14,11 @@ PV Fleets Temperature QA Pipeline
 
 import pandas as pd
 import pathlib
-import glob
-import timezonefinder
-from statistics import mode
-import numpy as np
 from matplotlib import pyplot as plt
-import rdtools
 import pvanalytics
 from pvanalytics.quality import data_shifts as ds
 from pvanalytics.quality import gaps
 from pvanalytics.quality.outliers import zscore
-from pvanalytics.system import is_tracking_envelope
 
 # %%
 # First, we import a module temperature data stream from a PV installation
@@ -53,7 +47,7 @@ plt.show()
 # %%
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
-# 1) Flatlined/stale data periods 
+# 1) Flatlined/stale data periods
 #    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) "Abnormal" data periods, which are out of the temperature limits of
 #    -40 to 185 deg C. Additional checks based on thresholds are applied
@@ -98,11 +92,11 @@ if data_stream_type == 'module':
         temperature_limit_mask = (temperature_limit_mask & module_limit_mask)
 if data_stream_type == 'ambient':
     ambient_limit_mask = pvanalytics.quality.weather.temperature_limits(
-            time_series, limits=(-40, 120))
+        time_series, limits=(-40, 120))
     temperature_limit_mask = (temperature_limit_mask & ambient_limit_mask)
     if temp_units == 'C':
         ambient_limit_mask_2 = (time_series <= 50)
-        temperature_limit_mask = (temperature_limit_mask & 
+        temperature_limit_mask = (temperature_limit_mask &
                                   ambient_limit_mask_2)
 # Get the percentage of data flagged for each issue, so it can later be logged
 pct_stale = round((len(time_series[
@@ -118,17 +112,17 @@ labels = ["Temperature"]
 if any(stale_data_mask):
     time_series.loc[stale_data_mask].plot(ls='',
                                           marker='o',
-                                          color = "green")
+                                          color="green")
     labels.append("Stale")
 if any(~temperature_limit_mask):
     time_series.loc[~temperature_limit_mask].plot(ls='',
                                                   marker='o',
-                                                  color = "yellow")
+                                                  color="yellow")
     labels.append("Abnormal")
 if any(zscore_outlier_mask):
     time_series.loc[zscore_outlier_mask].plot(ls='',
                                               marker='o',
-                                              color = "purple")
+                                              color="purple")
     labels.append("Outlier")
 plt.legend(labels=labels)
 plt.title("Time Series Labeled for Basic Issues")
@@ -150,7 +144,7 @@ time_series = time_series[~zscore_outlier_mask]
 time_series = time_series.asfreq(data_freq)
 
 # Visualize the time series post-filtering
-time_series.plot(title = "Time Series Post-Basic Data Filtering")
+time_series.plot(title="Time Series Post-Basic Data Filtering")
 plt.show()
 
 # %%
@@ -189,7 +183,7 @@ time_series = time_series.asfreq(data_freq)
 # Resample the time series to daily mean
 time_series_daily = time_series.resample('D').mean()
 data_shift_start_date, data_shift_end_date = \
-            ds.get_longest_shift_segment_dates(time_series_daily)
+    ds.get_longest_shift_segment_dates(time_series_daily)
 data_shift_period_length = (data_shift_end_date -
                             data_shift_start_date).days
 
@@ -198,7 +192,7 @@ data_shift_mask = pvanalytics.quality.data_shifts.detect_data_shifts(
     time_series_daily)
 # Get the shift dates
 shift_dates = list(time_series_daily[data_shift_mask].index)
-if len(shift_dates) > 0:         
+if len(shift_dates) > 0:
     shift_found = True
 else:
     shift_found = False
@@ -244,6 +238,3 @@ qa_check_dict = {"temperature_units": temp_units,
 
 print("QA Results:")
 print(qa_check_dict)
-
-
-
