@@ -21,7 +21,6 @@ from pvanalytics.quality import data_shifts as ds
 from pvanalytics.quality import gaps
 from pvanalytics.quality.outliers import zscore
 from pvanalytics.features.daytime import power_or_irradiance
-from pvanalytics.system import is_tracking_envelope
 from pvanalytics.quality.time import shifts_ruptures
 from pvanalytics.features import daytime
 
