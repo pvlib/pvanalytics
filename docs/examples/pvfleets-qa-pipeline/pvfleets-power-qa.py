@@ -1,16 +1,16 @@
 """
-PV Fleets QA Process: Temperature
-=================================
+PV Fleets QA Process: Power
+===========================
 
-PV Fleets Temperature QA Pipeline
+PV Fleets Power QA Pipeline
 """
 
 # %%
 # The NREL PV Fleets Data Initiative uses PVAnalytics routines to assess the
 # quality of systems' PV data. In this example, the PV Fleets process for
-# assessing the data quality of a temperature data stream is shown. This
+# assessing the data quality of an AC power data stream is shown. This
 # example pipeline illustrates how several PVAnalytics functions can be used
-# in sequence to assess the quality of a temperature data stream.
+# in sequence to assess the quality of a power or energy data stream.
 
 import pandas as pd
 import pathlib
