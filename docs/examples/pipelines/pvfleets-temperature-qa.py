@@ -214,7 +214,6 @@ for (st, ed) in zip(edges[:-1], edges[1:]):
 plt.title("Daily Time Series Labeled for Data Shifts")
 plt.show()
 
-
 # %%
 # Finally, we filter the time series to only include the longest
 # shift-free period. We then visualize the final time series post-QA filtering.
@@ -231,7 +230,20 @@ time_series = time_series.asfreq(data_freq)
 time_series.plot(title="Final Filtered Time Series")
 plt.show()
 
+# %%
+# Generate a dictionary output for the QA assessment of this data stream,
+# including the percent stale and erroneous data detected, any shift dates,
+# and the detected temperature units for the data stream.
 
+qa_check_dict = {"temperature_units": temp_units,
+                 "pct_stale": pct_stale,
+                 "pct_erroneous": pct_erroneous,
+                 "pct_outlier": pct_outlier,
+                 "data_shifts": shift_found,
+                 "shift_dates": shift_dates}
+
+print("QA Results:")
+print(qa_check_dict)
 
 
 
