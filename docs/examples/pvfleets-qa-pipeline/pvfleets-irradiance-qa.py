@@ -212,19 +212,18 @@ modeled_midday_series_daily = \
 
 # Estimate the time shifts by comparing the modelled midday point to the
 # measured midday point.
-is_shifted, time_shift_series = shifts_ruptures(
-    modeled_midday_series_daily,
-    midday_series_daily,
-    period_min=15,
-    shift_min=15,
-    zscore_cutoff=1.75)
+is_shifted, time_shift_series = shifts_ruptures(midday_series_daily,
+                                                modeled_midday_series_daily,
+                                                period_min=15,
+                                                shift_min=15,
+                                                zscore_cutoff=1.5)
 
 # Create a midday difference series between modeled and measured midday, to
 # visualize time shifts. First, resample each time series to daily frequency,
 # and compare the data stream's daily halfway point to the modeled halfway
 # point
-midday_diff_series = (modeled_midday_series.resample('D').mean() -
-                      midday_series.resample('D').mean()
+midday_diff_series = (midday_series.resample('D').mean() -
+                      modeled_midday_series.resample('D').mean()
                       ).dt.total_seconds() / 60
 
 # Generate boolean for detected time shifts
@@ -241,20 +240,22 @@ changepoints = changepoints[changepoints].index
 changepoint_amts = pd.Series(time_shift_series.loc[changepoints])
 time_shift_list = list()
 for idx in range(len(changepoint_amts)):
+    if changepoint_amts[idx] == 0:
+        change_amt = 0
+    else:
+        change_amt = -1 * changepoint_amts[idx]
     if idx < (len(changepoint_amts) - 1):
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(changepoint_amts.index[idx + 1]),
-                                "time_shift":
-                                    changepoint_amts[idx]})
+                                "time_shift": change_amt})
     else:
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(time_shift_series.index.max()),
-                                "time_shift":
-                                    changepoint_amts[idx]})
+                                "time_shift": change_amt})
 
 # Correct any time shifts in the time series
 new_index = pd.Series(time_series.index, index=time_series.index)
