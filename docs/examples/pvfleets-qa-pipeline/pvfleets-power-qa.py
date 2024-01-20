@@ -426,7 +426,7 @@ is_daytime = (psm3.ghi > 0)
 
 # Trim based on clearsky and daytime values
 time_series_clearsky = time_series.reindex(is_daytime.index)[
-    (is_clear) & (is_daytime)]
+    (is_clear) & (is_daytime)].dropna()
 
 # Get final PSM3 data
 psm3_clearsky = psm3.loc[time_series_clearsky.index]
