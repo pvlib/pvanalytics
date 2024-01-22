@@ -392,30 +392,20 @@ def test_shift_ruptures_shift_min(midday):
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected.loc['2020-01-01':'2020-01-25'] = 30
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
         shift_min=60
     )
     assert not shift_mask.any()
-    assert_series_equal(
-        shift_amount,
-        no_shift,
-        check_names=False
-    )
+    assert_series_equal(shift_amount, no_shift, check_names=False)
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
         shift_min=30
     )
-
-    if pd.infer_freq(shifted.index).lower() != 'h':
-        expected_mask = shift_expected != 0
-        expected_shift = shift_expected
-    else:
-        expected_mask = False
-        expected_shift = no_shift
-
-    assert_series_equal(shift_mask, expected_mask, check_names=False)
-    assert_series_equal(shift_amount, expected_shift, check_names=False)
+    assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
+    assert_series_equal(shift_amount, shift_expected, check_names=False)
 
 
 @requires_ruptures
