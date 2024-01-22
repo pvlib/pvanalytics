@@ -290,6 +290,7 @@ time_series = time_series[~time_series.index.duplicated(
 
 # Plot the difference between measured and modeled midday, as well as the
 # CPD-estimated time shift series.
+plt.figure()
 midday_diff_series.plot()
 time_shift_series.plot()
 plt.title("Midday Difference Time Shift Series")
