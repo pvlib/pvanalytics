@@ -88,7 +88,7 @@ def daytime_mask_center_aligned(ac_power_series):
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
     assert all(clearsky[~output] < 3)
-    if pd.infer_freq(clearsky.index) == 'T':
+    if pd.infer_freq(clearsky.index) in ['T', 'min']:
         # Blur the boundaries between night and day if testing
         # high-frequency data since the daytime filtering algorithm does
         # not have one-minute accuracy.
