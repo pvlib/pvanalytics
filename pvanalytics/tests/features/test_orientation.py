@@ -108,6 +108,6 @@ def test_stuck_tracker_profile(solarposition, clearsky):
 
 
 def test_frequency_to_hours():
-    assert orientation._freqstr_to_hours('H') == 1.0
-    assert orientation._freqstr_to_hours('15T') == 0.25
-    assert orientation._freqstr_to_hours('2H') == 2.0
+    assert orientation._freqstr_to_hours('h') == 1.0
+    assert orientation._freqstr_to_hours('15min') == 0.25
+    assert orientation._freqstr_to_hours('2h') == 2.0

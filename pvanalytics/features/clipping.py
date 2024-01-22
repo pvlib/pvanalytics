@@ -410,7 +410,7 @@ def geometric(ac_power, window=None, slope_max=0.2, freq=None,
         raise ValueError("Cannot infer frequency of `ac_power`. "
                          "Please resample or pass `freq`.")
     if freq_minutes < 10:
-        ac_power = ac_power.resample('15T').mean()
+        ac_power = ac_power.resample('15min').mean()
     if window is None and tracking and freq_minutes < 30:
         window = 5
     else:

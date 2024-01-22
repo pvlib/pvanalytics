@@ -7,7 +7,7 @@ from pvanalytics.features import clearsky
 @pytest.mark.filterwarnings("ignore:Support for multi-dimensional indexing")
 def test_reno_identical(quadratic):
     """Identical clearsky and measured irradiance all True"""
-    index = pd.date_range(start='04/03/2020', freq='15T',
+    index = pd.date_range(start='04/03/2020', freq='15min',
                           periods=len(quadratic))
     quadratic.index = index
     assert clearsky.reno(quadratic, quadratic).all()
@@ -17,7 +17,7 @@ def test_reno_identical(quadratic):
 @pytest.mark.filterwarnings("ignore:invalid value encountered in")
 def test_reno_begining_end(quadratic):
     """clearsky conditions except in the middle of the dataset"""
-    index = pd.date_range(start='03/03/2020', freq='15T',
+    index = pd.date_range(start='03/03/2020', freq='15min',
                           periods=len(quadratic))
     quadratic.index = index
     ghi = quadratic.copy()
@@ -31,7 +31,7 @@ def test_reno_begining_end(quadratic):
 
 def test_reno_large_interval(quadratic):
     """clearsky.reno() raises ValueError if timestamp spacing too large."""
-    index = pd.date_range(start='04/03/2020', freq='20T',
+    index = pd.date_range(start='04/03/2020', freq='20min',
                           periods=len(quadratic))
     quadratic.index = index
     with pytest.raises(ValueError):
