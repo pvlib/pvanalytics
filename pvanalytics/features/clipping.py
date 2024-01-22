@@ -90,7 +90,7 @@ def levels(ac_power, window=4, fraction_in_window=0.75,
         temp.loc[(power >= lower) & (power <= upper)] = 1.0
         flags = flags | _label_clipping(temp, window=window,
                                         frac=fraction_in_window)
-    return flags.reindex_like(ac_power).fillna(False)
+    return flags.reindex(ac_power.index, fill_value=False)
 
 
 def _daytime_powercurve(ac_power, power_quantile):
