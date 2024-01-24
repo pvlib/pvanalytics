@@ -28,7 +28,7 @@ import pvlib
 from pvanalytics.features.clipping import geometric
 
 # %%
-# First, we import an Ac power data stream from a PV installation
+# First, we import an AC power data stream from a PV installation
 # at NREL. This data set is publicly available via the PVDAQ database in the
 # DOE Open Energy Data Initiative (OEDI)
 # (https://data.openei.org/submissions/4568), under system ID 50.
