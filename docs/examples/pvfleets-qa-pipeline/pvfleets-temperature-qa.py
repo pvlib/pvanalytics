@@ -200,7 +200,7 @@ else:
     shift_found = False
 
 # Visualize the time shifts for the daily time series
-print("Shift Found: " + shift_found)
+print("Shift Found: ", shift_found)
 edges = ([time_series_daily.index[0]] + shift_dates +
          [time_series_daily.index[-1]])
 fig, ax = plt.subplots()

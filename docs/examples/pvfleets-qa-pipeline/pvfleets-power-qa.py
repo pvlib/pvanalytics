@@ -147,6 +147,8 @@ data_completeness_score = gaps.completeness_score(time_series)
 data_completeness_score.plot()
 plt.xlabel("Date")
 plt.ylabel("Daily Completeness Score (Fractional)")
+plt.axhline(y=0.25, color='r', linestyle='-',
+            label='Daily Completeness Cutoff')
 plt.tight_layout()
 plt.show()
 
@@ -345,7 +347,7 @@ else:
     shift_found = False
 
 # Visualize the time shifts for the daily time series
-print("Shift Found: " + shift_found)
+print("Shift Found: ", shift_found)
 edges = ([time_series_daily.index[0]] + shift_dates +
          [time_series_daily.index[-1]])
 fig, ax = plt.subplots()
