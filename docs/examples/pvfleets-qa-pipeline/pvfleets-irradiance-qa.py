@@ -171,7 +171,7 @@ time_series = time_series.asfreq(data_freq)
 
 # %%
 # Next, we check the time series for any time shifts, which may be caused by
-# time drift or by incorrect time zone assignment. To do this, we compared
+# time drift or by incorrect time zone assignment. To do this, we compare
 # the modelled midday time for the particular system location to its
 # measured midday time. We use
 # :py:func:`pvanalytics.quality.gaps.stale_values_round`) to determine the
