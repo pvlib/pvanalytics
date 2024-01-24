@@ -235,7 +235,7 @@ if any(time_shift_series != 0):
 else:
     time_shifts_detected = False
 
-# Build a list of dictionaries for time shifts
+# Build a list of time shifts for re-indexing. We choose to use dicts.
 time_shift_series.index = pd.to_datetime(
     time_shift_series.index)
 changepoints = (time_shift_series != time_shift_series.shift(1))
