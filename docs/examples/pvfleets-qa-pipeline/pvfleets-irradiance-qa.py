@@ -152,6 +152,8 @@ data_completeness_score = gaps.completeness_score(time_series)
 data_completeness_score.plot()
 plt.xlabel("Date")
 plt.ylabel("Daily Completeness Score (Fractional)")
+plt.axhline(y=0.25, color='r', linestyle='-',
+            label='Daily Completeness Cutoff')
 plt.tight_layout()
 plt.show()
 
