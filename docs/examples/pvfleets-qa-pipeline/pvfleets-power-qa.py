@@ -51,8 +51,8 @@ plt.show()
 # %%
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
-# 1) Flatlined/stale data periods
-#    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
+#
+# 1) Flatlined/stale data periods (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) Negative data
 # 3) "Abnormal" data periods, which are defined as less than 10% of the
 #    daily time series mean

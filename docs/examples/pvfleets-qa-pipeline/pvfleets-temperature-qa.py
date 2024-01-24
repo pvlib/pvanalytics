@@ -47,8 +47,8 @@ plt.show()
 # %%
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
-# 1) Flatlined/stale data periods
-#    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
+#
+# 1) Flatlined/stale data periods (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) "Abnormal" data periods, which are out of the temperature limits of
 #    -40 to 185 deg C. Additional checks based on thresholds are applied
 #    depending on the type of temperature sensor (ambient or module)
@@ -198,8 +198,7 @@ else:
     shift_found = False
 
 # Visualize the time shifts for the daily time series
-print("Shift Found??")
-print(shift_found)
+print("Shift Found: " + shift_found)
 edges = ([time_series_daily.index[0]] + shift_dates +
          [time_series_daily.index[-1]])
 fig, ax = plt.subplots()
