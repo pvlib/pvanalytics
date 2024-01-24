@@ -149,6 +149,7 @@ plt.xlabel("Date")
 plt.ylabel("Daily Completeness Score (Fractional)")
 plt.axhline(y=0.25, color='r', linestyle='-',
             label='Daily Completeness Cutoff')
+plt.legend()
 plt.tight_layout()
 plt.show()
 
