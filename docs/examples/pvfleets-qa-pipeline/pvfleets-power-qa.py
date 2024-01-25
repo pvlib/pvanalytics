@@ -69,7 +69,7 @@ stale_data_mask = gaps.stale_values_round(time_series,
 stale_data_mask.loc[(stale_data_mask) &
                     (~daytime_mask)] = False
 
-# 2) REMOVE NEGATIVE DATA
+# REMOVE NEGATIVE DATA
 negative_mask = (time_series < 0)
 
 # FIND ABNORMAL PERIODS
@@ -165,7 +165,7 @@ time_series = time_series.asfreq(data_freq)
 
 # %%
 # Next, we check the time series for any time shifts, which may be caused by
-# time drift or by incorrect time zone assignment. To do this, we compared
+# time drift or by incorrect time zone assignment. To do this, we compare
 # the modelled midday time for the particular system location to its
 # measured midday time. We use
 # :py:func:`pvanalytics.quality.gaps.stale_values_round`) to determine the
@@ -254,7 +254,7 @@ if any(time_shift_series != 0):
 else:
     time_shifts_detected = False
 
-# Build a list of dictionaries for time shifts
+# Build a list of time shifts for re-indexing. We choose to use dicts.
 time_shift_series.index = pd.to_datetime(
     time_shift_series.index)
 changepoints = (time_shift_series != time_shift_series.shift(1))

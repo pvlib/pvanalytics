@@ -56,7 +56,7 @@ plt.show()
 # 4) Outliers, which are defined as more than one 4 standard deviations
 #    away from the mean (:py:func:`pvanalytics.quality.outliers.zscore`)
 
-# 1) REMOVE STALE DATA (that isn't during nighttime periods)
+# REMOVE STALE DATA (that isn't during nighttime periods)
 # Day/night mask
 daytime_mask = power_or_irradiance(time_series)
 # Stale data mask
@@ -66,12 +66,12 @@ stale_data_mask = gaps.stale_values_round(time_series,
 stale_data_mask.loc[(stale_data_mask) &
                     (~daytime_mask)] = False
 
-# 2) REMOVE NEGATIVE DATA
+# REMOVE NEGATIVE DATA
 negative_mask = (time_series < 0)
 
 # FIND ABNORMAL PERIODS
 daily_min = time_series.resample('D').min()
-erroneous_mask = (daily_min < 50)
+erroneous_mask = (daily_min > 50)
 erroneous_mask = erroneous_mask.reindex(index=time_series.index,
                                         method='ffill',
                                         fill_value=False)
@@ -103,8 +103,8 @@ if any(stale_data_mask):
 if any(negative_mask):
     time_series.loc[negative_mask].plot(ls='', marker='o', color="orange")
     labels.append("Negative")
-if any(~erroneous_mask):
-    time_series.loc[~erroneous_mask].plot(ls='', marker='o', color="yellow")
+if any(erroneous_mask):
+    time_series.loc[erroneous_mask].plot(ls='', marker='o', color="yellow")
     labels.append("Abnormal")
 if any(out_of_bounds_mask):
     time_series.loc[out_of_bounds_mask].plot(ls='', marker='o', color="yellow")
@@ -130,7 +130,7 @@ plt.show()
 # Filter the time series, taking out all of the issues
 time_series = time_series[~stale_data_mask]
 time_series = time_series[~negative_mask]
-time_series = time_series[erroneous_mask]
+time_series = time_series[~erroneous_mask]
 time_series = time_series[~out_of_bounds_mask]
 time_series = time_series[~zscore_outlier_mask]
 time_series = time_series.asfreq(data_freq)
