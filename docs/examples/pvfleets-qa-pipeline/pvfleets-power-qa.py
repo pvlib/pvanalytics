@@ -338,8 +338,7 @@ data_shift_period_length = (data_shift_end_date -
                             data_shift_start_date).days
 
 # Get the number of shift dates
-data_shift_mask = pvanalytics.quality.data_shifts.detect_data_shifts(
-    time_series_daily)
+data_shift_mask = ds.detect_data_shifts(time_series_daily)
 # Get the shift dates
 shift_dates = list(time_series_daily[data_shift_mask].index)
 if len(shift_dates) > 0:
