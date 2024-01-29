@@ -125,6 +125,7 @@ plt.show()
 # Filter the time series, taking out all of the issues
 issue_mask = ((~stale_data_mask) & (~negative_mask) &
           (~erroneous_mask) & (~zscore_outlier_mask))
+
 time_series = time_series[issue_mask]
 time_series = time_series.asfreq(data_freq)
 
