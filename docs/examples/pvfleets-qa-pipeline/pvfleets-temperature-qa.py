@@ -138,9 +138,9 @@ plt.show()
 # post-filtering.
 
 # Filter the time series, taking out all of the issues
-time_series = time_series[~stale_data_mask]
-time_series = time_series[temperature_limit_mask]
-time_series = time_series[~zscore_outlier_mask]
+issue_mask = ((~stale_data_mask) & (temperature_limit_mask) &
+              (~zscore_outlier_mask))
+time_series = time_series[issue_mask]
 time_series = time_series.asfreq(data_freq)
 
 # Visualize the time series post-filtering
