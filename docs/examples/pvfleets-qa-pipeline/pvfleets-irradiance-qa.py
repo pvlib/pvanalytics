@@ -63,8 +63,7 @@ daytime_mask = power_or_irradiance(time_series)
 stale_data_mask = gaps.stale_values_round(time_series,
                                           window=3,
                                           decimals=2)
-stale_data_mask.loc[(stale_data_mask) &
-                    (~daytime_mask)] = False
+stale_data_mask = stale_data_mask & daytime_mask
 
 # REMOVE NEGATIVE DATA
 negative_mask = (time_series < 0)
@@ -90,7 +89,7 @@ pct_stale = round((len(time_series[
 pct_negative = round((len(time_series[
     negative_mask].dropna())/len(time_series.dropna())*100), 1)
 pct_erroneous = round((len(time_series[
-    ~erroneous_mask].dropna())/len(time_series.dropna())*100), 1)
+    erroneous_mask].dropna())/len(time_series.dropna())*100), 1)
 pct_outlier = round((len(time_series[
     zscore_outlier_mask].dropna())/len(time_series.dropna())*100), 1)
 
