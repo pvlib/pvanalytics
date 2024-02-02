@@ -32,8 +32,11 @@ from pvanalytics.features import daytime
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'system_15_poa_irradiance.csv'
-time_series = pd.read_csv(file, index_col=0, parse_dates=True).squeeze()
+file = pvanalytics_dir / 'data' / 'system_15_poa_irradiance.parquet'
+time_series = pd.read_parquet(file)
+time_series.set_index('measured_on', inplace = True)
+time_series.index = pd.to_datetime(time_series.index)
+time_series = time_series['poa_irradiance__484']
 latitude = 39.7406
 longitude = -105.1775
 data_freq = '15T'
@@ -212,8 +215,8 @@ modeled_midday_series_daily = \
 
 # Estimate the time shifts by comparing the modelled midday point to the
 # measured midday point.
-is_shifted, time_shift_series = shifts_ruptures(midday_series_daily,
-                                                modeled_midday_series_daily,
+is_shifted, time_shift_series = shifts_ruptures(modeled_midday_series_daily,
+                                                midday_series_daily,
                                                 period_min=15,
                                                 shift_min=15,
                                                 zscore_cutoff=1.5)
@@ -222,8 +225,8 @@ is_shifted, time_shift_series = shifts_ruptures(midday_series_daily,
 # visualize time shifts. First, resample each time series to daily frequency,
 # and compare the data stream's daily halfway point to the modeled halfway
 # point
-midday_diff_series = (midday_series.resample('D').mean() -
-                      modeled_midday_series.resample('D').mean()
+midday_diff_series = (modeled_midday_series.resample('D').mean() -
+                      midday_series.resample('D').mean()
                       ).dt.total_seconds() / 60
 
 # Generate boolean for detected time shifts
@@ -240,22 +243,18 @@ changepoints = changepoints[changepoints].index
 changepoint_amts = pd.Series(time_shift_series.loc[changepoints])
 time_shift_list = list()
 for idx in range(len(changepoint_amts)):
-    if changepoint_amts[idx] == 0:
-        change_amt = 0
-    else:
-        change_amt = -1 * changepoint_amts[idx]
     if idx < (len(changepoint_amts) - 1):
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(changepoint_amts.index[idx + 1]),
-                                "time_shift": change_amt})
+                                "time_shift": changepoint_amts[idx]})
     else:
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(time_shift_series.index.max()),
-                                "time_shift": change_amt})
+                                "time_shift": changepoint_amts[idx]})
 
 # Correct any time shifts in the time series
 new_index = pd.Series(time_series.index, index=time_series.index)

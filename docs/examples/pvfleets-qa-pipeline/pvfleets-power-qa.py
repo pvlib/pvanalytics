@@ -35,8 +35,11 @@ from pvanalytics.features.clipping import geometric
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST.csv'
-time_series = pd.read_csv(file, index_col=0, parse_dates=True).squeeze()
+file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST.parquet'
+time_series = pd.read_parquet(file)
+time_series.set_index('measured_on', inplace = True)
+time_series.index = pd.to_datetime(time_series.index)
+time_series = time_series['ac_power_2']
 latitude = 39.7406
 longitude = -105.1775
 data_freq = '15T'
@@ -233,18 +236,18 @@ modeled_midday_series_daily = \
 
 # Estimate the time shifts by comparing the modelled midday point to the
 # measured midday point.
-is_shifted, time_shift_series = shifts_ruptures(midday_series_daily,
-                                                modeled_midday_series_daily,
-                                                period_min=15,
-                                                shift_min=15,
-                                                zscore_cutoff=1.5)
+is_shifted, time_shift_series = shifts_ruptures(modeled_midday_series_daily,
+                                                     midday_series_daily,
+                                                     period_min=15,
+                                                     shift_min=15,
+                                                     zscore_cutoff=1.5)
 
 # Create a midday difference series between modeled and measured midday, to
 # visualize time shifts. First, resample each time series to daily frequency,
 # and compare the data stream's daily halfway point to the modeled halfway
 # point
-midday_diff_series = (midday_series.resample('D').mean() -
-                      modeled_midday_series.resample('D').mean()
+midday_diff_series = (modeled_midday_series.resample('D').mean() -
+                      midday_series.resample('D').mean()
                       ).dt.total_seconds() / 60
 
 # Generate boolean for detected time shifts
@@ -261,22 +264,18 @@ changepoints = changepoints[changepoints].index
 changepoint_amts = pd.Series(time_shift_series.loc[changepoints])
 time_shift_list = list()
 for idx in range(len(changepoint_amts)):
-    if changepoint_amts[idx] == 0:
-        change_amt = 0
-    else:
-        change_amt = -1 * changepoint_amts[idx]
     if idx < (len(changepoint_amts) - 1):
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(changepoint_amts.index[idx + 1]),
-                                "time_shift": change_amt})
+                                "time_shift": changepoint_amts[idx]})
     else:
         time_shift_list.append({"datetime_start":
                                 str(changepoint_amts.index[idx]),
                                 "datetime_end":
                                     str(time_shift_series.index.max()),
-                                "time_shift": change_amt})
+                                "time_shift": changepoint_amts[idx]})
 
 # Correct any time shifts in the time series
 new_index = pd.Series(time_series.index, index=time_series.index)
@@ -414,8 +413,10 @@ else:
 
 # Import the PSM3 data. This data is pulled via the following function in
 # PVLib: :py:func:`pvlib.iotools.get_psm3`
-file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST_psm3.csv'
-psm3 = pd.read_csv(file, index_col=0, parse_dates=True).squeeze()
+file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST_psm3.parquet'
+psm3 = pd.read_parquet(file)
+psm3.set_index('index', inplace = True)
+psm3.index = pd.to_datetime(psm3.index)
 
 psm3 = psm3.reindex(pd.date_range(psm3.index[0],
                                   psm3.index[-1],

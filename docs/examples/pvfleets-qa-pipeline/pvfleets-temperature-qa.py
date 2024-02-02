@@ -28,8 +28,11 @@ from pvanalytics.quality.outliers import zscore
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'system_4_module_temperature.csv'
-time_series = pd.read_csv(file, index_col=0, parse_dates=True).squeeze()
+file = pvanalytics_dir / 'data' / 'system_4_module_temperature.parquet'
+time_series = pd.read_parquet(file)
+time_series.set_index('index', inplace = True)
+time_series.index = pd.to_datetime(time_series.index)
+time_series = time_series['module_temp_1']
 latitude = 39.7406
 longitude = -105.1774
 # Identify the temperature data stream type (this affects the type of
