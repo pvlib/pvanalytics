@@ -408,8 +408,11 @@ def trim(series, days=10):
 
     """
     start, end = start_stop_dates(series, days=days)
-    mask = pd.Series(False, index=series.index)
+    mask = pd.Series(False, index=series.index.tz_convert(None))
+    
     if start:
+        start = pd.to_datetime(start.tz_convert(None))
+        end = pd.to_datetime(end.tz_convert(None))
         mask.loc[start.date():end.date()] = True
     return mask
 
