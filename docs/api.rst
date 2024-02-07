@@ -248,12 +248,16 @@ identification.
 Daytime
 -------
 
-Functions that return a Boolean mask indicating day and night.
+Functions that relate to determining day/night periods in a time
+series, and getting sunrise and sunset times based on the day-night mask
+outputs.
 
 .. autosummary::
    :toctree: generated/
 
    features.daytime.power_or_irradiance
+   features.daytime.get_sunrise
+   features.daytime.get_sunset
 
 Shading
 -------
