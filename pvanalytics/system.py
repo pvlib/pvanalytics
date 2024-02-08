@@ -370,7 +370,7 @@ def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
 
     """
     peak_times = _peak_times(power_or_poa[sunny])
-    azimuth_by_minute = solar_azimuth.resample('T').interpolate(
+    azimuth_by_minute = solar_azimuth.resample('1min').interpolate(
         method='linear'
     )
     modeled_azimuth = azimuth_by_minute[peak_times]

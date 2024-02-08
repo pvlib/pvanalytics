@@ -49,7 +49,7 @@ def _backfill_window(endpoints, window):
     flags = endpoints
     while window > 0:
         window = window - 1
-        flags = flags | endpoints.shift(-window).fillna(False)
+        flags = flags | endpoints.shift(-window, fill_value=False)
     return flags
 
 

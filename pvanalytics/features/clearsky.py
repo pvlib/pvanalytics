@@ -62,7 +62,7 @@ def reno(ghi, ghi_clearsky):
 
     """
     delta = ghi.index.to_series().diff()
-    delta_minutes = delta[1].total_seconds() / 60
+    delta_minutes = delta.iloc[1].total_seconds() / 60
     if delta_minutes > 15:
         raise ValueError('clearsky requires regular time intervals '
                          'of 15m or less')

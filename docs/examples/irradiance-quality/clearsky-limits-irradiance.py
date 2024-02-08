@@ -29,7 +29,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 rmis_file = pvanalytics_dir / 'data' / 'irradiance_RMIS_NREL.csv'
 data = pd.read_csv(rmis_file, index_col=0, parse_dates=True)
-freq = '5T'
+freq = '5min'
 # Make the datetime index tz-aware.
 data.index = data.index.tz_localize("Etc/GMT+7")
 

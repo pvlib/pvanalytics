@@ -94,7 +94,7 @@ def test_module_temperature(albuquerque):
     times = pd.date_range(
         start='01/01/2020',
         end='03/01/2020',
-        freq='H',
+        freq='h',
         tz='MST'
     )
     clearsky = albuquerque.get_clearsky(times, model='simplified_solis')

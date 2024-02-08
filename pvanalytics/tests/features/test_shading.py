@@ -9,7 +9,7 @@ def times():
     return pd.date_range(
         start='1/1/2020',
         end='12/31/2020 23:59',
-        freq='T',
+        freq='1min',
         tz='MST'
     )
 
@@ -50,8 +50,8 @@ def test_simple_shadow(daytime, clearsky_ghi):
 
 
 def test_invalid_interval(daytime, clearsky_ghi):
-    ghi = clearsky_ghi.resample('5T').first()
-    daytime_resampled = daytime.resample('5T').first()
+    ghi = clearsky_ghi.resample('5min').first()
+    daytime_resampled = daytime.resample('5min').first()
     with pytest.raises(ValueError, match="Data must be at 1-minute intervals"):
         shading.fixed(ghi, daytime_resampled, ghi)
     with pytest.raises(ValueError, match="Data must be at 1-minute intervals"):

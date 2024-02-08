@@ -34,7 +34,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'ac_power_inv_2173_stale_data.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data.asfreq("15T")
+data = data.asfreq("15min")
 data['value_normalized'].plot()
 data.loc[data["stale_data_mask"], "value_normalized"].plot(ls='', marker='.')
 plt.legend(labels=["AC Power", "Inserted Stale Data"])

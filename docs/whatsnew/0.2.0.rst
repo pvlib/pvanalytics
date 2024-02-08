@@ -1,7 +1,7 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated December 2023)
------------------------------
+0.2.0 (anticipated February 2024)
+---------------------------------
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
@@ -38,7 +38,7 @@ Bug Fixes
 ~~~~~~~~~
 * ``pvanalytics.__version__`` now correctly reports the version string instead
   of raising ``AttributeError``. (:pull:`181`)
-* Compatibility with pandas 2.0.0 (:pull:`185`)
+* Compatibility with pandas 2.0.0 (:pull:`185`) and future versions of pandas (:pull:`203`)
 * Compatibility with scipy 1.11 (:pull:`196`)
 
 Requirements
@@ -52,10 +52,12 @@ Documentation
   ``alabaster`` theme. (:issue:`176`, :pull:`178`)
 * Added PVFleets QA pipeline examples for checking temperature, irradiance, and power
   streams. (:issue:`201`, :pull:`202`)
+* Added a gallery page for :py:func:`~pvanalytics.quality.time.shifts_ruptures`.
+  (:pull:`192`)
 
 Testing
 ~~~~~~~
-* Added testing for python 3.11. (:pull:`189`)
+* Added testing for python 3.11 and 3.12. (:pull:`189`, :pull:`204`)
 
 
 Contributors

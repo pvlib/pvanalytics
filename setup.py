@@ -29,6 +29,7 @@ URL = 'https://github.com/pvlib/pvanalytics'
 TESTS_REQUIRE = [
     'pytest',
     'pytest-cov',
+    'packaging',
 ]
 
 INSTALL_REQUIRES = [
