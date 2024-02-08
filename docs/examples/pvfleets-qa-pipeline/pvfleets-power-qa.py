@@ -476,9 +476,10 @@ print("Predicted tilt: " + str(predicted_tilt))
 
 # CHECK MOUNTING CONFIGURATION
 daytime_mask = power_or_irradiance(time_series)
-predicted_mounting_config = is_tracking_envelope(time_series,
-                                                 daytime_mask,
-                                                 clipping_mask)
+predicted_mounting_config = is_tracking_envelope(
+    time_series,
+    daytime_mask,
+    clipping_mask.reindex(index=time_series.index))
 
 print("Predicted Mounting configuration:")
 print(predicted_mounting_config.name)
