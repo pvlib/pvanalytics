@@ -1,7 +1,7 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated December 2023)
------------------------------
+0.2.0 (anticipated February 2024)
+---------------------------------
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
@@ -55,7 +55,7 @@ Documentation
 
 Testing
 ~~~~~~~
-* Added testing for python 3.11. (:pull:`189`)
+* Added testing for python 3.11 and 3.12. (:pull:`189`, :pull:`204`)
 
 
 Contributors
