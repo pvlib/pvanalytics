@@ -81,7 +81,7 @@ def one_year_hourly():
     return pd.date_range(
         start='03/01/2020',
         end='02/28/2021 23:00',
-        freq='H',
+        freq='h',
         tz='Etc/GMT+7'
     )
 
@@ -92,7 +92,7 @@ def three_days_hourly():
     return pd.date_range(
         start='03/01/2020',
         end='03/03/2020 23:00',
-        freq='H',
+        freq='h',
         tz='Etc/GMT+7'
     )
 

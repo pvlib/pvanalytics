@@ -35,7 +35,7 @@ data = pd.read_csv(ac_power_file_1, index_col=0, parse_dates=True)
 data['label'] = data['label'].astype(bool)
 # This is the known frequency of the time series. You may need to infer
 # the frequency or set the frequency with your AC power time series.
-freq = "15T"
+freq = "15min"
 
 data['value_normalized'].plot()
 data.loc[data['label'], 'value_normalized'].plot(ls='', marker='o')

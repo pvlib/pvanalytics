@@ -286,7 +286,7 @@ def test_start_stop_dates_all_true():
     """If all values are True then start and stop are equal to first and
     last day of the series."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -299,7 +299,7 @@ def test_start_stop_dates_all_true():
 def test_start_stop_dates_first_day_false():
     """If day one is all False, then start date should be day 2."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -313,7 +313,7 @@ def test_start_stop_dates_first_day_false():
 def test_start_stop_dates_first_and_fifth_days_missing():
     """First valid date should be the sixth of January."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -331,7 +331,7 @@ def test_start_stop_dates_last_two_days_missing():
 
     """
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -345,7 +345,7 @@ def test_start_stop_dates_last_two_days_missing():
 def test_start_stop_dates_all_false():
     """If the passed to start_stop_dates is empty the returns (None, None)."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -356,7 +356,7 @@ def test_start_stop_dates_all_false():
 def test_start_stop_dates_not_enough_days():
     """Fewer than 10 days of True gives not start/stop dates."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -371,7 +371,7 @@ def test_start_stop_dates_one_day():
 
     """
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -387,7 +387,7 @@ def test_start_stop_dates_with_gaps_in_middle():
     consecutive 'good' days have no effect on the start and stop
     date."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -402,7 +402,7 @@ def test_trim_incomplete():
     """gaps.trim_incomplete() should return a boolean mask that selects
     only the good data in the middle of a series."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -419,7 +419,7 @@ def test_trim_incomplete_empty():
     """gaps.trim_incomplete() returns all False for series with no valid
     days."""
     index = pd.date_range(
-        freq='15T',
+        freq='15min',
         start='01-01-2020',
         end='08-01-2020 23:00'
     )
@@ -454,7 +454,7 @@ def test_completeness_score_all_nans():
     completeness = gaps.completeness_score(
         pd.Series(
             np.nan,
-            index=pd.date_range('01/01/2020 00:00', freq='1H', periods=48),
+            index=pd.date_range('01/01/2020 00:00', freq='1h', periods=48),
             dtype='float64'
         ),
         keep_index=False
@@ -474,7 +474,7 @@ def test_completeness_score_no_data():
     four_days = pd.date_range(start='01/01/2020', freq='D', periods=4)
     completeness = gaps.completeness_score(
         pd.Series(index=four_days, dtype='float64'),
-        freq='15T',
+        freq='15min',
         keep_index=False
     )
     assert_series_equal(
@@ -488,9 +488,10 @@ def test_completeness_score_incomplete_index():
     15-minute sample frequency"""
     data = pd.Series(
         1,
-        index=pd.date_range(start='01/01/2020', freq='1H', periods=72),
+        index=pd.date_range(start='01/01/2020', freq='1h', periods=72),
     )
-    completeness = gaps.completeness_score(data, freq='15T', keep_index=False)
+    completeness = gaps.completeness_score(data, freq='15min',
+                                           keep_index=False)
     assert_series_equal(
         pd.Series(
             0.25,
@@ -503,7 +504,8 @@ def test_completeness_score_incomplete_index():
 def test_completeness_score_complete():
     """A series with data at every point has completeness 1.0"""
     data = pd.Series(
-        1, index=pd.date_range(start='01/01/2020', freq='15T', periods=24*4*2)
+        1,
+        index=pd.date_range(start='01/01/2020', freq='15min', periods=24*4*2)
     )
     completeness = gaps.completeness_score(data, keep_index=False)
     assert_series_equal(
@@ -520,12 +522,12 @@ def test_completeness_score_freq_too_high():
     raised."""
     data = pd.Series(
         1,
-        index=pd.date_range(start='1/1/2020', freq='15T', periods=24*4*4)
+        index=pd.date_range(start='1/1/2020', freq='15min', periods=24*4*4)
     )
     with pytest.raises(ValueError):
-        gaps.completeness_score(data, freq='16T')
+        gaps.completeness_score(data, freq='16min')
     with pytest.raises(ValueError):
-        gaps.completeness_score(data, freq='1H')
+        gaps.completeness_score(data, freq='1h')
 
 
 def test_completeness_score_reindex():
@@ -533,10 +535,12 @@ def test_completeness_score_reindex():
     keep_index=True"""
     data = pd.Series(
         1,
-        index=pd.date_range(start='1/1/2020', freq='15T', end='1/3/2020 23:45')
+        index=pd.date_range(start='1/1/2020', freq='15min',
+                            end='1/3/2020 23:45')
     )
-    data.loc[pd.date_range(start='1/1/2020', freq='30T', periods=48)] = np.nan
-    data.loc[pd.date_range(start='1/3/2020', freq='1H', periods=24)] = np.nan
+    data.loc[pd.date_range(start='1/1/2020', freq='30min', periods=48)] = \
+        np.nan
+    data.loc[pd.date_range(start='1/3/2020', freq='1h', periods=24)] = np.nan
 
     expected = pd.Series(index=data.index, dtype='float64')
     expected.loc['1/1/2020'] = 0.5
@@ -551,7 +555,7 @@ def test_completeness_score_reindex():
 def test_complete_threshold_zero():
     """minimum_completeness of 0 returns all True regardless of data."""
     ten_days = pd.date_range(
-        start='01/01/2020', freq='15T', end='1/09/2020 23:45')
+        start='01/01/2020', freq='15min', end='1/09/2020 23:45')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(True, index=data.index),
@@ -561,7 +565,7 @@ def test_complete_threshold_zero():
     data.dropna()
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, minimum_completeness=0, freq='15T')
+        gaps.complete(data, minimum_completeness=0, freq='15min')
     )
     data = pd.Series(1.0, index=ten_days)
     assert_series_equal(
@@ -574,7 +578,7 @@ def test_complete_threshold_one():
     """If minimum_completeness=1 then any missing data on a day means all
     data for the day is flagged False."""
     ten_days = pd.date_range(
-        start='01/01/2020', freq='15T', end='01/09/2020 23:45')
+        start='01/01/2020', freq='15min', end='01/09/2020 23:45')
     data = pd.Series(index=ten_days, dtype='float64')
     assert_series_equal(
         pd.Series(False, index=data.index),
@@ -602,24 +606,24 @@ def test_complete_threshold_one():
     )
     assert_series_equal(
         gaps.complete(data, minimum_completeness=1.0),
-        gaps.complete(data, minimum_completeness=1.0, freq='15T')
+        gaps.complete(data, minimum_completeness=1.0, freq='15min')
     )
 
 
 def test_complete():
     """Test gaps.complete with varying amounts of missing data."""
     ten_days = pd.date_range(
-        start='1/1/2020', freq='H', end='1/10/2020 23:00')
+        start='1/1/2020', freq='h', end='1/10/2020 23:00')
     data = pd.Series(index=ten_days, dtype='float64')
     data.loc['1/1/2020'] = 1.0
     day_two_values = pd.date_range(
-        start='1/2/2020', freq='2H', end='1/2/2020 23:00')
+        start='1/2/2020', freq='2h', end='1/2/2020 23:00')
     data.loc[day_two_values] = 2.0
     day_three_values = pd.date_range(
-        start='1/3/2020', freq='3H', end='1/3/2020 23:00')
+        start='1/3/2020', freq='3h', end='1/3/2020 23:00')
     data.loc[day_three_values] = 3.0
     day_four_values = pd.date_range(
-        start='1/4/2020', freq='4H', end='1/4/2020 23:00')
+        start='1/4/2020', freq='4h', end='1/4/2020 23:00')
     data.loc[day_four_values] = 4.0
     data.loc['1/5/2020':] = 5.0
 

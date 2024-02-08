@@ -13,7 +13,7 @@ def summer_times():
     return pd.date_range(
         start='2020-5-1',
         end='2020-09-30 23:00',
-        freq='H',
+        freq='h',
         tz='Etc/GMT+7'
     )
 
@@ -180,7 +180,7 @@ def test_custom_tracking_envelope_thresholds(summer_power_fixed):
 def albuquerque_clearsky(albuquerque):
     """One year of clearsky data in Albuquerque, NM."""
     year_hourly = pd.date_range(
-        start='1/1/2020', end='1/1/2021', freq='H', tz='MST'
+        start='1/1/2020', end='1/1/2021', freq='h', tz='MST'
     )
     return albuquerque.get_clearsky(
         year_hourly,
@@ -296,7 +296,7 @@ def fine_index(clearsky_year):
     return pd.date_range(
         start=clearsky_year.index.min(),
         end=clearsky_year.index.max(),
-        freq='T'
+        freq='1min'
     )
 
 
@@ -402,7 +402,7 @@ def naive_times():
     return pd.date_range(
         start='2020',
         end='2021',
-        freq='H'
+        freq='h'
     )
 
 
