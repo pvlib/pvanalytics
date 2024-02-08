@@ -34,7 +34,7 @@ from pvanalytics.features import daytime
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'system_15_poa_irradiance.parquet'
 time_series = pd.read_parquet(file)
-time_series.set_index('measured_on', inplace = True)
+time_series.set_index('measured_on', inplace=True)
 time_series.index = pd.to_datetime(time_series.index)
 time_series = time_series['poa_irradiance__484']
 latitude = 39.7406
@@ -55,7 +55,8 @@ plt.show()
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
 #
-# 1) Flatlined/stale data periods (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
+# 1) Flatlined/stale data periods
+#    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) Negative irradiance data
 # 3) "Abnormal" data periods, which are defined as less than 10% of the
 #    daily time series mean OR greater than 1300
@@ -134,7 +135,7 @@ plt.show()
 # Filter the time series, taking out all of the issues
 issue_mask = ((~stale_data_mask) & (~negative_mask) & (~erroneous_mask) &
               (~out_of_bounds_mask) & (~zscore_outlier_mask))
-time_series =time_series[issue_mask]
+time_series = time_series[issue_mask]
 time_series = time_series.asfreq(data_freq)
 
 # Visualize the time series post-filtering

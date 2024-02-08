@@ -28,9 +28,9 @@ from pvanalytics.quality.outliers import zscore
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/system_4_module_temperature.parquet"#pvanalytics_dir / 'data' / 'system_4_module_temperature.parquet'
+file = pvanalytics_dir / 'data' / 'system_4_module_temperature.parquet'
 time_series = pd.read_parquet(file)
-time_series.set_index('index', inplace = True)
+time_series.set_index('index', inplace=True)
 time_series.index = pd.to_datetime(time_series.index)
 time_series = time_series['module_temp_1']
 latitude = 39.7406
@@ -54,7 +54,8 @@ plt.show()
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
 #
-# 1) Flatlined/stale data periods (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
+# 1) Flatlined/stale data periods
+#    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) "Abnormal" data periods, which are out of the temperature limits of
 #    -40 to 185 deg C. Additional checks based on thresholds are applied
 #    depending on the type of temperature sensor (ambient or module)

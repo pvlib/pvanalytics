@@ -37,7 +37,7 @@ from pvanalytics.features.clipping import geometric
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST.parquet'
 time_series = pd.read_parquet(file)
-time_series.set_index('measured_on', inplace = True)
+time_series.set_index('measured_on', inplace=True)
 time_series.index = pd.to_datetime(time_series.index)
 time_series = time_series['ac_power_2']
 latitude = 39.7406
@@ -58,7 +58,8 @@ plt.show()
 # Now, let's run basic data checks to identify stale and abnormal/outlier
 # data in the time series. Basic data checks include the following steps:
 #
-# 1) Flatlined/stale data periods (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
+# 1) Flatlined/stale data periods
+#    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) Negative data
 # 3) "Abnormal" data periods, which are defined as less than 10% of the
 #    daily time series mean
@@ -130,7 +131,7 @@ plt.show()
 
 # Filter the time series, taking out all of the issues
 issue_mask = ((~stale_data_mask) & (~negative_mask) &
-          (~erroneous_mask) & (~zscore_outlier_mask))
+              (~erroneous_mask) & (~zscore_outlier_mask))
 
 time_series = time_series[issue_mask]
 time_series = time_series.asfreq(data_freq)
@@ -243,10 +244,10 @@ modeled_midday_series_daily = \
 # Estimate the time shifts by comparing the modelled midday point to the
 # measured midday point.
 is_shifted, time_shift_series = shifts_ruptures(modeled_midday_series_daily,
-                                                     midday_series_daily,
-                                                     period_min=15,
-                                                     shift_min=15,
-                                                     zscore_cutoff=1.5)
+                                                midday_series_daily,
+                                                period_min=15,
+                                                shift_min=15,
+                                                zscore_cutoff=1.5)
 
 # Create a midday difference series between modeled and measured midday, to
 # visualize time shifts. First, resample each time series to daily frequency,
@@ -432,7 +433,7 @@ plt.show()
 # PVLib: :py:func:`pvlib.iotools.get_psm3`
 file = pvanalytics_dir / 'data' / 'system_50_ac_power_2_full_DST_psm3.parquet'
 psm3 = pd.read_parquet(file)
-psm3.set_index('index', inplace = True)
+psm3.set_index('index', inplace=True)
 psm3.index = pd.to_datetime(psm3.index)
 
 psm3 = psm3.reindex(pd.date_range(psm3.index[0],
