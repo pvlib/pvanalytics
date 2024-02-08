@@ -34,7 +34,7 @@ import pathlib
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 file = pvanalytics_dir / 'data' / 'ac_power_inv_2173.csv'
 data = pd.read_csv(file, index_col=0, parse_dates=True)
-data = data.asfreq("15T")
+data = data.asfreq("15min")
 
 # %%
 # Now, we use :py:func:`pvanalytics.quality.gaps.completeness_score` to get the

@@ -36,7 +36,7 @@ data = data.sort_index()
 
 # This is the known frequency of the time series. You may need to infer
 # the frequency or set the frequency with your AC power time series.
-freq = "1T"
+freq = "1min"
 # These are the latitude-longitude coordinates associated with the
 # SERF East system.
 latitude = 39.742
