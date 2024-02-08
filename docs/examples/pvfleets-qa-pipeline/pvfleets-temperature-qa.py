@@ -28,7 +28,7 @@ from pvanalytics.quality.outliers import zscore
 # This data is timezone-localized.
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-file = pvanalytics_dir / 'data' / 'system_4_module_temperature.parquet'
+file = "C:/Users/kperry/Documents/source/repos/pvanalytics/pvanalytics/data/system_4_module_temperature.parquet"#pvanalytics_dir / 'data' / 'system_4_module_temperature.parquet'
 time_series = pd.read_parquet(file)
 time_series.set_index('index', inplace = True)
 time_series.index = pd.to_datetime(time_series.index)
@@ -38,13 +38,16 @@ longitude = -105.1774
 # Identify the temperature data stream type (this affects the type of
 # checks we do)
 data_stream_type = "module"
-data_freq = '15T'
+data_freq = '15min'
 time_series = time_series.asfreq(data_freq)
 
 # %%
 # First, let's visualize the original time series as reference.
 
 time_series.plot(title="Original Time Series")
+plt.xlabel("Date")
+plt.ylabel("Temperature")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -148,6 +151,9 @@ time_series = time_series.asfreq(data_freq)
 
 # Visualize the time series post-filtering
 time_series.plot(title="Time Series Post-Basic Data Filtering")
+plt.xlabel("Date")
+plt.ylabel("Temperature")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -210,6 +216,9 @@ fig, ax = plt.subplots()
 for (st, ed) in zip(edges[:-1], edges[1:]):
     ax.plot(time_series_daily.loc[st:ed])
 plt.title("Daily Time Series Labeled for Data Shifts")
+plt.xlabel("Date")
+plt.ylabel("Mean Daily Temperature")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -226,6 +235,9 @@ time_series = time_series.asfreq(data_freq)
 
 # Plot the final filtered time series.
 time_series.plot(title="Final Filtered Time Series")
+plt.xlabel("Date")
+plt.ylabel("Temperature")
+plt.tight_layout()
 plt.show()
 
 # %%

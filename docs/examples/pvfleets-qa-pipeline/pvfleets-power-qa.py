@@ -42,13 +42,16 @@ time_series.index = pd.to_datetime(time_series.index)
 time_series = time_series['ac_power_2']
 latitude = 39.7406
 longitude = -105.1775
-data_freq = '15T'
+data_freq = '15min'
 time_series = time_series.asfreq(data_freq)
 
 # %%
 # First, let's visualize the original time series as reference.
 
 time_series.plot(title="Original Time Series")
+plt.xlabel("Date")
+plt.ylabel("AC Power (kW)")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -116,7 +119,7 @@ plt.legend(labels=labels)
 plt.title("Time Series Labeled for Basic Issues")
 plt.xticks(rotation=20)
 plt.xlabel("Date")
-plt.ylabel("AC Power")
+plt.ylabel("AC Power (kW)")
 plt.tight_layout()
 plt.show()
 
@@ -134,6 +137,9 @@ time_series = time_series.asfreq(data_freq)
 
 # Visualize the time series post-filtering
 time_series.plot(title="Time Series Post-Basic Data Filtering")
+plt.xlabel("Date")
+plt.ylabel("AC Power (kW)")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -295,6 +301,9 @@ plt.figure()
 midday_diff_series.plot()
 time_shift_series.plot()
 plt.title("Midday Difference Time Shift Series")
+plt.xlabel("Date")
+plt.ylabel("Midday Difference (Modeled-Measured), Minutes")
+plt.tight_layout()
 plt.show()
 
 # Plot the heatmap of the irradiance time series
@@ -352,22 +361,9 @@ fig, ax = plt.subplots()
 for (st, ed) in zip(edges[:-1], edges[1:]):
     ax.plot(time_series_daily.loc[st:ed])
 plt.title("Daily Time Series Labeled for Data Shifts")
-plt.show()
-
-# %%
-# We filter the time series to only include the longest
-# shift-free period. We then visualize the final time series post-QA filtering.
-
-time_series = time_series[
-    (time_series.index >=
-     data_shift_start_date.tz_convert(time_series.index.tz)) &
-    (time_series.index <=
-     data_shift_end_date.tz_convert(time_series.index.tz))]
-
-time_series = time_series.asfreq(data_freq)
-
-# Plot the final filtered time series.
-time_series.plot(title="Final Filtered Time Series")
+plt.xlabel("Date")
+plt.ylabel("Mean Daily AC Power (kW)")
+plt.tight_layout()
 plt.show()
 
 
@@ -399,12 +395,33 @@ if clipping:
     plt.title("Time Series Labeled for Clipping")
     plt.xticks(rotation=20)
     plt.xlabel("Date")
-    plt.ylabel("AC Power")
+    plt.ylabel("AC Power (kW)")
     plt.tight_layout()
     plt.show()
     plt.close()
 else:
     print("No clipping detected!!!")
+
+
+# %%
+# We filter the time series to only include the longest
+# shift-free period. We then visualize the final time series post-QA filtering.
+
+time_series = time_series[
+    (time_series.index >=
+     data_shift_start_date.tz_convert(time_series.index.tz)) &
+    (time_series.index <=
+     data_shift_end_date.tz_convert(time_series.index.tz))]
+
+time_series = time_series.asfreq(data_freq)
+
+# Plot the final filtered time series.
+time_series.plot(title="Final Filtered Time Series")
+plt.xlabel("Date")
+plt.ylabel("AC Power (kW)")
+plt.tight_layout()
+plt.show()
+
 
 # %%
 # Estimate the azimuth and tilt of the system, based on the power series data.
