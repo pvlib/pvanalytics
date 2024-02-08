@@ -46,6 +46,7 @@ DOCS_REQUIRE = [
     'pydata-sphinx-theme == 0.8.1',
     'sphinx-gallery',
     'matplotlib',
+    'pyarrow'
 ]
 
 EXTRAS_REQUIRE = {
