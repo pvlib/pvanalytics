@@ -12,7 +12,8 @@ test_file_1 = DATA_DIR / "serf_east_1min_ac_power.csv"
 
 
 @pytest.fixture(scope='module',
-                params=['H', '15T', pytest.param('T', marks=pytest.mark.slow)])
+                params=['h', '15min',
+                        pytest.param('min', marks=pytest.mark.slow)])
 def clearsky_january(request, albuquerque):
     return albuquerque.get_clearsky(
         pd.date_range(
@@ -50,7 +51,7 @@ def modeled_midday_series(ac_power_series):
 @pytest.fixture
 def daytime_mask_left_aligned(ac_power_series):
     # Resample the time series to 5-minute left aligned intervals
-    ac_power_series_left = ac_power_series.resample('5T',
+    ac_power_series_left = ac_power_series.resample('5min',
                                                     label='left').mean()
     data_freq = pd.infer_freq(ac_power_series_left.index)
     daytime_mask = daytime.power_or_irradiance(ac_power_series_left,
@@ -62,7 +63,7 @@ def daytime_mask_left_aligned(ac_power_series):
 def daytime_mask_right_aligned(ac_power_series):
     # Resample the time series to 5-minute right aligned intervals. Lop off the
     # last entry as it is moved to the next day (3/20)
-    ac_power_series_right = ac_power_series.resample('5T',
+    ac_power_series_right = ac_power_series.resample('5min',
                                                      label='right').mean()[:-1]
     data_freq = pd.infer_freq(ac_power_series_right.index)
     daytime_mask = daytime.power_or_irradiance(ac_power_series_right,
@@ -74,10 +75,10 @@ def daytime_mask_right_aligned(ac_power_series):
 def daytime_mask_center_aligned(ac_power_series):
     # Resample the time series to 5-minute center aligned intervals (take
     # left alignment and shift by frequency/2)
-    ac_power_series_center = ac_power_series.resample('5T',
+    ac_power_series_center = ac_power_series.resample('5min',
                                                       label='left').mean()
     ac_power_series_center.index = (ac_power_series_center.index +
-                                    (pd.Timedelta("5T") / 2))
+                                    (pd.Timedelta("5min") / 2))
     data_freq = pd.infer_freq(ac_power_series_center.index)
     daytime_mask = daytime.power_or_irradiance(ac_power_series_center,
                                                freq=data_freq)
@@ -87,7 +88,7 @@ def daytime_mask_center_aligned(ac_power_series):
 def _assert_daytime_no_shoulder(clearsky, output):
     # every night-time value in `output` has low or 0 irradiance
     assert all(clearsky[~output] < 3)
-    if pd.infer_freq(clearsky.index) == 'T':
+    if pd.infer_freq(clearsky.index) in ['T', 'min']:
         # Blur the boundaries between night and day if testing
         # high-frequency data since the daytime filtering algorithm does
         # not have one-minute accuracy.
@@ -125,10 +126,9 @@ def test_daytime_overcast(clearsky_january):
 
 def test_daytime_split_day():
     location = Location(35, -150)
-    clearsky = location.get_clearsky(
-        pd.date_range(start='1/1/2020', end='1/10/2020', freq='15T'),  # no tz
-        model='simplified_solis'
-    )
+    # no tz:
+    times = pd.date_range(start='1/1/2020', end='1/10/2020', freq='15min')
+    clearsky = location.get_clearsky(times, model='simplified_solis')
     _assert_daytime_no_shoulder(
         clearsky['ghi'],
         daytime.power_or_irradiance(clearsky['ghi'])
@@ -153,7 +153,7 @@ def test_daytime_daylight_savings(albuquerque):
     spring = pd.date_range(
         start='2/10/2020',
         end='4/10/2020',
-        freq='15T',
+        freq='15min',
         tz='America/Denver'
     )
     clearsky_spring = albuquerque.get_clearsky(
@@ -167,7 +167,7 @@ def test_daytime_daylight_savings(albuquerque):
     fall = pd.date_range(
         start='10/1/2020',
         end='12/1/2020',
-        freq='15T',
+        freq='15min',
         tz='America/Denver'
     )
     clearsky_fall = albuquerque.get_clearsky(

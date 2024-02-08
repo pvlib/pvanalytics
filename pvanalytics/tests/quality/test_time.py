@@ -25,7 +25,7 @@ def times():
     MST = pytz.timezone('MST')
     return pd.date_range(start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=MST),
                          end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=MST),
-                         freq='10T')
+                         freq='10min')
 
 
 def test_timestamp_spacing_date_range(times):
@@ -105,12 +105,12 @@ def test_has_dst_input_series_not_localized(tz, observes_dst, albuquerque):
 
 @pytest.mark.parametrize("tz, observes_dst", [('MST', False),
                                               ('America/Denver', True)])
-@pytest.mark.parametrize("freq", ['15T', '30T', 'H'])
+@pytest.mark.parametrize("freq", ['15min', '30min', 'h'])
 def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     # With rounding to 1-hour timestamps we need to reduce how many
     # days we look at.
-    window = 7 if freq != 'H' else 1
+    window = 7 if freq != 'h' else 1
     expected = pd.Series(False, index=sunrise.index)
     expected.loc['2020-03-08'] = observes_dst
     expected.loc['2020-11-01'] = observes_dst
@@ -192,7 +192,7 @@ def test_has_dst_no_dst_in_date_range(albuquerque):
     )
 
 
-@pytest.fixture(scope='module', params=['H', '15T', 'T'])
+@pytest.fixture(scope='module', params=['h', '15min', '1min'])
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
         pd.date_range(
@@ -392,30 +392,20 @@ def test_shift_ruptures_shift_min(midday):
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected.loc['2020-01-01':'2020-01-25'] = 30
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
         shift_min=60
     )
     assert not shift_mask.any()
-    assert_series_equal(
-        shift_amount,
-        no_shift,
-        check_names=False
-    )
+    assert_series_equal(shift_amount, no_shift, check_names=False)
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
         shift_min=30
     )
-    assert_series_equal(
-        shift_mask,
-        shift_expected != 0 if pd.infer_freq(shifted.index) != 'H' else False,
-        check_names=False
-    )
-    assert_series_equal(
-        shift_amount,
-        shift_expected if pd.infer_freq(shifted.index) != 'H' else no_shift,
-        check_names=False
-    )
+    assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
+    assert_series_equal(shift_amount, shift_expected, check_names=False)
 
 
 @requires_ruptures

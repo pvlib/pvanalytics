@@ -61,7 +61,7 @@ plt.show()
 # We mask the irradiance time series into day-night periods, and remove
 # any nighttime data to clean up the future regression.
 predicted_day_night_mask = power_or_irradiance(
-    series=data['poa_irradiance__771'], freq='15T')
+    series=data['poa_irradiance__771'], freq='15min')
 # Filter out nighttime periods
 data = data[predicted_day_night_mask]
 
