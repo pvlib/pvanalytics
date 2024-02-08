@@ -44,7 +44,7 @@ Bug Fixes
 Requirements
 ~~~~~~~~~~~~
 * Advance minimum ``pvlib`` to 0.9.4, ``numpy`` to 0.16.0,
-  ``pandas`` to 1.0.0, and ``scipy`` to 1.4.0. (:pull:`179`, :pull:`185`)
+  ``pandas`` to 1.0.0, and ``scipy`` to 1.6.0. (:pull:`179`, :pull:`185`)
 
 Documentation
 ~~~~~~~~~~~~~
