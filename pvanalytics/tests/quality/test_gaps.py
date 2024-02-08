@@ -447,11 +447,12 @@ def test_trim_daily_index():
         expected,
         gaps.trim(data)
     )
-    
+
+
 def test_trim_daily_index_tz_aware():
     """trim works when data has a daily index and data is tz-aware."""
     data = pd.Series(True, index=pd.date_range(
-        start='1/1/2020', end='2/29/2020', freq='D', tz = "Etc/GMT+8"))
+        start='1/1/2020', end='2/29/2020', freq='D', tz="Etc/GMT+8"))
     assert gaps.trim(data).all()
     data.iloc[0:8] = False
     data.iloc[9] = False
