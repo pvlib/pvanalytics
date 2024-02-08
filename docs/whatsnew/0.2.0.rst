@@ -40,6 +40,7 @@ Bug Fixes
   of raising ``AttributeError``. (:pull:`181`)
 * Compatibility with pandas 2.0.0 (:pull:`185`)
 * Compatibility with scipy 1.11 (:pull:`196`)
+* Fixed pandas version with gaps function
 
 Requirements
 ~~~~~~~~~~~~
