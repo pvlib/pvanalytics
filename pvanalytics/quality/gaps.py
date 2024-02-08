@@ -411,9 +411,7 @@ def trim(series, days=10):
     mask = pd.Series(False, index=series.index)
 
     if start:
-        mask.loc[pd.to_datetime(start.date()).tz_localize(series.index.tz):
-                 pd.to_datetime(end.date()).tz_localize(series.index.tz)] = \
-            True
+        mask.loc[start:end] = True
     return mask
 
 
