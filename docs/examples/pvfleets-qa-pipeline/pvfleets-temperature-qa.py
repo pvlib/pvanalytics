@@ -133,7 +133,6 @@ if any(zscore_outlier_mask):
     labels.append("Outlier")
 plt.legend(labels=labels)
 plt.title("Time Series Labeled for Basic Issues")
-plt.xticks(rotation=20)
 plt.xlabel("Date")
 plt.ylabel("Temperature")
 plt.tight_layout()
