@@ -449,6 +449,27 @@ def test_trim_daily_index():
     )
 
 
+def test_trim_daily_index_tz_aware():
+    """trim works when data has a daily index and data is tz-aware."""
+    data = pd.Series(True, index=pd.date_range(
+        start='1/1/2020', end='2/29/2020', freq='D', tz="Etc/GMT+8"))
+    assert gaps.trim(data).all()
+    data.iloc[0:8] = False
+    data.iloc[9] = False
+    expected = data.copy()
+    expected.iloc[0:10] = False
+    assert_series_equal(
+        expected,
+        gaps.trim(data)
+    )
+    data.iloc[-5:] = False
+    expected.iloc[-5:] = False
+    assert_series_equal(
+        expected,
+        gaps.trim(data)
+    )
+
+
 def test_completeness_score_all_nans():
     """A data set with all nans has completeness 0 for each day."""
     completeness = gaps.completeness_score(
