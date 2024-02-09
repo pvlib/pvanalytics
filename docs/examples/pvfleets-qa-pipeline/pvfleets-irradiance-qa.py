@@ -364,7 +364,6 @@ plt.xlabel("Date")
 plt.ylabel("AC Power (kW)")
 plt.tight_layout()
 plt.show()
-plt.close()
 
 # %%
 # Generate a dictionary output for the QA assessment of this data stream,
