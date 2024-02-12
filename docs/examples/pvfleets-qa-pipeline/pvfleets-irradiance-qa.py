@@ -58,8 +58,8 @@ plt.show()
 # 1) Flatlined/stale data periods
 #    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) Negative irradiance data
-# 3) "Abnormal" data periods, which are defined as less than 10% of the
-#    daily time series mean OR greater than 1300
+# 3) "Abnormal" data periods, which are defined as less than the daily minimum
+#    of 50 OR any data greater than 1300
 # 4) Outliers, which are defined as more than one 4 standard deviations
 #    away from the mean (:py:func:`pvanalytics.quality.outliers.zscore`)
 
@@ -361,10 +361,9 @@ time_series = time_series.asfreq(data_freq)
 # Display the final irradiance time series, post-QA filtering.
 time_series.plot(title="Final Filtered Time Series")
 plt.xlabel("Date")
-plt.ylabel("AC Power (kW)")
+plt.ylabel("Irradiance (W/m^2)")
 plt.tight_layout()
 plt.show()
-plt.close()
 
 # %%
 # Generate a dictionary output for the QA assessment of this data stream,
