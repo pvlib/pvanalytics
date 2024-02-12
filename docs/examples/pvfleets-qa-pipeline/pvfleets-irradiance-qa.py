@@ -58,8 +58,8 @@ plt.show()
 # 1) Flatlined/stale data periods
 #    (:py:func:`pvanalytics.quality.gaps.stale_values_round`)
 # 2) Negative irradiance data
-# 3) "Abnormal" data periods, which are defined as less than the daily minimum
-#    of 50 OR any data greater than 1300
+# 3) "Abnormal" data periods, which are defined as days with a daily minimum
+#    greater than 50 OR any data greater than 1300
 # 4) Outliers, which are defined as more than one 4 standard deviations
 #    away from the mean (:py:func:`pvanalytics.quality.outliers.zscore`)
 
