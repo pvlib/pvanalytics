@@ -1,7 +1,7 @@
 .. _whatsnew_020:
 
-0.2.0 (anticipated February 2024)
----------------------------------
+0.2.0 (February 14, 2024)
+-------------------------
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
@@ -40,8 +40,7 @@ Bug Fixes
   of raising ``AttributeError``. (:pull:`181`)
 * Compatibility with pandas 2.0.0 (:pull:`185`) and future versions of pandas (:pull:`203`)
 * Compatibility with scipy 1.11 (:pull:`196`)
-* Updated function :py:func:`~pvanalytics.quality.gaps.trim` to handle pandas 2.0.0 update for tz-aware timeseries
- (:pull:`206`)
+* Updated function :py:func:`~pvanalytics.quality.gaps.trim` to handle pandas 2.0.0 update for tz-aware timeseries (:pull:`206`)
 
 Requirements
 ~~~~~~~~~~~~
@@ -69,3 +68,5 @@ Contributors
 * Cliff Hansen (:ghuser:`cwhanse`)
 * Abhishek Parikh (:ghuser:`abhisheksparikh`)
 * Quyen Nguyen (:ghuser:`qnguyen345`)
+* Adam R. Jensen (:ghuser:`adamrjensen`)
+* Chris Deline (:ghuser:`cdeline`)
