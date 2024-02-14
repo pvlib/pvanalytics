@@ -69,3 +69,5 @@ Contributors
 * Cliff Hansen (:ghuser:`cwhanse`)
 * Abhishek Parikh (:ghuser:`abhisheksparikh`)
 * Quyen Nguyen (:ghuser:`qnguyen345`)
+* Adam R. Jensen (:ghuser:`adamrjensen`)
+* Chris Deline (:ghuser:`cdeline`)
