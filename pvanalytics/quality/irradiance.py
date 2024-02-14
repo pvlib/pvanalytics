@@ -417,7 +417,7 @@ def _daily_total(series):
     if freq:
         freq_hours = _to_hours(freq)
         return series.resample('D').apply(
-            integrate.trapz,
+            integrate.trapezoid,
             dx=freq_hours
         )
     hours = pd.Series(
@@ -425,7 +425,7 @@ def _daily_total(series):
         index=series.index
     )
     return series.resample('D').apply(
-        lambda day: integrate.trapz(y=day, x=hours[day.index])
+        lambda day: integrate.trapezoid(y=day, x=hours[day.index])
     )
 
 
