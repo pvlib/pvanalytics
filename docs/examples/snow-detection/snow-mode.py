@@ -1,4 +1,3 @@
-
 """
 Quantifying the effects of snow cover
 =====================================
@@ -38,7 +37,6 @@ for a utility-scale system.
 #%% Import packages
 
 import pathlib
-import os
 import json
 import pandas as pd
 import numpy as np
@@ -48,22 +46,21 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
-from pvanalytics.features import clipping
 
+import pvanalytics
 # Functions needed for the analysis procedure
+from pvanalytics.features import clipping
 from pvanalytics.snow import (get_irradiance_sapm, get_irradiance_imp,
                               get_transmission, categorize, apply_mask)
 
 # %% Load in system configuration parameters (dict)
+pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
+snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
+mask_file = pvanalytics_dir / 'data' / 'snow_mask.csv'
+config_file = pvanalytics_dir / 'data' / 'snowconfig.json'
 
-base_dir = pathlib.Path('.')
-data_dir = os.path.join(base_dir, 'data')
-data_path = os.path.join(data_dir, 'data.csv')
-snow_path = os.path.join(data_dir, 'snow.csv')
-mask_path = os.path.join(data_dir, 'mask.csv')
-config_path = os.path.join(data_dir, 'config.json')
-
-with open(config_path) as json_data:
+with open(config_file) as json_data:
     config = json.load(json_data)
 
 #%% Retrieve and print system inverter specs and electrical configuration
@@ -91,7 +88,7 @@ print(f"There are {num_str_per_cb} modules connected in series in each string,"
 # by an electric utility.
 
 # Load in utility data
-data = pd.read_csv(data_path, index_col='Timestamp')
+data = pd.read_csv(data_file, index_col='Timestamp')
 data.set_index(pd.DatetimeIndex(data.index,ambiguous='infer'), inplace=True)
 data = data[~data.index.duplicated()]
 
@@ -215,7 +212,7 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 '''
 
-horizon_mask = pd.read_csv(mask_path,
+horizon_mask = pd.read_csv(mask_file,
                            index_col='Unnamed: 0').squeeze("columns")
 
 data.loc[:, 'Horizon Mask'] = data.apply(lambda x: apply_mask(
@@ -682,7 +679,7 @@ ax.set_title('Measured and modeled production for INV1 CB2',
 # four modes that are associated with the presence of snow.
 
 # Daily snowfall is measured at 7:00 am of each day
-snow = pd.read_csv(snow_path, index_col='DATE') # originally in [mm]
+snow = pd.read_csv(snowfall_file, index_col='DATE') # originally in [mm]
 snow['SNOW'] *= 1/(10*2.54) # convert to [in]
 
 loss_cols = [c for c in data.columns if "Loss" in c]
