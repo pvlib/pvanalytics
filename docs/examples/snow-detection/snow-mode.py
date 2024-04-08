@@ -34,7 +34,7 @@ for a utility-scale system.
 
 """
 
-#%% Import packages
+# %% Import packages
 
 import pathlib
 import json
@@ -62,7 +62,7 @@ config_file = pvanalytics_dir / 'data' / 'snow_config.json'
 with open(config_file) as json_data:
     config = json.load(json_data)
 
-#%% Retrieve and print system inverter specs and electrical configuration
+# %% Retrieve and print system inverter specs and electrical configuration
 
 cec_inverter_db = pvlib.pvsystem.retrieve_sam('CECInverter')
 my_inverter = cec_inverter_db[config['inverter']]
@@ -80,7 +80,7 @@ print(f"There are {num_str_per_cb} modules connected in series in each string,"
       f" parallel at each combiner")
 
 
-#%%
+# %%
 # Read in 15-minute sampled DC voltage and current time series data, AC power,
 # module temperature collected by a BOM sensor and plane-of-array
 # irradiance data collected by a heated pyranometer. This sample is provided
@@ -88,7 +88,7 @@ print(f"There are {num_str_per_cb} modules connected in series in each string,"
 
 # Load in utility data
 data = pd.read_csv(data_file, index_col='Timestamp')
-data.set_index(pd.DatetimeIndex(data.index,ambiguous='infer'), inplace=True)
+data.set_index(pd.DatetimeIndex(data.index, ambiguous='infer'), inplace=True)
 data = data[~data.index.duplicated()]
 
 # Explore utility datatset
@@ -352,7 +352,7 @@ ax.xaxis.set_major_formatter(date_form)
 ax.scatter(modeled_vmp_sapm.index, modeled_vmp_sapm, s=1, c='b', label='SAPM')
 ax.scatter(modeled_vmp_sde.index, modeled_vmp_sde, s=1, c='g', label='SDE')
 
-ax.scatter(data.index, data[inv_cb + ' Voltage [V]'], s=1, c = 'r',
+ax.scatter(data.index, data[inv_cb + ' Voltage [V]'], s=1, c='r',
            label='Measured')
 ax.legend(fontsize='xx-large')
 ax.set_ylabel('Voltage [V]', fontsize='xx-large')
@@ -441,7 +441,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
         vmp_ratio = voltage / modeled_vmp
 
     # take care of divide by zero
-    vmp_ratio[modeled_vmp==0] = 0
+    vmp_ratio[modeled_vmp == 0] = 0
     # Both quantities in the "where" argument of np.divide must be arrays, or
     # else a RecursionError is raised
 
@@ -461,6 +461,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
                'mode': mode}
 
     return my_dict
+
 
 # %%
 # Demonstrate transmission, modeled voltage calculation and mode categorization
@@ -527,9 +528,9 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
         'num_mods_per_str': int(config['num_mods_per_str'][f'{inv_cb}'])}
 
     out = wrapper(data[v_col], data[i_col],
-              data['Cell Temp [C]'],
-              data['POA [W/m²]'], sapm_coeffs,
-              my_config)
+                  data['Cell Temp [C]'],
+                  data['POA [W/m²]'], sapm_coeffs,
+                  my_config)
 
     for k, v in out.items():
         data[inv_cb + ' ' + k] = v
@@ -564,7 +565,7 @@ for c in vratio_cols:
 ax.set_xlabel('Date', fontsize='xx-large')
 ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='xx-large')
 ax.axhline(1, c='k', alpha=0.1, ls='--')
-ax.legend();
+ax.legend()
 
 # %% Calculate all power losses - snow and non-snow
 
@@ -595,10 +596,10 @@ loss_cols = [c for c in data.columns if "Loss" in c]
 mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
 modeled_power_cols = [c for c in data.columns if "Modeled Power" in c]
 
-i = 1
-l = loss_cols[i]
-m = mode_cols[i]
-p = modeled_power_cols[i]
+col = 1
+l = loss_cols[col]
+m = mode_cols[col]
+p = modeled_power_cols[col]
 
 # Color intervals by mode
 cmap = {0: 'r',
@@ -618,29 +619,29 @@ days = np.unique(days_mapped)
 grouped = temp.groupby(days_mapped)
 
 for d in days:
-        temp_grouped = grouped.get_group(d)
-        ax.plot(temp_grouped.index, temp_grouped[p], c='k', ls='--')
-        ax.plot(temp_grouped.index, temp_grouped[p]- temp_grouped[l], c='k')
-        ax.fill_between(temp_grouped.index, temp_grouped[p] - temp_grouped[l],
-                        temp_grouped[p], color='k', alpha=0.2)
+    temp_grouped = grouped.get_group(d)
+    ax.plot(temp_grouped.index, temp_grouped[p], c='k', ls='--')
+    ax.plot(temp_grouped.index, temp_grouped[p]- temp_grouped[l], c='k')
+    ax.fill_between(temp_grouped.index, temp_grouped[p] - temp_grouped[l],
+                    temp_grouped[p], color='k', alpha=0.2)
 
-        chng_pts = np.ravel(np.where(temp_grouped[m].values[:-1]
-                                     - temp_grouped[m].values[1:] != 0))
+    chng_pts = np.ravel(np.where(temp_grouped[m].values[:-1]
+                                 - temp_grouped[m].values[1:] != 0))
 
-        if len(chng_pts) == 0:
-            ax.axvspan(temp_grouped.index[0], temp_grouped.index[-1],
-                    color=cmap[temp_grouped.at[temp_grouped.index[-1], m]],
-                     alpha=0.05)
-        else:
-            set1 = np.append([0], chng_pts)
-            set2 = np.append(chng_pts, [-1])
+    if len(chng_pts) == 0:
+        ax.axvspan(temp_grouped.index[0], temp_grouped.index[-1],
+                   color=cmap[temp_grouped.at[temp_grouped.index[-1], m]],
+                   alpha=0.05)
+    else:
+        set1 = np.append([0], chng_pts)
+        set2 = np.append(chng_pts, [-1])
 
-            for start, end in zip(set1, set2):
-                my_index = temp_grouped.index[start:end]
-                ax.axvspan(
-                    temp_grouped.index[start], temp_grouped.index[end],
-                    color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
-                    alpha=0.05)
+        for start, end in zip(set1, set2):
+            my_index = temp_grouped.index[start:end]
+            ax.axvspan(
+                temp_grouped.index[start], temp_grouped.index[end],
+                color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
+                alpha=0.05)
 
 # Add different colored intervals to legend
 handles, labels = ax.get_legend_handles_labels()
@@ -669,7 +670,7 @@ ax.legend(handles=handles, fontsize='xx-large', loc='upper left')
 ax.set_title('Measured and modeled production for INV1 CB2',
              fontsize='xx-large')
 
-#%%
+# %%
 
 # Calculate daily losses occuring while the system is operating in one of the
 # four modes that are associated with the presence of snow.
@@ -717,4 +718,4 @@ ax.legend()
 ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
-ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large');
+ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large')
