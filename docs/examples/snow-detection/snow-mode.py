@@ -211,11 +211,10 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 '''
 
-horizon_mask = pd.read_csv(mask_file,
-                           index_col='Unnamed: 0').squeeze("columns")
+horizon = pd.read_csv(mask_file, index_col='Az').squeeze("columns")
 
-data.loc[:, 'Horizon Mask'] = data.apply(lambda x: snow.apply_mask(
-    horizon_mask, x['azimuth'], x['elevation']), axis=1)
+data['Horizon Mask'] = snow.get_horizon_mask(horizon, data['azimuth'],
+                                             data['elevation'])
 
 # Exclude data collected while the sun is below the horizon
 data = data[~data['Horizon Mask']]
