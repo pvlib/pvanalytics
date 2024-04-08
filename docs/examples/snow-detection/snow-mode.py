@@ -50,8 +50,7 @@ from matplotlib.lines import Line2D
 import pvanalytics
 # Functions needed for the analysis procedure
 from pvanalytics.features import clipping
-from pvanalytics.snow import (get_irradiance_sapm, get_irradiance_imp,
-                              get_transmission, categorize, apply_mask)
+from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
@@ -215,7 +214,7 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 horizon_mask = pd.read_csv(mask_file,
                            index_col='Unnamed: 0').squeeze("columns")
 
-data.loc[:, 'Horizon Mask'] = data.apply(lambda x: apply_mask(
+data.loc[:, 'Horizon Mask'] = data.apply(lambda x: snow.apply_mask(
     horizon_mask, x['azimuth'], x['elevation']), axis=1)
 
 # Exclude data collected while the sun is below the horizon
@@ -278,17 +277,16 @@ i_scaling_factor = int(config['num_str_per_cb'][f'{inv_cb}'])
 imp = data[dc_current_cols[j]] / i_scaling_factor
 
 # Approach 1 using SAPM
-modeled_e_e1 = get_irradiance_sapm(data['Cell Temp [C]'],
-                                   imp,
-                                   sapm_coeffs['Impo'], sapm_coeffs['C0'],
-                                   sapm_coeffs['C1'], sapm_coeffs['Aimp'])
+modeled_e_e1 = snow.get_irradiance_sapm(
+    data['Cell Temp [C]'], imp, sapm_coeffs['Impo'], sapm_coeffs['C0'],
+    sapm_coeffs['C1'], sapm_coeffs['Aimp'])
 
-T1 = get_transmission(data['POA [W/m²]'], modeled_e_e1, imp)
+T1 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e1, imp)
 
 # Approach 2 using a linear irradiance-Imp model
-modeled_e_e2 = get_irradiance_imp(imp, sapm_coeffs['Impo'])
+modeled_e_e2 = snow.get_irradiance_imp(imp, sapm_coeffs['Impo'])
 
-T2 = get_transmission(data['POA [W/m²]'], modeled_e_e2, imp)
+T2 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e2, imp)
 
 # %%
 # Plot transmission calculated using two different approaches
@@ -416,13 +414,12 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     '''
 
     # Calculate transmission
-    modeled_e_e = get_irradiance_sapm(temp_cell,
-                                      current/config['num_str_per_cb'],
-                                      coeffs['Impo'], coeffs['C0'],
-                                      coeffs['C1'], coeffs['Aimp'])
+    modeled_e_e = snow.get_irradiance_sapm(
+        temp_cell, current/config['num_str_per_cb'], coeffs['Impo'],
+        coeffs['C0'], coeffs['C1'], coeffs['Aimp'])
 
-    T = get_transmission(effective_irradiance, modeled_e_e,
-                         current/config['num_str_per_cb'])
+    T = snow.get_transmission(effective_irradiance, modeled_e_e,
+                              current/config['num_str_per_cb'])
 
     name_T = inv_cb + ' Transmission'
     data[name_T] = T
@@ -454,7 +451,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     # vmp_ratio[modeled_vmp==0] = 0
 
     # TODO lets vectorize the function itself
-    categorize_v = np.vectorize(categorize)
+    categorize_v = np.vectorize(snow.categorize)
 
     mode = categorize_v(vmp_ratio, T, voltage, config['min_dcv'],
                         config['threshold_vratio'],
