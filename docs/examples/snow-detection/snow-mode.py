@@ -12,7 +12,7 @@ The effect of snow is classified into one of five categories:
         both operating voltage and current are reduced.
     Mode 2: The system is online and covered with opaque snow, such that
         operating voltage is reduced by the snow, but transmission
-        is consistent with snow-free conditions. #TODO seems contradictory
+        is consistent with snow-free conditions. # TODO seems contradictory
     Mode 3: The system is online and covered with light-transmissive snow,
         such that current is decreased but voltage is consistent with all
         system substrings being online.
@@ -68,9 +68,9 @@ with open(config_file) as json_data:
 cec_inverter_db = pvlib.pvsystem.retrieve_sam('CECInverter')
 my_inverter = cec_inverter_db[config['inverter']]
 
-max_ac_power = my_inverter['Paco']*0.001 # originally in [W], converted to [kW]
-mppt_low_voltage = my_inverter['Mppt_low'] # [V]
-mppt_high_voltage = my_inverter['Mppt_high'] # [V]
+max_ac_power = my_inverter['Paco']*0.001  # originally in W, convert to kW
+mppt_low_voltage = my_inverter['Mppt_low']  # [V]
+mppt_high_voltage = my_inverter['Mppt_high']  # [V]
 
 print(f"Inverter AC power rating: {max_ac_power} kW")
 print(f"Inverter MPPT range: {mppt_low_voltage} V - {mppt_high_voltage} V")
@@ -376,7 +376,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     1. Model effective irradiance based on measured current using the SAPM
     2. Calculate transmission
     3. Uses transmission to model voltage with the SAPM.
-    #TODO How is this voltage different than measured (snow-affected voltage)?
+    # TODO How is this voltage different than measured (snow-affected voltage)?
     4. Determine the snow mode for each point.
 
     Parameters
@@ -453,16 +453,16 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     #                           where=((voltage > 0) & (modeled_vmp>0)))
     # vmp_ratio[modeled_vmp==0] = 0
 
-    #TODO lets vectorize the function itself
+    # TODO lets vectorize the function itself
     categorize_v = np.vectorize(categorize)
 
     mode = categorize_v(vmp_ratio, T, voltage, config['min_dcv'],
                         config['threshold_vratio'],
                         config['threshold_transmission'])
-    my_dict = {'transmission' : T,
-               'modeled_vmp' : modeled_vmp,
-               'vmp_ratio' : vmp_ratio,
-               'mode' : mode}
+    my_dict = {'transmission': T,
+               'modeled_vmp': modeled_vmp,
+               'vmp_ratio': vmp_ratio,
+               'mode': mode}
 
     return my_dict
 
@@ -495,12 +495,12 @@ i_scaling_factor = int(config['num_str_per_cb'][f'{inv_cb}'])
 threshold_vratio = config['threshold_vratio']
 threshold_transmission = config['threshold_transmission']
 
-my_config = {'threshold_vratio' : threshold_vratio,
-             'threshold_transmission' : threshold_transmission,
-             'min_dcv' : mppt_low_voltage,
-             'max_dcv' : mppt_high_voltage,
-             'num_str_per_cb' : int(config['num_str_per_cb'][f'{inv_cb}']),
-             'num_mods_per_str' : int(config['num_mods_per_str'][f'{inv_cb}'])}
+my_config = {'threshold_vratio': threshold_vratio,
+             'threshold_transmission': threshold_transmission,
+             'min_dcv': mppt_low_voltage,
+             'max_dcv': mppt_high_voltage,
+             'num_str_per_cb': int(config['num_str_per_cb'][f'{inv_cb}']),
+             'num_mods_per_str': int(config['num_mods_per_str'][f'{inv_cb}'])}
 
 out = wrapper(data[v], data[i],
               data['Cell Temp [C]'],
@@ -523,12 +523,12 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
         config['num_str_per_cb'][f'INV{inv_num} CB{cb_num}'])
 
     my_config = {
-        'threshold_vratio' : threshold_vratio,
-        'threshold_transmission' : threshold_transmission,
-        'min_dcv' : mppt_low_voltage,
-        'max_dcv' : mppt_high_voltage,
-        'num_str_per_cb' : int(config['num_str_per_cb'][f'{inv_cb}']),
-        'num_mods_per_str' : int(config['num_mods_per_str'][f'{inv_cb}'])}
+        'threshold_vratio': threshold_vratio,
+        'threshold_transmission': threshold_transmission,
+        'min_dcv': mppt_low_voltage,
+        'max_dcv': mppt_high_voltage,
+        'num_str_per_cb': int(config['num_str_per_cb'][f'{inv_cb}']),
+        'num_mods_per_str': int(config['num_mods_per_str'][f'{inv_cb}'])}
 
     out = wrapper(data[v_col], data[i_col],
               data['Cell Temp [C]'],
@@ -605,7 +605,7 @@ m = mode_cols[i]
 p = modeled_power_cols[i]
 
 # Color intervals by mode
-cmap = {0 : 'r',
+cmap = {0: 'r',
         1: 'b',
         2: 'yellow',
         3: 'cyan',
@@ -617,7 +617,7 @@ ax.xaxis.set_major_formatter(date_form)
 temp = data[~data[m].isna()]
 
 # Plot each day individually so we are not exaggerating losses
-days_mapped = temp.index.map(lambda x : x.date())
+days_mapped = temp.index.map(lambda x: x.date())
 days = np.unique(days_mapped)
 grouped = temp.groupby(days_mapped)
 
@@ -646,7 +646,7 @@ for d in days:
                     color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
                     alpha=0.05)
 
-# # Add different colored intervals to legend
+# Add different colored intervals to legend
 handles, labels = ax.get_legend_handles_labels()
 
 modeled_line = Line2D([0], [0], label='Modeled', color='k', ls='--')
@@ -679,8 +679,8 @@ ax.set_title('Measured and modeled production for INV1 CB2',
 # four modes that are associated with the presence of snow.
 
 # Daily snowfall is measured at 7:00 am of each day
-snow = pd.read_csv(snowfall_file, index_col='DATE') # originally in [mm]
-snow['SNOW'] *= 1/(10*2.54) # convert to [in]
+snow = pd.read_csv(snowfall_file, index_col='DATE')  # originally in [mm]
+snow['SNOW'] *= 1/(10*2.54)  # convert to [in]
 
 loss_cols = [c for c in data.columns if "Loss" in c]
 mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
