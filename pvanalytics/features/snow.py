@@ -1,34 +1,30 @@
 import numpy as np
 
-def apply_mask(mask, azimuth, elevation):
+
+def get_horizon_mask(horizon, azimuth, elevation):
 
     """
-    Used to determine whether a given (azimuth, elevation) pair is above or
+    Determines if a given (azimuth, elevation) pair is above or
     below a horizon profile
 
     Parameters
     ----------
-    mask : pd.Series
-        Series with int index of 0 - 360 (represents azimuth) and float values
-        (represents elevation [deg] of horizon profile)
+    horizon : pd.Series
+        Series with int index of 0 - 359 (represents azimuth) and float values
+        (represents elevation [deg] of horizon profile).
     azimuth : numeric
-        Solar azimuth angle [deg]
+        Solar azimuth angle. [deg]
     elevation : numeric
-        Solar elevation angle [deg]
+        Solar elevation angle. [deg]
 
     Returns
     -------
     out : bool or NaN
     """
-    if np.isnan(azimuth) == False:
-        if elevation > mask[int(np.floor(azimuth))]:
-            out = False
-        else:
-            out = True
-    else:
-        out = np.nan
-    
+    yp = np.interp(azimuth, horizon.index, horizon.values)
+    out = elevation >= yp  # TODO or strictly >
     return out
+
 
 def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
                         irrad_ref=1000, temp_ref=25):
@@ -104,7 +100,7 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
 
 
 def get_transmission(measured_e_e, modeled_e_e, i_mp):
-    
+
     """
     Estimate transmittance as the ratio of modeled effective irradiance to
     measured irradiance.
@@ -136,7 +132,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5. :doi:`10.1109/PVSC48320.2023.10360065`
     """
-    
+
     T = modeled_e_e/measured_e_e
     T[T.isna()] = np.nan
     T[i_mp == 0] = 0
@@ -148,7 +144,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
 
 def categorize(vmp_ratio, transmission, voltage, min_dcv,
                threshold_vratio, threshold_transmission):
-    
+
     """
     Categorizes electrical behavior into a snow-related mode.
 
@@ -197,7 +193,7 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    
+
     if np.isnan(vmp_ratio) or np.isnan(transmission):
         return np.nan
     elif voltage < min_dcv:
