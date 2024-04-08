@@ -67,7 +67,7 @@ with open(config_path) as json_data:
     config = json.load(json_data)
 
 #%% Retrieve and print system inverter specs and electrical configuration
-    
+
 cec_inverter_db = pvlib.pvsystem.retrieve_sam('CECInverter')
 my_inverter = cec_inverter_db[config['inverter']]
 
@@ -119,8 +119,9 @@ data[dc_voltage_cols] = data[dc_voltage_cols].replace({np.nan: 0, None: 0})
 data[dc_current_cols] = data[dc_current_cols].replace({np.nan: 0, None: 0})
 data.loc[:, ac_power_cols] = data[ac_power_cols].replace({np.nan: 0, None: 0})
 
-# %% Plot DC voltage for each combiner input relative to inverter nameplate limits
-fig, ax = plt.subplots(figsize=(10,10))                  
+# %% Plot DC voltage for each combiner input relative to inverter nameplate
+# limits
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for v in dc_voltage_cols:
@@ -136,7 +137,7 @@ ax.legend(loc='lower left')
 
 # %% Plot AC power relative to inverter nameplate limits
 
-fig, ax = plt.subplots(figsize=(10,10))                  
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for a in ac_power_cols:
@@ -169,12 +170,12 @@ for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
     data.loc[data[v] > mppt_high_voltage, v] = np.nan
     data.loc[data[v] > mppt_high_voltage, i] = np.nan
     data.loc[data[v] > mppt_high_voltage, a] = np.nan
-    
+
     # Data where V < MPPT minimum
     data.loc[data[v] < mppt_low_voltage, v] = 0
     data.loc[data[v] < mppt_low_voltage, i] = 0
     data.loc[data[v] < mppt_low_voltage, a] = 0
-    
+
     # Data where system is at Voc
     data.loc[data[i] == 0, v] = 0
 
@@ -189,7 +190,7 @@ for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
 
 # %% Plot DC voltage for each combiner inputm with inverter nameplate limits
 
-fig, ax = plt.subplots(figsize=(10,10))                  
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for v in dc_voltage_cols:
@@ -214,15 +215,16 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 '''
 
-horizon_mask = pd.read_csv(mask_path, index_col='Unnamed: 0').squeeze("columns")
+horizon_mask = pd.read_csv(mask_path,
+                           index_col='Unnamed: 0').squeeze("columns")
 
 data.loc[:, 'Horizon Mask'] = data.apply(lambda x: apply_mask(
-    horizon_mask, x['azimuth'], x['elevation']), axis = 1)
+    horizon_mask, x['azimuth'], x['elevation']), axis=1)
 
 # Exclude data collected while the sun is below the horizon
-data = data[data['Horizon Mask'] == False]
+data = data[~data['Horizon Mask']]
 
-# %% 
+# %%
 
 # Define coefficients for modeling transmission and voltage. User can either
 # use the SAPM to calculate transmission or an approach based on the ratio
@@ -251,7 +253,7 @@ data['Cell Temp [C]'] = data['Module Temp [C]'] + \
     3*data['POA [W/m²]']/irrad_ref
 
 # %% Plot cell temperature
-fig, ax = plt.subplots(figsize=(10,10))                        
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 ax.scatter(data.index, data['Cell Temp [C]'], s=0.5, c='b')
@@ -259,7 +261,7 @@ ax.plot(data.index, data['Cell Temp [C]'], alpha=0.3, c='b')
 ax.set_ylabel('Cell Temp [C]', c='b', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='xx-large')
 
-# %% For one combiner, demonstrate the transmission calculation using two 
+# %% For one combiner, demonstrate the transmission calculation using two
 # different approaches to modeling effective irradiance from measured Imp.
 
 # Choose one combiner box
@@ -291,10 +293,10 @@ modeled_e_e2 = get_irradiance_imp(imp, sapm_coeffs['Impo'])
 
 T2 = get_transmission(data['POA [W/m²]'], modeled_e_e2, imp)
 
-# %% 
+# %%
 # Plot transmission calculated using two different approaches
 
-fig, ax = plt.subplots(figsize=(10,10))                             
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d \n%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
@@ -308,7 +310,7 @@ ax.legend()
 ax.set_ylabel('Transmission', fontsize='xx-large')
 ax.set_xlabel('Date + Time', fontsize='large')
 
-# %% 
+# %%
 # Model voltage using calculated transmission (two different approaches)
 
 # Number of modules in series in a string
@@ -349,7 +351,7 @@ modeled_vmp_sde *= v_scaling_factor
 
 # %% Plot modeled and measured voltage
 
-fig, ax = plt.subplots(figsize=(10,10))                             
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
@@ -367,7 +369,7 @@ ax.set_xlabel('Date', fontsize='large')
 
 def wrapper(voltage, current, temp_cell, effective_irradiance,
             coeffs, config, temp_ref=25, irrad_ref=1000):
-    
+
     '''
     Categorizes each data point as Mode 0-4 based on transmission and
     the ratio between measured and modeled votlage.
@@ -376,7 +378,8 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
 
     1. Model effective irradiance based on measured current using the SAPM
     2. Calculate transmission
-    3. Uses transmission to model voltage with the SAPM. # How is this voltage different than measured (snow-affected voltage)?
+    3. Uses transmission to model voltage with the SAPM.
+    #TODO How is this voltage different than measured (snow-affected voltage)?
     4. Determine the snow mode for each point.
 
     Parameters
@@ -388,7 +391,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     temp_cell : array
         Cell temperature. [degrees C]
     effective_irradiance : array
-        Snow-free POA irradiance measured by a heated pyranometer. [W/m²] 
+        Snow-free POA irradiance measured by a heated pyranometer. [W/m²]
     coeffs : dict
         A dict defining the SAPM parameters, used for pvlib.pvsystem.sapm.
     config : dict
@@ -407,14 +410,14 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
             Number of modules in series in each string.
         num_str_per_cb : int
             Number of strings in parallel at the combiner.
-    
+
     Returns
     -------
     my_dict : dict
         Keys are "transmission", "modeled_vmp", "vmp_ratio", and "mode"
-    
+
     '''
-    
+
     # Calculate transmission
     modeled_e_e = get_irradiance_sapm(temp_cell,
                                       current/config['num_str_per_cb'],
@@ -428,13 +431,13 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     data[name_T] = T
 
     # Model voltage for a single module, scale up to array
-    modeled_vmp = pvlib.pvsystem.sapm(effective_irradiance*T, temp_cell, 
+    modeled_vmp = pvlib.pvsystem.sapm(effective_irradiance*T, temp_cell,
                                       coeffs)['v_mp']
     modeled_vmp *= config['num_mods_per_str']
 
     # Voltage is modeled as NaN if T = 0, but V = 0 makes more sense
     modeled_vmp[T == 0] = 0
-    
+
     # Identify periods where modeled voltage is outside of MPPT range,
     # and correct values
     modeled_vmp[modeled_vmp > config['max_dcv']] = np.nan
@@ -443,7 +446,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     # Calculate voltage ratio
     with np.errstate(divide='ignore'):
         vmp_ratio = voltage / modeled_vmp
-    
+
     # take care of divide by zero
     vmp_ratio[modeled_vmp==0] = 0
     # Both quantities in the "where" argument of np.divide must be arrays, or
@@ -452,8 +455,9 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     #     vmp_ratio = np.divide(voltage, modeled_vmp,
     #                           where=((voltage > 0) & (modeled_vmp>0)))
     # vmp_ratio[modeled_vmp==0] = 0
-    
-    categorize_v = np.vectorize(categorize) #TODO lets vectorize the function itself
+
+    #TODO lets vectorize the function itself
+    categorize_v = np.vectorize(categorize)
 
     mode = categorize_v(vmp_ratio, T, voltage, config['min_dcv'],
                         config['threshold_vratio'],
@@ -462,10 +466,10 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
                'modeled_vmp' : modeled_vmp,
                'vmp_ratio' : vmp_ratio,
                'mode' : mode}
-    
+
     return my_dict
 
-# %% 
+# %%
 # Demonstrate transmission, modeled voltage calculation and mode categorization
 # on voltage, current pair
 
@@ -511,16 +515,16 @@ out = wrapper(data[v], data[i],
 # all combiners. Use the SAPM to calculate transmission and model the voltage.
 
 for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
-    
+
     matched = re.match(r'INV(\d+) CB(\d+) Current', i_col)
     inv_num = matched.group(1)
     cb_num = matched.group(2)
-    inv_cb = f'INV{inv_num} CB{cb_num}' 
-    
+    inv_cb = f'INV{inv_num} CB{cb_num}'
+
     v_scaling_factor = int(config['num_mods_per_str'][inv_cb])
     i_scaling_factor = int(
         config['num_str_per_cb'][f'INV{inv_num} CB{cb_num}'])
-    
+
     my_config = {
         'threshold_vratio' : threshold_vratio,
         'threshold_transmission' : threshold_transmission,
@@ -528,21 +532,21 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
         'max_dcv' : mppt_high_voltage,
         'num_str_per_cb' : int(config['num_str_per_cb'][f'{inv_cb}']),
         'num_mods_per_str' : int(config['num_mods_per_str'][f'{inv_cb}'])}
-    
+
     out = wrapper(data[v_col], data[i_col],
               data['Cell Temp [C]'],
               data['POA [W/m²]'], sapm_coeffs,
               my_config)
-    
+
     for k, v in out.items():
         data[inv_cb + ' ' + k] = v
 
 
 # %%
 # Look at transmission for all DC inputs
-        
+
 transmission_cols = [c for c in data.columns if 'transmission' in c]
-fig, ax = plt.subplots(figsize=(10,10))                             
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data['2022-01-06 07:45:00': '2022-01-09 17:45:00']
@@ -556,7 +560,7 @@ ax.legend()
 # Look at voltage ratios for all DC inputs
 
 vratio_cols = [c for c in data.columns if "vmp_ratio" in c]
-fig, ax = plt.subplots(figsize=(10,10))                             
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data['2022-01-06 07:45:00': '2022-01-09 17:45:00']
@@ -569,7 +573,7 @@ ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='xx-large')
 ax.axhline(1, c='k', alpha=0.1, ls='--')
 ax.legend();
 
-# %% Calculate all power losses - snow and non-snow 
+# %% Calculate all power losses - snow and non-snow
 
 modeled_df = pvlib.pvsystem.sapm(data['POA [W/m²]'],
                                  data['Cell Temp [C]'],
@@ -610,7 +614,7 @@ cmap = {0 : 'r',
         3: 'cyan',
         4: 'g'}
 
-fig, ax = plt.subplots(figsize=(10,10))                             
+fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data[~data[m].isna()]
@@ -627,7 +631,7 @@ for d in days:
         ax.fill_between(temp_grouped.index, temp_grouped[p] - temp_grouped[l],
                         temp_grouped[p], color='k', alpha=0.2)
 
-        chng_pts = np.ravel(np.where(temp_grouped[m].values[:-1] 
+        chng_pts = np.ravel(np.where(temp_grouped[m].values[:-1]
                                      - temp_grouped[m].values[1:] != 0))
 
         if len(chng_pts) == 0:
@@ -640,9 +644,10 @@ for d in days:
 
             for start, end in zip(set1, set2):
                 my_index = temp_grouped.index[start:end]
-                ax.axvspan(temp_grouped.index[start], temp_grouped.index[end],
-                        color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
-                        alpha=0.05)
+                ax.axvspan(
+                    temp_grouped.index[start], temp_grouped.index[end],
+                    color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
+                    alpha=0.05)
 
 # # Add different colored intervals to legend
 handles, labels = ax.get_legend_handles_labels()
@@ -656,9 +661,9 @@ yellow_patch = mpatches.Patch(color='y', alpha=0.05, label='Mode 2')
 purple_patch = mpatches.Patch(color='cyan', alpha=0.05, label='Mode 3')
 green_patch = mpatches.Patch(color='g', alpha=0.05, label='Mode 4')
 
-handles.append(measured_line) 
-handles.append(modeled_line) 
-handles.append(red_patch) 
+handles.append(measured_line)
+handles.append(modeled_line)
+handles.append(red_patch)
 handles.append(green_patch)
 handles.append(blue_patch)
 handles.append(yellow_patch)
@@ -668,7 +673,8 @@ handles.append(purple_patch)
 ax.set_xlabel('Date', fontsize='xx-large')
 ax.set_ylabel('DC Power [W]', fontsize='xx-large')
 ax.legend(handles=handles, fontsize='xx-large', loc='upper left')
-ax.set_title('Measured and modeled production for INV1 CB2', fontsize='xx-large')
+ax.set_title('Measured and modeled production for INV1 CB2',
+             fontsize='xx-large')
 
 #%%
 
@@ -718,6 +724,4 @@ ax.legend()
 ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
-ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large');       
-
-# %%
+ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large');
