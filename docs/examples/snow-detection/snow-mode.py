@@ -57,7 +57,7 @@ pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
 mask_file = pvanalytics_dir / 'data' / 'snow_mask.csv'
-config_file = pvanalytics_dir / 'data' / 'snowconfig.json'
+config_file = pvanalytics_dir / 'data' / 'snow_config.json'
 
 with open(config_file) as json_data:
     config = json.load(json_data)
