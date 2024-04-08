@@ -56,7 +56,7 @@ from pvanalytics.features import snow
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
-mask_file = pvanalytics_dir / 'data' / 'snow_mask.csv'
+horizon_file = pvanalytics_dir / 'data' / 'snow_horizon.csv'
 config_file = pvanalytics_dir / 'data' / 'snow_config.json'
 
 with open(config_file) as json_data:
@@ -211,7 +211,7 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 '''
 
-horizon = pd.read_csv(mask_file, index_col='Az').squeeze("columns")
+horizon = pd.read_csv(horizon_file, index_col='Az').squeeze("columns")
 
 data['Horizon Mask'] = snow.get_horizon_mask(horizon, data['azimuth'],
                                              data['elevation'])
