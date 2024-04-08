@@ -1,6 +1,6 @@
 """Tests for utility functions."""
 import pandas as pd
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 import pytest
 from pvanalytics.quality import util
 
@@ -51,7 +51,7 @@ def ten_days():
     return pd.date_range(
         start='01/01/2020',
         end='01/10/2020 23:59',
-        freq='10T'
+        freq='10min'
     )
 
 

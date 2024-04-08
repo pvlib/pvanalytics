@@ -6,7 +6,8 @@ import pvlib
 from pvlib import location, pvsystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pathlib import Path
-from pkg_resources import Requirement, parse_version
+from packaging.version import Version
+from packaging.specifiers import SpecifierSet
 
 TEST_DIR = Path(__file__).parent
 DATA_DIR = TEST_DIR.parent / 'data'
@@ -46,8 +47,7 @@ def requires_pvlib(versionspec, reason=''):
     reason : str, optional
         Additional context to show in pytest log output
     """
-    req = Requirement.parse('pvlib' + versionspec)
-    is_satisfied = parse_version(pvlib.__version__) in req
+    is_satisfied = Version(pvlib.__version__) in SpecifierSet(versionspec)
     message = 'requires pvlib' + versionspec
     if reason:
         message += f'({reason})'
@@ -80,9 +80,8 @@ def quadratic():
 def one_year_hourly():
     return pd.date_range(
         start='03/01/2020',
-        end='03/01/2021',
-        closed='left',
-        freq='H',
+        end='02/28/2021 23:00',
+        freq='h',
         tz='Etc/GMT+7'
     )
 
@@ -92,9 +91,8 @@ def three_days_hourly():
     """Three days with one hour timestamp spacing in Etc/GMT+7"""
     return pd.date_range(
         start='03/01/2020',
-        end='03/04/2020',
-        closed='left',
-        freq='H',
+        end='03/03/2020 23:00',
+        freq='h',
         tz='Etc/GMT+7'
     )
 

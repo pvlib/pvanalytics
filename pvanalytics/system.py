@@ -370,7 +370,7 @@ def infer_orientation_daily_peak(power_or_poa, sunny, tilts,
 
     """
     peak_times = _peak_times(power_or_poa[sunny])
-    azimuth_by_minute = solar_azimuth.resample('T').interpolate(
+    azimuth_by_minute = solar_azimuth.resample('1min').interpolate(
         method='linear'
     )
     modeled_azimuth = azimuth_by_minute[peak_times]
@@ -412,7 +412,9 @@ def _power_residuals_from_clearsky(system_params,
                                    temperature,
                                    wind_speed,
                                    temperature_coefficient,
-                                   temperature_model_parameters):
+                                   temperature_model_parameters,
+                                   relative_airmass,
+                                   dni_extra):
     """Return the residuals between a system with parameters given in
     `system_params` and the data in `power_ac`.
 
@@ -444,29 +446,44 @@ def _power_residuals_from_clearsky(system_params,
         Temperature coefficient of DC power. [1/C]
     temperature_model_parameters : dict
         Parameters for the cell temperature model.
+    relative_airmass: Series
+        Relative airmass at the same times as data in `power_ac`.
+        Required for the running the Perez model in
+        :py:func:`pvlib.irradiance.get_total_irradiance`
+    dni_extra: Series
+        Extraterrestrial radiation at the same times as data in `power_ac`.
+        Required for the running the Perez model in
+        :py:func:`pvlib.irradiance.get_total_irradiance`
 
     Returns
     -------
     Series
         Difference between `power_ac` and the PVWatts output with the
         given parameters.
-
-    Notes
-    ------
-    Uses the defaults in :py:func:`pvlib.irradiance.get_total_irradiance` to
-    calculated plane-of-array irradiance, i.e., the isotropic model for sky
-    diffuse irradiance, and the Perez irradiance transposition model.
     """
     tilt = system_params[0]
     azimuth = system_params[1]
     dc_capacity = system_params[2]
     dc_inverter_limit = system_params[3]
+    # Get total irradiance
     poa = pvlib.irradiance.get_total_irradiance(
         tilt, azimuth,
         solar_zenith,
         solar_azimuth,
-        dni, ghi, dhi
+        dni, ghi, dhi,
+        dni_extra=dni_extra,
+        airmass=relative_airmass,
+        albedo=0.2,
+        model='perez'
     )
+    # Get AOI
+    aoi = pvlib.irradiance.aoi(tilt, azimuth,
+                               solar_zenith,
+                               solar_azimuth)
+    # Run IAM model
+    iam = pvlib.iam.physical(aoi, n=1.5)
+    # Apply IAM to direct POA component only
+    poa_transmitted = poa['poa_direct'] * iam + poa['poa_diffuse']
     temp_cell = pvlib.temperature.sapm_cell(
         poa['poa_global'],
         temperature,
@@ -474,12 +491,15 @@ def _power_residuals_from_clearsky(system_params,
         **temperature_model_parameters
     )
     pdc = pvlib.pvsystem.pvwatts_dc(
-        poa['poa_global'],
+        poa_transmitted,
         temp_cell,
         dc_capacity,
         temperature_coefficient
     )
-    return power_ac - pvlib.inverter.pvwatts(pdc, dc_inverter_limit)
+    # PVWatts losses
+    losses = pvlib.pvsystem.pvwatts_losses() / 100
+    return power_ac - pvlib.inverter.pvwatts(pdc * (1-losses),
+                                             dc_inverter_limit)
 
 
 def _rsquared(data, residuals):
@@ -492,9 +512,13 @@ def _rsquared(data, residuals):
 def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
                                   solar_zenith, solar_azimuth,
                                   temperature=25, wind_speed=0,
-                                  temperature_coefficient=-0.004,
-                                  temperature_model_parameters=None):
-    """Get the tilt and azimuth that give PVWatts output that most closely
+                                  temperature_coefficient=-0.0047,
+                                  temperature_model_parameters=None,
+                                  azimuth_min=0,
+                                  azimuth_max=360,
+                                  tilt_min=0,
+                                  tilt_max=90):
+    """Get the tilt and azimuth that give PVWatts v5 output that most closely
     fits the data in `power_ac`.
 
     Input data `power_ac`, `ghi`, `dhi`, `dni` should reflect clear-sky
@@ -547,6 +571,18 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
         ``pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm'][
         'open_rack_glass_glass']`` is used. See
         :py:func:`pvlib.temperature.sapm_cell` for more information.
+    azimuth_min: Float, default 0
+        Minimum possible azimuth (bounds) for the least squares search problem.
+        [degrees]
+    azimuth_max: Float, default 360
+        Maximum possible azimuth (bounds) for the least squares search problem.
+        [degrees]
+    tilt_min: Float, default 0
+        Minimum possible tilt (bounds) for the least squares search problem.
+        [degrees]
+    tilt_max: Float, default 90
+        Maximum possible tilt (bounds) for the least squares search problem.
+        [degrees]
 
     Returns
     -------
@@ -561,6 +597,18 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     ------
     ValueError
         If any input passed as a Series contains undefined values (i.e. NaNs).
+
+    Notes
+    -----
+    To prevent significant slowdown, this function uses the SAPM
+    thermal model (:py:func:`~pvlib.temperature.sapm_cell`) instead of
+    the model specified in the PVWatts v5 reference [1]_
+    (:py:func:`~pvlib.temperature.fuentes`).
+
+    References
+    ----------
+    .. [1] Aron Dobos, "PVWatts Version 5 Manual", NREL/TP-6A20-62641 (2014).
+           :doi:`10.2172/1158421`
     """
     if power_ac.hasnans:
         raise ValueError("power_ac must not contain undefined values")
@@ -577,11 +625,19 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
     initial_azimuth = 180
     initial_dc_capacity = power_ac.max()
     initial_dc_limit = power_ac.max() * 1.5
+    # Get relative airmass for Perez model
+    relative_airmass = pvlib.atmosphere.get_relative_airmass(solar_zenith)
+    # Get extraterrestrial irradiance for Perez model
+    dni_extra = pvlib.irradiance.get_extra_radiation(power_ac.index)
+    # Optimize for azimuth, tilt, DC capacity, and DC limit using the
+    # :py:func:`scipy.optimize.least_squares` function
     fit_result = scipy.optimize.least_squares(
         _power_residuals_from_clearsky,
         [initial_tilt, initial_azimuth, initial_dc_capacity, initial_dc_limit],
-        bounds=([0, 0, power_ac.max()*0.5, power_ac.max()*0.5],
-                [90, 360, power_ac.max()*2, power_ac.max()*3]),
+        bounds=([tilt_min, azimuth_min,
+                 power_ac.max()*0.5, power_ac.max()*0.5],
+                [tilt_max, azimuth_max,
+                 power_ac.max()*2, power_ac.max()*3]),
         kwargs={
             'ghi': ghi,
             'dhi': dhi,
@@ -592,7 +648,9 @@ def infer_orientation_fit_pvwatts(power_ac, ghi, dhi, dni,
             'temperature': temperature,
             'temperature_coefficient': temperature_coefficient,
             'wind_speed': wind_speed,
-            'temperature_model_parameters': temperature_model_parameters
+            'temperature_model_parameters': temperature_model_parameters,
+            'relative_airmass': relative_airmass,
+            'dni_extra': dni_extra
         }
     )
     r_squared = _rsquared(power_ac, fit_result.fun)

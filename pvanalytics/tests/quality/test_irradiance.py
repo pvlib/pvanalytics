@@ -3,11 +3,27 @@ from datetime import datetime
 import pytz
 import pandas as pd
 import numpy as np
-
 import pytest
-from pandas.util.testing import assert_series_equal
-
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import irradiance
+from ..conftest import DATA_DIR
+
+
+test_file_1 = DATA_DIR / "irradiance_RMIS_NREL.csv"
+
+
+@pytest.fixture
+def generate_RMIS_irradiance_series():
+    # Pull down the saved PVLib dataframe and process it
+    df = pd.read_csv(test_file_1, index_col=0, parse_dates=True)
+    df = df.tz_localize("Etc/GMT+7")
+    # Get the GHI, DHI, and DNI series
+    dni_series = df['irradiance_dni__7982']
+    dhi_series = df['irradiance_dhi__7983']
+    ghi_series = df['irradiance_ghi__7981']
+    dni_clear_series = df['pvlib_clearsky_dni']
+    sza = df['pvlib_zenith']
+    return (dhi_series, dni_series, ghi_series, dni_clear_series, sza)
 
 
 @pytest.fixture
@@ -180,7 +196,7 @@ def times():
     return pd.date_range(
         start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=mst),
         end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=mst),
-        freq='10T'
+        freq='10min'
     )
 
 
@@ -222,7 +238,7 @@ def test_clearsky_limits_negative_and_nan():
 
     """
     index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),
-                          freq='15T', periods=5)
+                          freq='15min', periods=5)
     measured = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])
     clearsky = pd.Series(index=index, data=1000)
     assert_series_equal(
@@ -260,9 +276,8 @@ def test_daily_insolation_limits(albuquerque):
     """Daily insolation limits works with uniform timestamp spacing."""
     three_days = pd.date_range(
         start='1/1/2020',
-        end='1/4/2020',
-        closed='left',
-        freq='H'
+        end='1/3/2020 23:00',
+        freq='h'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
     assert irradiance.daily_insolation_limits(
@@ -289,9 +304,8 @@ def test_daily_insolation_limits_uneven(albuquerque):
     """daily_insolation_limits works with uneven timestamp spacing."""
     three_days = pd.date_range(
         start='1/1/2020',
-        end='1/4/2020',
-        closed='left',
-        freq='15T'
+        end='1/3/2020 23:45',
+        freq='15min'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
     ghi = clearsky['ghi'].copy()
@@ -314,3 +328,84 @@ def test_daily_insolation_limits_uneven(albuquerque):
         pd.Series(True, index=ghi.index),
         check_names=False
     )
+
+
+def test_calculate_ghi_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_component_sum_series() function on GHI calculation.
+    """
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
+        generate_RMIS_irradiance_series
+    # Run with fill_night_value as np.nan
+    ghi_series_fill_value = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series,
+        dhi=dhi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_night_value=np.nan)
+    # Make sure that periods where sza>90 are marked as NaN
+    assert all(ghi_series_fill_value[sza_series > 90].isna())
+    # Run with fill_night_value = 'equation'
+    ghi_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series,
+        dhi=dhi_series,
+        dni=dni_series,
+        fill_night_value='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(ghi_series_equation[sza_series > 90].dropna() ==
+               dhi_series[sza_series > 90].dropna())
+    # Run with fill_night_value = None
+    ghi_series_none = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series,
+        dhi=dhi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_night_value=None)
+    ghi_test = dni_series * np.cos(sza_series * np.pi / 180) + dhi_series
+    assert all(ghi_test.round(5).dropna() == ghi_series_none.round(5).dropna())
+    # Throw an error if int/float, None, or 'equation' aren't passed in
+    # fill_night_value parameter
+    with pytest.raises(ValueError):
+        irradiance.calculate_component_sum_series(solar_zenith=sza_series,
+                                                  dhi=dhi_series,
+                                                  dni=dni_series,
+                                                  zenith_limit=90,
+                                                  fill_night_value='random')
+
+
+def test_calculate_dhi_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_component_sum_series() function on DHI calculation.
+    """
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
+        generate_RMIS_irradiance_series
+    # Test with equation used
+    dhi_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series,
+        ghi=ghi_series,
+        dni=dni_series,
+        zenith_limit=90,
+        fill_night_value='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(dhi_series_equation[sza_series > 90].dropna() ==
+               ghi_series[sza_series > 90].dropna())
+
+
+def test_calculate_dni_component(generate_RMIS_irradiance_series):
+    """
+    Test calculate_component_sum_series() function on DNI calculation.
+    """
+    # Pull down RMIS data to test on
+    dhi_series, dni_series, ghi_series, dni_clear_series, sza_series = \
+        generate_RMIS_irradiance_series
+    dni_series_equation = irradiance.calculate_component_sum_series(
+        solar_zenith=sza_series,
+        ghi=ghi_series,
+        dhi=dhi_series,
+        dni_clear=dni_clear_series,
+        zenith_limit=90,
+        fill_night_value='equation')
+    # Make sure that periods where sza>90 are equal equal to GHI values
+    assert all(dni_series_equation[sza_series > 90].dropna() == 0)

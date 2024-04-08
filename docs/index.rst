@@ -13,7 +13,7 @@ system-level data. It can be used as a standalone analysis package
 and as a data cleaning "front end" for other PV analysis packages.
 
 PVAnalytics is free and open source under a
-`permissive license <https://github.com/pvlib/pvanalytics/blob/master/LICENSE>`_.
+`permissive license <https://github.com/pvlib/pvanalytics/blob/main/LICENSE>`_.
 The source code for PVAnalytics is hosted on `github
 <https://github.com/pvlib/pvanalytics>`_.
 
@@ -78,22 +78,13 @@ It supports:
 
 Additionally, PVAnalytics relies on several other packages in the open
 source scientific python ecosystem.  For details on dependencies and versions,
-see our `setup.py <https://github.com/pvlib/pvanalytics/blob/master/setup.py>`_.
+see our `setup.py <https://github.com/pvlib/pvanalytics/blob/main/setup.py>`_.
 
-Contents
-========
 
 .. toctree::
-   :maxdepth: 3
+   :hidden:
    :caption: Contents:
 
    api
    generated/gallery/index
    whatsnew/index
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

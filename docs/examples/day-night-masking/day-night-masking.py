@@ -33,9 +33,10 @@ pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 ac_power_file = pvanalytics_dir / 'data' / 'serf_east_1min_ac_power.csv'
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
+
 # This is the known frequency of the time series. You may need to infer
 # the frequency or set the frequency with your AC power time series.
-freq = "1T"
+freq = "1min"
 # These are the latitude-longitude coordinates associated with the
 # SERF East system.
 latitude = 39.742

@@ -49,7 +49,7 @@ def _backfill_window(endpoints, window):
     flags = endpoints
     while window > 0:
         window = window - 1
-        flags = flags | endpoints.shift(-window).fillna(False)
+        flags = flags | endpoints.shift(-window, fill_value=False)
     return flags
 
 
@@ -119,7 +119,6 @@ def stale_values_diff(x, window=6, rtol=1e-5, atol=1e-8, mark='tail'):
     """
     if window < 2:
         raise ValueError('window set to {}, must be at least 2'.format(window))
-
     flags = x.rolling(window=window).apply(
         _all_close_to_first,
         raw=True,
@@ -174,9 +173,7 @@ def stale_values_round(x, window=6, decimals=3, mark='tail'):
 
     """
     rounded_diff = x.round(decimals=decimals).diff()
-    endpoints = rounded_diff.rolling(window=window-1).apply(
-        lambda xs: len(xs[xs == 0]) == window-1
-    ).fillna(False).astype(bool)
+    endpoints = (rounded_diff == 0).rolling(window=window-1).sum() == window-1
     return _mark(endpoints, window, mark)
 
 
@@ -412,8 +409,9 @@ def trim(series, days=10):
     """
     start, end = start_stop_dates(series, days=days)
     mask = pd.Series(False, index=series.index)
+
     if start:
-        mask.loc[start.date():end.date()] = True
+        mask.loc[start:end] = True
     return mask
 
 

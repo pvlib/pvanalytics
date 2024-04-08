@@ -1,0 +1,72 @@
+.. _whatsnew_020:
+
+0.2.0 (February 14, 2024)
+-------------------------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+* Updated function :py:func:`~pvanalytics.system.infer_orientation_fit_pvwatts`
+  to more closely align with the PVWatts v5 methodology. This includes incorporating
+  relative airmass and extraterrestrial irradiance into the Perez total irradiance model,
+  accounting for array incidence loss (IAM), and including losses in the PVWatts
+  inverter model. Additionally, added optional arguments for bounding the azimuth range in
+  during least squares optimization. (:issue:`147`, :pull:`180`)
+* Updated function :py:func:`~pvanalytics.quality.time.shifts_ruptures` to align with the
+  methodology tested and reported on at PVRW 2023 ("Survey of Time Shift Detection Algorithms
+  for Measured PV Data"). This includes converting the changepoint detection algorithm from
+  Pelt to Binary Segmentation (which runs much faster), and performing additional processing
+  to each detected segment to remove outliers and filter by a quantile cutoff instead of the
+  original rounding technique. (:pull:`197`)
+
+
+Enhancements
+~~~~~~~~~~~~
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunrise`
+  for calculating the daily sunrise datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
+* Added function :py:func:`~pvanalytics.features.daytime.get_sunset`
+  for calculating the daily sunset datetimes for a time series, based on the
+  :py:func:`~pvanalytics.features.daytime.power_or_irradiance` day/night mask output. 
+  (:pull:`187`)
+* Updated function :py:func:`~pvanalytics.features.daytime.power_or_irradiance`
+  to be more performant by vectorization; the original logic was using a lambda call that was
+  slowing the function speed down considerably. This update resulted in a ~50X speedup. (:pull:`186`)
+
+
+Bug Fixes
+~~~~~~~~~
+* ``pvanalytics.__version__`` now correctly reports the version string instead
+  of raising ``AttributeError``. (:pull:`181`)
+* Compatibility with pandas 2.0.0 (:pull:`185`) and future versions of pandas (:pull:`203`)
+* Compatibility with scipy 1.11 (:pull:`196`)
+* Updated function :py:func:`~pvanalytics.quality.gaps.trim` to handle pandas 2.0.0 update for tz-aware timeseries (:pull:`206`)
+
+Requirements
+~~~~~~~~~~~~
+* Advance minimum ``pvlib`` to 0.9.4, ``numpy`` to 0.16.0,
+  ``pandas`` to 1.0.0, and ``scipy`` to 1.6.0. (:pull:`179`, :pull:`185`)
+
+Documentation
+~~~~~~~~~~~~~
+* Online docs now use ``pydata-sphinx-theme`` instead of the built-in
+  ``alabaster`` theme. (:issue:`176`, :pull:`178`)
+* Added PVFleets QA pipeline examples for checking temperature, irradiance, and power
+  streams. (:issue:`201`, :pull:`202`)
+* Added a gallery page for :py:func:`~pvanalytics.quality.time.shifts_ruptures`.
+  (:pull:`192`)
+
+Testing
+~~~~~~~
+* Added testing for python 3.11 and 3.12. (:pull:`189`, :pull:`204`)
+
+
+Contributors
+~~~~~~~~~~~~
+* Kirsten Perry (:ghuser:`kperrynrel`)
+* Kevin Anderson (:ghuser:`kanderso-nrel`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Abhishek Parikh (:ghuser:`abhisheksparikh`)
+* Quyen Nguyen (:ghuser:`qnguyen345`)
+* Adam R. Jensen (:ghuser:`adamrjensen`)
+* Chris Deline (:ghuser:`cdeline`)

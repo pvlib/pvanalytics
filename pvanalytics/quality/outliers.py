@@ -62,7 +62,6 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
         outlier.
 
     """
-    data = data.copy()
     nan_mask = pd.Series([False] * len(data),
                          index=data.index)
 
@@ -75,13 +74,9 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
             raise ValueError(f"Unnexpected value ({nan_policy}) passed to "
                              "nan_policy. Expected 'raise' or 'omit'.")
 
-    data[~nan_mask] = pd.Series(abs(stats.zscore(data[~nan_mask])) > zmax,
-                                index=data[~nan_mask].index)
-
-    # Place False where original series had NaNs
-    data[nan_mask] = False
-    # Return a boolean-casted series
-    return data.astype(bool)
+    is_outlier = pd.Series(False, index=data.index)
+    is_outlier.loc[~nan_mask] = abs(stats.zscore(data[~nan_mask])) > zmax
+    return is_outlier
 
 
 def hampel(data, window=5, max_deviation=3.0, scale=None):

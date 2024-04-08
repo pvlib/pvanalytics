@@ -2,7 +2,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 from pvanalytics.quality import weather
 
 
@@ -94,7 +94,7 @@ def test_module_temperature(albuquerque):
     times = pd.date_range(
         start='01/01/2020',
         end='03/01/2020',
-        freq='H',
+        freq='h',
         tz='MST'
     )
     clearsky = albuquerque.get_clearsky(times, model='simplified_solis')

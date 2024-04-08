@@ -1,6 +1,6 @@
 """Tests for features.clipping"""
 import pytest
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 import numpy as np
 import pandas as pd
 from pvlib import irradiance, temperature, pvsystem, inverter
@@ -87,7 +87,7 @@ def test_threshold_no_clipping(quadratic):
     """In a data set with a single quadratic there is no clipping."""
     quadratic.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     assert not clipping.threshold(quadratic).any()
@@ -98,14 +98,14 @@ def test_threshold_no_clipping_with_night(quadratic):
     no clipping."""
     quadratic.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     full_day = quadratic.reindex(
         pd.date_range(
             start='01/01/2020 00:00',
             end='01/01/2020 23:50',
-            freq='10T')
+            freq='10min')
     )
     full_day.fillna(0)
     assert not clipping.threshold(quadratic).any()
@@ -116,7 +116,7 @@ def test_threshold_clipping(quadratic_clipped):
     indicated."""
     quadratic_clipped.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     assert not clipping.threshold(quadratic_clipped).all()
@@ -128,14 +128,14 @@ def test_threshold_clipping_with_night(quadratic_clipped):
     before and after simulating night time conditions."""
     quadratic_clipped.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     full_day = quadratic_clipped.reindex(
         pd.date_range(
             start='01/01/2020 00:00',
             end='01/01/2020 23:50',
-            freq='10T')
+            freq='10min')
     )
     full_day.fillna(0)
     assert not clipping.threshold(full_day).all()
@@ -146,12 +146,12 @@ def test_threshold_clipping_with_freq(quadratic_clipped):
     """Passing the frequency gives same result as infered frequency."""
     quadratic_clipped.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     assert_series_equal(
         clipping.threshold(quadratic_clipped),
-        clipping.threshold(quadratic_clipped, freq='10T')
+        clipping.threshold(quadratic_clipped, freq='10min')
     )
 
 
@@ -160,7 +160,7 @@ def test_threshold_clipping_with_interruption(quadratic_clipped):
     quadratic_clipped.loc[28:31] = [750, 725, 700, 650]
     quadratic_clipped.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     clipped = clipping.threshold(quadratic_clipped)
@@ -176,25 +176,25 @@ def test_threshold_clipping_four_days(quadratic, quadratic_clipped):
     """Clipping is identified in the first of four days."""
     quadratic.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     quadratic_clipped.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     full_day_clipped = quadratic_clipped.reindex(
         pd.date_range(
             start='01/01/2020 00:00',
             end='01/01/2020 23:50',
-            freq='10T')
+            freq='10min')
     )
     full_day = quadratic.reindex(
         pd.date_range(
             start='01/01/2020 00:00',
             end='01/01/2020 23:50',
-            freq='10T')
+            freq='10min')
     )
     full_day_clipped.fillna(0)
     full_day.fillna(0)
@@ -210,7 +210,7 @@ def test_threshold_clipping_four_days(quadratic, quadratic_clipped):
     ])
 
     power.index = pd.date_range(
-        start='01/01/2020 00:00', freq='10T', periods=len(power)
+        start='01/01/2020 00:00', freq='10min', periods=len(power)
     )
 
     clipped = clipping.threshold(power)
@@ -223,14 +223,14 @@ def test_threshold_no_clipping_four_days(quadratic):
     """Four days with no clipping."""
     quadratic.index = pd.date_range(
         start='01/01/2020 07:30',
-        freq='10T',
+        freq='10min',
         periods=61
     )
     full_day = quadratic.reindex(
         pd.date_range(
             start='01/01/2020 00:00',
             end='01/01/2020 23:50',
-            freq='10T')
+            freq='10min')
     )
     full_day.fillna(0)
 
@@ -242,7 +242,7 @@ def test_threshold_no_clipping_four_days(quadratic):
     ])
 
     power.index = pd.date_range(
-        start='01/01/2020 00:00', freq='10T', periods=len(power)
+        start='01/01/2020 00:00', freq='10min', periods=len(power)
     )
 
     clipped = clipping.threshold(power)
@@ -252,7 +252,7 @@ def test_threshold_no_clipping_four_days(quadratic):
 
 @pytest.fixture(scope='module')
 def july():
-    return pd.date_range(start='7/1/2020', end='8/1/2020', freq='T')
+    return pd.date_range(start='7/1/2020', end='8/1/2020', freq='min')
 
 
 @pytest.fixture(scope='module')
@@ -290,26 +290,26 @@ def power_pvwatts(request, clearsky_july, solarposition_july):
     return inverter.pvwatts(dc, pdc0_inverter)
 
 
-@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['min', '5min', '15min', '30min', 'h'])
 def test_geometric_no_clipping(power_pvwatts, freq):
     clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert not clipped.any()
 
 
 @pytest.mark.pdc0_inverter(60)
-@pytest.mark.parametrize('freq', ['T', '5T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['min', '5min', '15min', '30min', 'h'])
 def test_geometric_clipping(power_pvwatts, freq):
     clipped = clipping.geometric(power_pvwatts.resample(freq).asfreq())
     assert clipped.any()
 
 
 @pytest.mark.pdc0_inverter(65)
-@pytest.mark.parametrize('freq', ['5T', '15T', '30T', 'H'])
+@pytest.mark.parametrize('freq', ['5min', '15min', '30min', 'h'])
 def test_geometric_clipping_correct(power_pvwatts, freq):
     power = power_pvwatts.resample(freq).asfreq()
     clipped = clipping.geometric(power)
     expected = power == power.max()
-    if freq == '5T':
+    if freq == '5min':
         assert np.allclose(power[clipped], power.max(), atol=0.5)
     else:
         assert_series_equal(clipped, expected)
@@ -317,10 +317,9 @@ def test_geometric_clipping_correct(power_pvwatts, freq):
 
 @pytest.mark.pdc0_inverter(65)
 def test_geometric_clipping_midday_clouds(power_pvwatts):
-    power = power_pvwatts.resample('15T').asfreq()
+    power = power_pvwatts.resample('15min').asfreq()
     power.loc[power.between_time(
         start_time='17:30', end_time='19:30',
-        include_start=True, include_end=True
     ).index] = list(range(30, 39)) * 31
     clipped = clipping.geometric(power)
     expected = power == power.max()
@@ -329,7 +328,7 @@ def test_geometric_clipping_midday_clouds(power_pvwatts):
 
 @pytest.mark.pdc0_inverter(80)
 def test_geometric_clipping_window(power_pvwatts):
-    power = power_pvwatts.resample('15T').asfreq()
+    power = power_pvwatts.resample('15min').asfreq()
     clipped = clipping.geometric(power)
     assert clipped.any()
     clipped_window = clipping.geometric(power, window=24)
@@ -338,7 +337,7 @@ def test_geometric_clipping_window(power_pvwatts):
 
 @pytest.mark.pdc0_inverter(89)
 def test_geometric_clipping_tracking(power_pvwatts):
-    power = power_pvwatts.resample('15T').asfreq()
+    power = power_pvwatts.resample('15min').asfreq()
     clipped = clipping.geometric(power)
     assert clipped.any()
     clipped = clipping.geometric(power, tracking=True)
@@ -347,14 +346,14 @@ def test_geometric_clipping_tracking(power_pvwatts):
 
 @pytest.mark.pdc0_inverter(80)
 def test_geometric_clipping_window_overrides_tracking(power_pvwatts):
-    power = power_pvwatts.resample('15T').asfreq()
+    power = power_pvwatts.resample('15min').asfreq()
     clipped = clipping.geometric(power, tracking=True)
     assert clipped.any()
     clipped_override = clipping.geometric(power, tracking=True, window=24)
     assert not clipped_override.any()
 
 
-@pytest.mark.parametrize('freq', ['5T', '15T'])
+@pytest.mark.parametrize('freq', ['5min', '15min'])
 def test_geometric_clipping_missing_data(freq, power_pvwatts):
     power = power_pvwatts.resample(freq).asfreq()
     power.loc[power.between_time('09:00', '10:30').index] = np.nan
@@ -376,4 +375,4 @@ def test_geometric_index_not_sorted():
     )
     with pytest.raises(ValueError,
                        match=r"Index must be monotonically increasing\."):
-        clipping.geometric(power, freq='30T')
+        clipping.geometric(power, freq='30min')
