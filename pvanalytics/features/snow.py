@@ -262,7 +262,7 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    mode = np.zeros_like(voltage, dtype=int)
+    mode = np.zeros_like(voltage, dtype=object)  # allows both int and None
 
     umin = voltage > min_dcv  # necessary for all modes except 0
     uvr = np.where(vmp_ratio > threshold_vratio, 3, 1)
