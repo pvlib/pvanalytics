@@ -600,9 +600,9 @@ mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
 modeled_power_cols = [c for c in data.columns if "Modeled Power" in c]
 
 col = 1
-l = loss_cols[col]
-m = mode_cols[col]
-p = modeled_power_cols[col]
+los = loss_cols[col]
+mod = mode_cols[col]
+pwr = modeled_power_cols[col]
 
 # Color intervals by mode
 cmap = {0: 'r',
@@ -614,7 +614,7 @@ cmap = {0: 'r',
 fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
-temp = data[~data[m].isna()]
+temp = data[~data[mod].isna()]
 
 # Plot each day individually so we are not exaggerating losses
 days_mapped = temp.index.map(lambda x: x.date())
@@ -623,17 +623,17 @@ grouped = temp.groupby(days_mapped)
 
 for d in days:
     temp_grouped = grouped.get_group(d)
-    ax.plot(temp_grouped[p], c='k', ls='--')
-    ax.plot(temp_grouped[p]- temp_grouped[l], c='k')
-    ax.fill_between(temp_grouped.index, temp_grouped[p] - temp_grouped[l],
-                    temp_grouped[p], color='k', alpha=0.2)
+    ax.plot(temp_grouped[pwr], c='k', ls='--')
+    ax.plot(temp_grouped[pwr] - temp_grouped[los], c='k')
+    ax.fill_between(temp_grouped.index, temp_grouped[pwr] - temp_grouped[los],
+                    temp_grouped[pwr], color='k', alpha=0.2)
 
-    chng_pts = np.ravel(np.where(temp_grouped[m].values[:-1]
-                                 - temp_grouped[m].values[1:] != 0))
+    chng_pts = np.ravel(np.where(temp_grouped[mod].values[:-1]
+                                 - temp_grouped[mod].values[1:] != 0))
 
     if len(chng_pts) == 0:
         ax.axvspan(temp_grouped.index[0], temp_grouped.index[-1],
-                   color=cmap[temp_grouped.at[temp_grouped.index[-1], m]],
+                   color=cmap[temp_grouped.at[temp_grouped.index[-1], mod]],
                    alpha=0.05)
     else:
         set1 = np.append([0], chng_pts)
@@ -643,7 +643,7 @@ for d in days:
             my_index = temp_grouped.index[start:end]
             ax.axvspan(
                 temp_grouped.index[start], temp_grouped.index[end],
-                color=cmap[temp_grouped.at[temp_grouped.index[end], m]],
+                color=cmap[temp_grouped.at[temp_grouped.index[end], mod]],
                 alpha=0.05)
 
 # Add different colored intervals to legend

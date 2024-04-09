@@ -27,8 +27,8 @@ def test_categorize():
     threshold_vratio = 0.7
     threshold_transmission = 0.6
     # np.nan, vr<thres, vr<thres, vr=thres, vr>thres, vr>thres, vr<thres
-    # vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo<thres 
-    # tr<thres, np.nan, tr>thres, tr<thres, tr<thres, tr<thres, tr>thres 
+    # vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo<thres
+    # tr<thres, np.nan, tr>thres, tr<thres, tr<thres, tr<thres, tr>thres
     expected = np.array([np.nan, np.nan, 2, 2, 2, 4, 0])
     result = snow.categorize(vmp_ratio, transmission, voltage, min_dcv,
                              threshold_vratio, threshold_transmission)

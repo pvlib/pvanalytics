@@ -143,7 +143,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
 
 
 def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
-               threshold_vratio, threshold_transmission):
+                   threshold_vratio, threshold_transmission):
 
     """
     Categorizes electrical behavior into a snow-related mode.
@@ -262,7 +262,7 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    mode = np.zeros_like(voltage)
+    mode = np.zeros_like(voltage, dtype=int)
 
     umin = voltage > min_dcv  # necessary for all modes except 0
     uvr = np.where(vmp_ratio > threshold_vratio, 3, 1)
@@ -271,6 +271,6 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
     mode = umin * (uvr + utrans)
 
     # preserve nan
-    mode[np.isnan(vmp_ratio) | np.isnan(transmission)] = -1
-    
+    mode[np.isnan(vmp_ratio) | np.isnan(transmission)] = None
+
     return mode
