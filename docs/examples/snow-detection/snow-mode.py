@@ -122,7 +122,7 @@ date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for v in dc_voltage_cols:
     ax.scatter(data.index, data[v], s=0.5, label=v)
-    ax.plot(data.index, data[v], alpha=0.2)
+    ax.plot(data[v], alpha=0.2)
 ax.axhline(mppt_high_voltage, c='r', ls='--',
            label='Maximum MPPT voltage: {} V'.format(mppt_high_voltage))
 ax.axhline(mppt_low_voltage, c='g', ls='--',
@@ -138,7 +138,7 @@ date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for a in ac_power_cols:
     ax.scatter(data.index, data[a], s=0.5, label=a)
-    ax.plot(data.index, data[a], alpha=0.2)
+    ax.plot(data[a], alpha=0.2)
 ax.axhline(max_ac_power, c='r', ls='--',
            label='Maximum allowed AC power: {} kW'.format(max_ac_power))
 ax.set_xlabel('Date', fontsize='large')
@@ -191,7 +191,7 @@ date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for v in dc_voltage_cols:
     ax.scatter(data.index, data[v], s=0.5, label=v)
-    ax.plot(data.index, data[v], alpha=0.2)
+    ax.plot(data[v], alpha=0.2)
 ax.axhline(mppt_high_voltage, c='r', ls='--',
            label='Maximum MPPT voltage: {} V'.format(mppt_high_voltage))
 ax.axhline(mppt_low_voltage, c='g', ls='--',
@@ -252,7 +252,7 @@ fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 ax.scatter(data.index, data['Cell Temp [C]'], s=0.5, c='b')
-ax.plot(data.index, data['Cell Temp [C]'], alpha=0.3, c='b')
+ax.plot(data['Cell Temp [C]'], alpha=0.3, c='b')
 ax.set_ylabel('Cell Temp [C]', c='b', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='xx-large')
 
@@ -295,10 +295,10 @@ date_form = DateFormatter("%m/%d \n%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
 ax.scatter(T1.index, T1, s=0.5, c='b', label='SAPM')
-ax.plot(T1.index, T1, alpha=0.3, c='b')
+ax.plot(T1, alpha=0.3, c='b')
 
 ax.scatter(T2.index, T2, s=0.3, c='g', label='Linear model')
-ax.plot(T2.index, T2, alpha=0.3, c='g')
+ax.plot(T2, alpha=0.3, c='g')
 
 ax.legend()
 ax.set_ylabel('Transmission', fontsize='xx-large')
@@ -450,11 +450,14 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     # vmp_ratio[modeled_vmp==0] = 0
 
     # TODO lets vectorize the function itself
-    categorize_v = np.vectorize(snow.categorize)
+    categorize_v = np.vectorize(snow.categorize_old)
 
     mode = categorize_v(vmp_ratio, T, voltage, config['min_dcv'],
                         config['threshold_vratio'],
                         config['threshold_transmission'])
+    mode = snow.categorize(vmp_ratio, T, voltage, config['min_dcv'],
+                           config['threshold_vratio'],
+                           config['threshold_transmission'])
     my_dict = {'transmission': T,
                'modeled_vmp': modeled_vmp,
                'vmp_ratio': vmp_ratio,
@@ -620,8 +623,8 @@ grouped = temp.groupby(days_mapped)
 
 for d in days:
     temp_grouped = grouped.get_group(d)
-    ax.plot(temp_grouped.index, temp_grouped[p], c='k', ls='--')
-    ax.plot(temp_grouped.index, temp_grouped[p]- temp_grouped[l], c='k')
+    ax.plot(temp_grouped[p], c='k', ls='--')
+    ax.plot(temp_grouped[p]- temp_grouped[l], c='k')
     ax.fill_between(temp_grouped.index, temp_grouped[p] - temp_grouped[l],
                     temp_grouped[p], color='k', alpha=0.2)
 
