@@ -374,6 +374,7 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     2. Calculate transmission
     3. Uses transmission to model voltage with the SAPM.
     # TODO How is this voltage different than measured (snow-affected voltage)?
+    # Answer: All cells are modeled to get the incoming irradiance
     4. Determine the snow mode for each point.
 
     Parameters
@@ -652,6 +653,7 @@ handles, labels = ax.get_legend_handles_labels()
 modeled_line = Line2D([0], [0], label='Modeled', color='k', ls='--')
 measured_line = Line2D([0], [0], label='Measured', color='k')
 
+# TODO don't mark offline periods as Mode 0
 red_patch = mpatches.Patch(color='r', alpha=0.05, label='Mode 0')
 blue_patch = mpatches.Patch(color='b', alpha=0.05, label='Mode 1')
 yellow_patch = mpatches.Patch(color='y', alpha=0.05, label='Mode 2')

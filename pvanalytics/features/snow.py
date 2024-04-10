@@ -4,8 +4,7 @@ import numpy as np
 def get_horizon_mask(horizon, azimuth, elevation):
 
     """
-    Determines if a given (azimuth, elevation) pair is above or
-    below a horizon profile
+    Determines if a given (azimuth, elevation) pair is above a horizon profile.
 
     Parameters
     ----------
@@ -22,7 +21,7 @@ def get_horizon_mask(horizon, azimuth, elevation):
     out : bool or NaN
     """
     yp = np.interp(azimuth, horizon.index, horizon.values)
-    out = elevation >= yp  # TODO or strictly >
+    out = elevation >= yp
     return out
 
 
@@ -106,9 +105,9 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     measured irradiance.
 
     Measured irradiance should be in the array's plane and represent snow-free
-    conditions. When possible, the irradiance should be adjusted for
-    reflections and spectral content. For example, the measured irradiance
-    could be obtained with a heated plane-of-array pyranometer.
+    conditions. For example, the measured irradiance could be obtained with a
+    heated plane-of-array pyranometer. When necessary, the irradiance should be
+    adjusted for reflections and spectral content. 
 
     Parameters
     ----------
@@ -123,7 +122,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     Returns
     -------
     T : array
-        Effective transmission. [unitless]
+        Effective transmission. [unitless]  # TODO describe when expect nan, 0
 
     References
     ----------
@@ -133,8 +132,9 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
        2023, pp. 1-5. :doi:`10.1109/PVSC48320.2023.10360065`
     """
     # TODO only works with Series
-    T = modeled_e_e/measured_e_e
-    T[T.isna()] = np.nan  # TODO what does this accomplish
+    T = modeled_e_e / measured_e_e
+    # no transmission if no current
+    T[i_mp.isna()] = np.nan
     T[i_mp == 0] = 0
     T[T < 0] = np.nan
     T[T > 1] = 1
@@ -262,9 +262,9 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    umin = voltage > min_dcv  # necessary for all modes except 0
-    uvr = np.where(vmp_ratio > threshold_vratio, 3, 1)
-    utrans = np.where(transmission > threshold_transmission, 1, 0)
+    umin = voltage >= min_dcv  # necessary for all modes except 0
+    uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
+    utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
     mode = np.where(np.isnan(vmp_ratio) | np.isnan(transmission), None,
                     umin * (uvr + utrans))

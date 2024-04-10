@@ -75,7 +75,7 @@ def test_categorize():
     # np.nan, vr<thres, vr<thres, vr=thres, vr>thres, vr>thres, vr<thres
     # vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo<thres
     # tr<thres, np.nan, tr>thres, tr<thres, tr<thres, tr<thres, tr>thres
-    expected = np.array([None, None, 2, 2, 2, 4, 0])
+    expected = np.array([None, None, 2, 2, 3, 4, 0])
     result = snow.categorize(vmp_ratio, transmission, voltage, min_dcv,
                              threshold_vratio, threshold_transmission)
     assert_array_equal(result, expected)
