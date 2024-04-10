@@ -132,9 +132,9 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5. :doi:`10.1109/PVSC48320.2023.10360065`
     """
-
+    # TODO only works with Series
     T = modeled_e_e/measured_e_e
-    T[T.isna()] = np.nan
+    T[T.isna()] = np.nan  # TODO what does this accomplish
     T[i_mp == 0] = 0
     T[T < 0] = np.nan
     T[T > 1] = 1
