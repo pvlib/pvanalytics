@@ -147,7 +147,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     return T
 
 
-def categorize_old(vmp_ratio, transmission, measured_voltage, 
+def categorize_old(vmp_ratio, transmission, measured_voltage,
                    predicted_voltage, min_dcv, threshold_vratio,
                    threshold_transmission):
 
