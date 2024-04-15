@@ -107,7 +107,7 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     Measured irradiance should be in the array's plane and represent snow-free
     conditions. For example, the measured irradiance could be obtained with a
     heated plane-of-array pyranometer. When necessary, the irradiance should be
-    adjusted for reflections and spectral content. 
+    adjusted for reflections and spectral content.
 
     Parameters
     ----------
@@ -117,12 +117,15 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
         Effective irradiance modeled from measured current at maximum power.
         [W/m2]
     i_mp : array
-        Maximum power current at the resolution of a single module. [A]
+        Maximum power DC current at the resolution of a single module. [A]
 
     Returns
     -------
     T : array
-        Effective transmission. [unitless]  # TODO describe when expect nan, 0
+        Effective transmission. [unitless] Returns NaN where measured DC
+        current is NaN and where measured irradiance is zero. Returns zero
+        where measured current is zero. Returns 1 where the ratio between
+        measured and modeled irradiance exceeds 1.
 
     References
     ----------
@@ -131,19 +134,22 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5. :doi:`10.1109/PVSC48320.2023.10360065`
     """
-    # TODO only works with Series
     T = modeled_e_e / measured_e_e
     # no transmission if no current
-    T[i_mp.isna()] = np.nan
+    T[np.isnan(i_mp)] = np.nan
     T[i_mp == 0] = 0
+    # no transmission if no irradiance
+    T[measured_e_e == 0] = np.nan
+    # bound T between 0 and 1
     T[T < 0] = np.nan
     T[T > 1] = 1
 
     return T
 
 
-def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
-                   threshold_vratio, threshold_transmission):
+def categorize_old(vmp_ratio, transmission, measured_voltage, 
+                   predicted_voltage, min_dcv, threshold_vratio,
+                   threshold_transmission):
 
     """
     Categorizes electrical behavior into a snow-related mode.
@@ -151,7 +157,9 @@ def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
     Modes are defined in [1]_:
 
     * Mode 0: system is covered with enough opaque snow that the system is
-      offline due to voltage below the inverter's turn-on voltage.
+      offline due to voltage below the inverter's turn-on voltage. Excludes
+      periods when system is predicted to be offline based on measured
+      irradiance.
     * Mode 1: system is online and covered with non-uniform snow, such that
       both operating voltage and current are decreased by the presence of snow.
     * Mode 2: system is online and covered with opaque snow, such that
@@ -171,7 +179,7 @@ def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
     transmission : float
         Fraction of plane-of-array irradiance that can reach the array's cells
         through the snow cover. [dimensionless]
-    voltage : float
+    measured_voltage : float
         [V]
     min_dcv : float
         The lower voltage bound on the inverter's maximum power point
@@ -196,7 +204,7 @@ def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
 
     if np.isnan(vmp_ratio) or np.isnan(transmission):
         return np.nan
-    elif voltage < min_dcv:
+    elif (measured_voltage < min_dcv) and (predicted_voltage > min_dcv):
         return 0
     elif vmp_ratio < threshold_vratio:
         if transmission < threshold_transmission:
@@ -211,8 +219,8 @@ def categorize_old(vmp_ratio, transmission, voltage, min_dcv,
     return np.nan
 
 
-def categorize(vmp_ratio, transmission, voltage, min_dcv,
-               threshold_vratio, threshold_transmission):
+def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
+               min_dcv, threshold_vratio, threshold_transmission):
 
     """
     Categorizes electrical behavior into a snow-related mode.
@@ -220,7 +228,9 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
     Modes are defined in [1]_:
 
     * Mode 0: system is covered with enough opaque snow that the system is
-      offline due to voltage below the inverter's turn-on voltage.
+      offline due to voltage below the inverter's turn-on voltage.  Excludes
+      periods when voltage modeled using measured irradiance does not
+      exceed the inverter's turn-on voltage.
     * Mode 1: system is online and covered with non-uniform snow, such that
       both operating voltage and current are decreased by the presence of snow.
     * Mode 2: system is online and covered with opaque snow, such that
@@ -240,8 +250,11 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
     transmission : array-like
         Fraction of plane-of-array irradiance that can reach the array's cells
         through the snow cover. [dimensionless]
-    voltage : array-like
+    measured_voltage : array-like
         Measured DC voltage. [V]
+    modeled_voltage : array-like
+        DC voltage modeled using measured plane-of-array irradiance and
+        back-of-module temperature. [V]
     min_dcv : float
         The lower voltage bound on the inverter's maximum power point
         tracking (MPPT) algorithm. [V]
@@ -262,11 +275,12 @@ def categorize(vmp_ratio, transmission, voltage, min_dcv,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    umin = voltage >= min_dcv  # necessary for all modes except 0
+    umin_meas = measured_voltage >= min_dcv  # necessary for all modes except 0
+    umin_model = modeled_voltage >= min_dcv  # necessary for all modes except 0
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
     utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
     mode = np.where(np.isnan(vmp_ratio) | np.isnan(transmission), None,
-                    umin * (uvr + utrans))
+                    umin_meas * umin_model * (uvr + utrans))
 
     return mode

@@ -53,6 +53,7 @@ from pvanalytics.features import clipping
 from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
+import os
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
@@ -184,7 +185,7 @@ for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
     data.loc[mask3, i] = np.nan
     data.loc[mask3, a] = np.nan
 
-# %% Plot DC voltage for each combiner inputm with inverter nameplate limits
+# %% Plot DC voltage for each combiner input with inverter nameplate limits
 
 fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
@@ -211,13 +212,24 @@ San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 '''
 
-horizon = pd.read_csv(horizon_file, index_col='Az').squeeze("columns")
+horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 
 data['Horizon Mask'] = snow.get_horizon_mask(horizon, data['azimuth'],
                                              data['elevation'])
 
-# Exclude data collected while the sun is below the horizon
-data = data[~data['Horizon Mask']]
+#%% Plot horizon mask
+
+fig, ax = plt.subplots()
+
+ax.scatter(data['azimuth'],data['elevation'], s=0.5, label='data',
+           c=data['Horizon Mask'])
+ax.scatter(horizon.index, horizon, s=0.5, label='mask')
+ax.legend()
+ax.set_xlabel(r'Azimuth [$\degree$]')
+ax.set_ylabel(r'Elevation [$\degree$]')
+
+#%% Exclude data collected while the sun is below the horizon
+data = data[data['Horizon Mask']]
 
 # %%
 
@@ -442,21 +454,10 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
         vmp_ratio = voltage / modeled_vmp
 
     # take care of divide by zero
-    vmp_ratio[modeled_vmp == 0] = 0
-    # Both quantities in the "where" argument of np.divide must be arrays, or
-    # else a RecursionError is raised
+    vmp_ratio[modeled_vmp == 0] = np.nan
 
-    #     vmp_ratio = np.divide(voltage, modeled_vmp,
-    #                           where=((voltage > 0) & (modeled_vmp>0)))
-    # vmp_ratio[modeled_vmp==0] = 0
-
-    # TODO lets vectorize the function itself
-    categorize_v = np.vectorize(snow.categorize_old)
-
-    mode = categorize_v(vmp_ratio, T, voltage, config['min_dcv'],
-                        config['threshold_vratio'],
-                        config['threshold_transmission'])
-    mode = snow.categorize(vmp_ratio, T, voltage, config['min_dcv'],
+    mode = snow.categorize(vmp_ratio, T, voltage, modeled_vmp,
+                           config['min_dcv'],
                            config['threshold_vratio'],
                            config['threshold_transmission'])
     my_dict = {'transmission': T,
@@ -724,3 +725,5 @@ ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large')
+
+# %%
