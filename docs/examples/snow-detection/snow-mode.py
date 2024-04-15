@@ -53,7 +53,6 @@ from pvanalytics.features import clipping
 from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
-import os
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
@@ -217,18 +216,17 @@ horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 data['Horizon Mask'] = snow.get_horizon_mask(horizon, data['azimuth'],
                                              data['elevation'])
 
-#%% Plot horizon mask
+# %% Plot horizon mask
 
 fig, ax = plt.subplots()
-
-ax.scatter(data['azimuth'],data['elevation'], s=0.5, label='data',
+ax.scatter(data['azimuth'], data['elevation'], s=0.5, label='data',
            c=data['Horizon Mask'])
 ax.scatter(horizon.index, horizon, s=0.5, label='mask')
 ax.legend()
 ax.set_xlabel(r'Azimuth [$\degree$]')
 ax.set_ylabel(r'Elevation [$\degree$]')
 
-#%% Exclude data collected while the sun is below the horizon
+# %% Exclude data collected while the sun is below the horizon
 data = data[data['Horizon Mask']]
 
 # %%
