@@ -67,7 +67,8 @@ def test_get_transmission():
 
 def test_categorize():
     vmp_ratio = np.array([np.nan, 0.9, 0.1, 0.6, 0.7, 0.9, 0.9])
-    voltage = np.array([400., 400., 400., 400., 400., 400., 200.])
+    measured_voltage = np.array([400., 450., 400., 420., 420., 495., 270.])
+    modeled_voltage = np.array([np.nan, 500, 4000, 700, 600, 550, 300])
     transmission = np.array([0.5, np.nan, 0.9, 0.9, 0.5, 0.9, 0.9])
     min_dcv = 300
     threshold_vratio = 0.7
@@ -76,6 +77,7 @@ def test_categorize():
     # vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo>thres, vo<thres
     # tr<thres, np.nan, tr>thres, tr<thres, tr<thres, tr<thres, tr>thres
     expected = np.array([None, None, 2, 2, 3, 4, 0])
-    result = snow.categorize(vmp_ratio, transmission, voltage, min_dcv,
+    result = snow.categorize(vmp_ratio, transmission, measured_voltage,
+                             modeled_voltage, min_dcv,
                              threshold_vratio, threshold_transmission)
     assert_array_equal(result, expected)
