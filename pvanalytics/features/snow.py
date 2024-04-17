@@ -147,78 +147,6 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     return T
 
 
-def categorize_old(vmp_ratio, transmission, measured_voltage,
-                   predicted_voltage, min_dcv, threshold_vratio,
-                   threshold_transmission):
-
-    """
-    Categorizes electrical behavior into a snow-related mode.
-
-    Modes are defined in [1]_:
-
-    * Mode 0: system is covered with enough opaque snow that the system is
-      offline due to voltage below the inverter's turn-on voltage. Excludes
-      periods when system is predicted to be offline based on measured
-      irradiance.
-    * Mode 1: system is online and covered with non-uniform snow, such that
-      both operating voltage and current are decreased by the presence of snow.
-    * Mode 2: system is online and covered with opaque snow, such that
-      operating voltage is decreased by the presence of snow, but transmission
-      is consistent with snow-free conditions.
-    * Mode 3: system is online and covered with light-transmissive snow, such
-      that transmission is decreased but voltage is consistent with all
-      system substrings being online.
-    * Mode 4: transmisison and voltage are consistent with snow-free
-      conditions.
-
-    Parameters
-    ----------
-    vmp_ratio : float
-        Ratio between measured voltage and voltage modeled using
-        calculated values of transmission. [dimensionless]
-    transmission : float
-        Fraction of plane-of-array irradiance that can reach the array's cells
-        through the snow cover. [dimensionless]
-    measured_voltage : float
-        [V]
-    min_dcv : float
-        The lower voltage bound on the inverter's maximum power point
-        tracking (MPPT) algorithm. [V]
-    threshold_vratio : float
-        The lower bound for vratio that is representative of snow-free
-        conditions. Determined empirically. Depends on system configuration and
-        site conditions. [unitless]
-    threshold_transmission : float
-        The lower bound on transmission that is found under snow-free
-        conditions, determined empirically. [unitless]
-
-    Returns
-    -------
-    mode : int
-
-    .. [1] E. C. Cooper, J. L. Braid and L. M. Burnham, "Identifying the
-       Electrical Signature of Snow in Photovoltaic Inverter Data," 2023 IEEE
-       50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
-       2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
-    """
-
-    if np.isnan(vmp_ratio) or np.isnan(transmission):
-        return np.nan
-    elif (measured_voltage < min_dcv) and (predicted_voltage > min_dcv):
-        return 0
-    elif vmp_ratio < threshold_vratio:
-        if transmission < threshold_transmission:
-            return 1
-        elif transmission > threshold_transmission:
-            return 2
-    elif vmp_ratio > threshold_vratio:
-        if transmission < threshold_transmission:
-            return 3
-        elif transmission > threshold_transmission:
-            return 4
-    return np.nan
-
-
 def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
                min_dcv, threshold_vratio, threshold_transmission):
 
@@ -275,12 +203,26 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5, :doi:`10.1109/PVSC48320.2023.10360065`.
     """
-    umin_meas = measured_voltage >= min_dcv  # necessary for all modes except 0
-    umin_model = modeled_voltage >= min_dcv  # necessary for all modes except 0
+    umin_meas = measured_voltage >= min_dcv
+    umin_model = modeled_voltage >= min_dcv
+
+    # offline if both measurement and model say that voltage is too low.
+    # if either measured or modeled is above the minimum, then system is
+    # possibly generating
+    offline = ~(umin_meas & umin_model)
+
+    # vmp_ratio discrimates between states (1,2) and (3,4)
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
+
+    # transmission discrimates within (1,2) and (3,4)
     utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
-    mode = np.where(np.isnan(vmp_ratio) | np.isnan(transmission), None,
-                    umin_meas * umin_model * (uvr + utrans))
+    # None if nan or system is offline
+    # if not offline:
+    #   - 0 if umin_meas is 0, i.e., measurement indicate no power but
+    #     it must be that umin_model is 1
+    #   - state 1, 2, 3, 4 defined by uvr + utrans
+    mode = np.where(offline | np.isnan(vmp_ratio) | np.isnan(transmission),
+                    None, umin_meas * (uvr + utrans))
 
     return mode
