@@ -209,7 +209,7 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     # offline if both measurement and model say that voltage is too low.
     # if either measured or modeled is above the minimum, then system is
     # possibly generating
-    offline = ~(umin_meas & umin_model)
+    offline = ~umin_meas & ~umin_model
 
     # vmp_ratio discrimates between states (1,2) and (3,4)
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
