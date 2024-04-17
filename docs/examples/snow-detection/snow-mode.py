@@ -247,20 +247,12 @@ sde_coeffs = cec_module_db[config['panel']]
 
 # %%
 """
-Model cell temperature using procedure outlined in Eqn. 12 of [1]
-and model effective irradiance using Eqn. 23 of [2].
-
-[1] D. L. King, E.E. Boyson, and J.A. Kratochvil, Photovoltaic Array
-Performance Model, SAND2004-3535, Sandia National Laboratories,
-Albuquerque, NM, 2004.
-[2] B. H. King, C. W. Hansen, D. Riley, C. D. Robinson and L. Pratt,
-“Procedure to Determine Coefficients for the Sandia Array Performance
-Model (SAPM)," SAND2016-5284, June 2016.
+Model cell temperature using the SAPM model.
 """
 
 irrad_ref = 1000
-data['Cell Temp [C]'] = data['Module Temp [C]'] + \
-    3*data['POA [W/m²]']/irrad_ref
+data['Cell Temp [C]'] = pvlib.temperature.sapm_cell_from_module(
+    data['Module Temp [C]'], data['POA [W/m²]'], 3)
 
 # %% Plot cell temperature
 fig, ax = plt.subplots(figsize=(10, 10))
@@ -411,10 +403,10 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
             Upper bound voltage for the MPPT algorithm. [V]
         threshold_vratio : float
             The lower bound on vratio that is found under snow-free conditions,
-            determined empirically
+            determined empirically.
         threshold_transmission : float
             The lower bound on transmission that is found under snow-free
-            conditions, determined empirically
+            conditions, determined empirically.
         num_mods_per_str : int
             Number of modules in series in each string.
         num_str_per_cb : int
@@ -423,7 +415,8 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     Returns
     -------
     my_dict : dict
-        Keys are "transmission", "modeled_vmp", "vmp_ratio", and "mode"
+        Keys are ``'transmission'``, ``'modeled_vmp'``, ``'vmp_ratio'``,
+        and ``'mode'``
 
     '''
 
@@ -727,5 +720,3 @@ ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large')
-
-# %%
