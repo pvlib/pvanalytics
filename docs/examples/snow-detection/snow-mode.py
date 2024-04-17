@@ -6,17 +6,22 @@ We classify the effect of snow on a PV system's DC array.
 
 The effect of snow is classified into one of five categories:
 
-    Mode 0: The system is covered with enough opaque snow that the system is
-        offline due to voltage below the inverter's turn-on voltage.
-    Mode 1: The system is online and covered with non-uniform snow, such that
-        both operating voltage and current are reduced.
-    Mode 2: The system is online and covered with opaque snow, such that
-        operating voltage is reduced by the snow, but transmission
-        is consistent with snow-free conditions. # TODO seems contradictory
-    Mode 3: The system is online and covered with light-transmissive snow,
-        such that current is decreased but voltage is consistent with all
-        system substrings being online.
-    Mode 4: Current and voltage are consistent with snow-free conditions.
+    * Mode 0: Indicates periods with enough opaque snow that the system is not
+      producing power. Specifically, Mode 0 is when the measured voltage is
+      below the inverter's turn-on voltage but the voltage modeled using
+      measured irradiance is below the inverter's turn-on voltage. 
+    * Mode 1: Indicates periods when the system has non-uniform snow and
+      both operating voltage and current are decreased. Operating voltage is
+      reduced when bypass diodes activate and current is decreased due to
+      decreased irradiance.
+    * Mode 2: Indicates periods when the operating voltage is reduced but
+      current is consistent with snow-free conditions.
+    * Mode 3: Indicates periods when the operating voltage is consistent with
+      snow-free conditionss but current is reduced.
+    * Mode 4: Voltage and current are consistent with snow-free conditions.
+    
+    Mode is None when both measured and voltage modeled from measured
+    irradiance are below the inverter turn-on voltage.
 
 The procedure involves four steps:
     1. Using measured plane-of-array (POA) irradiance and temperature, model
@@ -380,12 +385,11 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
 
     This function illustrates a workflow to get to snow mode:
 
-    1. Model effective irradiance based on measured current using the SAPM
-    2. Calculate transmission
-    3. Uses transmission to model voltage with the SAPM.
-    # TODO How is this voltage different than measured (snow-affected voltage)?
-    # Answer: All cells are modeled to get the incoming irradiance
-    4. Determine the snow mode for each point.
+    1. Model effective irradiance based on measured current using the SAPM.
+    2. Calculate transmission.
+    3. Model voltage from measured irradiance reduced by transmission. Assume
+       that all strings are producing voltage.
+    4. Determine the snow mode for each point in time.
 
     Parameters
     ----------

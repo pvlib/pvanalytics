@@ -155,20 +155,21 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
 
     Modes are defined in [1]_:
 
-    * Mode 0: system is covered with enough opaque snow that the system is
-      offline due to voltage below the inverter's turn-on voltage.  Excludes
-      periods when voltage modeled using measured irradiance does not
-      exceed the inverter's turn-on voltage.
-    * Mode 1: system is online and covered with non-uniform snow, such that
-      both operating voltage and current are decreased by the presence of snow.
-    * Mode 2: system is online and covered with opaque snow, such that
-      operating voltage is decreased by the presence of snow, but transmission
-      is consistent with snow-free conditions.
-    * Mode 3: system is online and covered with light-transmissive snow, such
-      that transmission is decreased but voltage is consistent with all
-      system substrings being online.
-    * Mode 4: transmisison and voltage are consistent with snow-free
-      conditions.
+    * Mode 0: Indicates periods with enough opaque snow that the system is not
+      producing power. Specifically, Mode 0 is when the measured voltage is
+      below the inverter's turn-on voltage but the voltage modeled using
+      measured irradiance is below the inverter's turn-on voltage. 
+    * Mode 1: Indicates periods when the system has non-uniform snow and
+      both operating voltage and current are decreased. Operating voltage is
+      reduced when bypass diodes activate and current is decreased due to
+      decreased irradiance.
+    * Mode 2: Indicates periods when the operating voltage is reduced but
+      current is consistent with snow-free conditions.
+    * Mode 3: Indicates periods when the operating voltage is consistent with
+      snow-free conditionss but current is reduced.
+    * Mode 4: Voltage and current are consistent with snow-free conditions.
+    * Mode is None when both measured and voltage modeled from measured
+      irradiance are below the inverter turn-on voltage.
 
     Parameters
     ----------
@@ -196,7 +197,7 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
 
     Returns
     -------
-    mode : int
+    mode : int or None
 
     .. [1] E. C. Cooper, J. L. Braid and L. M. Burnham, "Identifying the
        Electrical Signature of Snow in Photovoltaic Inverter Data," 2023 IEEE
