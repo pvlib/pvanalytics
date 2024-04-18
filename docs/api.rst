@@ -269,6 +269,17 @@ Functions for labeling shadows.
 
    features.shading.fixed
 
+Snow
+----
+
+Functions for identifying and quantifying the effects of snow.
+.. autosummary::
+   :toctree: generated/
+
+   features.snow.categorize
+   features.snow.get_transmission
+
+
 System
 ======
 
