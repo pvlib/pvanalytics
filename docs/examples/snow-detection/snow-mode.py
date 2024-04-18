@@ -5,7 +5,7 @@ Quantifying the effects of snow cover
 We classify the effect of snow on a PV system's DC array. Snow on an array's
 modules may reduce string voltage and/or string current, by reducing or
 blocking irradiance from reaching the cells. These effects may vary across
-the array since snow cover may not be uniform. 
+the array since snow cover may not be uniform.
 
 In this analysis, all differences between measured power and power modeled
 from snow-free irradiance measurements are ascribed to the effects of snow. The
