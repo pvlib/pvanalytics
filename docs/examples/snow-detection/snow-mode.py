@@ -2,14 +2,19 @@
 Quantifying the effects of snow cover
 =====================================
 
-We classify the effect of snow on a PV system's DC array.
+We classify the effect of snow on a PV system's DC array. Snow on an array's
+modules may reduce string voltage and/or string current, by reducing or
+blocking irradiance from reaching the cells. These effects may vary across
+the array since snow cover may not be uniform. 
 
-The effect of snow is classified into one of five categories:
+In this analysis, all differences between measured power and power modeled
+from snow-free irradiance measurements are ascribed to the effects of snow. The
+effect of snow is classified into one of five categories:
 
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is below the inverter's turn-on voltage. 
+      measured irradiance is below the inverter's turn-on voltage.
     * Mode 1: Indicates periods when the system has non-uniform snow and
       both operating voltage and current are decreased. Operating voltage is
       reduced when bypass diodes activate and current is decreased due to
@@ -19,7 +24,7 @@ The effect of snow is classified into one of five categories:
     * Mode 3: Indicates periods when the operating voltage is consistent with
       snow-free conditionss but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
-    
+
     Mode is None when both measured and voltage modeled from measured
     irradiance are below the inverter turn-on voltage.
 
