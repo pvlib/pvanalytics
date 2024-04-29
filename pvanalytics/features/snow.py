@@ -158,7 +158,7 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is above the inverter's turn-on voltage. 
+      measured irradiance is above the inverter's turn-on voltage.
     * Mode 1: Indicates periods when the system has non-uniform snow and
       both operating voltage and current are decreased. Operating voltage is
       reduced when bypass diodes activate and current is decreased due to
@@ -173,7 +173,7 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
 
     An additional mode was added to cover a case that was not addressed in
     [1]_:
-    * Mode -1: Indicates periods where voltage modeled with measured irradiance 
+    * Mode -1: Indicates periods where voltage modeled with measured irradiance
       is below the inverter's turn-on voltage. Under Mode -1, it is unknown if
       and how snow impacts power output.
 
