@@ -52,6 +52,7 @@ import pandas as pd
 import numpy as np
 import re
 import pvlib
+from matplotlib import colormaps as cm
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import matplotlib.patches as mpatches
@@ -187,7 +188,7 @@ for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
 
     # Data where inverter is clipping based on AC power
     mask1 = data[a] > max_ac_power
-    mask2 = clipping.geometric(ac_power=data[a], freq='15T')
+    mask2 = clipping.geometric(ac_power=data[a], freq='15min')
     mask3 = np.logical_or(mask1.values, mask2.values)
 
     data.loc[mask3, v] = np.nan
@@ -595,7 +596,11 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
     loss = np.maximum(data[name_modeled_power] - data[i_col]*data[v_col], 0)
     data[name_loss] = loss
 
-# %%
+# %% Plot measured and modeled power, color by mode
+
+N = 6
+alpha = 0.5
+cmap = cm.get_cmap('plasma').resampled(N)
 
 loss_cols = [c for c in data.columns if "Loss" in c]
 mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
@@ -605,13 +610,6 @@ col = 1
 los = loss_cols[col]
 mod = mode_cols[col]
 pwr = modeled_power_cols[col]
-
-# Color intervals by mode
-cmap = {0: 'r',
-        1: 'b',
-        2: 'yellow',
-        3: 'cyan',
-        4: 'g'}
 
 fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
@@ -628,15 +626,16 @@ for d in days:
     ax.plot(temp_grouped[pwr], c='k', ls='--')
     ax.plot(temp_grouped[pwr] - temp_grouped[los], c='k')
     ax.fill_between(temp_grouped.index, temp_grouped[pwr] - temp_grouped[los],
-                    temp_grouped[pwr], color='k', alpha=0.2)
+                    temp_grouped[pwr], color='k', alpha=alpha)
 
     chng_pts = np.ravel(np.where(temp_grouped[mod].values[:-1]
                                  - temp_grouped[mod].values[1:] != 0))
 
     if len(chng_pts) == 0:
         ax.axvspan(temp_grouped.index[0], temp_grouped.index[-1],
-                   color=cmap[temp_grouped.at[temp_grouped.index[-1], mod]],
-                   alpha=0.05)
+                   color=cmap.colors[temp_grouped.at[temp_grouped.index[-1],
+                                                     mod]],
+                   alpha=alpha)
     else:
         set1 = np.append([0], chng_pts)
         set2 = np.append(chng_pts, [-1])
@@ -645,29 +644,22 @@ for d in days:
             my_index = temp_grouped.index[start:end]
             ax.axvspan(
                 temp_grouped.index[start], temp_grouped.index[end],
-                color=cmap[temp_grouped.at[temp_grouped.index[end], mod]],
-                alpha=0.05)
+                color=cmap.colors[temp_grouped.at[temp_grouped.index[end],
+                                                  mod]],
+                alpha=alpha, ec=None)
 
 # Add different colored intervals to legend
 handles, labels = ax.get_legend_handles_labels()
 
 modeled_line = Line2D([0], [0], label='Modeled', color='k', ls='--')
 measured_line = Line2D([0], [0], label='Measured', color='k')
-
-# TODO don't mark offline periods as Mode 0
-red_patch = mpatches.Patch(color='r', alpha=0.05, label='Mode 0')
-blue_patch = mpatches.Patch(color='b', alpha=0.05, label='Mode 1')
-yellow_patch = mpatches.Patch(color='y', alpha=0.05, label='Mode 2')
-purple_patch = mpatches.Patch(color='cyan', alpha=0.05, label='Mode 3')
-green_patch = mpatches.Patch(color='g', alpha=0.05, label='Mode 4')
-
 handles.append(measured_line)
 handles.append(modeled_line)
-handles.append(red_patch)
-handles.append(green_patch)
-handles.append(blue_patch)
-handles.append(yellow_patch)
-handles.append(purple_patch)
+
+for i in range(-1, N-1):
+    my_patch = mpatches.Patch(color=cmap.colors[i], label=f'Mode {i}')
+    handles.append(my_patch)
+
 # handles.append(gray_patch)
 
 ax.set_xlabel('Date', fontsize='xx-large')
@@ -724,4 +716,6 @@ ax.legend()
 ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
-ax.set_title('Losses incurred in modes 0 -3', fontsize='xx-large')
+ax.set_title('Losses incurred in modes -1, 0, 1, 2, 3', fontsize='xx-large')
+
+# %%

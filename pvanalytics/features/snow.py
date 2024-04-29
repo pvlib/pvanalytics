@@ -158,7 +158,7 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is below the inverter's turn-on voltage. 
+      measured irradiance is above the inverter's turn-on voltage. 
     * Mode 1: Indicates periods when the system has non-uniform snow and
       both operating voltage and current are decreased. Operating voltage is
       reduced when bypass diodes activate and current is decreased due to
@@ -170,6 +170,12 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     * Mode 4: Voltage and current are consistent with snow-free conditions.
     * Mode is None when both measured and voltage modeled from measured
       irradiance are below the inverter turn-on voltage.
+
+    An additional mode was added to cover a case that was not addressed in
+    [1]_:
+    * Mode -1: Indicates periods where voltage modeled with measured irradiance 
+      is below the inverter's turn-on voltage. Under Mode -1, it is unknown if
+      and how snow impacts power output.
 
     Parameters
     ----------
@@ -207,10 +213,10 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     umin_meas = measured_voltage >= min_dcv
     umin_model = modeled_voltage >= min_dcv
 
-    # offline if both measurement and model say that voltage is too low.
-    # if either measured or modeled is above the minimum, then system is
+    # offline if model says that voltage is too low.
+    # if modeled is above the minimum, then system is
     # possibly generating
-    offline = ~umin_meas & ~umin_model
+    # offline = ~umin_meas & ~umin_model
 
     # vmp_ratio discrimates between states (1,2) and (3,4)
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
@@ -218,12 +224,15 @@ def categorize(vmp_ratio, transmission, measured_voltage, modeled_voltage,
     # transmission discrimates within (1,2) and (3,4)
     utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
-    # None if nan or system is offline
+    # None if nan
+    # if offline:
+    #   - -1 if umin_model is 0
     # if not offline:
     #   - 0 if umin_meas is 0, i.e., measurement indicate no power but
     #     it must be that umin_model is 1
     #   - state 1, 2, 3, 4 defined by uvr + utrans
-    mode = np.where(offline | np.isnan(vmp_ratio) | np.isnan(transmission),
+    mode = np.where(np.isnan(vmp_ratio) | np.isnan(transmission),
                     None, umin_meas * (uvr + utrans))
+    mode = np.where(~umin_model, -1, mode)
 
     return mode
