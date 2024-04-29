@@ -52,7 +52,6 @@ import pandas as pd
 import numpy as np
 import re
 import pvlib
-from matplotlib import colormaps as cm
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import matplotlib.patches as mpatches
@@ -600,7 +599,7 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
 
 N = 6
 alpha = 0.5
-cmap = cm.get_cmap('plasma').resampled(N)
+cmap = plt.get_cmap('plasma', N)
 
 loss_cols = [c for c in data.columns if "Loss" in c]
 mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
@@ -659,8 +658,6 @@ handles.append(modeled_line)
 for i in range(-1, N-1):
     my_patch = mpatches.Patch(color=cmap.colors[i], label=f'Mode {i}')
     handles.append(my_patch)
-
-# handles.append(gray_patch)
 
 ax.set_xlabel('Date', fontsize='xx-large')
 ax.set_ylabel('DC Power [W]', fontsize='xx-large')
