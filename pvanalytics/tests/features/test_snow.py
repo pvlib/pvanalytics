@@ -66,25 +66,27 @@ def test_get_transmission():
 
 
 def test_categorize():
-    vmp_ratio = np.array([np.nan, 0.9, 0.1, 0.6, 0.7, 0.9, 0.9, 0.5])
     measured_voltage = np.array([400., 450., 400., 420., 420., 495., 270.,
-                                 275.])
-    modeled_voltage = np.array([np.nan, 500, 4000, 700, 600, 550, 300, 550])
-    transmission = np.array([0.5, np.nan, 0.5, 0.9, 0.5, 0.9, 0.9, 0.9])
+                                 200., 850., 0., 700.])
+    modeled_voltage_with_calculated_transmission = np.array([np.nan, 500, 4000,
+                                                             700, 600, 550,
+                                                             300, 200, 600,
+                                                             0, 700])
+    modeled_voltage_with_ideal_transmission = np.array([700, 600, 6000, 750,
+                                                        700, 700, 350, 250,
+                                                        600, 400, 850])
+    transmission = np.array([0.5, np.nan, 0.5, 0.9, 0.5, 0.9, 0.9, 0.9, 1, 0,
+                             0.9])
+    
     min_dcv = 300
+    max_dcv = 800
     threshold_vratio = 0.7
     threshold_transmission = 0.6
-    # vmp_ratio: np.nan, >thres, <thres, <thres, =thres, >thres, >thres, <thres
-    # measured_voltage: >thres, >thres, >thres, >thres, >thres, >thres, <thres,
-    #                   <thres
-    # modeled_voltage: np.nan, >thres, >thres, >thres, >thres, >thres, <thres,
-    #                  >thres
-    # transmission: <thres, np.nan, <thres, >thres, <thres, >thres, >thres,
-    #               >thres, > thres
-    # None (vmp_ratio, modeled_voltage), None (transmission), 1, 2, 3, 4, -1,
-    # 0
-    expected = np.array([None, None, 1, 2, 3, 4, -1, 0])
-    result = snow.categorize(vmp_ratio, transmission, measured_voltage,
-                             modeled_voltage, min_dcv,
-                             threshold_vratio, threshold_transmission)
+
+    expected = np.array([None, None, 1, 2, 3, 4, 0, -1, -1, 0, -1])
+    result, _ = snow.categorize(transmission, measured_voltage,
+                                modeled_voltage_with_calculated_transmission,
+                                modeled_voltage_with_ideal_transmission,
+                                min_dcv, max_dcv, threshold_vratio,
+                                threshold_transmission)
     assert_array_equal(result, expected)

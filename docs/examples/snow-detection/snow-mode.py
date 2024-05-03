@@ -125,8 +125,11 @@ data[dc_voltage_cols] = data[dc_voltage_cols].replace({np.nan: 0, None: 0})
 data[dc_current_cols] = data[dc_current_cols].replace({np.nan: 0, None: 0})
 data.loc[:, ac_power_cols] = data[ac_power_cols].replace({np.nan: 0, None: 0})
 
-# %% Plot DC voltage for each combiner input relative to inverter nameplate
+
+# %% 
+# Plot DC voltage for each combiner input relative to inverter nameplate
 # limits
+
 fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
@@ -140,6 +143,7 @@ ax.axhline(mppt_low_voltage, c='g', ls='--',
 ax.set_xlabel('Date', fontsize='large')
 ax.set_ylabel('Voltage [V]', fontsize='large')
 ax.legend(loc='lower left')
+plt.show()
 
 # %% Plot AC power relative to inverter nameplate limits
 
@@ -154,6 +158,7 @@ ax.axhline(max_ac_power, c='r', ls='--',
 ax.set_xlabel('Date', fontsize='large')
 ax.set_ylabel('AC Power [kW]', fontsize='large')
 ax.legend(loc='upper left')
+plt.show()
 
 # %% Filter data.
 # Identify periods where the system is operating off of its maximum power
@@ -209,6 +214,7 @@ ax.axhline(mppt_low_voltage, c='g', ls='--',
 ax.set_xlabel('Date', fontsize='large')
 ax.set_ylabel('Voltage [V]', fontsize='large')
 ax.legend(loc='lower left')
+plt.show()
 
 # %% We want to exclude periods where array voltage is affected by horizon
 # shading
@@ -235,6 +241,7 @@ ax.scatter(horizon.index, horizon, s=0.5, label='mask')
 ax.legend()
 ax.set_xlabel(r'Azimuth [$\degree$]')
 ax.set_ylabel(r'Elevation [$\degree$]')
+plt.show()
 
 # %% Exclude data collected while the sun is below the horizon
 data = data[data['Horizon Mask']]
@@ -267,6 +274,7 @@ ax.scatter(data.index, data['Cell Temp [C]'], s=0.5, c='b')
 ax.plot(data['Cell Temp [C]'], alpha=0.3, c='b')
 ax.set_ylabel('Cell Temp [C]', c='b', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='xx-large')
+plt.show()
 
 # %% For one combiner, demonstrate the transmission calculation using two
 # different approaches to modeling effective irradiance from measured Imp.
@@ -315,6 +323,7 @@ ax.plot(T2, alpha=0.3, c='g')
 ax.legend()
 ax.set_ylabel('Transmission', fontsize='xx-large')
 ax.set_xlabel('Date + Time', fontsize='large')
+plt.show()
 
 # %%
 # Model voltage using calculated transmission (two different approaches)
@@ -369,6 +378,7 @@ ax.scatter(data.index, data[inv_cb + ' Voltage [V]'], s=1, c='r',
 ax.legend(fontsize='xx-large')
 ax.set_ylabel('Voltage [V]', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='large')
+plt.show()
 
 
 # %% Function to do analysis so we can loop over combiner boxes
@@ -433,35 +443,25 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
     T = snow.get_transmission(effective_irradiance, modeled_e_e,
                               current/config['num_str_per_cb'])
 
-    name_T = inv_cb + ' Transmission'
-    data[name_T] = T
-
     # Model voltage for a single module, scale up to array
-    modeled_vmp = pvlib.pvsystem.sapm(effective_irradiance*T, temp_cell,
-                                      coeffs)['v_mp']
-    modeled_vmp *= config['num_mods_per_str']
+    modeled_voltage_with_calculated_transmission =\
+        pvlib.pvsystem.sapm(effective_irradiance*T, temp_cell,
+                            coeffs)['v_mp'] * config['num_mods_per_str']
+    modeled_voltage_with_ideal_transmission =\
+        pvlib.pvsystem.sapm(effective_irradiance, temp_cell,
+                            coeffs)['v_mp'] * config['num_mods_per_str']
 
-    # Voltage is modeled as NaN if T = 0, but V = 0 makes more sense
-    modeled_vmp[T == 0] = 0
+    mode, vmp_ratio = snow.categorize(
+        T, voltage, modeled_voltage_with_calculated_transmission,
+        modeled_voltage_with_ideal_transmission, config['min_dcv'],
+        config['max_dcv'], config['threshold_vratio'],
+        config['threshold_transmission'])
 
-    # Identify periods where modeled voltage is outside of MPPT range,
-    # and correct values
-    modeled_vmp[modeled_vmp > config['max_dcv']] = np.nan
-    modeled_vmp[modeled_vmp < config['min_dcv']] = 0
-
-    # Calculate voltage ratio
-    with np.errstate(divide='ignore'):
-        vmp_ratio = voltage / modeled_vmp
-
-    # take care of divide by zero
-    vmp_ratio[modeled_vmp == 0] = np.nan
-
-    mode = snow.categorize(vmp_ratio, T, voltage, modeled_vmp,
-                           config['min_dcv'],
-                           config['threshold_vratio'],
-                           config['threshold_transmission'])
     my_dict = {'transmission': T,
-               'modeled_vmp': modeled_vmp,
+               'modeled_voltage_with_calculated_transmission':
+               modeled_voltage_with_calculated_transmission,
+               'modeled_voltage_with_ideal_transmission':
+               modeled_voltage_with_ideal_transmission,
                'vmp_ratio': vmp_ratio,
                'mode': mode}
 
@@ -544,7 +544,8 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
 # %%
 # Look at transmission for all DC inputs
 
-transmission_cols = [c for c in data.columns if 'transmission' in c]
+transmission_cols = [c for c in data.columns if 'transmission' in c and
+                     'voltage' not in c]
 fig, ax = plt.subplots(figsize=(10, 10))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
@@ -554,6 +555,7 @@ for c in transmission_cols:
     ax.scatter(temp.index, temp[c], s=0.5, label=c)
 ax.set_xlabel('Date', fontsize='xx-large')
 ax.legend()
+plt.show()
 
 # %%
 # Look at voltage ratios for all DC inputs
@@ -571,6 +573,7 @@ ax.set_xlabel('Date', fontsize='xx-large')
 ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='xx-large')
 ax.axhline(1, c='k', alpha=0.1, ls='--')
 ax.legend()
+plt.show()
 
 # %% Calculate all power losses - snow and non-snow
 
@@ -664,6 +667,7 @@ ax.set_ylabel('DC Power [W]', fontsize='xx-large')
 ax.legend(handles=handles, fontsize='xx-large', loc='upper left')
 ax.set_title('Measured and modeled production for INV1 CB2',
              fontsize='xx-large')
+plt.show()
 
 # %%
 
@@ -714,5 +718,6 @@ ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Losses incurred in modes -1, 0, 1, 2, 3', fontsize='xx-large')
+plt.show()
 
 # %%
