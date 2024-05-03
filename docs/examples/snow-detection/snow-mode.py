@@ -126,7 +126,7 @@ data[dc_current_cols] = data[dc_current_cols].replace({np.nan: 0, None: 0})
 data.loc[:, ac_power_cols] = data[ac_power_cols].replace({np.nan: 0, None: 0})
 
 
-# %% 
+# %%
 # Plot DC voltage for each combiner input relative to inverter nameplate
 # limits
 
@@ -541,8 +541,7 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
         data[inv_cb + ' ' + k] = v
 
 
-# %%
-# Look at transmission for all DC inputs
+# %% Look at transmission for all DC inputs
 
 transmission_cols = [c for c in data.columns if 'transmission' in c and
                      'voltage' not in c]
@@ -557,8 +556,7 @@ ax.set_xlabel('Date', fontsize='xx-large')
 ax.legend()
 plt.show()
 
-# %%
-# Look at voltage ratios for all DC inputs
+# %% Look at voltage ratios for all DC inputs
 
 vratio_cols = [c for c in data.columns if "vmp_ratio" in c]
 fig, ax = plt.subplots(figsize=(10, 10))
@@ -719,5 +717,3 @@ ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Losses incurred in modes -1, 0, 1, 2, 3', fontsize='xx-large')
 plt.show()
-
-# %%

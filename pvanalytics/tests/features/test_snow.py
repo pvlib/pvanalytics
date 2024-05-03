@@ -77,7 +77,7 @@ def test_categorize():
                                                         600, 400, 850])
     transmission = np.array([0.5, np.nan, 0.5, 0.9, 0.5, 0.9, 0.9, 0.9, 1, 0,
                              0.9])
-    
+
     min_dcv = 300
     max_dcv = 800
     threshold_vratio = 0.7
