@@ -1,10 +1,8 @@
 .. _whatsnew_021:
 
-0.2.1 (XXXX, 2024)
--------------------------
-
 Breaking Changes
 ~~~~~~~~~~~~~~~~
+0.2.1 (not yet released)
 
 
 Enhancements
@@ -13,11 +11,10 @@ Enhancements
   and :py:func:`~pvanalytics.features.snow.get_transmission` to categorize
   data by the effect of snow on DC voltage and current. (:pull:`209`)
 
-Bug Fixes
-~~~~~~~~~
-
 Requirements
 ~~~~~~~~~~~~
+* Minimum python advanced to 3.8. (:pull:`210`)
+* Minimum statsmodels advanced to 0.10.0 and numpy to 1.17.0. (:pull:`210`)
 
 Documentation
 ~~~~~~~~~~~~~
@@ -28,6 +25,6 @@ Testing
 
 
 Contributors
-~~~~~~~~~~~~
 * Cliff Hansen (:ghuser:`cwhanse`)
 * Emma Cooper (:ghuser:`eccoope`)
+* Kevin Anderson (:ghuser:`kandersolar`)
