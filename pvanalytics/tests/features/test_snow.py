@@ -66,13 +66,13 @@ def test_get_transmission():
 
 
 def test_categorize():
-    measured_voltage = np.array([400., 450., 400., 420., 420., 495., 270.,
+    measured_voltage = np.array([400., 450., 350., 420., 420., 495., 270.,
                                  200., 850., 0., 700.])
-    modeled_voltage_with_calculated_transmission = np.array([np.nan, 500, 4000,
+    modeled_voltage_with_calculated_transmission = np.array([np.nan, 500, 700,
                                                              700, 600, 550,
                                                              300, 200, 600,
                                                              0, 700])
-    modeled_voltage_with_ideal_transmission = np.array([700, 600, 6000, 750,
+    modeled_voltage_with_ideal_transmission = np.array([700, 600, 700, 750,
                                                         700, 700, 350, 250,
                                                         600, 400, 850])
     transmission = np.array([0.5, np.nan, 0.5, 0.9, 0.5, 0.9, 0.9, 0.9, 1, 0,
