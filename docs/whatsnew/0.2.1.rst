@@ -1,0 +1,30 @@
+.. _whatsnew_021:
+
+0.2.1 (not yet released)
+------------------------
+
+
+Enhancements
+~~~~~~~~~~~~
+
+
+Bug Fixes
+~~~~~~~~~
+
+
+Requirements
+~~~~~~~~~~~~
+* Minimum python advanced to 3.8. (:pull:`210`)
+* Minimum statsmodels advanced to 0.10.0 and numpy to 1.17.0. (:pull:`210`)
+
+Documentation
+~~~~~~~~~~~~~
+
+
+Testing
+~~~~~~~
+
+
+
+Contributors
+~~~~~~~~~~~~
