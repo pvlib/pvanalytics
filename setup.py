@@ -33,11 +33,11 @@ TESTS_REQUIRE = [
 ]
 
 INSTALL_REQUIRES = [
-    'numpy >= 1.16.0',
+    'numpy >= 1.17.0',
     'pandas >= 1.0.0, != 1.1.*',
     'pvlib >= 0.9.4',
     'scipy >= 1.6.0',
-    'statsmodels >= 0.9.0',
+    'statsmodels >= 0.10.0',
     'scikit-image >= 0.16.0',
     'importlib-metadata; python_version < "3.8"',
 ]
