@@ -14,7 +14,7 @@ effect of snow is classified into one of five categories:
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is below the inverter's turn-on voltage.
+      measured irradiance is above the inverter's turn-on voltage.
     * Mode 1: Indicates periods when the system has non-uniform snow and
       both operating voltage and current are decreased. Operating voltage is
       reduced when bypass diodes activate and current is decreased due to
@@ -24,6 +24,12 @@ effect of snow is classified into one of five categories:
     * Mode 3: Indicates periods when the operating voltage is consistent with
       snow-free conditionss but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
+    * Mode -1: Indicates periods where it is unknown whether snow is impacting
+      system performance. This includes periods where voltage modeled with
+      measured irradiance assuming perfect transmission is below the inverter's
+      turn-on voltage, or when the same quantity is greater than the upper
+      bound on the inverter's MPPT range. Mode -1 also includes periods when
+      measured voltage exceeds the upper bound on the inverter's MPPT range.
 
     Mode is None when both measured and voltage modeled from measured
     irradiance are below the inverter turn-on voltage.
@@ -167,20 +173,10 @@ plt.show()
 # operating point. To allow us to make a valid comparison between system
 # measurements and modeled power at MMP, we set measurements collected below
 # the MPPT minimum voltage to zero, which emulates the condition where the
-# inverter turns off when it cannot meet the turn-on voltage. When the inverter
-# is clipping power, we replace voltage and current measurements with NaN as
-# these measurements reflect current and voltage that has been artificially
-# adjusted away from the MMP. This masking may result in an omission of some
-# snow loss conditions where a very light-transmissive snow cover allows the
-# system to reach the inverter's clipping voltage.
+# inverter turns off when it cannot meet the turn-on voltage.
 
 ac_power_cols_repeated = ac_power_cols + ac_power_cols + ac_power_cols
 for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
-
-    # Data where V > MPPT maximum
-    data.loc[data[v] > mppt_high_voltage, v] = np.nan
-    data.loc[data[v] > mppt_high_voltage, i] = np.nan
-    data.loc[data[v] > mppt_high_voltage, a] = np.nan
 
     # Data where V < MPPT minimum
     data.loc[data[v] < mppt_low_voltage, v] = 0
@@ -216,16 +212,14 @@ ax.set_ylabel('Voltage [V]', fontsize='large')
 ax.legend(loc='lower left')
 plt.show()
 
-# %% We want to exclude periods where array voltage is affected by horizon
-# shading
-'''
-Load in and apply horizon profiling created using approach described in [1].
+# %%
 
-[1] J. L. Braid and B. G. Pierce, "Horizon Profiling Methods for Photovoltaic
-Arrays," 2023 IEEE 50th Photovoltaic Specialists Conference (PVSC),
-San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
-
-'''
+# We want to exclude periods where array voltage is affected by horizon
+# shading. Load in and apply horizon profiling created using approach described
+# in [1].
+# [1] J. L. Braid and B. G. Pierce, "Horizon Profiling Methods for Photovoltaic
+# Arrays," 2023 IEEE 50th Photovoltaic Specialists Conference (PVSC),
+# San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
 
 horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 
@@ -276,7 +270,8 @@ ax.set_ylabel('Cell Temp [C]', c='b', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='xx-large')
 plt.show()
 
-# %% For one combiner, demonstrate the transmission calculation using two
+# %%
+# For one combiner, demonstrate the transmission calculation using two
 # different approaches to modeling effective irradiance from measured Imp.
 
 # Choose one combiner box
@@ -387,8 +382,8 @@ def wrapper(voltage, current, temp_cell, effective_irradiance,
             coeffs, config, temp_ref=25, irrad_ref=1000):
 
     '''
-    Categorizes each data point as Mode 0-4 based on transmission and
-    the ratio between measured and modeled votlage.
+    Categorizes each data point as Mode 0-4 based on transmission and the
+    ratio between measured and modeled votlage.
 
     This function illustrates a workflow to get to snow mode:
 
@@ -692,7 +687,7 @@ for d in days:
     temp = data_gped.get_group(d)
 
     for c, m, l, p in zip(columns, mode_cols, loss_cols, modeled_power_cols):
-        snow_loss_filter = ~(temp[m].isna()) & (temp[m] != 4)
+        snow_loss_filter = ~(temp[m].isna()) & (temp[m] != 4) & (temp[m] != -1)
         daily_snow_loss = 100*temp[snow_loss_filter][l].sum()/temp[p].sum()
         snow_loss.at[d, c] = daily_snow_loss
 
@@ -715,5 +710,7 @@ ax.legend()
 ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
-ax.set_title('Losses incurred in modes -1, 0, 1, 2, 3', fontsize='xx-large')
+ax.set_title('Losses incurred in modes 0, 1, 2, 3', fontsize='xx-large')
 plt.show()
+
+# %%
