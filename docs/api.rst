@@ -273,6 +273,7 @@ Snow
 ----
 
 Functions for identifying and quantifying the effects of snow.
+
 .. autosummary::
    :toctree: generated/
 
