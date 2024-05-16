@@ -280,7 +280,6 @@ Functions for identifying and quantifying the effects of snow.
    features.snow.categorize
    features.snow.get_transmission
 
-
 System
 ======
 
