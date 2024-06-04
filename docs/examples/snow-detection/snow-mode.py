@@ -66,17 +66,7 @@ from matplotlib.lines import Line2D
 import pvanalytics
 # Functions needed for the analysis procedure
 from pvanalytics.features import clipping
-# from pvanalytics.features import snow
-import sys
-import os
-base_dir = pathlib.Path('C:\\')
-pvanalytics_dir = pathlib.Path(os.path.join(base_dir, "Users", "eccoope",
-                                            "Documents", "GitHub",
-                                            "pvanalytics", "pvanalytics"))
-
-my_path = os.path.join(pvanalytics_dir, 'features')
-sys.path.insert(0, my_path)
-import snow
+from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
 # pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
