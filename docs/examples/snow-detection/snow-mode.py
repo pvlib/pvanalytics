@@ -11,6 +11,12 @@ In this analysis, all differences between measured power and power modeled
 from snow-free irradiance measurements are ascribed to the effects of snow. The
 effect of snow is classified into one of five categories:
 
+    * Mode -1: Indicates periods where it is unknown whether snow is impacting
+      system performance. This includes periods where voltage modeled with
+      measured irradiance assuming perfect transmission is below the inverter's
+      turn-on voltage, or when the same quantity is greater than the upper
+      bound on the inverter's MPPT range. Mode -1 also includes periods when
+      measured voltage exceeds the upper bound on the inverter's MPPT range.
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
@@ -24,12 +30,6 @@ effect of snow is classified into one of five categories:
     * Mode 3: Indicates periods when the operating voltage is consistent with
       snow-free conditionss but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
-    * Mode -1: Indicates periods where it is unknown whether snow is impacting
-      system performance. This includes periods where voltage modeled with
-      measured irradiance assuming perfect transmission is below the inverter's
-      turn-on voltage, or when the same quantity is greater than the upper
-      bound on the inverter's MPPT range. Mode -1 also includes periods when
-      measured voltage exceeds the upper bound on the inverter's MPPT range.
 
     Mode is None when both measured and voltage modeled from measured
     irradiance are below the inverter turn-on voltage.
@@ -180,7 +180,7 @@ plt.show()
 # point (MPP), and correct or mask. Conditions outside of the MPP cannot
 # be accurately modeled without external information on the system's
 # operating point. To allow us to make a valid comparison between system
-# measurements and modeled power at MMP, we set measurements collected below
+# measurements and modeled power at MPP, we set measurements collected below
 # the MPPT minimum voltage to zero, which emulates the condition where the
 # inverter turns off when it cannot meet the turn-on voltage.
 

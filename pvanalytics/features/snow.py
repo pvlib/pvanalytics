@@ -8,12 +8,12 @@ def get_horizon_mask(horizon, azimuth, elevation):
 
     Parameters
     ----------
-    horizon : pd.Series
+    horizon : array-like
         Series with int index of 0 - 359 (represents azimuth) and float values
         (represents elevation [deg] of horizon profile).
-    azimuth : numeric
+    azimuth : array-like
         Solar azimuth angle. [deg]
-    elevation : numeric
+    elevation : array-like
         Solar elevation angle. [deg]
 
     Returns
@@ -35,9 +35,9 @@ def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
 
     Parameters
     ----------
-    temp_cell : array
+    temp_cell : array-like
         Temperature of cells inside module. [degrees C]
-    i_mp : array
+    i_mp : array-like
         Maximum power current at the resolution of a single module. [A]
     imp0 : float
         Short-circuit current at reference condition. [A]
@@ -51,7 +51,7 @@ def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
 
     Returns
     -------
-    effective_irradiance : array
+    effective_irradiance : array-like
         Effective irradiance. [W/m2]
 
     References
@@ -78,14 +78,14 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
 
     Parameters
     ----------
-    i_mp : array
+    i_mp : array-like
         Maximum power current at the resolution of a single module. [A]
     imp0 : float
         Short-circuit current at reference condition. [A]
 
     Returns
     -------
-    effective_irradiance : array
+    effective_irradiance : array-like
         Effective irradiance. [W/m2]
 
     References
@@ -111,17 +111,17 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
 
     Parameters
     ----------
-    measured_e_e : array
+    measured_e_e : array-like
         Plane-of-array irradiance absent the effect of snow. [W/m2]
-    modeled_e_e : array
+    modeled_e_e : array-like
         Effective irradiance modeled from measured current at maximum power.
         [W/m2]
-    i_mp : array
+    i_mp : array-like
         Maximum power DC current at the resolution of a single module. [A]
 
     Returns
     -------
-    T : array
+    T : array-like
         Effective transmission. [unitless] Returns NaN where measured DC
         current is NaN and where measured irradiance is zero. Returns zero
         where measured current is zero. Returns 1 where the ratio between
@@ -157,6 +157,19 @@ def categorize(transmission, measured_voltage,
 
     Modes are defined in [1]_:
 
+    * Mode -1: Indicates periods where it is unknown if and how snow impacts
+      power output. Mode -1 includes periods when:
+
+          1. voltage modeled with measured irradiance is below the inverter's
+             turn-on voltage OR
+          2. voltage modeled with measured irradiance exceeds the upper bound
+             of the inverter's MPPT algorithm OR
+          3. measured voltage exceeds the upper bound of the inverter's MPPT
+             algorithm.
+
+      Mode -1 is added in this function to cover a case that was not addressed
+      in [1]_.
+
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
       below the inverter's turn-on voltage but the voltage modeled using
@@ -170,25 +183,9 @@ def categorize(transmission, measured_voltage,
     * Mode 3: Indicates periods when the operating voltage is consistent with
       snow-free conditionss but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
-    * Mode is None when both measured and voltage modeled from measured
-      irradiance are below the inverter turn-on voltage.
-
-    An additional mode was added to cover a case that was not addressed in
-    [1]_:
-    * Mode -1: Indicates periods where it is unknown if and how snow impacts
-    power output. Mode -1 includes periods when
-      (a) voltage modeled with measured irradiance is below the inverter's
-      turn-on voltage OR
-      (b) voltage modeled with measured irradiance exceeds the upper bound of
-      the inverter's MPPT algorithm OR
-      (c) measured voltage exceeds the upper bound of the inverter's MPPT
-      algorithm
 
     Parameters
     ----------
-    vmp_ratio : array-like
-        Ratio between measured voltage and voltage modeled using
-        calculated values of transmission. [dimensionless]
     transmission : array-like
         Fraction of plane-of-array irradiance that can reach the array's cells
         through the snow cover. [dimensionless]
@@ -217,7 +214,11 @@ def categorize(transmission, measured_voltage,
     Returns
     -------
     mode : int or None
+        ``mode`` is ``None`` when any of the inputs used to determine ``mode``
+        is ``nan``.
 
+    References
+    ----------
     .. [1] E. C. Cooper, J. L. Braid and L. M. Burnham, "Identifying the
        Electrical Signature of Snow in Photovoltaic Inverter Data," 2023 IEEE
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
