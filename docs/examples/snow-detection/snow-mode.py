@@ -69,7 +69,7 @@ from pvanalytics.features import clipping
 from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
-# pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
 horizon_file = pvanalytics_dir / 'data' / 'snow_horizon.csv'
