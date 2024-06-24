@@ -90,8 +90,8 @@ print(f"Inverter AC power rating: {max_ac_power} kW")
 print(f"Inverter MPPT range: {mppt_low_voltage} V - {mppt_high_voltage} V")
 num_str_per_cb = config['num_str_per_cb']['INV1 CB1']
 num_mods_per_str = config['num_mods_per_str']['INV1 CB1']
-print(f"There are {num_mods_per_str} modules connected in series in each string,"
-      f" and there are {num_str_per_cb} strings connected in"
+print(f"There are {num_mods_per_str} modules connected in series in each,"
+      f" string and there are {num_str_per_cb} strings connected in"
       f" parallel at each combiner")
 
 
