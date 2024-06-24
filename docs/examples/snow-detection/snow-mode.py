@@ -65,7 +65,6 @@ from matplotlib.lines import Line2D
 
 import pvanalytics
 # Functions needed for the analysis procedure
-from pvanalytics.features import clipping
 from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
