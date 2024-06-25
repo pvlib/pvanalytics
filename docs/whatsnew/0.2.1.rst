@@ -7,6 +7,7 @@ Breaking Changes
 
 Enhancements
 ~~~~~~~~~~~~
+* Compatibility with numpy 2.0. (:pull:`211`)
 * Added functions :py:func:`~pvanalytics.features.snow.categorize`
   and :py:func:`~pvanalytics.features.snow.get_transmission` to categorize
   data by the effect of snow on DC voltage and current. (:pull:`209`)
