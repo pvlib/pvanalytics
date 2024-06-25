@@ -6,7 +6,7 @@
 
 Enhancements
 ~~~~~~~~~~~~
-* Compatibility with numpy 2.0. (:pull:``)
+* Compatibility with numpy 2.0. (:pull:`211`)
 
 
 Bug Fixes
