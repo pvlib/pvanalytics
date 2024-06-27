@@ -8,8 +8,8 @@ def get_horizon_mask(horizon, azimuth, elevation):
 
     Parameters
     ----------
-    horizon : array-like
-        Series with int index of 0 - 359 (represents azimuth) and float values
+    horizon : Series
+        Series with numeric index of 0 - 359 (represents azimuth) and float values
         (represents elevation [deg] of horizon profile).
     azimuth : array-like
         Solar azimuth angle. [deg]
