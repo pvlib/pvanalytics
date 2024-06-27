@@ -57,6 +57,8 @@ library status.
     features of data rather than properties of the system that produced the
     data.
   - :py:mod:`features.shading` functions for identifying shadows.
+  - :py:mod:`features.snow` functions for identifying snow coverage and
+    classifying the effects of snow coverage.
 
 - :py:mod:`system` identification of PV system characteristics from data
   (e.g. nameplate power, tilt, azimuth)
