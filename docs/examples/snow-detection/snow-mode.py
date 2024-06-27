@@ -212,7 +212,7 @@ plt.show()
 horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 
 data['Horizon Mask'] = snow._get_horizon_mask(horizon, data['azimuth'],
-                                             data['elevation'])
+                                              data['elevation'])
 
 # %%
 # Plot horizon mask
