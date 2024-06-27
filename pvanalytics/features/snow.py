@@ -181,7 +181,7 @@ def categorize(transmission, measured_voltage,
     * Mode 2: Indicates periods when the operating voltage is reduced but
       current is consistent with snow-free conditions.
     * Mode 3: Indicates periods when the operating voltage is consistent with
-      snow-free conditionss but current is reduced.
+      snow-free conditions but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
 
     Parameters
