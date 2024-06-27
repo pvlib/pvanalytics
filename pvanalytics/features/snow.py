@@ -240,10 +240,10 @@ def categorize(transmission, measured_voltage,
     # take care of divide by zero
     vmp_ratio[modeled_voltage_with_calculated_transmission == 0] = 1
 
-    # vmp_ratio discrimates between states (1,2) and (3,4)
+    # vmp_ratio discriminates between states (1,2) and (3,4)
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
 
-    # transmission discrimates within (1,2) and (3,4)
+    # transmission discriminates within (1,2) and (3,4)
     utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
     # None if transmission, vmp_ratio, modeled_voltage_with_ideal_transmission,
