@@ -46,7 +46,7 @@ def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
         irradiance.
     alpha_imp : float
         Normalized temperature coefficient for short-circuit current. [1/°C]
-    temp_ref : float
+    temp_ref : float, default 25
         Reference cell temperature. [degrees C]
 
     Returns
