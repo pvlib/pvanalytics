@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_horizon_mask(horizon, azimuth, elevation):
+def _get_horizon_mask(horizon, azimuth, elevation):
 
     """
     Determines if a given (azimuth, elevation) pair is above a horizon profile.
@@ -9,8 +9,8 @@ def get_horizon_mask(horizon, azimuth, elevation):
     Parameters
     ----------
     horizon : Series
-        Series with numeric index of 0 - 359 (represents azimuth) and float values
-        (represents elevation [deg] of horizon profile).
+        Series with numeric index of 0 - 359 (represents azimuth) and float
+        values (represents elevation [deg] of horizon profile).
     azimuth : array-like
         Solar azimuth angle. [deg]
     elevation : array-like
@@ -18,9 +18,12 @@ def get_horizon_mask(horizon, azimuth, elevation):
 
     Returns
     -------
-    out : bool or NaN
+    out : array-like
+        Array of bool and NaN values, where True indicates that the
+        (azimuth, elevation) pair is above the horizon profile. NaN if the sun
+        position inputs contain a NaN.
     """
-    yp = np.interp(azimuth, horizon.index, horizon.values)
+    yp = np.interp(azimuth, horizon.index, horizon.values, period=360)
     out = elevation >= yp
     return out
 
@@ -46,7 +49,9 @@ def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
         irradiance.
     alpha_imp : float
         Normalized temperature coefficient for short-circuit current. [1/°C]
-    temp_ref : float, default 25
+    irrad_ref : float
+        Reference irradiance. [W/m2]
+    temp_ref : float
         Reference cell temperature. [degrees C]
 
     Returns
@@ -213,9 +218,12 @@ def categorize(transmission, measured_voltage,
 
     Returns
     -------
-    mode : int or None
+    mode : array-like
         ``mode`` is ``None`` when any of the inputs used to determine ``mode``
         is ``nan``.
+    vmp_ratio : array-like
+        Ratio between measured DC voltage and DC voltage modeled with
+        calculated transmission.
 
     References
     ----------
@@ -231,14 +239,17 @@ def categorize(transmission, measured_voltage,
     umax_model = modeled_voltage_with_ideal_transmission < max_dcv
 
     # Voltage is modeled as NaN if T = 0, but V = 0 makes more sense
-    modeled_voltage_with_calculated_transmission[transmission == 0] = 0
+    modeled_voltage_with_calculated_transmission_copy = np.where(
+        transmission == 0, 0, modeled_voltage_with_calculated_transmission)
 
     with np.errstate(divide='ignore'):
         vmp_ratio =\
-            measured_voltage / modeled_voltage_with_calculated_transmission
+            measured_voltage /\
+            modeled_voltage_with_calculated_transmission_copy
 
     # take care of divide by zero
-    vmp_ratio[modeled_voltage_with_calculated_transmission == 0] = 1
+    vmp_ratio = np.where(modeled_voltage_with_calculated_transmission == 0, 1,
+                         vmp_ratio)
 
     # vmp_ratio discriminates between states (1,2) and (3,4)
     uvr = np.where(vmp_ratio >= threshold_vratio, 3, 1)
