@@ -20,8 +20,8 @@ def is_cumulative_energy(energy_series, pct_increase_threshold=95):
     differenced_series = energy_series.diff()
     differenced_series = differenced_series.dropna()
     if len(differenced_series) == 0:
-        warnings.warn("The energy time series has a length of zero and "
-                      "cannot be run.")
+        warnings.warn(
+            "The energy time series has a length of zero and cannot be run.")
         return False
     else:
         # If over X percent of the data is increasing (set via the
