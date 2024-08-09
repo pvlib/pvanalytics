@@ -1,10 +1,14 @@
 """Tests for energy functions."""
 import pytest
+import os
 import pandas as pd
 from pandas.testing import assert_series_equal
 from pvanalytics.quality import energy
 
-energy_df = pd.read_csv("../../data/10004_one_week.csv")
+script_directory = os.path.dirname(__file__)
+energy_filepath = os.path.join(script_directory,
+                               "../../data/10004_one_week.csv")
+energy_df = pd.read_csv(energy_filepath)
 
 
 @pytest.fixture
