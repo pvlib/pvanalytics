@@ -4,85 +4,148 @@ import pandas as pd
 from pandas.testing import assert_series_equal
 from pvanalytics.quality import energy
 
+energy_df = pd.read_csv("../../data/10004_one_week.csv")
+
 
 @pytest.fixture
 def cumulative_series():
     """
-    A series that is cumulative data.
+    A pandas energy time series with cumulative data.
     """
-    data = [0, 10, 25, 30, 45, 60]
+    data = energy_df["ac_energy_inv_16425"]
     return pd.Series(data=data)
 
 
 @pytest.fixture
 def noncumulative_series():
-    """A series that is noncumulative data.
     """
-    data = [0, 10, 5, 15, 0, 20]
-    return pd.Series(data=data)
+    A pandas energy time series with noncumulative data.
+    """
+    # Perform .diff() to turn cumulative data into noncumulative
+    diff_data = energy_df["ac_energy_inv_16425"].diff().dropna()
+    return pd.Series(data=diff_data)
 
 
 @pytest.fixture
 def zero_length_series():
     """
-    A series that has zero length.
+    A pandas energy time series that has zero length.
     """
     data = []
     return pd.Series(data=data, dtype="float64")
 
 
-def test_is_cumulative_energy_true(cumulative_series):
+@pytest.fixture
+def simple_diff_energy_series():
     """
-    Tests if is_cumulative_energy for cumulative series is True.
+    The differenced pandas energy series using the simple .diff() function.
     """
-    assert energy.is_cumulative_energy(cumulative_series) is True
+    diff_data = energy_df["ac_energy_inv_16425"].diff()
+    return pd.Series(data=diff_data)
 
 
-def test_is_noncumulative_energy_false(noncumulative_series):
+@pytest.fixture
+def avg_diff_energy_series():
     """
-    Tests if is_cumulative_energy for noncumulative series is False.
+    The differenced pandas energy series using averaged difference method.
     """
-    assert energy.is_cumulative_energy(noncumulative_series) is False
+    diff_data = energy_df["ac_energy_inv_16425"].diff()
+    avg_diff_series = 0.5 * (diff_data.shift(-1) + diff_data)
+    return pd.Series(data=avg_diff_series)
 
 
-def test_is_zero_length_cumulative_energy_false(zero_length_series):
+def test_cumulative_energy_simple_diff_check_true(cumulative_series):
     """
-    Tests if is_cumulative_energy for zero length series is False.
+    Tests if cumulative_energy_simple_diff_check for cumulative series is True.
     """
-    assert energy.is_cumulative_energy(zero_length_series) is False
+    assert energy.cumulative_energy_simple_diff_check(
+        energy_series=cumulative_series, system_self_consumption=0.0) is True
 
 
-def test_check_cumulative(cumulative_series):
+def test_noncumulative_energy_simple_diff_check_false(noncumulative_series):
+    """
+    Tests if cumulative_energy_simple_diff_check for noncumulative series
+    is False.
+    """
+    assert energy.cumulative_energy_simple_diff_check(
+        energy_series=noncumulative_series,
+        system_self_consumption=0.0) is False
+
+
+def test_zero_length_energy_simple_diff_check_false(zero_length_series):
+    """
+    Tests if cumulative_energy_simple_diff_check for zero length series is
+    False.
+    """
+    assert energy.cumulative_energy_simple_diff_check(
+        energy_series=zero_length_series) is False
+
+
+def test_cumulative_energy_avg_diff_check_true(cumulative_series):
+    """
+    Tests if cumulative_energy_avg_diff_check for cumulative series is True.
+    """
+    assert energy.cumulative_energy_avg_diff_check(
+        energy_series=cumulative_series, system_self_consumption=0.0) is True
+
+
+def test_noncumulative_energy_avg_diff_check_false(noncumulative_series):
+    """
+    Tests if cumulative_energy_avg_diff_check for noncumulative series
+    is False.
+    """
+    assert energy.cumulative_energy_avg_diff_check(
+        energy_series=noncumulative_series,
+        system_self_consumption=0.0) is False
+
+
+def test_zero_length_energy_avg_diff_check_false(zero_length_series):
+    """
+    Tests if cumulative_energy_avg_diff_check for zero length series is
+    False.
+    """
+    assert energy.cumulative_energy_avg_diff_check(
+        energy_series=zero_length_series) is False
+
+
+def test_check_cumulative(cumulative_series, simple_diff_energy_series,
+                          avg_diff_energy_series):
     """
     Tests check_cumulative_energy for cumulative series.
-    Test returns the adjusted series and True.
+    Test returns the adjusted difference series, average difference series,
+    and True.
     """
-    result_series, is_cumulative = energy.check_cumulative_energy(
-        cumulative_series)
-    adjusted_series = pd.Series([None, 10, 15, 5, 15, 15])
-    assert_series_equal(result_series, adjusted_series)
+    simple_diff_result, avg_diff_result, is_cumulative = \
+        energy.check_cumulative_energy(
+            energy_series=cumulative_series, system_self_consumption=0.0)
+    assert_series_equal(simple_diff_result, simple_diff_energy_series)
+    assert_series_equal(avg_diff_result, avg_diff_energy_series)
     assert is_cumulative is True
 
 
 def test_check_noncumulative(noncumulative_series):
     """
     Tests check_cumulative_energy for noncumulative series.
-    Test returns the nonadjusted series (the same as noncumulative series)
-    and False.
+    Test returns the original noncumulative energy series, original
+    noncumulative energy series, and False.
     """
-    result_series, is_cumulative = energy.check_cumulative_energy(
-        noncumulative_series)
-    assert_series_equal(result_series, noncumulative_series)
+    simple_diff_result, avg_diff_result, is_cumulative = \
+        energy.check_cumulative_energy(
+            energy_series=noncumulative_series, system_self_consumption=0.0)
+    assert_series_equal(simple_diff_result, noncumulative_series)
+    assert_series_equal(avg_diff_result, noncumulative_series)
     assert is_cumulative is False
 
 
 def test_check_zero_length(zero_length_series):
     """
     Tests check_cumulative_energy for zero length series.
-    Test returns the nonadjusted series (the same as noncumulative series)
-    and False.
+    Test returns the original zero length energy series, original
+    zero length energy series, and False.
     """
-    result_series, is_cumulative = energy.check_cumulative_energy(
-        zero_length_series)
-    assert_series_equal(result_series, zero_length_series)
+    simple_diff_result, avg_diff_result, is_cumulative = \
+        energy.check_cumulative_energy(
+            energy_series=zero_length_series, system_self_consumption=0.0)
+    assert_series_equal(simple_diff_result, zero_length_series)
+    assert_series_equal(avg_diff_result, zero_length_series)
     assert is_cumulative is False
