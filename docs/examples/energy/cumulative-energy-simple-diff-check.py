@@ -14,20 +14,19 @@ Check and correct energy series for cumulative energy with simple differencing.
 # that check, then the data stream is cumulative and it can be corrected
 # via simple differencing.
 
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from pvanalytics.quality import energy
+import pathlib
+import pvanalytics
 
 # %%
 # First, read in the ac energy data. This data set contains one week of
 # 10-minute ac energy data.
 
-script_directory = os.path.dirname(__file__)
-energy_filepath = os.path.join(
-    script_directory,
-    "../../../pvanalytics/data/system_10004_ac_energy.csv")
-data = pd.read_csv(energy_filepath)
+pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+energy_file = pvanalytics_dir / 'data' / 'system_10004_ac_energy.csv'
+data = pd.read_csv(energy_file)
 energy_series = data['ac_energy_inv_16425']
 
 # %%
