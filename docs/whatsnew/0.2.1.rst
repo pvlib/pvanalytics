@@ -7,6 +7,17 @@
 Enhancements
 ~~~~~~~~~~~~
 * Compatibility with numpy 2.0. (:pull:`211`)
+* Added function :py:func:`~pvanalytics.quality.energy.cumulative_energy_simple_diff_check` to
+  check if an energy time series is cumulative via simple differencing.
+  (:issue:`165`, :pull:`212`)
+* Added function :py:func:`~pvanalytics.quality.energy.cumulative_energy_avg_diff_check` to
+  check if an energy time series is cumulative via average differencing.
+  (:issue:`165`, :pull:`212`)
+* Added function :py:func:`~pvanalytics.quality.energy.convert_cumulative_energy` to correct
+  the cumulative energy to interval-based, non-cumulative energy series, if the energy series
+  passes the simple difference :py:func:`~pvanalytics.quality.energy.cumulative_energy_simple_diff_check`
+  or average difference :py:func:`~pvanalytics.quality.energy.cumulative_energy_avg_diff_check`
+  checks. (:issue:`165`, :pull:`212`)
 
 
 Bug Fixes
@@ -20,12 +31,13 @@ Requirements
 
 Documentation
 ~~~~~~~~~~~~~
-
+* Added examples for checking cumulative energy time series. (:issue:`165`, :pull:`212`)
 
 Testing
 ~~~~~~~
-
+* Added testing for ``pvanalytics.quality.energy``. (:issue:`165`, :pull:`212`)
 
 
 Contributors
 ~~~~~~~~~~~~
+* Quyen Nguyen (:ghuser:`qnguyen345`)
