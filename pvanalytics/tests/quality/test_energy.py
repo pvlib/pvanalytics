@@ -123,15 +123,17 @@ def test_convert_cumulative_with_simple_diff(cumulative_series,
     assert_series_equal(simple_diff_result, simple_diff_energy_series)
 
 
-def test_convert_cumulative_with_avg_diff(cumulative_series,
-                                          avg_diff_energy_series):
+def test_convert_cumulative_with_avg_diff():
     """
     Tests convert_cumulative_energy for cumulative series.
     Test returns the corrected differenced series via avgerage differencing.
     """
+    cumulative_series = pd.Series([1.5, 1, 2, 5, 8])
+    avg_diff_series = 0.5 * \
+        (cumulative_series.diff().shift(-1) + cumulative_series.diff())
     simple_diff_result = energy.convert_cumulative_energy(
-        energy_series=avg_diff_energy_series, system_self_consumption=0.0)
-    assert_series_equal(simple_diff_result, avg_diff_energy_series)
+        energy_series=cumulative_series, system_self_consumption=0.0)
+    assert_series_equal(simple_diff_result, avg_diff_series)
 
 
 def test_convert_noncumulative(noncumulative_series):
