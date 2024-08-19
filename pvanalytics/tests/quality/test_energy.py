@@ -49,13 +49,23 @@ def simple_diff_energy_series():
 
 
 @pytest.fixture
-def avg_diff_energy_series():
+def alt_cumulative_series():
     """
-    The differenced pandas energy series using averaged difference method.
+    A cumulative energy series.
     """
-    diff_data = energy_df["ac_energy_inv_16425"].diff()
-    avg_diff_series = 0.5 * (diff_data.shift(-1) + diff_data)
-    return pd.Series(data=avg_diff_series)
+    cumulative_series = pd.Series([1.5, 1, 2, 5, 8])
+    return cumulative_series
+
+
+@pytest.fixture
+def alt_avg_diff_series():
+    """
+    The average differene energy series.
+    """
+    cumulative_series = pd.Series([1.5, 1, 2, 5, 8])
+    avg_diff_series = 0.5 * \
+        (cumulative_series.diff().shift(-1) + cumulative_series.diff())
+    return pd.Series(avg_diff_series)
 
 
 def test_cumulative_energy_simple_diff_check_true(cumulative_series):
@@ -123,17 +133,15 @@ def test_convert_cumulative_with_simple_diff(cumulative_series,
     assert_series_equal(simple_diff_result, simple_diff_energy_series)
 
 
-def test_convert_cumulative_with_avg_diff():
+def test_convert_cumulative_with_avg_diff(alt_cumulative_series,
+                                          alt_avg_diff_series):
     """
     Tests convert_cumulative_energy for cumulative series.
-    Test returns the corrected differenced series via avgerage differencing.
+    Test returns the corrected differenced series via average differencing.
     """
-    cumulative_series = pd.Series([1.5, 1, 2, 5, 8])
-    avg_diff_series = 0.5 * \
-        (cumulative_series.diff().shift(-1) + cumulative_series.diff())
     simple_diff_result = energy.convert_cumulative_energy(
-        energy_series=cumulative_series, system_self_consumption=0.0)
-    assert_series_equal(simple_diff_result, avg_diff_series)
+        energy_series=alt_cumulative_series, system_self_consumption=0.0)
+    assert_series_equal(simple_diff_result, alt_avg_diff_series)
 
 
 def test_convert_noncumulative(noncumulative_series):
