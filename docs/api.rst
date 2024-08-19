@@ -12,6 +12,7 @@ Energy
 
 Functions for checking if an energy data stream is cumulative
 or not.
+
 .. autosummary::
    :toctree: generated/
 
@@ -21,8 +22,10 @@ or not.
 If the energy data stream passes the checks, then 
 it is converted to non-cumulative energy data stream via simple or
 average differencing
+
 .. autosummary::
    :toctree: generated/
+
    quality.energy.convert_cumulative_energy
 
 Data Shifts

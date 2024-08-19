@@ -57,9 +57,11 @@ plt.show()
 # %%
 # Plot the corrected, non-cumulative energy series.
 
-corrected_energy_df = pd.DataFrame({"local_measured_on": data["local_measured_on"],
-                                    "corrected_ac_energy_inv_16425": corrected_energy_series})
-corrected_energy_df = corrected_energy_df[corrected_energy_df["corrected_ac_energy_inv_16425"] >= 0]
+corrected_energy_df = pd.DataFrame({
+    "local_measured_on": data["local_measured_on"],
+    "corrected_ac_energy_inv_16425": corrected_energy_series})
+corrected_energy_df = corrected_energy_df[
+    corrected_energy_df["corrected_ac_energy_inv_16425"] >= 0]
 corrected_energy_df.plot(x="local_measured_on",
                          y="corrected_ac_energy_inv_16425")
 plt.title("Corrected, Non-cumulative Energy Series")
