@@ -5,13 +5,17 @@ import warnings
 def cumulative_energy_simple_diff_check(energy_series,
                                         pct_increase_threshold=95,
                                         system_self_consumption=-0.5):
-    """Check if an energy time series has cumulative energy or not.
+    """Check if an energy time series is cumulative via simple differencing.
 
-    The check uses the simple diff function .diff().
+    To determine if an energy data stream is cumulative, subsequent values in
+    the series are differenced to determine if the data stream is consistently
+    increasing. If the percentage of increasing values in the data set exceeds
+    the pct_increase_threshold parameter, the energy series is determined as
+    cumulative and a True boolean is returned. Otherwise, False is returned.
 
     Parameters
     ----------
-    energy_series : Pandas series with datetime index.
+    energy_series: Series
         Time series of energy data stream with datetime index.
     pct_increase_threshold: Int, default 95
         The percentage threshold to consider the energy series as cumulative.
@@ -46,13 +50,18 @@ def cumulative_energy_simple_diff_check(energy_series,
 def cumulative_energy_avg_diff_check(energy_series,
                                      pct_increase_threshold=95,
                                      system_self_consumption=-0.5):
-    """Check if an energy time series has cumulative energy or not.
+    """Check if an energy time series is cumulative via average differencing.
 
-    The check uses the average difference.
+    To determine if an energy data stream is cumulative, subsequent values in
+    the series are average differenced to determine if the data stream is
+    consistently increasing. If the percentage of increasing values in the
+    data set exceeds the pct_increase_threshold parameter, the energy series
+    is determined as cumulative and a True boolean is returned.
+    Otherwise, False is returned.
 
     Parameters
     ----------
-    energy_series : Pandas series with datetime index.
+    energy_series: Series
         Time series of energy data stream with datetime index.
     pct_increase_threshold: int, default 95
         The percentage threshold to consider the energy series as cumulative.
@@ -85,13 +94,19 @@ def cumulative_energy_avg_diff_check(energy_series,
             return False
 
 
-def check_cumulative_energy(energy_series, pct_increase_threshold=95,
-                            system_self_consumption=-0.5):
-    """Run the cumulative energy check for simple and averaged difference.
+def convert_cumulative_energy(energy_series, pct_increase_threshold=95,
+                              system_self_consumption=-0.5):
+    """Convert cumulative to interval-based, non-cumulative energy, if needed.
+
+    Two main test are run to determine if the associated energy
+    data stream is cumulative or not: a simple differencing function is run
+    on the series via cumulative_energy_simple_diff_check, and an
+    average differencing function is run on the series via
+    cumulative_energy_avg_diff_check.
 
     Parameters
     ----------
-    energy_series : Pandas series with datetime index.
+    energy_series: Series
         Time series of energy data stream with datetime index.
     pct_increase_threshold: int, default 95
         The percentage threshold to consider the energy series as cumulative.
@@ -101,37 +116,32 @@ def check_cumulative_energy(energy_series, pct_increase_threshold=95,
 
     Returns
     -------
-    Tuple
-        (simple_diff_energy_series, avg_diff_energy_series, cumulative_energy)
-
-        simple_diff_energy_series: Pandas series with datetime index.
-            The differenced energy series using the simple .diff() function if
-            energy is cumulative; otherwise, it remains as the original,
-            noncumulative energy series.
-        avg_diff_energy_series: Pandas series with datetime index.
-            The averaged difference energy series using the averaged difference
-            method if energy is cumulative; otherwise, it remains as the
-            original, noncumulative energy series.
-        cumulative_energy: Boolean
-            True if energy series is cumulative, False otherwise.
+    Series
+        corrected_energy_series is retuned if the energy series is cumulative.
+        If the energy series passes the simple difference check, then the
+        the series is corrected via the simple differencing. Else, if
+        energy series passes the average difference check, then the series is
+        corrected via average differencing.
+        If neither checks are passes, then the original non-cumulative
+        energy_series is returned.
     """
-    # Check if energy series is cumulative for both simple and averaged diff
-    cumulative_energy = (
-        cumulative_energy_simple_diff_check(energy_series,
-                                            pct_increase_threshold,
-                                            system_self_consumption) and
-        cumulative_energy_avg_diff_check(energy_series,
-                                         pct_increase_threshold,
-                                         system_self_consumption))
-    if cumulative_energy:
-        # Adjust energy series if it is cumulative
-        simple_diff_energy_series = energy_series.diff()
-        avg_diff_energy_series = 0.5 * \
-            (simple_diff_energy_series.shift(-1) + simple_diff_energy_series)
-        return (simple_diff_energy_series, avg_diff_energy_series,
-                cumulative_energy)
+    # Check if energy series is cumulative with simple difference and average
+    # difference
+    simple_diff_check = cumulative_energy_simple_diff_check(
+        energy_series, pct_increase_threshold, system_self_consumption)
+    avg_diff_check = cumulative_energy_avg_diff_check(energy_series,
+                                                      pct_increase_threshold,
+                                                      system_self_consumption)
+    if simple_diff_check:
+        # Return simple difference of energy series if it passes the simple
+        # difference check
+        corrected_energy_series = energy_series.diff()
+        return corrected_energy_series
+    elif avg_diff_check:
+        # Return average differnce of energy series if it passes the
+        # average difference check
+        corrected_energy_series = 0.5 * \
+            (energy_series.diff().shift(-1) + energy_series.diff())
+        return corrected_energy_series
     else:
-        simple_diff_energy_series = energy_series
-        avg_diff_energy_series = energy_series
-        return (simple_diff_energy_series, avg_diff_energy_series,
-                cumulative_energy)
+        return energy_series

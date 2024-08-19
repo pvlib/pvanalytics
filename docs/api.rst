@@ -7,6 +7,24 @@ API Reference
 Quality
 =======
 
+Energy
+-----------
+
+Functions for checking if an energy data stream is cumulative
+or not.
+.. autosummary::
+   :toctree: generated/
+
+   quality.energy.cumulative_energy_simple_diff_check
+   quality.energy.cumulative_energy_avg_diff_check
+
+If the energy data stream passes the checks, then 
+it is converted to non-cumulative energy data stream via simple or
+average differencing
+.. autosummary::
+   :toctree: generated/
+   quality.energy.convert_cumulative_energy
+
 Data Shifts
 -----------
 
