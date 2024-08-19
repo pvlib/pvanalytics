@@ -123,7 +123,8 @@ def test_convert_cumulative_with_simple_diff(cumulative_series,
     assert_series_equal(simple_diff_result, simple_diff_energy_series)
 
 
-def test_convert_cumulative_with_avg_diff(avg_diff_energy_series):
+def test_convert_cumulative_with_avg_diff(cumulative_series,
+                                          avg_diff_energy_series):
     """
     Tests convert_cumulative_energy for cumulative series.
     Test returns the corrected differenced series via avgerage differencing.

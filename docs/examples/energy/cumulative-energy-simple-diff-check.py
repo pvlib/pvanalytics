@@ -51,6 +51,7 @@ plt.title("Cumulative Energy Series")
 plt.xticks(rotation=45)
 plt.xlabel("Datetime")
 plt.ylabel("AC Energy (kWh)")
+plt.tight_layout()
 plt.show()
 
 # %%
@@ -67,4 +68,5 @@ plt.title("Corrected, Non-cumulative Energy Series")
 plt.xticks(rotation=45)
 plt.xlabel("Datetime")
 plt.ylabel("AC Energy (kWh)")
+plt.tight_layout()
 plt.show()
