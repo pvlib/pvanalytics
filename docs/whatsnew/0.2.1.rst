@@ -11,6 +11,10 @@ Enhancements
   and :py:func:`~pvanalytics.features.snow.get_transmission` to categorize
   data by the effect of snow on DC voltage and current. (:pull:`209`)
 
+Bug Fixes
+~~~~~~~~~
+
+
 Requirements
 ~~~~~~~~~~~~
 * Minimum python advanced to 3.8. (:pull:`210`)
