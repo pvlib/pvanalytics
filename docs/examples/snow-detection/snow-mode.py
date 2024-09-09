@@ -65,7 +65,6 @@ from matplotlib.lines import Line2D
 
 import pvanalytics
 # Functions needed for the analysis procedure
-from pvanalytics.features import clipping
 from pvanalytics.features import snow
 
 # %% Load in system configuration parameters (dict)
@@ -91,8 +90,8 @@ print(f"Inverter AC power rating: {max_ac_power} kW")
 print(f"Inverter MPPT range: {mppt_low_voltage} V - {mppt_high_voltage} V")
 num_str_per_cb = config['num_str_per_cb']['INV1 CB1']
 num_mods_per_str = config['num_mods_per_str']['INV1 CB1']
-print(f"There are {num_str_per_cb} modules connected in series in each string,"
-      f" and there are {num_mods_per_str} strings connected in"
+print(f"There are {num_mods_per_str} modules connected in series in each,"
+      f" string and there are {num_str_per_cb} strings connected in"
       f" parallel at each combiner")
 
 
@@ -113,7 +112,6 @@ print('Start: {}'.format(data.index[0]))
 print('End: {}'.format(data.index[-1]))
 print('Frequency: {}'.format(data.index.inferred_freq))
 print('Columns : ' + ', '.join(data.columns))
-data.between_time('8:00', '16:00').head()
 
 # Identify current, voltage, and AC power columns
 dc_voltage_cols = [c for c in data.columns if 'Voltage' in c]
@@ -123,20 +121,15 @@ ac_power_cols = [c for c in data.columns if 'AC' in c]
 # Set negative or Nan current, voltage, AC power values to zero. This is
 # allows us to calculate losses later.
 
-data.loc[:, dc_voltage_cols] = np.maximum(data[dc_voltage_cols], 0)
-data.loc[:, dc_current_cols] = np.maximum(data[dc_current_cols], 0)
-data.loc[:, ac_power_cols] = np.maximum(data[ac_power_cols], 0)
-
-data[dc_voltage_cols] = data[dc_voltage_cols].replace({np.nan: 0, None: 0})
-data[dc_current_cols] = data[dc_current_cols].replace({np.nan: 0, None: 0})
-data.loc[:, ac_power_cols] = data[ac_power_cols].replace({np.nan: 0, None: 0})
-
+data.fillna(0, inplace=True)
 
 # %%
 # Plot DC voltage for each combiner input relative to inverter nameplate
-# limits
+# limits. We are looking for periods where DC voltage is less than the
+# inverter's turn-on voltage, as these values are recorded outside of MPP
+# operating conditions.
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for v in dc_voltage_cols:
@@ -149,11 +142,15 @@ ax.axhline(mppt_low_voltage, c='g', ls='--',
 ax.set_xlabel('Date', fontsize='large')
 ax.set_ylabel('Voltage [V]', fontsize='large')
 ax.legend(loc='lower left')
+fig.tight_layout()
 plt.show()
 
-# %% Plot AC power relative to inverter nameplate limits
+# %%
+# Plot AC power relative to inverter nameplate limits. We are looking for
+# periods of clipping, as these values are recorded outside of MPP operating
+# conditions.
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 for a in ac_power_cols:
@@ -164,6 +161,7 @@ ax.axhline(max_ac_power, c='r', ls='--',
 ax.set_xlabel('Date', fontsize='large')
 ax.set_ylabel('AC Power [kW]', fontsize='large')
 ax.legend(loc='upper left')
+fig.tight_layout()
 plt.show()
 
 # %% Filter data.
@@ -186,15 +184,6 @@ for v, i, a in zip(dc_voltage_cols, dc_current_cols, ac_power_cols_repeated):
     # Data where system is at Voc
     data.loc[data[i] == 0, v] = 0
 
-    # Data where inverter is clipping based on AC power
-    mask1 = data[a] > max_ac_power
-    mask2 = clipping.geometric(ac_power=data[a], freq='15min')
-    mask3 = np.logical_or(mask1.values, mask2.values)
-
-    data.loc[mask3, v] = np.nan
-    data.loc[mask3, i] = np.nan
-    data.loc[mask3, a] = np.nan
-
 # %% Plot DC voltage for each combiner input with inverter nameplate limits
 
 fig, ax = plt.subplots(figsize=(10, 10))
@@ -213,7 +202,6 @@ ax.legend(loc='lower left')
 plt.show()
 
 # %%
-
 # We want to exclude periods where array voltage is affected by horizon
 # shading. Load in and apply horizon profiling created using approach described
 # in [1].
@@ -223,10 +211,11 @@ plt.show()
 
 horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 
-data['Horizon Mask'] = snow.get_horizon_mask(horizon, data['azimuth'],
-                                             data['elevation'])
+data['Horizon Mask'] = snow._get_horizon_mask(horizon, data['azimuth'],
+                                              data['elevation'])
 
-# %% Plot horizon mask
+# %%
+# Plot horizon mask
 
 fig, ax = plt.subplots()
 ax.scatter(data['azimuth'], data['elevation'], s=0.5, label='data',
@@ -237,7 +226,8 @@ ax.set_xlabel(r'Azimuth [$\degree$]')
 ax.set_ylabel(r'Elevation [$\degree$]')
 plt.show()
 
-# %% Exclude data collected while the sun is below the horizon
+# %%
+# Exclude data collected while the sun is below the horizon
 data = data[data['Horizon Mask']]
 
 # %%
@@ -260,14 +250,16 @@ irrad_ref = 1000
 data['Cell Temp [C]'] = pvlib.temperature.sapm_cell_from_module(
     data['Module Temp [C]'], data['POA [W/m²]'], 3)
 
-# %% Plot cell temperature
-fig, ax = plt.subplots(figsize=(10, 10))
+# %%
+# Plot cell temperature
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 ax.scatter(data.index, data['Cell Temp [C]'], s=0.5, c='b')
 ax.plot(data['Cell Temp [C]'], alpha=0.3, c='b')
 ax.set_ylabel('Cell Temp [C]', c='b', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='xx-large')
+fig.tight_layout()
 plt.show()
 
 # %%
@@ -305,7 +297,7 @@ T2 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e2, imp)
 # %%
 # Plot transmission calculated using two different approaches
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d \n%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
@@ -318,6 +310,7 @@ ax.plot(T2, alpha=0.3, c='g')
 ax.legend()
 ax.set_ylabel('Transmission', fontsize='xx-large')
 ax.set_xlabel('Date + Time', fontsize='large')
+fig.tight_layout()
 plt.show()
 
 # %%
@@ -359,9 +352,10 @@ SDE_params = {
 modeled_vmp_sde = pvlib.pvsystem.singlediode(**SDE_params)['v_mp']
 modeled_vmp_sde *= v_scaling_factor
 
-# %% Plot modeled and measured voltage
+# %%
+# Plot modeled and measured voltage
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
@@ -374,9 +368,11 @@ ax.legend(fontsize='xx-large')
 ax.set_ylabel('Voltage [V]', fontsize='xx-large')
 ax.set_xlabel('Date', fontsize='large')
 plt.show()
+fig.tight_layout()
 
 
-# %% Function to do analysis so we can loop over combiner boxes
+# %%
+# Function to do analysis so we can loop over combiner boxes
 
 def wrapper(voltage, current, temp_cell, effective_irradiance,
             coeffs, config, temp_ref=25, irrad_ref=1000):
@@ -536,11 +532,12 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
         data[inv_cb + ' ' + k] = v
 
 
-# %% Look at transmission for all DC inputs
+# %%
+# Look at transmission for all DC inputs
 
 transmission_cols = [c for c in data.columns if 'transmission' in c and
                      'voltage' not in c]
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data['2022-01-06 07:45:00': '2022-01-09 17:45:00']
@@ -549,12 +546,14 @@ for c in transmission_cols:
     ax.scatter(temp.index, temp[c], s=0.5, label=c)
 ax.set_xlabel('Date', fontsize='xx-large')
 ax.legend()
+fig.tight_layout()
 plt.show()
 
-# %% Look at voltage ratios for all DC inputs
+# %%
+# Look at voltage ratios for all DC inputs
 
 vratio_cols = [c for c in data.columns if "vmp_ratio" in c]
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data['2022-01-06 07:45:00': '2022-01-09 17:45:00']
@@ -566,9 +565,11 @@ ax.set_xlabel('Date', fontsize='xx-large')
 ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='xx-large')
 ax.axhline(1, c='k', alpha=0.1, ls='--')
 ax.legend()
+fig.tight_layout()
 plt.show()
 
-# %% Calculate all power losses - snow and non-snow
+# %%
+# Calculate all power losses - snow and non-snow
 
 modeled_df = pvlib.pvsystem.sapm(data['POA [W/m²]'],
                                  data['Cell Temp [C]'],
@@ -591,7 +592,8 @@ for v_col, i_col in zip(dc_voltage_cols, dc_current_cols):
     loss = np.maximum(data[name_modeled_power] - data[i_col]*data[v_col], 0)
     data[name_loss] = loss
 
-# %% Plot measured and modeled power, color by mode
+# %%
+# Plot measured and modeled power, color by mode
 
 N = 6
 alpha = 0.5
@@ -606,7 +608,7 @@ los = loss_cols[col]
 mod = mode_cols[col]
 pwr = modeled_power_cols[col]
 
-fig, ax = plt.subplots(figsize=(10, 10))
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 temp = data[~data[mod].isna()]
@@ -660,6 +662,7 @@ ax.set_ylabel('DC Power [W]', fontsize='xx-large')
 ax.legend(handles=handles, fontsize='xx-large', loc='upper left')
 ax.set_title('Measured and modeled production for INV1 CB2',
              fontsize='xx-large')
+fig.tight_layout()
 plt.show()
 
 # %%
@@ -692,7 +695,7 @@ for d in days:
         snow_loss.at[d, c] = daily_snow_loss
 
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 6))
 date_form = DateFormatter("%m/%d")
 
 days_mapped = data.index.map(lambda x: x.date())
@@ -711,6 +714,7 @@ ax.set_ylabel('[%]', fontsize='xx-large')
 ax.set_xticks(xvals, days)
 ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Losses incurred in modes 0, 1, 2, 3', fontsize='xx-large')
+fig.tight_layout()
 plt.show()
 
 # %%
