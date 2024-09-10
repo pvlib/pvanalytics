@@ -656,8 +656,9 @@ measured_line = Line2D([0], [0], label='Measured', color='k')
 handles.append(measured_line)
 handles.append(modeled_line)
 
-for i in range(-1, N-1):
-    my_patch = mpatches.Patch(color=cmap.colors[i], label=f'Mode {i}')
+for i in [-1, 0, 1, 2, 3, 4]: # modes
+    color_idx = i + 1
+    my_patch = mpatches.Patch(color=cmap.colors[color_idx], label=f'Mode {i}')
     handles.append(my_patch)
 
 ax.set_xlabel('Date', fontsize='xx-large')
