@@ -66,12 +66,14 @@ from matplotlib.dates import DateFormatter
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 
-import pvanalytics
+#import pvanalytics
 # Functions needed for the analysis procedure
-from pvanalytics.features import snow
+# from pvanalytics.features import snow
+import snow
 
 # %% Load in system configuration parameters (dict)
-pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+#pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
+pvanalytics_dir = pathlib.Path('C:\python\pvanalytics\pvanalytics\pvanalytics')
 data_file = pvanalytics_dir / 'data' / 'snow_data.csv'
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
 horizon_file = pvanalytics_dir / 'data' / 'snow_horizon.csv'
@@ -606,7 +608,7 @@ loss_cols = [c for c in data.columns if "Loss" in c]
 mode_cols = [c for c in data.columns if "mode" in c and "modeled" not in c]
 modeled_power_cols = [c for c in data.columns if "Modeled Power" in c]
 
-col = 1
+col = 1 # plot one combiner box
 los = loss_cols[col]
 mod = mode_cols[col]
 pwr = modeled_power_cols[col]
@@ -658,7 +660,8 @@ handles.append(modeled_line)
 
 for i in [-1, 0, 1, 2, 3, 4]: # modes
     color_idx = i + 1
-    my_patch = mpatches.Patch(color=cmap.colors[color_idx], label=f'Mode {i}')
+    my_patch = mpatches.Patch(color=cmap.colors[color_idx], label=f'Mode {i}',
+                              alpha=alpha)
     handles.append(my_patch)
 
 ax.set_xlabel('Date', fontsize='xx-large')
