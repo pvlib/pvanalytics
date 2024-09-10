@@ -11,16 +11,11 @@ In this analysis, all differences between measured power and power modeled
 from snow-free irradiance measurements are ascribed to the effects of snow. The
 effect of snow is classified into one of five categories:
 
-    * Mode -1: Indicates periods where it is unknown whether snow is impacting
-      system performance. This includes periods where voltage modeled with
-      measured irradiance assuming perfect transmission is below the inverter's
-      turn-on voltage, or when the same quantity is greater than the upper
-      bound on the inverter's MPPT range. Mode -1 also includes periods when
-      measured voltage exceeds the upper bound on the inverter's MPPT range.
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
-      below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is above the inverter's turn-on voltage.
+      below the lower bound of the inverter's MPPT range but the voltage
+      modeled using measured irradiance and ideal transmission is above the
+      lower bound of the inverter's MPPT range.
     * Mode 1: Indicates periods when the system has non-uniform snow and
       both operating voltage and current are decreased. Operating voltage is
       reduced when bypass diodes activate and current is decreased due to
@@ -31,8 +26,21 @@ effect of snow is classified into one of five categories:
       snow-free conditionss but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
 
+    * Mode -1: Indicates periods where it is unknown if or how snow impacts
+      power output. Mode -1 includes periods when:
+
+          1. Voltage modeled using measured irradiance and ideal transmission
+             is outside the inverter's MPPT range, OR
+          2. measured voltage exceeds the upper bound of the inverter's MPPT
+             algorithm.
+
     Mode is None when both measured and voltage modeled from measured
     irradiance are below the inverter turn-on voltage.
+
+.. image:: ../../_images/snow_mode_diagram.png
+  :alt: Logic diagram for snow mode classification.
+  :width: 500
+  :align: center
 
 The procedure involves four steps:
     1. Using measured plane-of-array (POA) irradiance and temperature, model

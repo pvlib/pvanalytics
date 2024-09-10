@@ -106,7 +106,7 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
 def get_transmission(measured_e_e, modeled_e_e, i_mp):
 
     """
-    Estimate transmittance as the ratio of modeled effective irradiance to
+    Estimate transmission as the ratio of modeled effective irradiance to
     measured irradiance.
 
     Measured irradiance should be in the array's plane and represent snow-free
@@ -139,22 +139,22 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
        50th Photovoltaic Specialists Conference (PVSC), San Juan, PR, USA,
        2023, pp. 1-5. :doi:`10.1109/PVSC48320.2023.10360065`
     """
-    T = modeled_e_e / measured_e_e
+    transmission = modeled_e_e / measured_e_e
     # no transmission if no current
-    T[np.isnan(i_mp)] = np.nan
-    T[i_mp == 0] = 0
+    transmission[np.isnan(i_mp)] = np.nan
+    transmission[i_mp == 0] = 0
     # no transmission if no irradiance
-    T[measured_e_e == 0] = np.nan
-    # bound T between 0 and 1
-    T[T < 0] = np.nan
-    T[T > 1] = 1
+    transmission[measured_e_e == 0] = np.nan
+    # bound transmission between 0 and 1
+    transmission[transmission < 0] = np.nan
+    transmission[transmission > 1] = 1
 
-    return T
+    return transmission
 
 
 def categorize(transmission, measured_voltage,
-               modeled_voltage_with_calculated_transmission,
-               modeled_voltage_with_ideal_transmission,
+               modeled_voltage_with_snow,
+               modeled_voltage_no_snow,
                min_dcv, max_dcv, threshold_vratio, threshold_transmission):
 
     """
@@ -162,25 +162,13 @@ def categorize(transmission, measured_voltage,
 
     Modes are defined in [1]_:
 
-    * Mode -1: Indicates periods where it is unknown if and how snow impacts
-      power output. Mode -1 includes periods when:
-
-          1. voltage modeled with measured irradiance is below the inverter's
-             turn-on voltage OR
-          2. voltage modeled with measured irradiance exceeds the upper bound
-             of the inverter's MPPT algorithm OR
-          3. measured voltage exceeds the upper bound of the inverter's MPPT
-             algorithm.
-
-      Mode -1 is added in this function to cover a case that was not addressed
-      in [1]_.
-
     * Mode 0: Indicates periods with enough opaque snow that the system is not
       producing power. Specifically, Mode 0 is when the measured voltage is
-      below the inverter's turn-on voltage but the voltage modeled using
-      measured irradiance is above the inverter's turn-on voltage.
-    * Mode 1: Indicates periods when the system has non-uniform snow and
-      both operating voltage and current are decreased. Operating voltage is
+      below the lower bound of the inverter's MPPT range but the voltage
+      modeled using measured irradiance and ideal transmission is above the
+      lower bound of the inverter's MPPT range.
+    * Mode 1: Indicates periods when the system has non-uniform snow that
+      decreases both operating voltage and current. Operating Voltage is
       reduced when bypass diodes activate and current is decreased due to
       decreased irradiance.
     * Mode 2: Indicates periods when the operating voltage is reduced but
@@ -188,6 +176,17 @@ def categorize(transmission, measured_voltage,
     * Mode 3: Indicates periods when the operating voltage is consistent with
       snow-free conditions but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
+    * Mode -1: Indicates periods where it is unknown if or how snow impacts
+      power output. Mode -1 includes periods when:
+
+          1. Voltage modeled using measured irradiance and ideal transmission
+             is outside the inverter's MPPT range, OR
+          2. measured voltage exceeds the upper bound of the inverter's MPPT
+             algorithm.
+
+      Mode -1 is added in this function to cover a case that was not addressed
+      in [1]_.
+
 
     Parameters
     ----------
@@ -196,12 +195,12 @@ def categorize(transmission, measured_voltage,
         through the snow cover. [dimensionless]
     measured_voltage : array-like
         Measured DC voltage. [V]
-    modeled_voltage_with_calculated_transmission : array-like
-        DC voltage modeled using measured plane-of-array irradiance,
-        back-of-module temperature, and calculated transmission. [V]
-    modeled_voltage_with_ideal_transmission : array-like
+    modeled_voltage_with_snow : array-like
+        DC voltage modeled using measured plane-of-array irradiance reduced by
+        calculated transmission. [V]
+    modeled_voltage_no_snow : array-like
         DC voltage modeled using measured plane-of-array irradiance and
-        back-of-module temperature. Assumes transmission equals 1. [V]
+        assuming transmission equals 1. [V]
     min_dcv : float
         The lower voltage bound on the inverter's maximum power point
         tracking (MPPT) algorithm. [V]
@@ -235,20 +234,20 @@ def categorize(transmission, measured_voltage,
     umin_meas = measured_voltage >= min_dcv
     umax_meas = measured_voltage < max_dcv
 
-    umin_model = modeled_voltage_with_ideal_transmission >= min_dcv
-    umax_model = modeled_voltage_with_ideal_transmission < max_dcv
+    umin_model = modeled_voltage_no_snow >= min_dcv
+    umax_model = modeled_voltage_no_snow < max_dcv
 
-    # Voltage is modeled as NaN if T = 0, but V = 0 makes more sense
-    modeled_voltage_with_calculated_transmission_copy = np.where(
-        transmission == 0, 0, modeled_voltage_with_calculated_transmission)
+    # Voltage is modeled as NaN if transmission = 0, but V = 0 makes more sense
+    modeled_voltage_with_snow_copy = np.where(
+        transmission == 0, 0, modeled_voltage_with_snow)
 
     with np.errstate(divide='ignore'):
         vmp_ratio =\
             measured_voltage /\
-            modeled_voltage_with_calculated_transmission_copy
+            modeled_voltage_with_snow_copy
 
     # take care of divide by zero
-    vmp_ratio = np.where(modeled_voltage_with_calculated_transmission == 0, 1,
+    vmp_ratio = np.where(modeled_voltage_with_snow_copy == 0, 1,
                          vmp_ratio)
 
     # vmp_ratio discriminates between states (1,2) and (3,4)
@@ -257,21 +256,22 @@ def categorize(transmission, measured_voltage,
     # transmission discriminates within (1,2) and (3,4)
     utrans = np.where(transmission >= threshold_transmission, 1, 0)
 
-    # None if transmission, vmp_ratio, modeled_voltage_with_ideal_transmission,
-    # modeled_voltage_with_calculated_transmission, or measured_voltage is nan
-    # -1 if umin_model is 0
-    # 0 if umin_meas is 0, i.e., measurement indicate no power but it must be
-    # that umin_model is 1
-    # state 1, 2, 3, 4 defined by uvr + utrans
-    # -1 if umax_model is 0
-    # -1 if umax_meas is 0
+    # None if transmission, vmp_ratio, modeled_voltage_no_snow,
+    # modeled_voltage_with_snow_copy, or measured_voltage is nan
 
+    # 0 if umin_meas is 0, i.e., measurement indicate no power
+    # state 1, 2, 3, 4 defined by uvr + utrans
     mode = umin_meas * (uvr + utrans)
+
+    # -1 if umax_model is 0
+    # -1 if umax_meas is 0 or umin_meas is 0
     mode = np.where(~umin_model | ~umax_model | ~umax_meas, -1, mode)
+
+    # replace nan with None
     mode = np.where(np.isnan(vmp_ratio) | np.isnan(transmission) |
                     np.isnan(measured_voltage) |
-                    np.isnan(modeled_voltage_with_calculated_transmission) |
-                    np.isnan(modeled_voltage_with_ideal_transmission),
+                    np.isnan(modeled_voltage_with_snow_copy) |
+                    np.isnan(modeled_voltage_no_snow),
                     None, mode)
 
     return mode, vmp_ratio
