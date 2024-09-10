@@ -37,11 +37,6 @@ effect of snow is classified into one of five categories:
     Mode is None when both measured and voltage modeled from measured
     irradiance are below the inverter turn-on voltage.
 
-.. image:: ../../_images/snow_mode_diagram.png
-  :alt: Logic diagram for snow mode classification.
-  :width: 500
-  :align: center
-
 The procedure involves four steps:
     1. Using measured plane-of-array (POA) irradiance and temperature, model
        the module's maximum power current (Imp) and voltage (Vmp) assuming
