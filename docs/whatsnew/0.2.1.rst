@@ -2,7 +2,6 @@
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
-0.2.1 (not yet released)
 
 
 Enhancements
@@ -31,6 +30,7 @@ Testing
 
 
 Contributors
+~~~~~~~~~~~~
 * Cliff Hansen (:ghuser:`cwhanse`)
 * Emma Cooper (:ghuser:`eccoope`)
 * Kevin Anderson (:ghuser:`kandersolar`)
