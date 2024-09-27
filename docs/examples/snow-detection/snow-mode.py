@@ -23,7 +23,7 @@ effect of snow is classified into one of five categories:
     * Mode 2: Indicates periods when the operating voltage is reduced but
       current is consistent with snow-free conditions.
     * Mode 3: Indicates periods when the operating voltage is consistent with
-      snow-free conditionss but current is reduced.
+      snow-free conditions but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
 
     * Mode -1: Indicates periods where it is unknown if or how snow impacts
@@ -93,7 +93,7 @@ print(f"Inverter AC power rating: {max_ac_power} kW")
 print(f"Inverter MPPT range: {mppt_low_voltage} V - {mppt_high_voltage} V")
 num_str_per_cb = config['num_str_per_cb']['INV1 CB1']
 num_mods_per_str = config['num_mods_per_str']['INV1 CB1']
-print(f"There are {num_mods_per_str} modules connected in series in each,"
+print(f"There are {num_mods_per_str} modules connected in series in each"
       f" string and there are {num_str_per_cb} strings connected in"
       f" parallel at each combiner")
 
@@ -207,10 +207,11 @@ plt.show()
 # %%
 # We want to exclude periods where array voltage is affected by horizon
 # shading. Load in and apply horizon profiling created using approach described
-# in [1].
-# [1] J. L. Braid and B. G. Pierce, "Horizon Profiling Methods for Photovoltaic
-# Arrays," 2023 IEEE 50th Photovoltaic Specialists Conference (PVSC),
-# San Juan, PR, USA, 2023, pp. 1-7. doi:`10.1109/PVSC48320.2023.10359914`
+# in [1]_.
+#
+# .. [1] J. L. Braid and B. G. Pierce, "Horizon Profiling Methods for Photovoltaic
+#    Arrays," 2023 IEEE 50th Photovoltaic Specialists Conference (PVSC),
+#    San Juan, PR, USA, 2023, pp. 1-7. :doi:`10.1109/PVSC48320.2023.10359914`
 
 horizon = pd.read_csv(horizon_file, index_col='Unnamed: 0').squeeze("columns")
 
@@ -234,7 +235,6 @@ plt.show()
 data = data[data['Horizon Mask']]
 
 # %%
-
 # Define coefficients for modeling transmission and voltage. User can either
 # use the SAPM to calculate transmission or an approach based on the ratio
 # between measured current and nameplate current. For modeling voltage, the
@@ -245,9 +245,7 @@ cec_module_db = pvlib.pvsystem.retrieve_sam('cecmod')
 sde_coeffs = cec_module_db[config['panel']]
 
 # %%
-"""
-Model cell temperature using the SAPM model.
-"""
+# Model cell temperature using the SAPM model.
 
 irrad_ref = 1000
 data['Cell Temp [C]'] = pvlib.temperature.sapm_cell_from_module(
