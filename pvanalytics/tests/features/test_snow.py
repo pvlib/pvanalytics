@@ -11,15 +11,6 @@ from pandas.testing import assert_series_equal
 from pvanalytics.features import snow
 
 
-def test_get_horizon_mask():
-    horizon = pd.Series(index=range(0, 360), data=0)
-    horizon[5:10] = 10
-    result = snow._get_horizon_mask(horizon, azimuth=np.array([4, 5, 7]),
-                                    elevation=np.array([-1, 11, np.nan]))
-    expected = np.array([False, True, False])
-    assert_array_equal(result, expected)
-
-
 def test_get_irradiance_sapm():
     # solve Ee^2 + 2 Ee - 3 = 0
     c0, c1 = (2, 1)

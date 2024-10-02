@@ -1,33 +1,6 @@
 import numpy as np
 
 
-def _get_horizon_mask(horizon, azimuth, elevation):
-
-    """
-    Determines if a given (azimuth, elevation) pair is above a horizon profile.
-
-    Parameters
-    ----------
-    horizon : Series
-        Series with numeric index of 0 - 359 (represents azimuth) and float
-        values (represents elevation [deg] of horizon profile).
-    azimuth : array-like
-        Solar azimuth angle. [deg]
-    elevation : array-like
-        Solar elevation angle. [deg]
-
-    Returns
-    -------
-    out : array-like
-        Array of bool and NaN values, where True indicates that the
-        (azimuth, elevation) pair is above the horizon profile. NaN if the sun
-        position inputs contain a NaN.
-    """
-    yp = np.interp(azimuth, horizon.index, horizon.values, period=360)
-    out = elevation >= yp
-    return out
-
-
 def get_irradiance_sapm(temp_cell, i_mp, imp0, c0, c1, alpha_imp,
                         irrad_ref=1000, temp_ref=25):
     """
@@ -160,34 +133,6 @@ def categorize(transmission, measured_voltage,
     """
     Categorizes electrical behavior into a snow-related mode.
 
-    Modes are defined in [1]_:
-
-    * Mode 0: Indicates periods with enough opaque snow that the system is not
-      producing power. Specifically, Mode 0 is when the measured voltage is
-      below the lower bound of the inverter's MPPT range but the voltage
-      modeled using measured irradiance and ideal transmission is above the
-      lower bound of the inverter's MPPT range.
-    * Mode 1: Indicates periods when the system has non-uniform snow that
-      decreases both operating voltage and current. Operating Voltage is
-      reduced when bypass diodes activate and current is decreased due to
-      decreased irradiance.
-    * Mode 2: Indicates periods when the operating voltage is reduced but
-      current is consistent with snow-free conditions.
-    * Mode 3: Indicates periods when the operating voltage is consistent with
-      snow-free conditions but current is reduced.
-    * Mode 4: Voltage and current are consistent with snow-free conditions.
-    * Mode -1: Indicates periods where it is unknown if or how snow impacts
-      power output. Mode -1 includes periods when:
-
-          1. Voltage modeled using measured irradiance and ideal transmission
-             is outside the inverter's MPPT range, OR
-          2. measured voltage exceeds the upper bound of the inverter's MPPT
-             algorithm.
-
-      Mode -1 is added in this function to cover a case that was not addressed
-      in [1]_.
-
-
     Parameters
     ----------
     transmission : array-like
@@ -223,6 +168,38 @@ def categorize(transmission, measured_voltage,
     vmp_ratio : array-like
         Ratio between measured DC voltage and DC voltage modeled with
         calculated transmission.
+
+    Notes
+    -----
+    Modes are defined in [1]_:
+
+    * Mode 0: Indicates periods with enough opaque snow that the system is not
+      producing power. Specifically, Mode 0 is when the measured voltage is
+      below the lower bound of the inverter's MPPT range but the voltage
+      modeled using measured irradiance and ideal transmission is above the
+      lower bound of the inverter's MPPT range.
+    * Mode 1: Indicates periods when the system has non-uniform snow which
+      affects all strings. Mode 1 is assigned when both operating voltage and
+      current are reduced. Operating voltage is reduced when snow causes
+      mismatch and current is decreased due to reduced transmission.
+    * Mode 2: Indicates periods when the system has non-uniform snow which
+      causes mismatch for some modules, but doesn't reduce light transmission
+      to other modules.
+    * Mode 3: Indicates periods when the the system has snow that reduces
+      light transmission but doesn't create mismatch. Operating voltage is
+      consistent with snow-free conditions but current is reduced.
+    * Mode 4: Voltage and current are consistent with snow-free conditions.
+
+    * Mode -1: Indicates periods where it is unknown if or how snow impacts
+      power output. Mode -1 includes periods when:
+
+          1. Voltage modeled using measured irradiance and ideal transmission
+             is outside the inverter's MPPT range, OR
+          2. measured voltage exceeds the upper bound of the inverter's MPPT
+             algorithm.
+
+      Mode -1 is added in this function to cover a case that was not addressed
+      in [1]_.
 
     References
     ----------
