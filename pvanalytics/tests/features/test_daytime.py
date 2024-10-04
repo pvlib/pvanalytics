@@ -38,13 +38,13 @@ def ac_power_series():
 @pytest.fixture
 def modeled_midday_series(ac_power_series):
     # Get the modeled sunrise and sunset for the location
+    dates = ac_power_series.index.normalize().unique()
     modeled_sunrise_sunset_df = pvlib.solarposition.sun_rise_set_transit_spa(
-        ac_power_series.index, 39.742, -105.1727)
-    modeled_sunrise_sunset_df.index = modeled_sunrise_sunset_df.index.date
-    modeled_sunrise_sunset_df = modeled_sunrise_sunset_df.drop_duplicates()
+        dates, 39.742, -105.1727)
     # Take the 'transit' column as the midday point between sunrise and
     # sunset for each day in the modeled irradiance series
     modeled_midday_series = modeled_sunrise_sunset_df['transit']
+    modeled_midday_series.index = dates.date
     return modeled_midday_series
 
 
