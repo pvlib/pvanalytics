@@ -277,7 +277,6 @@ Functions for identifying and quantifying the effects of snow.
 .. autosummary::
    :toctree: generated/
 
-   features.snow._get_horizon_mask
    features.snow.get_irradiance_sapm
    features.snow.get_irradiance_imp
    features.snow.categorize
