@@ -19,30 +19,27 @@ effect of snow is classified into one of five categories:
     * Mode 1: Indicates periods when the system has non-uniform snow which
       affects all strings. Mode 1 is assigned when both operating voltage and
       current are reduced. Operating voltage is reduced when snow causes
-      mismatch and current is decreased due to reduced transmission.
+      mismatch. Current is decreased due to reduced transmission.
     * Mode 2: Indicates periods when the system has non-uniform snow which
-      causes mismatch for some modules, but doesn't reduce light transmission
-      to other modules.
+      affects some strings, causing mismatch for some modules,
+      but not reducing light transmission for other modules.
     * Mode 3: Indicates periods when the the system has snow that reduces
       light transmission but doesn't create mismatch. Operating voltage is
       consistent with snow-free conditions but current is reduced.
     * Mode 4: Voltage and current are consistent with snow-free conditions.
 
-    * Mode -1: Indicates periods where it is unknown if or how snow impacts
+    * Mode -1: Indicates periods when it is unknown if or how snow impacts
       power output. Mode -1 includes periods when:
 
           1. Voltage modeled using measured irradiance and ideal transmission
              is outside the inverter's MPPT range, OR
-          2. measured voltage exceeds the upper bound of the inverter's MPPT
+          2. Measured voltage exceeds the upper bound of the inverter's MPPT
              algorithm.
 
-    Mode is None when both measured and voltage modeled from measured
-    irradiance are below the inverter turn-on voltage.
-
 The procedure involves four steps:
-    1. Using measured plane-of-array (POA) irradiance and temperature, model
-       the module's maximum power current (Imp) and voltage (Vmp) assuming
-       that all the POA irradiance reaches the module's cells.
+    1. Model the module's maximum power current (Imp) and voltage (Vmp)
+       assuming that all the measured POA irradiance reaches the module's
+       cells.
     2. Use the modeled Imp and measured Imp, determine the fraction of
        plane-of-array irradiance that reaches the module's cells. This fraction
        is called the transmittance.
@@ -98,7 +95,8 @@ power_col = 'INV1 AC Power [kW]'
 current_col = 'INV1 CB2 Current [A]'
 
 
-# %% Retrieve and print system inverter specs and DC electrical configuration
+# %%
+# Retrieve and print system inverter specs and DC electrical configuration
 
 cec_inverter_db = pvlib.pvsystem.retrieve_sam('CECInverter')
 my_inverter = cec_inverter_db["Yaskawa_Solectria_Solar__PVI_60TL_480__480V_"]
@@ -114,7 +112,8 @@ num_str_per_cb = 4
 num_mods_per_str = 18
 
 
-# %% Plot AC power relative to inverter nameplate limits. We are looking for
+# %% 
+# Plot AC power relative to inverter nameplate limits. We are looking for
 # periods of clipping, as these values are outside of MPP operating
 # conditions. In these data, there is no clipping so no need to filter
 # points out.
@@ -133,7 +132,8 @@ ax.legend()
 fig.tight_layout()
 plt.show()
 
-# %% Model DC voltage and power. Here we use the SAPM. Alternatively, one
+# %%
+# Model DC voltage and power. Here we use the SAPM. Alternatively, one
 # could use a single diode model.
 
 # SAPM coefficients derived from data from CFV Solar Test Laboratory, 2013.
@@ -164,7 +164,6 @@ sapm_coeffs = {
         "C6": np.nan,
         "C7": np.nan,
     }
-
 
 # Model cell temperature using the SAPM model.
 
@@ -233,17 +232,20 @@ date_form = mdates.DateFormatter("%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
 ax.plot(modeled_vmp_no_snow, '.-', c='b', fillstyle='full', label='No snow')
-ax.plot(modeled_vmp_with_snow, '.-', c='r', fillstyle='full', label='With snow')
+ax.plot(modeled_vmp_with_snow, '.-', c='r', fillstyle='full',
+        label='With snow')
 ax.scatter(data.index, data[voltage_col], s=3, c='k', label='Measured')
 
 ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
 
 ax.axhline(mppt_high_voltage, c='r', ls='--')
-ax.text(0.02, mppt_high_voltage -30, 'Maximum MPPT voltage: {} V'.format(mppt_high_voltage),
+ax.text(0.02, mppt_high_voltage - 30,
+        'Maximum MPPT voltage: {} V'.format(mppt_high_voltage),
         transform=ax.get_yaxis_transform())
 ax.axhline(mppt_low_voltage, c='g', ls='--')
-ax.text(0.02, mppt_low_voltage + 20, 'Minimum MPPT voltage: {} V'.format(mppt_low_voltage),
+ax.text(0.02, mppt_low_voltage + 20,
+        'Minimum MPPT voltage: {} V'.format(mppt_low_voltage),
         transform=ax.get_yaxis_transform())
 
 ax.legend(fontsize='large')
@@ -256,6 +258,7 @@ plt.show()
 # %%
 # We write a function to assign snow categories, so that we could loop over
 # additional combiner boxes.
+
 
 def assign_snow_modes(voltage, current, temp_cell, effective_irradiance,
                       coeffs, min_dcv, max_dcv, threshold_vratio,
@@ -331,20 +334,23 @@ def assign_snow_modes(voltage, current, temp_cell, effective_irradiance,
         modeled_voltage_with_ideal_transmission, min_dcv, max_dcv,
         threshold_vratio, threshold_transmission)
 
-    result = pd.DataFrame(index=voltage.index, data={'transmission': T,
-               'modeled_voltage_with_calculated_transmission':
-               modeled_voltage_with_calculated_transmission,
-               'modeled_voltage_with_ideal_transmission':
-               modeled_voltage_with_ideal_transmission,
-               'vmp_ratio': vmp_ratio,
-               'mode': mode})
+    result = pd.DataFrame(
+        index=voltage.index,
+        data={
+            'transmission': T,
+            'modeled_voltage_with_calculated_transmission':
+                modeled_voltage_with_calculated_transmission,
+            'modeled_voltage_with_ideal_transmission':
+                modeled_voltage_with_ideal_transmission,
+            'vmp_ratio': vmp_ratio,
+            'mode': mode})
 
     return result
 
 
 # %%
 # Demonstrate transmission, modeled voltage calculation and mode categorization
-# on voltage, current pair
+# on voltage, current pair.
 
 # threshold_vratio and threshold_transmission were empirically determined
 # using data collected on this system over five summers. Transmission and
@@ -388,7 +394,7 @@ fig.tight_layout()
 plt.show()
 
 # %%
-# Look at voltage ratio
+# Look at voltage ratio.
 
 fig, ax = plt.subplots(figsize=(10, 6))
 date_form = mdates.DateFormatter("%m/%d")
@@ -426,7 +432,7 @@ loss_snow[~snow_loss_filter] = 0.0
 
 
 # %%
-# Plot measured and modeled power, color by mode
+# Plot measured and modeled power, and show snow mode with colored bars.
 
 N = 6
 alpha = 0.5
@@ -494,17 +500,15 @@ fig.tight_layout()
 plt.show()
 
 # %%
-
 # Calculate daily DC energy loss due to snow as a percentage of potential
 # (modeled) DC power.
-# Plot daily DC energy loss and daily snowfall totals.
 
 # DataFrame so that we can group by days.
 loss_df = pd.DataFrame(data={'modeled_power': modeled_power,
                              'loss_snow': loss_snow})
 
-# We will also show daily snowfall totals for context.
-# Daily snowfall is measured at 7:00 am of each day.
+# Read in daily snowfall is measured at 7:00 am of each day.
+# Daily snowfall will be plotted beside losses, for context.
 
 snowfall_file = pvanalytics_dir / 'data' / 'snow_snowfall.csv'
 snowfall = pd.read_csv(snowfall_file, index_col='DATE', parse_dates=True)
@@ -520,9 +524,10 @@ snow_loss_daily = pd.Series(index=days, dtype=float)
 
 for d in days:
     temp = loss_df_gped.get_group(d)
-    snow_loss_daily.at[d] = 100 * temp['loss_snow'].sum() / temp['modeled_power'].sum()
+    snow_loss_daily.at[d] = 100 * temp['loss_snow'].sum() / \
+        temp['modeled_power'].sum()
 
-
+# Plot daily DC energy loss and daily snowfall totals.
 fig, ax = plt.subplots(figsize=(10, 6))
 ax2 = ax.twinx()
 snow_loss_daily.plot(kind='bar', ax=ax, width=-0.4, align='edge',

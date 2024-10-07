@@ -201,6 +201,10 @@ def categorize(transmission, measured_voltage,
       Mode -1 is added in this function to cover a case that was not addressed
       in [1]_.
 
+    Mode is None when measured values (voltage, current, irradiance or
+    temperature) are either missing or produce modeled voltage that is
+    invalid.
+
     References
     ----------
     .. [1] E. C. Cooper, J. L. Braid and L. M. Burnham, "Identifying the
