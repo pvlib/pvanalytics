@@ -69,7 +69,7 @@ There is function for calculating the component sum for GHI, DHI,
 and DNI, and correcting for nighttime periods. Using this function, we can
 estimate one irradiance field using the two other irradiance fields.
 This can be useful for comparison, as well as to
-calculate missing data fields. 
+calculate missing data fields.
 
 .. autosummary::
    :toctree: generated/
@@ -268,6 +268,19 @@ Functions for labeling shadows.
    :toctree: generated/
 
    features.shading.fixed
+
+Snow
+----
+
+Functions for identifying and quantifying the effects of snow.
+
+.. autosummary::
+   :toctree: generated/
+
+   features.snow.get_irradiance_sapm
+   features.snow.get_irradiance_imp
+   features.snow.categorize
+   features.snow.get_transmission
 
 System
 ======
