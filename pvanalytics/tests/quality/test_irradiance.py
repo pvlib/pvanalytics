@@ -157,6 +157,37 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
     assert_series_equal(dni_out, dni_out_expected, check_names=False)
 
 
+def test_check_irradiance_limits_qcrad_extreme(irradiance_qcrad):
+    """Test different input combinations to check_irradiance_limits_qcrad.
+
+    Notes
+    -----
+    Copyright (c) 2019 SolarArbiter. See the file
+    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
+    of this distribution and at `<https://github.com/pvlib/
+    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
+    for more information.
+
+    """
+    expected = irradiance_qcrad
+
+    # Update flagging for extreme limits
+    expected['ghi_limit_flag_extreme'] = \
+        pd.Series([0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1]).astype(bool)
+    expected['dhi_limit_flag_extreme'] = \
+        pd.Series([1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1]).astype(bool)
+    expected['dni_limit_flag_extreme'] = \
+        pd.Series([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]).astype(bool)
+
+    ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
+        expected['solar_zenith'], expected['dni_extra'], ghi=expected['ghi'],
+        dhi=expected['dhi'], dni=expected['dni'], limits='extreme')
+
+    assert_series_equal(ghi_out, expected['ghi_limit_flag_extreme'], check_names=False)  # noqa: E501
+    assert_series_equal(dhi_out, expected['dhi_limit_flag_extreme'], check_names=False)  # noqa: E501
+    assert_series_equal(dni_out, expected['dni_limit_flag_extreme'], check_names=False)  # noqa: E501
+
+
 def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
     """Test that QCRad identifies consistent irradiance measurements.
 
