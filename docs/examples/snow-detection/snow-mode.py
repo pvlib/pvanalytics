@@ -70,11 +70,9 @@ from matplotlib.lines import Line2D
 import pvanalytics
 
 # Functions needed for the analysis procedure
-#from pvanalytics.features import snow
-import snow
+from pvanalytics.features import snow
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-pvanalytics_dir = pathlib.Path('C:\python\pvanalytics\pvanalytics\pvanalytics')
 
 # %%
 # Read in 15-minute DC voltage, DC current and AC power data.
@@ -189,30 +187,33 @@ modeled_e_e1 = snow.get_irradiance_sapm(
     data['Cell Temp [C]'], string_current, sapm_coeffs['Impo'],
     sapm_coeffs['C0'], sapm_coeffs['C1'], sapm_coeffs['Aimp'])
 
-T1 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e1, imp)
+T1 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e1, string_current)
 
 
 fig, ax = plt.subplots(figsize=(10, 6))
-date_form = mdates.DateFormatter("%m/%d \n%H:%M")
+date_form = mdates.DateFormatter("%m/%d")
 ax.xaxis.set_major_formatter(date_form)
 
 ax.plot(T1, '.-', alpha=0.5, c='b', fillstyle='full')
 
-ax.set_ylabel('Transmission', fontsize='xx-large')
-ax.set_xlabel('Date + Time', fontsize='large')
+ax.set_ylabel('Transmission', fontsize='large')
+ax.set_xlabel('Date', fontsize='large')
 fig.tight_layout()
 plt.show()
 
 # %%
-# Model and plot the voltage using calculated transmission.
-
-
+# Visualize measured and modeled DC voltage.
 
 # Model DC output of a single module without the effect of snow.
 # Here we use the pyranometer irradiance.
 model_no_snow = pvlib.pvsystem.sapm(data['POA [W/m²]'],
                                     data['Cell Temp [C]'],
                                     sapm_coeffs)
+
+# Replaced modeled voltage with NaN when no voltage was measured to make
+# comparision between modeled and measured easier.
+
+model_no_snow.loc[data['INV1 CB2 Voltage [V]'].isna(), 'v_mp'] = np.nan
 
 # Scale modeled Vmp to that of a string
 modeled_vmp_no_snow = model_no_snow['v_mp'] * num_mods_per_str
@@ -232,15 +233,25 @@ date_form = mdates.DateFormatter("%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
 ax.plot(modeled_vmp_no_snow, '.-', c='b', fillstyle='full', label='No snow')
-ax.plot(modeled_vmp_with_snow, '.-', c='b', fillstyle='full', label='With snow')
+ax.plot(modeled_vmp_with_snow, '.-', c='r', fillstyle='full', label='With snow')
+ax.scatter(data.index, data[voltage_col], s=3, c='k', label='Measured')
 
-ax.scatter(data.index, data[voltage_col], s=1, c='r', label='Measured')
+ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
+
+ax.axhline(mppt_high_voltage, c='r', ls='--')
+ax.text(0.02, mppt_high_voltage -30, 'Maximum MPPT voltage: {} V'.format(mppt_high_voltage),
+        transform=ax.get_yaxis_transform())
+ax.axhline(mppt_low_voltage, c='g', ls='--')
+ax.text(0.02, mppt_low_voltage + 20, 'Minimum MPPT voltage: {} V'.format(mppt_low_voltage),
+        transform=ax.get_yaxis_transform())
+
 ax.legend(fontsize='large')
 ax.set_ylabel('Voltage [V]', fontsize='large')
 ax.set_xlabel('Date', fontsize='large')
-plt.show()
-fig.tight_layout()
 
+fig.tight_layout()
+plt.show()
 
 # %%
 # We write a function to assign snow categories, so that we could loop over
@@ -385,8 +396,8 @@ ax.xaxis.set_major_formatter(date_form)
 
 ax.plot(snow_results['vmp_ratio'], label='INV1 CB2 Voltage Ratio')
 
-ax.set_xlabel('Date', fontsize='xx-large')
-ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='xx-large')
+ax.set_xlabel('Date', fontsize='large')
+ax.set_ylabel('Voltage Ratio (measured/modeled)', fontsize='large')
 ax.axhline(1, c='k', alpha=0.1, ls='--')
 ax.legend()
 fig.tight_layout()
@@ -514,9 +525,9 @@ for d in days:
 
 fig, ax = plt.subplots(figsize=(10, 6))
 ax2 = ax.twinx()
-snow_loss_daily.plot(kind='bar', ax=ax, width=0.4, align='edge',
+snow_loss_daily.plot(kind='bar', ax=ax, width=-0.4, align='edge',
                      label='Snow loss (%)')
-snowfall['SNOW'].plot(kind='bar', ax=ax2,  width=-0.4, alpha=0.2,
+snowfall['SNOW'].plot(kind='bar', ax=ax2,  width=0.4, alpha=0.2,
                       align='edge',
                       label='Snow fall in prior 24 hours')
 
@@ -529,4 +540,3 @@ ax.xaxis.set_major_formatter(date_form)
 ax.set_title('Daily energy loss and snowfall', fontsize='large')
 fig.tight_layout()
 plt.show()
-
