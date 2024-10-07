@@ -76,7 +76,7 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
     return i_mp / imp0 * irrad_ref
 
 
-def get_transmission(measured_e_e, modeled_e_e, i_mp):
+def get_transmission(measured_e_e, modeled_e_e, current_dc):
 
     """
     Estimate transmission as the ratio of modeled effective irradiance to
@@ -90,12 +90,12 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     Parameters
     ----------
     measured_e_e : array-like
-        Plane-of-array irradiance absent the effect of snow. [W/m2]
+        Plane-of-array irradiance without the effect of snow. [W/m2]
     modeled_e_e : array-like
         Effective irradiance modeled from measured current at maximum power.
         [W/m2]
-    i_mp : array-like
-        Maximum power DC current at the resolution of a single module. [A]
+    current_dc : array-like
+        Measured DC current at the resolution of a single module. [A]
 
     Returns
     -------
@@ -114,8 +114,8 @@ def get_transmission(measured_e_e, modeled_e_e, i_mp):
     """
     transmission = modeled_e_e / measured_e_e
     # no transmission if no current
-    transmission[np.isnan(i_mp)] = np.nan
-    transmission[i_mp == 0] = 0
+    transmission[np.isnan(current_dc)] = np.nan
+    transmission[current_dc == 0] = 0
     # no transmission if no irradiance
     transmission[measured_e_e == 0] = np.nan
     # bound transmission between 0 and 1

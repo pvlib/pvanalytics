@@ -70,10 +70,11 @@ from matplotlib.lines import Line2D
 import pvanalytics
 
 # Functions needed for the analysis procedure
-from pvanalytics.features import snow
+#from pvanalytics.features import snow
+import snow
 
 pvanalytics_dir = pathlib.Path(pvanalytics.__file__).parent
-
+pvanalytics_dir = pathlib.Path('C:\python\pvanalytics\pvanalytics\pvanalytics')
 
 # %%
 # Read in 15-minute DC voltage, DC current and AC power data.
@@ -115,31 +116,6 @@ num_str_per_cb = 4
 num_mods_per_str = 18
 
 
-# %% Plot DC voltage at the combiner input relative to inverter nameplate
-# limits. We are looking for periods where DC voltage is less than the
-# inverter's MPPT voltage range, as these values are outside of MPP
-# operating conditions. If we find these periods, we 
-
-fig, ax = plt.subplots(figsize=(10, 6))
-locator = mdates.DayLocator()
-#ax.xaxis.set_minor_locator(mdates.DayLocator(interval=0.25))
-ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
-ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
-ax.plot(data[voltage_col], '.-', alpha=0.5, fillstyle='full',
-        label='DC voltage')
-ax.axhline(mppt_high_voltage, c='r', ls='--')
-ax.text(0.02, mppt_high_voltage + 20, 'Maximum MPPT voltage: {} V'.format(mppt_high_voltage),
-        transform=ax.get_yaxis_transform())
-ax.axhline(mppt_low_voltage, c='g', ls='--')
-ax.text(0.02, mppt_low_voltage + 20, 'Minimum MPPT voltage: {} V'.format(mppt_low_voltage),
-        transform=ax.get_yaxis_transform())
-ax.set_xlabel('Date', fontsize='large')
-ax.set_ylabel('Voltage [V]', fontsize='large')
-ax.set_ylim([0, 1.2*mppt_high_voltage])
-ax.legend(loc='lower left')
-fig.tight_layout()
-plt.show()
-
 # %% Plot AC power relative to inverter nameplate limits. We are looking for
 # periods of clipping, as these values are outside of MPP operating
 # conditions. In these data, there is no clipping so no need to filter
@@ -159,13 +135,10 @@ ax.legend()
 fig.tight_layout()
 plt.show()
 
-# %%
-# Define coefficients for modeling transmission and voltage. User can either
-# use the SAPM to calculate transmission or an approach based on the ratio
-# between measured current and nameplate current. For modeling voltage, the
-# user can use the SAPM or a single diode equivalent.
+# %% Model DC voltage and power. Here we use the SAPM. Alternatively, one
+# could use a single diode model.
 
-# Data from CFV Solar Test Lab, tested 2013.
+# SAPM coefficients derived from data from CFV Solar Test Laboratory, 2013.
 sapm_coeffs = {
         "Cells_in_Series": 72,
         "Isco": 9.36992857142857,
@@ -204,17 +177,17 @@ data['Cell Temp [C]'] = pvlib.temperature.sapm_cell_from_module(
 # %%
 # Demonstrate the transmission calculation and plot the result.
 
-# We scale measured current at the combiner to that
-# of a single string, assuming all strings have the same current.
-# The string current should be the same current as a single module.
+# We scale measured current to that of a single string, assuming
+# that all strings have the same current.
 
-# String current
-imp = data[current_col] / num_str_per_cb
+string_current = data['INV1 CB2 Current [A]'] / num_str_per_cb
 
-# Model effective irradiance using SAPM
+# Use SAPM to model effective irradiance from single-string current.
+
+
 modeled_e_e1 = snow.get_irradiance_sapm(
-    data['Cell Temp [C]'], imp, sapm_coeffs['Impo'], sapm_coeffs['C0'],
-    sapm_coeffs['C1'], sapm_coeffs['Aimp'])
+    data['Cell Temp [C]'], string_current, sapm_coeffs['Impo'],
+    sapm_coeffs['C0'], sapm_coeffs['C1'], sapm_coeffs['Aimp'])
 
 T1 = snow.get_transmission(data['POA [W/m²]'], modeled_e_e1, imp)
 
@@ -233,17 +206,33 @@ plt.show()
 # %%
 # Model and plot the voltage using calculated transmission.
 
-modeled_vmp_sapm = pvlib.pvsystem.sapm(data['POA [W/m²]']*T1,
-                                       data['Cell Temp [C]'],
-                                       sapm_coeffs)['v_mp']
-modeled_vmp_sapm *= num_mods_per_str
 
+
+# Model DC output of a single module without the effect of snow.
+# Here we use the pyranometer irradiance.
+model_no_snow = pvlib.pvsystem.sapm(data['POA [W/m²]'],
+                                    data['Cell Temp [C]'],
+                                    sapm_coeffs)
+
+# Scale modeled Vmp to that of a string
+modeled_vmp_no_snow = model_no_snow['v_mp'] * num_mods_per_str
+
+
+# Model DC output of a single module with the effect of snow.
+# Here we use the pyranmeter irradiance reduced by the estimated transmission.
+model_with_snow = pvlib.pvsystem.sapm(data['POA [W/m²]'] * T1,
+                                      data['Cell Temp [C]'],
+                                      sapm_coeffs)
+
+# Scale modeled Vmp to that of a string
+modeled_vmp_with_snow = model_with_snow['v_mp'] * num_mods_per_str
 
 fig, ax = plt.subplots(figsize=(10, 6))
 date_form = mdates.DateFormatter("%H:%M")
 ax.xaxis.set_major_formatter(date_form)
 
-ax.plot(modeled_vmp_sapm, '.-', c='b', fillstyle='full', label='SAPM')
+ax.plot(modeled_vmp_no_snow, '.-', c='b', fillstyle='full', label='No snow')
+ax.plot(modeled_vmp_with_snow, '.-', c='b', fillstyle='full', label='With snow')
 
 ax.scatter(data.index, data[voltage_col], s=1, c='r', label='Measured')
 ax.legend(fontsize='large')
