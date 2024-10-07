@@ -112,7 +112,7 @@ num_str_per_cb = 4
 num_mods_per_str = 18
 
 
-# %% 
+# %%
 # Plot AC power relative to inverter nameplate limits. We are looking for
 # periods of clipping, as these values are outside of MPP operating
 # conditions. In these data, there is no clipping so no need to filter
