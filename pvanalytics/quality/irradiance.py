@@ -42,8 +42,7 @@ def _qcrad_ub(dni_extra, sza, lim):
     return lim['mult'] * dni_extra * cosd_sza**lim['exp'] + lim['min']
 
 
-def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None,
-                           out_of_bounds=False):
+def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     r"""Test for physical limits on GHI using the QCRad criteria.
 
     Test is applied to each GHI value. A GHI value passes if value >
@@ -65,9 +64,6 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None,
         Must have keys 'ghi_ub' and 'ghi_lb'. For 'ghi_ub' value is a
         dict with keys {'mult', 'exp', 'min'} and float values. For
         'ghi_lb' value is a float.
-    out_of_bounds : boolean
-        Whether to fail (False) or pass (True) a test when the test conditions
-        are not satisfied, e.g., irradiance is below threshold.
 
     Returns
     -------
@@ -288,6 +284,7 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds, out_of_bounds):
             ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
     )
     result = np.where(~sza_bounds | ~ghi_bounds, out_of_bounds, result)
+    print(f"SZA: {sza_bounds} GHI: {ghi_bounds} Flag: {result}")
     return result
 
 
