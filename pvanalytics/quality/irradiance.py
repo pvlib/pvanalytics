@@ -272,22 +272,27 @@ def _get_bounds(bounds):
             bounds['ratio_bounds'][0], bounds['ratio_bounds'][1])
 
 
-def _check_irrad_ratio(ratio, ghi, sza, bounds):
+def _check_irrad_ratio(ratio, ghi, sza, bounds, out_of_bounds):
     # unpack bounds dict
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
     # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
-    return (
-        quality.util.check_limits(
-            sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
-        & quality.util.check_limits(
-            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
+    sza_bounds = quality.util.check_limits(
+        sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
+    ghi_bounds = quality.util.check_limits(
+        ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
+
+    result = (
+        sza_bounds
+        & ghi_bounds
         & quality.util.check_limits(
             ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
     )
+    result = np.where(~sza_bounds | ~ghi_bounds, out_of_bounds, result)
+    return result
 
 
 def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
-                                       param=None):
+                                       param=None, out_of_bounds=False):
     """Check consistency of GHI, DHI and DNI using QCRad criteria.
 
     Uses criteria given in [1]_ to validate the ratio of irradiance
@@ -313,6 +318,9 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         value is a dict with keys 'zenith_bounds', 'ghi_bounds', and
         'ratio_bounds' and value is an ordered pair [lower, upper]
         of float.
+    out_of_bounds : default False
+        Whether a test is failed (False) or passes (True) when test conditions
+        are not satisfied.
 
     Returns
     -------
@@ -347,16 +355,20 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     bounds = param['ghi_ratio']
     consistent_components = (
         _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds['high_zenith'])
+                           sza=solar_zenith, bounds=bounds['high_zenith'],
+                           out_of_bounds=out_of_bounds)
         | _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                             sza=solar_zenith, bounds=bounds['low_zenith']))
+                             sza=solar_zenith, bounds=bounds['low_zenith'],
+                             out_of_bounds=out_of_bounds))
 
     bounds = param['dhi_ratio']
     diffuse_ratio_limit = (
         _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds['high_zenith'])
+                           bounds=bounds['high_zenith'],
+                           out_of_bounds=out_of_bounds)
         | _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                             bounds=bounds['low_zenith']))
+                             bounds=bounds['low_zenith'],
+                             out_of_bounds=out_of_bounds))
 
     return consistent_components, diffuse_ratio_limit
 
