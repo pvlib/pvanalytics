@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Apr  8 14:39:12 2024
-
-@author: cliff
-"""
 import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal

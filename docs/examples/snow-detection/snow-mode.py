@@ -308,8 +308,25 @@ def assign_snow_modes(voltage, current, temp_cell, effective_irradiance,
     Returns
     -------
     my_dict : dict
-        Keys are ``'transmission'``, ``'modeled_vmp'``, ``'vmp_ratio'``,
-        and ``'mode'``
+        Keys are ``'transmission'``,
+        ``'modeled_voltage_with_calculated_transmission'``,
+        ``'modeled_voltage_with_ideal_transmission'``,
+        ``'vmp_ratio'``, and ``'mode'``.
+
+        'transmission' is the fracton of POA irradiance that is estimated
+        to reach the cells, after being reduced by snow cover.
+
+        'modeled_voltage_with_calculated_transmission' is the Vmp modeled
+        with POA irradiance x transmission
+
+        'modeled_voltage_with_ideal_transmission' is the Vmp modeled with
+        POA irradiance and assuming transmission is 1.
+
+        'vmp_ratio' is modeled_voltage_with_calculated_transmission divided
+        by measured voltage.
+
+        'mode' is the snow mode assigned.
+        See :py:func:`pvanalytics.features.snow.categorize`
 
     '''
 
@@ -318,26 +335,26 @@ def assign_snow_modes(voltage, current, temp_cell, effective_irradiance,
         temp_cell, current / num_str_per_cb, coeffs['Impo'],
         coeffs['C0'], coeffs['C1'], coeffs['Aimp'])
 
-    T = snow.get_transmission(effective_irradiance, modeled_e_e,
-                              current / num_str_per_cb)
+    transmission = snow.get_transmission(effective_irradiance, modeled_e_e,
+                                         current / num_str_per_cb)
 
     # Model voltage for a single module, scale up to array
     modeled_voltage_with_calculated_transmission =\
-        pvlib.pvsystem.sapm(effective_irradiance*T, temp_cell,
+        pvlib.pvsystem.sapm(effective_irradiance*transmission, temp_cell,
                             coeffs)['v_mp'] * num_mods_per_str
     modeled_voltage_with_ideal_transmission =\
         pvlib.pvsystem.sapm(effective_irradiance, temp_cell,
                             coeffs)['v_mp'] * num_mods_per_str
 
     mode, vmp_ratio = snow.categorize(
-        T, voltage, modeled_voltage_with_calculated_transmission,
+        transmission, voltage, modeled_voltage_with_calculated_transmission,
         modeled_voltage_with_ideal_transmission, min_dcv, max_dcv,
         threshold_vratio, threshold_transmission)
 
     result = pd.DataFrame(
         index=voltage.index,
         data={
-            'transmission': T,
+            'transmission': transmission,
             'modeled_voltage_with_calculated_transmission':
                 modeled_voltage_with_calculated_transmission,
             'modeled_voltage_with_ideal_transmission':

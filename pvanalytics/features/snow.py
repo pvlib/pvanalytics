@@ -60,6 +60,8 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
         Maximum power current at the resolution of a single module. [A]
     imp0 : float
         Short-circuit current at reference condition. [A]
+    irrad_ref : float
+        The reference irradiance used to determine ``imp0``. [W/m2]
 
     Returns
     -------
@@ -68,8 +70,8 @@ def get_irradiance_imp(i_mp, imp0, irrad_ref=1000):
 
     References
     ----------
-    .. [1] C. F. Abe, J. B. Dias, G. Notton, G. A. Faggianelli, G. Pigelet, and
-       D. Ouvrard, David, "Estimation of the effective irradiance and bifacial
+    .. [1] C. F. Abe, J. B. Dias, G. Notton, G. A. Faggianelli, G. Pigelet,
+       and D. Ouvrard, "Estimation of the effective irradiance and bifacial
        gain for PV arrays using the maximum power current", IEEE Journal of
        Photovoltaics, 2022, pp. 432-441. :doi:`10.1109/JPHOTOV.2023.3242117`
     """
