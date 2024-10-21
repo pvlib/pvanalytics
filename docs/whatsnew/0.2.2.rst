@@ -1,0 +1,28 @@
+.. _whatsnew_022:
+
+0.2.2 (not yet released)
+------------------------
+
+
+Enhancements
+~~~~~~~~~~~~
+
+
+Bug Fixes
+~~~~~~~~~
+
+
+Requirements
+~~~~~~~~~~~~
+
+
+Documentation
+~~~~~~~~~~~~~
+
+
+Testing
+~~~~~~~
+
+
+Contributors
+~~~~~~~~~~~~
