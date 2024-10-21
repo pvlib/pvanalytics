@@ -10,13 +10,13 @@ from pvanalytics import quality
 from pvanalytics import util
 
 
-BSRN_LIMITS_PHYSICAL = {  # Physically Possible Limits  (also used by QCRad)
+QCRAD_LIMITS_PHYSICAL = {  # Physically Possible Limits  (also called BSRN)
     'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
     'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
     'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
     'ghi_lb': -4, 'dhi_lb': -4, 'dni_lb': -4}
 
-BSRN_LIMITS_EXTREME = {  # Extremely Rare Limis
+QCRAD_LIMITS_EXTREME = {  # Extremely Rare Limis
     'ghi_ub': {'mult': 1.2, 'exp': 1.2, 'min': 50},
     'dhi_ub': {'mult': 0.75, 'exp': 1.2, 'min': 30},
     'dni_ub': {'mult': 0.95, 'exp': 0.2, 'min': 10},
@@ -69,7 +69,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits='physical'):
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        BSRN QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
+        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
         'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
         values. For 'ghi_lb' value is a float.
 
@@ -88,9 +88,9 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits='physical'):
 
     """
     if limits == 'physical':
-        limits = BSRN_LIMITS_PHYSICAL
+        limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
-        limits = BSRN_LIMITS_EXTREME
+        limits = QCRAD_LIMITS_EXTREME
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
     ghi_limit_flag = quality.util.check_limits(ghi, limits['ghi_lb'], ghi_ub)
@@ -118,7 +118,7 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits='physical'):
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        BSRN QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
+        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
         'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
         values. For 'ghi_lb' value is a float.
 
@@ -137,9 +137,9 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits='physical'):
 
     """
     if limits == 'physical':
-        limits = BSRN_LIMITS_PHYSICAL
+        limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
-        limits = BSRN_LIMITS_EXTREME
+        limits = QCRAD_LIMITS_EXTREME
 
     dhi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dhi_ub'])
 
@@ -168,7 +168,7 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits='physical'):
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        BSRN QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
+        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
         'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
         values. For 'ghi_lb' value is a float.
 
@@ -187,9 +187,9 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits='physical'):
 
     """
     if limits == 'physical':
-        limits = BSRN_LIMITS_PHYSICAL
+        limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
-        limits = BSRN_LIMITS_EXTREME
+        limits = QCRAD_LIMITS_EXTREME
 
     dni_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dni_ub'])
 
@@ -227,7 +227,7 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         Direct normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        BSRN QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
+        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
         'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
         values. For 'ghi_lb' value is a float.
 
@@ -256,9 +256,9 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
 
     """
     if limits == 'physical':
-        limits = BSRN_LIMITS_PHYSICAL
+        limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
-        limits = BSRN_LIMITS_EXTREME
+        limits = QCRAD_LIMITS_EXTREME
 
     if ghi is not None:
         ghi_limit_flag = check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra,
