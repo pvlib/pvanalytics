@@ -268,39 +268,21 @@ def _get_bounds(bounds):
             bounds['ratio_bounds'][0], bounds['ratio_bounds'][1])
 
 
-def _check_irrad_ratio(ratio, ghi, sza, bounds, outside_domain):
-    # LOW ZENITH
-    ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = \
-        _get_bounds(bounds['low_zenith'])
+def _check_irrad_ratio(ratio, ghi, sza, bounds):
+    # unpack bounds
+    ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
 
-    within_domain_lz = (
+    within_domain = (
         quality.util.check_limits(
             sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
         & quality.util.check_limits(
             ghi, lower_bound=ghi_lb, upper_bound=ghi_ub, inclusive_lower=True)
     )
 
-    flag_lz = quality.util.check_limits(
+    flag = within_domain & quality.util.check_limits(
         ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
 
-    # HIGH ZENITH
-    ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = \
-        _get_bounds(bounds['high_zenith'])
-
-    within_domain_hz = (
-        quality.util.check_limits(
-            sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
-        & quality.util.check_limits(
-            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub, inclusive_lower=True)
-    )
-
-    flag_hz = quality.util.check_limits(
-        ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
-
-    flag = (flag_lz & within_domain_lz) | (flag_hz & within_domain_hz)
-    within_domain = within_domain_lz | within_domain_hz
-    flag[~within_domain] = outside_domain
-    return flag
+    return flag, within_domain
 
 
 def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
@@ -369,16 +351,30 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     dhi_ratio = dhi / ghi
 
     bounds = param['ghi_ratio']
-    consistent_components = (
-        _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds,
-                           outside_domain=outside_domain))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+
+    consistent_components = ((flag_lz & within_domain_lz) |
+                             (flag_hz & within_domain_hz))
+    consistent_components[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     bounds = param['dhi_ratio']
-    diffuse_ratio_limit = (
-        _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds,
-                           outside_domain=outside_domain))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+    within_domain_hz = within_domain_lz | within_domain_hz
+    diffuse_ratio_limit = ((flag_lz & within_domain_lz) |
+                           (flag_hz & within_domain_hz))
+    diffuse_ratio_limit[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     return consistent_components, diffuse_ratio_limit
 
