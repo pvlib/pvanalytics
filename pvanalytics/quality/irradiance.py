@@ -297,7 +297,7 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds, outside_domain):
     flag_hz = quality.util.check_limits(
         ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
 
-    flag = flag_lz | flag_hz
+    flag = (flag_lz & within_domain_lz) | (flag_hz & within_domain_hz)
     within_domain = within_domain_lz | within_domain_hz
     flag[~within_domain] = outside_domain
     return flag
@@ -343,6 +343,10 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     Notes
     -----
+    The ``ghi_bounds`` are applied differently in the two tests. The components
+    tests applies the bounds to the sum of the diffuse and direct components,
+    whereas the diffuse ratio tests applies the bounds to the measured ``ghi``.
+
     Copyright (c) 2019 SolarArbiter. See the file
     LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
     of this distribution and at `<https://github.com/pvlib/
