@@ -325,14 +325,14 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     Notes
     -----
-    The QCRad algorithm checks that the input GHI is consistent with the component
-    sum :math:`DNI \times \cos \( zenith \) + DHI` of input DNI and DHI, and that the
-    ratio :math:`\frac{DHI}{GHI}` is reasonable.
+    The QCRad algorithm checks that the input GHI is consistent with the
+    component sum :math:`DNI \times \cos \( zenith \) + DHI` of input DNI and
+    DHI, and that the ratio :math:`\frac{DHI}{GHI}` is reasonable.
 
-    In these two parts, the ``ghi_bounds`` are applied differently. In the components
-    test, the bounds are applied to the component sum of diffuse and direct
-    irradiance, whereas in the diffuse ratio test the bounds are applied to the
-    measured ``ghi``.
+    In these two parts, the ``ghi_bounds`` are applied differently. In the
+    components test, the bounds are applied to the component sum of diffuse and
+    direct irradiance, whereas in the diffuse ratio test the bounds are applied
+    to the measured ``ghi``.
 
     Copyright (c) 2019 SolarArbiter. See the file
     LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
