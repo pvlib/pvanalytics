@@ -36,7 +36,7 @@ ac_power_file = pvanalytics_dir / 'data' / \
 data = pd.read_csv(ac_power_file, index_col=0, parse_dates=True)
 data = data.sort_index()
 time_series = data['ac_power']
-time_series = time_series.asfreq('15T')
+time_series = time_series.asfreq('15min')
 
 # Plot the first few days of the time series to visualize it
 time_series[:pd.to_datetime("2016-07-06 00:00:00-07:00")].plot()

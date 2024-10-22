@@ -233,7 +233,7 @@ def times():
     return pd.date_range(
         start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=mst),
         end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=mst),
-        freq='10T'
+        freq='10min'
     )
 
 
@@ -275,7 +275,7 @@ def test_clearsky_limits_negative_and_nan():
 
     """
     index = pd.date_range(start=datetime(2019, 6, 15, 12, 0, 0),
-                          freq='15T', periods=5)
+                          freq='15min', periods=5)
     measured = pd.Series(index=index, data=[800, 1000, 1200, -200, np.nan])
     clearsky = pd.Series(index=index, data=1000)
     assert_series_equal(
@@ -314,7 +314,7 @@ def test_daily_insolation_limits(albuquerque):
     three_days = pd.date_range(
         start='1/1/2020',
         end='1/3/2020 23:00',
-        freq='H'
+        freq='h'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
     assert irradiance.daily_insolation_limits(
@@ -342,7 +342,7 @@ def test_daily_insolation_limits_uneven(albuquerque):
     three_days = pd.date_range(
         start='1/1/2020',
         end='1/3/2020 23:45',
-        freq='15T'
+        freq='15min'
     )
     clearsky = albuquerque.get_clearsky(three_days, model='simplified_solis')
     ghi = clearsky['ghi'].copy()

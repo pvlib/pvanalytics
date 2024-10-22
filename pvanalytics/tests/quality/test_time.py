@@ -25,7 +25,7 @@ def times():
     MST = pytz.timezone('MST')
     return pd.date_range(start=datetime(2018, 6, 15, 12, 0, 0, tzinfo=MST),
                          end=datetime(2018, 6, 15, 13, 0, 0, tzinfo=MST),
-                         freq='10T')
+                         freq='10min')
 
 
 def test_timestamp_spacing_date_range(times):
@@ -105,12 +105,12 @@ def test_has_dst_input_series_not_localized(tz, observes_dst, albuquerque):
 
 @pytest.mark.parametrize("tz, observes_dst", [('MST', False),
                                               ('America/Denver', True)])
-@pytest.mark.parametrize("freq", ['15T', '30T', 'H'])
+@pytest.mark.parametrize("freq", ['15min', '30min', 'h'])
 def test_has_dst_rounded(tz, freq, observes_dst, albuquerque):
     sunrise = _get_sunrise(albuquerque, tz)
     # With rounding to 1-hour timestamps we need to reduce how many
     # days we look at.
-    window = 7 if freq != 'H' else 1
+    window = 7 if freq != 'h' else 1
     expected = pd.Series(False, index=sunrise.index)
     expected.loc['2020-03-08'] = observes_dst
     expected.loc['2020-11-01'] = observes_dst
@@ -192,11 +192,11 @@ def test_has_dst_no_dst_in_date_range(albuquerque):
     )
 
 
-@pytest.fixture(scope='module', params=['H', '15T', 'T'])
+@pytest.fixture(scope='module', params=['h', '15min', '1min'])
 def midday(request, albuquerque):
     solar_position = albuquerque.get_solarposition(
         pd.date_range(
-            start='1/1/2020', end='2/29/2020 23:59',
+            start='1/1/2020', end='3/30/2020 23:59',
             tz='MST', freq=request.param
         )
     )
@@ -233,10 +233,10 @@ def test_shift_ruptures_positive_shift(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-01-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     expected_shift_mask = pd.Series(False, index=midday.index)
-    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    expected_shift_mask['2020-01-01':'2020-03-30'] = True
     shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
@@ -251,10 +251,10 @@ def test_shift_ruptures_negative_shift(midday):
     shifted = _shift_between(
         midday, -60,
         start='2020-01-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     expected_shift_mask = pd.Series(False, index=midday.index)
-    expected_shift_mask['2020-01-01':'2020-02-29'] = True
+    expected_shift_mask['2020-01-01':'2020-03-30'] = True
     shift_mask, shift_amounts = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, expected_shift_mask, check_names=False)
     assert_series_equal(
@@ -294,9 +294,11 @@ def _shift_between(series, shift, start, end):
 @requires_ruptures
 def test_shift_ruptures_period_min(midday):
     no_shifts = pd.Series(0, index=midday.index, dtype='int64')
+    # period_min must be equal to length of series / 2 or less in order for
+    # binary segmentation algoritm to work.
     shift_mask, shift_amount = time.shifts_ruptures(
         midday, midday,
-        period_min=len(midday)
+        period_min=len(midday) / 2
     )
     assert not shift_mask.any()
     assert_series_equal(
@@ -344,10 +346,10 @@ def test_shifts_ruptures_shift_at_end(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-02-01',
-        end='2020-02-29'
+        end='2020-03-30'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
-    shift_expected['2020-02-02':'2020-02-29'] = 60
+    shift_expected['2020-02-02':'2020-03-30'] = 60
     shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
     assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
     assert_series_equal(
@@ -362,11 +364,12 @@ def test_shifts_ruptures_shift_in_middle(midday):
     shifted = _shift_between(
         midday, 60,
         start='2020-01-25',
-        end='2020-02-15'
+        end='2020-03-05'
     )
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
-    shift_expected['2020-01-26':'2020-02-15'] = 60
-    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday)
+    shift_expected['2020-01-26':'2020-03-05'] = 60
+    shift_mask, shift_amount = time.shifts_ruptures(shifted, midday,
+                                                    prediction_penalty=13)
     assert_series_equal(
         shift_mask,
         shift_expected != 0,
@@ -389,30 +392,20 @@ def test_shift_ruptures_shift_min(midday):
     shift_expected = pd.Series(0, index=shifted.index, dtype='int64')
     shift_expected.loc['2020-01-01':'2020-01-25'] = 30
     no_shift = pd.Series(0, index=shifted.index, dtype='int64')
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
-        shift_min=60, round_up_from=40
+        shift_min=60
     )
     assert not shift_mask.any()
-    assert_series_equal(
-        shift_amount,
-        no_shift,
-        check_names=False
-    )
+    assert_series_equal(shift_amount, no_shift, check_names=False)
+
     shift_mask, shift_amount = time.shifts_ruptures(
         shifted, midday,
         shift_min=30
     )
-    assert_series_equal(
-        shift_mask,
-        shift_expected != 0 if pd.infer_freq(shifted.index) != 'H' else False,
-        check_names=False
-    )
-    assert_series_equal(
-        shift_amount,
-        shift_expected if pd.infer_freq(shifted.index) != 'H' else no_shift,
-        check_names=False
-    )
+    assert_series_equal(shift_mask, shift_expected != 0, check_names=False)
+    assert_series_equal(shift_amount, shift_expected, check_names=False)
 
 
 @requires_ruptures
@@ -481,26 +474,4 @@ def test_dst_dates(timezone, expected_dates):
     assert_series_equal(
         time.dst_dates(index.tz_localize(None), timezone),
         expected.tz_localize(None)
-    )
-
-
-def test_rounding():
-    xs = pd.Series(
-        [-10, 10, -16, 16, -28, 28, -30, 30, -8, 8, -7, 7, -3, 3, 0]
-    )
-    assert_series_equal(
-        time._round_multiple(xs, 15),
-        pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, -15, 15, 0, 0, 0, 0, 0])
-    )
-    assert_series_equal(
-        time._round_multiple(xs, 15, up_from=9),
-        pd.Series([-15, 15, -15, 15, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
-    )
-    assert_series_equal(
-        time._round_multiple(xs, 15, up_from=15),
-        pd.Series([0, 0, -15, 15, -15, 15, -30, 30, 0, 0, 0, 0, 0, 0, 0])
-    )
-    assert_series_equal(
-        time._round_multiple(xs, 30),
-        pd.Series([0, 0, -30, 30, -30, 30, -30, 30, 0, 0, 0, 0, 0, 0, 0])
     )

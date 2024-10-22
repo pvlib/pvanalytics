@@ -1,0 +1,31 @@
+.. _whatsnew_021:
+
+
+0.2.1 (October 16, 2024)
+------------------------
+
+
+Enhancements
+~~~~~~~~~~~~
+* Compatibility with numpy 2.0. (:pull:`211`)
+* Added functions :py:func:`~pvanalytics.features.snow.categorize`
+  and :py:func:`~pvanalytics.features.snow.get_transmission` to categorize
+  data by the effect of snow on DC voltage and current. (:pull:`209`)
+
+
+Requirements
+~~~~~~~~~~~~
+* Minimum python advanced to 3.8. (:pull:`210`)
+* Minimum statsmodels advanced to 0.10.0 and numpy to 1.17.0. (:pull:`210`)
+
+
+Documentation
+~~~~~~~~~~~~~
+* Added a gallery example for snow effects categorization (:pull:`209`)
+
+
+Contributors
+~~~~~~~~~~~~
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Emma Cooper (:ghuser:`eccoope`)
+* Kevin Anderson (:ghuser:`kandersolar`)

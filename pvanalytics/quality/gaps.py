@@ -49,7 +49,7 @@ def _backfill_window(endpoints, window):
     flags = endpoints
     while window > 0:
         window = window - 1
-        flags = flags | endpoints.shift(-window).fillna(False)
+        flags = flags | endpoints.shift(-window, fill_value=False)
     return flags
 
 
@@ -409,8 +409,9 @@ def trim(series, days=10):
     """
     start, end = start_stop_dates(series, days=days)
     mask = pd.Series(False, index=series.index)
+
     if start:
-        mask.loc[start.date():end.date()] = True
+        mask.loc[start:end] = True
     return mask
 
 

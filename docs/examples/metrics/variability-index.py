@@ -52,7 +52,7 @@ clearsky = location.get_clearsky(data.index)
 # an hourly frequency.
 variability_index_series = variability_index(data['irradiance_ghi__7981'],
                                              clearsky['ghi'],
-                                             freq='1H')
+                                             freq='1h')
 
 # %%
 # Plot the calculated VI against the underlying GHI measurements, for the

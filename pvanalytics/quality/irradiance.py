@@ -27,20 +27,20 @@ QCRAD_CONSISTENCY = {
     'ghi_ratio': {
         'low_zenith': {
             'zenith_bounds': [0.0, 75],
-            'ghi_bounds': [50, np.Inf],
+            'ghi_bounds': [50, np.inf],
             'ratio_bounds': [0.92, 1.08]},
         'high_zenith': {
             'zenith_bounds': [75, 93],
-            'ghi_bounds': [50, np.Inf],
+            'ghi_bounds': [50, np.inf],
             'ratio_bounds': [0.85, 1.15]}},
     'dhi_ratio': {
         'low_zenith': {
             'zenith_bounds': [0.0, 75],
-            'ghi_bounds': [50, np.Inf],
+            'ghi_bounds': [50, np.inf],
             'ratio_bounds': [0.0, 1.05]},
         'high_zenith': {
             'zenith_bounds': [75, 93],
-            'ghi_bounds': [50, np.Inf],
+            'ghi_bounds': [50, np.inf],
             'ratio_bounds': [0.0, 1.10]}}}
 
 
@@ -413,7 +413,7 @@ def clearsky_limits(measured, clearsky, csi_max=1.1):
     csi = pvlib.irradiance.clearsky_index(
         measured,
         clearsky,
-        max_clearsky_index=np.Inf
+        max_clearsky_index=np.inf
     )
     return quality.util.check_limits(
         csi, upper_bound=csi_max, inclusive_upper=True
@@ -438,7 +438,7 @@ def _daily_total(series):
     if freq:
         freq_hours = _to_hours(freq)
         return series.resample('D').apply(
-            integrate.trapz,
+            integrate.trapezoid,
             dx=freq_hours
         )
     hours = pd.Series(
@@ -446,7 +446,7 @@ def _daily_total(series):
         index=series.index
     )
     return series.resample('D').apply(
-        lambda day: integrate.trapz(y=day, x=hours[day.index])
+        lambda day: integrate.trapezoid(y=day, x=hours[day.index])
     )
 
 
