@@ -10,7 +10,8 @@ from pvanalytics import quality
 from pvanalytics import util
 
 
-QCRAD_LIMITS_PHYSICAL = {  # Physically Possible Limits  (also called BSRN)
+# QCRAD limits are often also referred to as BSRN limits
+QCRAD_LIMITS_PHYSICAL = {  # Physically Possible Limits
     'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
     'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
     'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
@@ -91,6 +92,7 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits='physical'):
         limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
         limits = QCRAD_LIMITS_EXTREME
+
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
     ghi_limit_flag = quality.util.check_limits(ghi, limits['ghi_lb'], ghi_ub)

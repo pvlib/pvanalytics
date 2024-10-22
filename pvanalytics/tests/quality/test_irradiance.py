@@ -42,23 +42,25 @@ def irradiance_qcrad():
     output = pd.DataFrame(
         columns=['ghi', 'dhi', 'dni', 'solar_zenith', 'dni_extra',
                  'ghi_limit_flag', 'dhi_limit_flag', 'dni_limit_flag',
+                 'ghi_extreme_limit_flag', 'dhi_extreme_limit_flag',
+                 'dni_extreme_limit_flag',
                  'consistent_components', 'diffuse_ratio_limit'],
-        data=np.array([[-100, 100, 100, 30, 1370, 0, 1, 1, 0, 0],
-                       [100, -100, 100, 30, 1370, 1, 0, 1, 0, 0],
-                       [100, 100, -100, 30, 1370, 1, 1, 0, 0, 1],
-                       [1000, 100, 900, 0, 1370, 1, 1, 1, 1, 1],
-                       [1000, 200, 800, 15, 1370, 1, 1, 1, 1, 1],
-                       [1000, 200, 800, 60, 1370, 0, 1, 1, 0, 1],
-                       [1000, 300, 850, 80, 1370, 0, 0, 1, 0, 1],
-                       [1000, 500, 800, 90, 1370, 0, 0, 1, 0, 1],
-                       [500, 100, 1100, 0, 1370, 1, 1, 1, 0, 1],
-                       [1000, 300, 1200, 0, 1370, 1, 1, 1, 0, 1],
-                       [500, 600, 100, 60, 1370, 1, 1, 1, 0, 0],
-                       [500, 600, 400, 80, 1370, 0, 0, 1, 0, 0],
-                       [500, 500, 300, 80, 1370, 0, 0, 1, 1, 1],
-                       [0, 0, 0, 93, 1370, 1, 1, 1, 0, 0]]))
+        data=np.array([[-100, 100, 100, 30, 1370, 0, 1, 1, 0, 1, 1, 0, 0],
+                       [100, -100, 100, 30, 1370, 1, 0, 1, 1, 0, 1, 0, 0],
+                       [100, 100, -100, 30, 1370, 1, 1, 0, 1, 1, 0, 0, 1],
+                       [1000, 100, 900, 0, 1370, 1, 1, 1, 1, 1, 1, 1, 1],
+                       [1000, 200, 800, 15, 1370, 1, 1, 1, 1, 1, 1, 1, 1],
+                       [1000, 200, 800, 60, 1370, 0, 1, 1, 0, 1, 1, 0, 1],
+                       [1000, 300, 850, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 1],
+                       [1000, 500, 800, 90, 1370, 0, 0, 1, 0, 0, 0, 0, 1],
+                       [500, 100, 1100, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1],
+                       [1000, 300, 1200, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1],
+                       [500, 600, 100, 60, 1370, 1, 1, 1, 1, 0, 1, 0, 0],
+                       [500, 600, 400, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 0],
+                       [500, 500, 300, 80, 1370, 0, 0, 1, 0, 0, 1, 1, 1],
+                       [0, 0, 0, 93, 1370, 1, 1, 1, 1, 1, 1, 0, 0]]))
     dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
-              'bool', 'bool', 'bool', 'bool', 'bool']
+              'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool']
     for (col, typ) in zip(output.columns, dtypes):
         output[col] = output[col].astype(typ)
     return output
@@ -83,6 +85,13 @@ def test_check_ghi_limits_qcrad(irradiance_qcrad):
                                                 expected['dni_extra'])
     assert_series_equal(ghi_out, ghi_out_expected, check_names=False)
 
+    ghi_out_extreme = irradiance.check_ghi_limits_qcrad(
+        expected['ghi'], expected['solar_zenith'], expected['dni_extra'],
+        limits='extreme')
+    ghi_extreme_out_expected = expected['ghi_extreme_limit_flag']
+    assert_series_equal(
+        ghi_out_extreme, ghi_extreme_out_expected, check_names=False)
+
 
 def test_check_dhi_limits_qcrad(irradiance_qcrad):
     """Test that QCRad identifies out of bounds DHI values.
@@ -103,6 +112,13 @@ def test_check_dhi_limits_qcrad(irradiance_qcrad):
                                                 expected['dni_extra'])
     assert_series_equal(dhi_out, dhi_out_expected, check_names=False)
 
+    dhi_out_extreme = irradiance.check_dhi_limits_qcrad(
+        expected['dhi'], expected['solar_zenith'], expected['dni_extra'],
+        limits='extreme')
+    dhi_extreme_out_expected = expected['dhi_extreme_limit_flag']
+    assert_series_equal(
+        dhi_out_extreme, dhi_extreme_out_expected, check_names=False)
+
 
 def test_check_dni_limits_qcrad(irradiance_qcrad):
     """Test that QCRad identifies out of bounds DNI values.
@@ -122,6 +138,13 @@ def test_check_dni_limits_qcrad(irradiance_qcrad):
                                                 expected['solar_zenith'],
                                                 expected['dni_extra'])
     assert_series_equal(dni_out, dni_out_expected, check_names=False)
+
+    dni_out_extreme = irradiance.check_dni_limits_qcrad(
+        expected['dni'], expected['solar_zenith'], expected['dni_extra'],
+        limits='extreme')
+    dni_extreme_out_expected = expected['dni_extreme_limit_flag']
+    assert_series_equal(
+        dni_out_extreme, dni_extreme_out_expected, check_names=False)
 
 
 def test_check_irradiance_limits_qcrad(irradiance_qcrad):
@@ -159,33 +182,16 @@ def test_check_irradiance_limits_qcrad(irradiance_qcrad):
 
 def test_check_irradiance_limits_qcrad_extreme(irradiance_qcrad):
     """Test different input combinations to check_irradiance_limits_qcrad.
-
-    Notes
-    -----
-    Copyright (c) 2019 SolarArbiter. See the file
-    LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
-    of this distribution and at `<https://github.com/pvlib/
-    pvanalytics/blob/master/LICENSES/SOLARFORECASTARBITER_LICENSE>`_
-    for more information.
-
     """
     expected = irradiance_qcrad
-
-    # Update flagging for extreme limits
-    expected['ghi_limit_flag_extreme'] = \
-        pd.Series([0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1]).astype(bool)
-    expected['dhi_limit_flag_extreme'] = \
-        pd.Series([1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1]).astype(bool)
-    expected['dni_limit_flag_extreme'] = \
-        pd.Series([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1]).astype(bool)
 
     ghi_out, dhi_out, dni_out = irradiance.check_irradiance_limits_qcrad(
         expected['solar_zenith'], expected['dni_extra'], ghi=expected['ghi'],
         dhi=expected['dhi'], dni=expected['dni'], limits='extreme')
 
-    assert_series_equal(ghi_out, expected['ghi_limit_flag_extreme'], check_names=False)  # noqa: E501
-    assert_series_equal(dhi_out, expected['dhi_limit_flag_extreme'], check_names=False)  # noqa: E501
-    assert_series_equal(dni_out, expected['dni_limit_flag_extreme'], check_names=False)  # noqa: E501
+    assert_series_equal(ghi_out, expected['ghi_extreme_limit_flag'], check_names=False)  # noqa: E501
+    assert_series_equal(dhi_out, expected['dhi_extreme_limit_flag'], check_names=False)  # noqa: E501
+    assert_series_equal(dni_out, expected['dni_extreme_limit_flag'], check_names=False)  # noqa: E501
 
 
 def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
