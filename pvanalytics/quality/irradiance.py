@@ -312,7 +312,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         value is a dict with keys 'zenith_bounds', 'ghi_bounds', and
         'ratio_bounds' and value is an ordered pair [lower, upper]
         of float.
-    outside_domain : default False
+    outside_domain : bool, default False
         Value to return when the tests are not applicable, i.e., when the
         input data fall outside the test domain.
 
@@ -326,7 +326,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     Notes
     -----
     The QCRad algorithm checks that the input GHI is consistent with the
-    component sum :math:`DNI \times \cos \( zenith \) + DHI` of input DNI and
+    component sum :math:`DNI \times \cos ( zenith ) + DHI` of input DNI and
     DHI, and that the ratio :math:`\frac{DHI}{GHI}` is reasonable.
 
     In these two parts, the ``ghi_bounds`` are applied differently. In the
