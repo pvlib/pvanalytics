@@ -306,13 +306,13 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series
         Direct normal irradiance in :math:`W/m^2`
-    param : dict
+    param : dict, optional
         keys are 'ghi_ratio' and 'dhi_ratio'. For each key, value is a dict
         with keys 'high_zenith' and 'low_zenith'; for each of these keys,
         value is a dict with keys 'zenith_bounds', 'ghi_bounds', and
         'ratio_bounds' and value is an ordered pair [lower, upper]
         of float.
-    outside_domain : bool, default False
+    outside_domain : scalar, default False
         Value to return when the tests are not applicable, i.e., when the
         input data fall outside the test domain.
 
