@@ -287,7 +287,7 @@ def _check_irrad_ratio(ratio, ghi, sza, bounds):
 
 def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
                                        param=None, outside_domain=False):
-    """Check consistency of GHI, DHI and DNI using QCRad criteria.
+    r"""Check consistency of GHI, DHI and DNI using QCRad criteria.
 
     Uses criteria given in [1]_ to validate the ratio of irradiance
     components.
