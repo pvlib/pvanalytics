@@ -314,7 +314,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         of float.
     outside_domain : default False
         Value to return when the tests are not applicable, i.e., when the
-        inputs fall outside the test domain.
+        input data fall outside the test domain.
 
     Returns
     -------
