@@ -375,7 +375,6 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     flag_hz, within_domain_hz = _check_irrad_ratio(
         ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
         bounds=bounds['high_zenith'])
-    within_domain_hz = within_domain_lz | within_domain_hz
     diffuse_ratio_limit = ((flag_lz & within_domain_lz) |
                            (flag_hz & within_domain_hz))
     diffuse_ratio_limit[~(within_domain_lz | within_domain_hz)] = \
