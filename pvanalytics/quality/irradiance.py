@@ -292,9 +292,9 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     Uses criteria given in [1]_ to validate the ratio of irradiance
     components.
 
-    .. warning:: Not valid for night time. While you can pass data
-       from night time to this function, be aware that the truth
-       values returned for that data will not be valid.
+    .. warning:: Not valid for night time or low irradiance. When the input
+       data fall outside the test domain, the returned value is set by the
+       ``outside_domain`` parameter.
 
     Parameters
     ----------
