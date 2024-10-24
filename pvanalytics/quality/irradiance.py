@@ -204,7 +204,7 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
                                   dni=None, limits='physical'):
     r"""Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
-    Criteria from [1]_ are used to determine physically plausible
+    Criteria from [1]_ and [2]_ are used to determine physically plausible
     lower and upper bounds. Each value is tested and a value passes if
     value > lower bound and value < upper bound. Lower bounds are
     constant for all tests. Upper bounds are calculated as
@@ -252,11 +252,15 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
 
     References
     ----------
-    .. [1] C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-       Algorithm for Surface Radiation Measurements, The Open Atmospheric
-       Science Journal 2, pp. 23-37, 2008.
-
-    """
+    .. [1] C. N. Long and Y. Shi, "An Automated Quality Assessment and Control
+       Algorithm for Surface Radiation Measurements," The Open Atmospheric
+       Science Journal, vol. 2, no. 1. Bentham Science Publishers Ltd.,
+       pp. 23–37, Apr. 18, 2008. :doi:`10.2174/1874282300802010023`.
+    .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
+       tests, V2.0," Baseline Surface Radiation Network (BSRN),
+       Accessed: Oct. 24, 2024. [Online.] Available:
+       <https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>_
+    """  # noqa: E501
     if limits == 'physical':
         limits = QCRAD_LIMITS_PHYSICAL
     elif limits == 'extreme':
@@ -307,7 +311,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
                                        param=None):
     """Check consistency of GHI, DHI and DNI using QCRad criteria.
 
-    Uses criteria given in [1]_ to validate the ratio of irradiance
+    Uses criteria given in [1]_, [2]_ to validate the ratio of irradiance
     components.
 
     .. warning:: Not valid for night time. While you can pass data
@@ -348,11 +352,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     References
     ----------
-    .. [1] C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-       Algorithm for Surface Radiation Measurements, The Open Atmospheric
-       Science Journal 2, pp. 23-37, 2008.
-
-    """
+    .. [1] C. N. Long and Y. Shi, "An Automated Quality Assessment and Control
+       Algorithm for Surface Radiation Measurements," The Open Atmospheric
+       Science Journal, vol. 2, no. 1. Bentham Science Publishers Ltd.,
+       pp. 23–37, Apr. 18, 2008. :doi:`10.2174/1874282300802010023`.
+    .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
+       tests, V2.0," Baseline Surface Radiation Network (BSRN),
+       Accessed: Oct. 24, 2024. [Online.] Available:
+       <https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>_
+    """  # noqa: E501
     if not param:
         param = QCRAD_CONSISTENCY
 
