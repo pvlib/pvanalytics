@@ -6,6 +6,9 @@
 
 Enhancements
 ~~~~~~~~~~~~
+* Added optional keyword `outside_domain` to
+  :py:func:`~pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`.
+  (:pull:`214`)
 
 
 Bug Fixes
@@ -26,3 +29,4 @@ Testing
 
 Contributors
 ~~~~~~~~~~~~
+* Adam R. Jensen (:ghuser:`AdamRJensen`)
