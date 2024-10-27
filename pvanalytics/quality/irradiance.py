@@ -294,29 +294,32 @@ def _get_bounds(bounds):
 
 
 def _check_irrad_ratio(ratio, ghi, sza, bounds):
-    # unpack bounds dict
+    # unpack bounds
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
-    # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
-    return (
+
+    within_domain = (
         quality.util.check_limits(
             sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
         & quality.util.check_limits(
-            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
-        & quality.util.check_limits(
-            ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub, inclusive_lower=True)
     )
+
+    flag = within_domain & quality.util.check_limits(
+        ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+
+    return flag, within_domain
 
 
 def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
-                                       param=None):
-    """Check consistency of GHI, DHI and DNI using QCRad criteria.
+                                       param=None, outside_domain=False):
+    r"""Check consistency of GHI, DHI and DNI using QCRad criteria.
 
     Uses criteria given in [1]_, [2]_ to validate the ratio of irradiance
     components.
 
-    .. warning:: Not valid for night time. While you can pass data
-       from night time to this function, be aware that the truth
-       values returned for that data will not be valid.
+    .. warning:: Not valid for night time or low irradiance. When the input
+       data fall outside the test domain, the returned value is set by the
+       ``outside_domain`` parameter.
 
     Parameters
     ----------
@@ -328,12 +331,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series
         Direct normal irradiance in :math:`W/m^2`
-    param : dict
+    param : dict, optional
         keys are 'ghi_ratio' and 'dhi_ratio'. For each key, value is a dict
         with keys 'high_zenith' and 'low_zenith'; for each of these keys,
         value is a dict with keys 'zenith_bounds', 'ghi_bounds', and
         'ratio_bounds' and value is an ordered pair [lower, upper]
         of float.
+    outside_domain : scalar, default False
+        Value to return when the tests are not applicable, i.e., when the
+        input data fall outside the test domain.
 
     Returns
     -------
@@ -344,6 +350,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     Notes
     -----
+    The QCRad algorithm checks that the input GHI is consistent with the
+    component sum :math:`DNI \times \cos ( zenith ) + DHI` of input DNI and
+    DHI, and that the ratio :math:`\frac{DHI}{GHI}` is reasonable.
+
+    In these two parts, the ``ghi_bounds`` are applied differently. In the
+    components test, the bounds are applied to the component sum of diffuse and
+    direct irradiance, whereas in the diffuse ratio test the bounds are applied
+    to the measured ``ghi``.
+
     Copyright (c) 2019 SolarArbiter. See the file
     LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
     of this distribution and at `<https://github.com/pvlib/
@@ -370,18 +385,29 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     dhi_ratio = dhi / ghi
 
     bounds = param['ghi_ratio']
-    consistent_components = (
-        _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds['high_zenith'])
-        | _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                             sza=solar_zenith, bounds=bounds['low_zenith']))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+
+    consistent_components = ((flag_lz & within_domain_lz) |
+                             (flag_hz & within_domain_hz))
+    consistent_components[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     bounds = param['dhi_ratio']
-    diffuse_ratio_limit = (
-        _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds['high_zenith'])
-        | _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                             bounds=bounds['low_zenith']))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+    diffuse_ratio_limit = ((flag_lz & within_domain_lz) |
+                           (flag_hz & within_domain_hz))
+    diffuse_ratio_limit[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     return consistent_components, diffuse_ratio_limit
 

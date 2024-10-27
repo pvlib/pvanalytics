@@ -6,12 +6,14 @@
 
 Enhancements
 ~~~~~~~~~~~~
-* Added extreme limits option to
   :py:func:`~pvanalytics.quality.irradiance.check_ghi_limits_qcrad`,
   :py:func:`~pvanalytics.quality.irradiance.check_dhi_limits_qcrad`,
   :py:func:`~pvanalytics.quality.irradiance.check_dni_limits_qcrad`, and
   :py:func:`~pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`.
   (:pull:`190`)
+* Added optional keyword `outside_domain` to
+  :py:func:`~pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`.
+  (:pull:`214`)
 
 Bug Fixes
 ~~~~~~~~~
@@ -31,3 +33,4 @@ Testing
 
 Contributors
 ~~~~~~~~~~~~
+* Adam R. Jensen (:ghuser:`AdamRJensen`)

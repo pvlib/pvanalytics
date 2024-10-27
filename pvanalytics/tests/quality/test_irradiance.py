@@ -44,23 +44,27 @@ def irradiance_qcrad():
                  'ghi_limit_flag', 'dhi_limit_flag', 'dni_limit_flag',
                  'ghi_extreme_limit_flag', 'dhi_extreme_limit_flag',
                  'dni_extreme_limit_flag',
-                 'consistent_components', 'diffuse_ratio_limit'],
-        data=np.array([[-100, 100, 100, 30, 1370, 0, 1, 1, 0, 1, 1, 0, 0],
-                       [100, -100, 100, 30, 1370, 1, 0, 1, 1, 0, 1, 0, 0],
-                       [100, 100, -100, 30, 1370, 1, 1, 0, 1, 1, 0, 0, 1],
-                       [1000, 100, 900, 0, 1370, 1, 1, 1, 1, 1, 1, 1, 1],
-                       [1000, 200, 800, 15, 1370, 1, 1, 1, 1, 1, 1, 1, 1],
-                       [1000, 200, 800, 60, 1370, 0, 1, 1, 0, 1, 1, 0, 1],
-                       [1000, 300, 850, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 1],
-                       [1000, 500, 800, 90, 1370, 0, 0, 1, 0, 0, 0, 0, 1],
-                       [500, 100, 1100, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1],
-                       [1000, 300, 1200, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1],
-                       [500, 600, 100, 60, 1370, 1, 1, 1, 1, 0, 1, 0, 0],
-                       [500, 600, 400, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 0],
-                       [500, 500, 300, 80, 1370, 0, 0, 1, 0, 0, 1, 1, 1],
-                       [0, 0, 0, 93, 1370, 1, 1, 1, 1, 1, 1, 0, 0]]))
+                 'consistent_components', 'diffuse_ratio_limit',
+                 'consistent_components_outside_domain',
+                 'diffuse_ratio_limit_outside_domain',
+                 ],
+        data=np.array([[-100, 100, 100, 30, 1370, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1],
+                       [100, -100, 100, 30, 1370, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0],
+                       [100, 100, -100, 30, 1370, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1],
+                       [1000, 100, 900, 0, 1370, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                       [1000, 200, 800, 15, 1370, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                       [1000, 200, 800, 60, 1370, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1],
+                       [1000, 300, 850, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1],
+                       [1000, 500, 800, 90, 1370, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+                       [500, 100, 1100, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+                       [1000, 300, 1200, 0, 1370, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+                       [500, 600, 100, 60, 1370, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+                       [500, 600, 400, 80, 1370, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+                       [500, 500, 300, 80, 1370, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1],
+                       [0, 0, 0, 93, 1370, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1]]))
     dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
-              'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool']
+              'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool',
+              'bool', 'boo']
     for (col, typ) in zip(output.columns, dtypes):
         output[col] = output[col].astype(typ)
     return output
@@ -213,6 +217,20 @@ def test_check_irradiance_consistency_qcrad(irradiance_qcrad):
     assert_series_equal(cons_comp, expected['consistent_components'],
                         check_names=False)
     assert_series_equal(diffuse, expected['diffuse_ratio_limit'],
+                        check_names=False)
+
+
+def test_check_irradiance_consistency_qcrad_outside_domain(irradiance_qcrad):
+    expected = irradiance_qcrad
+    cons_comp, diffuse = irradiance.check_irradiance_consistency_qcrad(
+        expected['solar_zenith'], expected['ghi'],
+        expected['dhi'], expected['dni'],
+        outside_domain=True)
+    assert_series_equal(cons_comp,
+                        expected['consistent_components_outside_domain'],
+                        check_names=False)
+    assert_series_equal(diffuse,
+                        expected['diffuse_ratio_limit_outside_domain'],
                         check_names=False)
 
 
