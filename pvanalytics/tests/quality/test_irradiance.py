@@ -64,7 +64,7 @@ def irradiance_qcrad():
                        [0, 0, 0, 93, 1370, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1]]))  # noqa: E501
     dtypes = ['float64', 'float64', 'float64', 'float64', 'float64',
               'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool', 'bool',
-              'bool', 'boo']
+              'bool', 'bool']
     for (col, typ) in zip(output.columns, dtypes):
         output[col] = output[col].astype(typ)
     return output
