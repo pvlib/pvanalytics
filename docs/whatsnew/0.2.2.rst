@@ -6,6 +6,7 @@
 
 Enhancements
 ~~~~~~~~~~~~
+* Added extreme limits option to
   :py:func:`~pvanalytics.quality.irradiance.check_ghi_limits_qcrad`,
   :py:func:`~pvanalytics.quality.irradiance.check_dhi_limits_qcrad`,
   :py:func:`~pvanalytics.quality.irradiance.check_dni_limits_qcrad`, and
