@@ -17,7 +17,7 @@ QCRAD_LIMITS_PHYSICAL = {  # Physically Possible Limits
     'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
     'ghi_lb': -4, 'dhi_lb': -4, 'dni_lb': -4}
 
-QCRAD_LIMITS_EXTREME = {  # Extremely Rare Limis
+QCRAD_LIMITS_EXTREME = {  # Extremely Rare Limits
     'ghi_ub': {'mult': 1.2, 'exp': 1.2, 'min': 50},
     'dhi_ub': {'mult': 0.75, 'exp': 1.2, 'min': 30},
     'dni_ub': {'mult': 0.95, 'exp': 0.2, 'min': 10},
