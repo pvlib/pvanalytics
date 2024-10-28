@@ -120,9 +120,9 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits='physical'):
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
-        'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
-        values. For 'ghi_lb' value is a float.
+        QCRAD QC limits. If dict, must have keys 'dhi_ub' and 'dhi_lb'. For
+        'dhi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
+        values. For 'dhi_lb' value is a float.
 
     Returns
     -------
@@ -170,9 +170,9 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits='physical'):
         Extraterrestrial normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
-        'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
-        values. For 'ghi_lb' value is a float.
+        QCRAD QC limits. If dict, must have keys 'dni_ub' and 'dni_lb'. For
+        'dni_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
+        values. For 'dni_lb' value is a float.
 
     Returns
     -------
@@ -229,9 +229,11 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         Direct normal irradiance in :math:`W/m^2`
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
-        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
-        'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
-        values. For 'ghi_lb' value is a float.
+        QCRAD QC limits. If dict, must have keys:
+            
+            * 'ghi_ub', 'dhi_ub', 'dni_ub': dicts with keys
+              {'mult', 'exp', 'min'} and float values.
+            * 'ghi_lb', 'dhi_lb', 'dni_lb': float values.
 
     Returns
     -------
