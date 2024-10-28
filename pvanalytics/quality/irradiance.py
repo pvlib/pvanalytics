@@ -230,7 +230,7 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
     limits : {'physical', 'extreme'} or dict, default 'physical'
         If string, must be either 'physical' or 'extreme', corresponding to the
         QCRAD QC limits. If dict, must have keys:
-            
+
             * 'ghi_ub', 'dhi_ub', 'dni_ub': dicts with keys
               {'mult', 'exp', 'min'} and float values.
             * 'ghi_lb', 'dhi_lb', 'dni_lb': float values.
@@ -261,7 +261,7 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
     .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
        tests, V2.0," Baseline Surface Radiation Network (BSRN),
        Accessed: Oct. 24, 2024. [Online.] Available:
-       <https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>_
+       `<https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>`_
     """  # noqa: E501
     if limits == 'physical':
         limits = QCRAD_LIMITS_PHYSICAL
@@ -316,8 +316,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
                                        param=None, outside_domain=False):
     r"""Check consistency of GHI, DHI and DNI using QCRad criteria.
 
-    Uses criteria given in [1]_, [2]_ to validate the ratio of irradiance
-    components.
+    Uses criteria given in [1]_ to validate the ratio of irradiance components.
 
     .. warning:: Not valid for night time or low irradiance. When the input
        data fall outside the test domain, the returned value is set by the
