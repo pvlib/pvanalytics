@@ -375,7 +375,7 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
        tests, V2.0," Baseline Surface Radiation Network (BSRN),
        Accessed: Oct. 24, 2024. [Online.] Available:
-       <https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>_
+       https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf
     """  # noqa: E501
     if not param:
         param = QCRAD_CONSISTENCY
