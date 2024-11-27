@@ -1,0 +1,29 @@
+.. _whatsnew_023:
+
+0.2.3 (not yet released)
+------------------------
+
+
+Enhancements
+~~~~~~~~~~~~
+
+
+Bug Fixes
+~~~~~~~~~
+
+
+Requirements
+~~~~~~~~~~~~
+
+
+Documentation
+~~~~~~~~~~~~~
+
+
+Testing
+~~~~~~~
+
+
+Contributors
+~~~~~~~~~~~~
+

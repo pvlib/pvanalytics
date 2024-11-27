@@ -1,7 +1,7 @@
 .. _whatsnew_022:
 
-0.2.2 (not yet released)
-------------------------
+0.2.2 (November 27, 2024)
+-------------------------
 
 
 Enhancements
@@ -12,26 +12,12 @@ Enhancements
   :py:func:`~pvanalytics.quality.irradiance.check_dni_limits_qcrad`, and
   :py:func:`~pvanalytics.quality.irradiance.check_irradiance_limits_qcrad`.
   (:pull:`190`)
-* Added optional keyword `outside_domain` to
+* Added optional keyword ``outside_domain`` to
   :py:func:`~pvanalytics.quality.irradiance.check_irradiance_consistency_qcrad`.
   (:pull:`214`)
-
-Bug Fixes
-~~~~~~~~~
-
-
-Requirements
-~~~~~~~~~~~~
-
-
-Documentation
-~~~~~~~~~~~~~
-
-
-Testing
-~~~~~~~
-
 
 Contributors
 ~~~~~~~~~~~~
 * Adam R. Jensen (:ghuser:`AdamRJensen`)
+* Cliff Hansen (:ghuser:`cwhanse`)
+* Kevin Anderson (:ghuser:`kandersolar`)
