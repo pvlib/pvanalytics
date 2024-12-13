@@ -10,10 +10,18 @@ from pvanalytics import quality
 from pvanalytics import util
 
 
-QCRAD_LIMITS = {'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
-                'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
-                'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
-                'ghi_lb': -4, 'dhi_lb': -4, 'dni_lb': -4}
+# QCRAD limits are often also referred to as BSRN limits
+QCRAD_LIMITS_PHYSICAL = {  # Physically Possible Limits
+    'ghi_ub': {'mult': 1.5, 'exp': 1.2, 'min': 100},
+    'dhi_ub': {'mult': 0.95, 'exp': 1.2, 'min': 50},
+    'dni_ub': {'mult': 1.0, 'exp': 0.0, 'min': 0},
+    'ghi_lb': -4, 'dhi_lb': -4, 'dni_lb': -4}
+
+QCRAD_LIMITS_EXTREME = {  # Extremely Rare Limits
+    'ghi_ub': {'mult': 1.2, 'exp': 1.2, 'min': 50},
+    'dhi_ub': {'mult': 0.75, 'exp': 1.2, 'min': 30},
+    'dni_ub': {'mult': 0.95, 'exp': 0.2, 'min': 10},
+    'ghi_lb': -2, 'dhi_lb': -2, 'dni_lb': -2}
 
 QCRAD_CONSISTENCY = {
     'ghi_ratio': {
@@ -42,8 +50,8 @@ def _qcrad_ub(dni_extra, sza, lim):
     return lim['mult'] * dni_extra * cosd_sza**lim['exp'] + lim['min']
 
 
-def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
-    r"""Test for physical limits on GHI using the QCRad criteria.
+def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits='physical'):
+    r"""Test for lower and upper limits on GHI using the QCRad criteria.
 
     Test is applied to each GHI value. A GHI value passes if value >
     lower bound and value < upper bound. Lower bounds are constant for
@@ -60,10 +68,11 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
         Solar zenith angle in degrees
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
-    limits : dict, default QCRAD_LIMITS
-        Must have keys 'ghi_ub' and 'ghi_lb'. For 'ghi_ub' value is a
-        dict with keys {'mult', 'exp', 'min'} and float values. For
-        'ghi_lb' value is a float.
+    limits : {'physical', 'extreme'} or dict, default 'physical'
+        If string, must be either 'physical' or 'extreme', corresponding to the
+        QCRAD QC limits. If dict, must have keys 'ghi_ub' and 'ghi_lb'. For
+        'ghi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
+        values. For 'ghi_lb' value is a float.
 
     Returns
     -------
@@ -79,8 +88,11 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     for more information.
 
     """
-    if not limits:
-        limits = QCRAD_LIMITS
+    if limits == 'physical':
+        limits = QCRAD_LIMITS_PHYSICAL
+    elif limits == 'extreme':
+        limits = QCRAD_LIMITS_EXTREME
+
     ghi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['ghi_ub'])
 
     ghi_limit_flag = quality.util.check_limits(ghi, limits['ghi_lb'], ghi_ub)
@@ -88,8 +100,8 @@ def check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra, limits=None):
     return ghi_limit_flag
 
 
-def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
-    r"""Test for physical limits on DHI using the QCRad criteria.
+def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits='physical'):
+    r"""Test for lower and upper limits on DHI using the QCRad criteria.
 
     Test is applied to each DHI value. A DHI value passes if value >
     lower bound and value < upper bound. Lower bounds are constant for
@@ -106,10 +118,11 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
         Solar zenith angle in degrees
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
-    limits : dict, default QCRAD_LIMITS
-        Must have keys 'dhi_ub' and 'dhi_lb'. For 'dhi_ub' value is a
-        dict with keys {'mult', 'exp', 'min'} and float values. For
-        'dhi_lb' value is a float.
+    limits : {'physical', 'extreme'} or dict, default 'physical'
+        If string, must be either 'physical' or 'extreme', corresponding to the
+        QCRAD QC limits. If dict, must have keys 'dhi_ub' and 'dhi_lb'. For
+        'dhi_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
+        values. For 'dhi_lb' value is a float.
 
     Returns
     -------
@@ -125,8 +138,10 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     for more information.
 
     """
-    if not limits:
-        limits = QCRAD_LIMITS
+    if limits == 'physical':
+        limits = QCRAD_LIMITS_PHYSICAL
+    elif limits == 'extreme':
+        limits = QCRAD_LIMITS_EXTREME
 
     dhi_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dhi_ub'])
 
@@ -135,8 +150,8 @@ def check_dhi_limits_qcrad(dhi, solar_zenith, dni_extra, limits=None):
     return dhi_limit_flag
 
 
-def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
-    r"""Test for physical limits on DNI using the QCRad criteria.
+def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits='physical'):
+    r"""Test for lower and upper limits on DNI using the QCRad criteria.
 
     Test is applied to each DNI value. A DNI value passes if value >
     lower bound and value < upper bound. Lower bounds are constant for
@@ -153,10 +168,11 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
         Solar zenith angle in degrees
     dni_extra : Series
         Extraterrestrial normal irradiance in :math:`W/m^2`
-    limits : dict, default QCRAD_LIMITS
-        Must have keys 'dni_ub' and 'dni_lb'. For 'dni_ub' value is a
-        dict with keys {'mult', 'exp', 'min'} and float values. For
-        'dni_lb' value is a float.
+    limits : {'physical', 'extreme'} or dict, default 'physical'
+        If string, must be either 'physical' or 'extreme', corresponding to the
+        QCRAD QC limits. If dict, must have keys 'dni_ub' and 'dni_lb'. For
+        'dni_ub' value is a dict with keys {'mult', 'exp', 'min'} and float
+        values. For 'dni_lb' value is a float.
 
     Returns
     -------
@@ -172,8 +188,10 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
     for more information.
 
     """
-    if not limits:
-        limits = QCRAD_LIMITS
+    if limits == 'physical':
+        limits = QCRAD_LIMITS_PHYSICAL
+    elif limits == 'extreme':
+        limits = QCRAD_LIMITS_EXTREME
 
     dni_ub = _qcrad_ub(dni_extra, solar_zenith, limits['dni_ub'])
 
@@ -183,10 +201,10 @@ def check_dni_limits_qcrad(dni, solar_zenith, dni_extra, limits=None):
 
 
 def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
-                                  dni=None, limits=None):
+                                  dni=None, limits='physical'):
     r"""Test for physical limits on GHI, DHI or DNI using the QCRad criteria.
 
-    Criteria from [1]_ are used to determine physically plausible
+    Criteria from [1]_ and [2]_ are used to determine physically plausible
     lower and upper bounds. Each value is tested and a value passes if
     value > lower bound and value < upper bound. Lower bounds are
     constant for all tests. Upper bounds are calculated as
@@ -209,10 +227,13 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series or None, default None
         Direct normal irradiance in :math:`W/m^2`
-    limits : dict, default QCRAD_LIMITS
-        for keys 'ghi_ub', 'dhi_ub', 'dni_ub', value is a dict with
-        keys {'mult', 'exp', 'min'} and float values. For keys
-        'ghi_lb', 'dhi_lb', 'dni_lb', value is a float.
+    limits : {'physical', 'extreme'} or dict, default 'physical'
+        If string, must be either 'physical' or 'extreme', corresponding to the
+        QCRAD QC limits. If dict, must have keys:
+
+            * 'ghi_ub', 'dhi_ub', 'dni_ub': dicts with keys
+              {'mult', 'exp', 'min'} and float values.
+            * 'ghi_lb', 'dhi_lb', 'dni_lb': float values.
 
     Returns
     -------
@@ -233,13 +254,19 @@ def check_irradiance_limits_qcrad(solar_zenith, dni_extra, ghi=None, dhi=None,
 
     References
     ----------
-    .. [1] C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-       Algorithm for Surface Radiation Measurements, The Open Atmospheric
-       Science Journal 2, pp. 23-37, 2008.
-
-    """
-    if not limits:
-        limits = QCRAD_LIMITS
+    .. [1] C. N. Long and Y. Shi, "An Automated Quality Assessment and Control
+       Algorithm for Surface Radiation Measurements," The Open Atmospheric
+       Science Journal, vol. 2, no. 1. Bentham Science Publishers Ltd.,
+       pp. 23–37, Apr. 18, 2008. :doi:`10.2174/1874282300802010023`.
+    .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
+       tests, V2.0," Baseline Surface Radiation Network (BSRN),
+       Accessed: Oct. 24, 2024. [Online.] Available:
+       `<https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf>`_
+    """  # noqa: E501
+    if limits == 'physical':
+        limits = QCRAD_LIMITS_PHYSICAL
+    elif limits == 'extreme':
+        limits = QCRAD_LIMITS_EXTREME
 
     if ghi is not None:
         ghi_limit_flag = check_ghi_limits_qcrad(ghi, solar_zenith, dni_extra,
@@ -269,29 +296,32 @@ def _get_bounds(bounds):
 
 
 def _check_irrad_ratio(ratio, ghi, sza, bounds):
-    # unpack bounds dict
+    # unpack bounds
     ghi_lb, ghi_ub, sza_lb, sza_ub, ratio_lb, ratio_ub = _get_bounds(bounds)
-    # for zenith set inclusive_lower to handle edge cases, e.g., zenith=0
-    return (
+
+    within_domain = (
         quality.util.check_limits(
             sza, lower_bound=sza_lb, upper_bound=sza_ub, inclusive_lower=True)
         & quality.util.check_limits(
-            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub)
-        & quality.util.check_limits(
-            ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+            ghi, lower_bound=ghi_lb, upper_bound=ghi_ub, inclusive_lower=True)
     )
+
+    flag = within_domain & quality.util.check_limits(
+        ratio, lower_bound=ratio_lb, upper_bound=ratio_ub)
+
+    return flag, within_domain
 
 
 def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
-                                       param=None):
-    """Check consistency of GHI, DHI and DNI using QCRad criteria.
+                                       param=None, outside_domain=False):
+    r"""Check consistency of GHI, DHI and DNI using QCRad criteria.
 
-    Uses criteria given in [1]_ to validate the ratio of irradiance
-    components.
+    Uses criteria given in [1]_ to validate the ratio of irradiance components.
+    These tests are equivalent to the BSRN comparison tests [2]_.
 
-    .. warning:: Not valid for night time. While you can pass data
-       from night time to this function, be aware that the truth
-       values returned for that data will not be valid.
+    .. warning:: Not valid for night time or low irradiance. When the input
+       data fall outside the test domain, the returned value is set by the
+       ``outside_domain`` parameter.
 
     Parameters
     ----------
@@ -303,12 +333,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
         Diffuse horizontal irradiance in :math:`W/m^2`
     dni : Series
         Direct normal irradiance in :math:`W/m^2`
-    param : dict
+    param : dict, optional
         keys are 'ghi_ratio' and 'dhi_ratio'. For each key, value is a dict
         with keys 'high_zenith' and 'low_zenith'; for each of these keys,
         value is a dict with keys 'zenith_bounds', 'ghi_bounds', and
         'ratio_bounds' and value is an ordered pair [lower, upper]
         of float.
+    outside_domain : scalar, default False
+        Value to return when the tests are not applicable, i.e., when the
+        input data fall outside the test domain.
 
     Returns
     -------
@@ -319,6 +352,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     Notes
     -----
+    The QCRad algorithm checks that the input GHI is consistent with the
+    component sum :math:`DNI \times \cos ( zenith ) + DHI` of input DNI and
+    DHI, and that the ratio :math:`\frac{DHI}{GHI}` is reasonable.
+
+    In these two parts, the ``ghi_bounds`` are applied differently. In the
+    components test, the bounds are applied to the component sum of diffuse and
+    direct irradiance, whereas in the diffuse ratio test the bounds are applied
+    to the measured ``ghi``.
+
     Copyright (c) 2019 SolarArbiter. See the file
     LICENSES/SOLARFORECASTARBITER_LICENSE at the top level directory
     of this distribution and at `<https://github.com/pvlib/
@@ -327,11 +369,15 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
 
     References
     ----------
-    .. [1] C. N. Long and Y. Shi, An Automated Quality Assessment and Control
-       Algorithm for Surface Radiation Measurements, The Open Atmospheric
-       Science Journal 2, pp. 23-37, 2008.
-
-    """
+    .. [1] C. N. Long and Y. Shi, "An Automated Quality Assessment and Control
+       Algorithm for Surface Radiation Measurements," The Open Atmospheric
+       Science Journal, vol. 2, no. 1. Bentham Science Publishers Ltd.,
+       pp. 23–37, Apr. 18, 2008. :doi:`10.2174/1874282300802010023`.
+    .. [2]  C. N. Long and E. G. Dutton, "BSRN Global Network recommended QC
+       tests, V2.0," Baseline Surface Radiation Network (BSRN),
+       Accessed: Oct. 24, 2024. [Online.] Available:
+       https://bsrn.awi.de/fileadmin/user_upload/bsrn.awi.de/Publications/BSRN_recommended_QC_tests_V2.pdf
+    """  # noqa: E501
     if not param:
         param = QCRAD_CONSISTENCY
 
@@ -341,18 +387,29 @@ def check_irradiance_consistency_qcrad(solar_zenith, ghi, dhi, dni,
     dhi_ratio = dhi / ghi
 
     bounds = param['ghi_ratio']
-    consistent_components = (
-        _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                           sza=solar_zenith, bounds=bounds['high_zenith'])
-        | _check_irrad_ratio(ratio=ghi_ratio, ghi=component_sum,
-                             sza=solar_zenith, bounds=bounds['low_zenith']))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=ghi_ratio, ghi=component_sum, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+
+    consistent_components = ((flag_lz & within_domain_lz) |
+                             (flag_hz & within_domain_hz))
+    consistent_components[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     bounds = param['dhi_ratio']
-    diffuse_ratio_limit = (
-        _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                           bounds=bounds['high_zenith'])
-        | _check_irrad_ratio(ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
-                             bounds=bounds['low_zenith']))
+    flag_lz, within_domain_lz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['low_zenith'])
+    flag_hz, within_domain_hz = _check_irrad_ratio(
+        ratio=dhi_ratio, ghi=ghi, sza=solar_zenith,
+        bounds=bounds['high_zenith'])
+    diffuse_ratio_limit = ((flag_lz & within_domain_lz) |
+                           (flag_hz & within_domain_hz))
+    diffuse_ratio_limit[~(within_domain_lz | within_domain_hz)] = \
+        outside_domain
 
     return consistent_components, diffuse_ratio_limit
 
