@@ -22,6 +22,7 @@ Documentation
 
 Testing
 ~~~~~~~
+* Add testing for python 3.13 (:pull:`215`).
 
 
 Contributors
