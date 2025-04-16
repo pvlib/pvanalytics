@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=70.1", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "pvanalytics"
+description = "PVAnalytics is a python library for the analysis of photovoltaic system-level data."
+authors = [
+    { name = "pvanalytics Contributors", email = "pvlib-admin@googlegroups.com" },
+]
+requires-python = ">=3.8"
+dependencies = [
+    'numpy >= 1.17.0',
+    'pandas >= 1.0.0, != 1.1.*',
+    'pvlib >= 0.9.4',
+    'scipy >= 1.6.0',
+    'statsmodels >= 0.10.0',
+    'scikit-image >= 0.16.0',
+]
+license = "MIT"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Science/Research',
+    'Programming Language :: Python :: 3',
+    'Topic :: Scientific/Engineering',
+]
+readme.text = """
+PVAnalytics is a collection of functions for working with data
+from photovoltaic power systems. The library includes functions for
+general data quality tests such as outlier detection, validation that
+data is physically plausible, filtering data for specific conditions,
+and labeling specific features in the data.
+
+Documentation: https://pvanalytics.readthedocs.io
+
+Source code: https://github.com/pvlib/pvanalytics
+"""
+readme.content-type = "text/x-rst"
+dynamic = ["version"]
+
+
+[project.optional-dependencies]
+optional = [
+    'ruptures',
+]
+doc = [
+    'sphinx == 4.5.0',
+    'pydata-sphinx-theme == 0.8.1',
+    'sphinx-gallery',
+    'matplotlib',
+    'pyarrow'
+]
+test = [
+    'pytest',
+    'pytest-cov',
+    'packaging',
+]
+all = ["pvlib[test,optional,doc]"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/pvlib/pvanalytics/issues"
+Documentation = "https://pvanalytics.readthedocs.io/"
+"Source Code" = "https://github.com/pvlib/pvanalytics"
+
+
+[tool.setuptools.packages.find]
+include = ["pvanalytics*"]
+
+
+[tool.setuptools.package-data]
+pvanalytics = ["pvanalytics/data/*"]
+
+[tool.setuptools_scm]
