@@ -47,11 +47,19 @@ optional = [
 ]
 doc = [
     'sphinx == 4.5.0',
-    'sphinxcontrib-applehelp == 1.0.4',  # needed for sphinx < 5, https://github.com/sphinx-doc/sphinx/issues/11890
     'pydata-sphinx-theme == 0.8.1',
     'sphinx-gallery',
     'matplotlib',
-    'pyarrow'
+    'pyarrow',
+    # the following are needed for sphinx < 5.  TODO upgrade to sphinx>5, and
+    # get rid of these pins.
+    # https://github.com/sphinx-doc/sphinx/issues/11890
+    # https://stackoverflow.com/questions/77848565/sphinxcontrib-applehelp-breaking-sphinx-builds-with-sphinx-version-less-than-5-0
+    'sphinxcontrib-applehelp==1.0.4',
+    'sphinxcontrib-devhelp==1.0.2',
+    'sphinxcontrib-htmlhelp==2.0.1',
+    'sphinxcontrib-qthelp==1.0.3',
+    'sphinxcontrib-serializinghtml==1.1.5',
 ]
 test = [
     'pytest',
