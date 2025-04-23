@@ -10,7 +10,8 @@ Enhancements
 
 Bug Fixes
 ~~~~~~~~~
-
+* :py:func:`pvanalytics.features.clearsky.reno` now correctly passes
+  ``window_length`` to the underlying pvlib function. (:pull:`221`)
 
 Requirements
 ~~~~~~~~~~~~

@@ -72,7 +72,7 @@ def reno(ghi, ghi_clearsky):
         ghi,
         ghi_clearsky,
         ghi.index,
-        window_length,
+        window_length=window_length,
         lower_line_length=-5*scale_factor,
         upper_line_length=10*scale_factor,
         slope_dev=8*scale_factor
