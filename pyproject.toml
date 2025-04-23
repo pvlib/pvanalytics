@@ -47,6 +47,7 @@ optional = [
 ]
 doc = [
     'sphinx == 4.5.0',
+    'sphinxcontrib-applehelp == 1.0.7',  # needed for sphinx < 5, https://github.com/sphinx-doc/sphinx/issues/11890
     'pydata-sphinx-theme == 0.8.1',
     'sphinx-gallery',
     'matplotlib',
