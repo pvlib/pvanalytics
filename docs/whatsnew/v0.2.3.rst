@@ -15,6 +15,12 @@ Bug Fixes
 
 Requirements
 ~~~~~~~~~~~~
+* Advance minimum python to 3.8, and the following dependencies (:pull:`220`):
+
+  - numpy: 1.20.0
+  - pandas: 1.2.0
+  - statsmodels: 0.13.0
+  - scikit-image: 0.18.0
 
 
 Documentation
