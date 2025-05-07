@@ -386,14 +386,13 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth, tracking,
         data={'actual_power_kW': actual_power_ts,
               'predicted_power_kW': predicted_power_ts})
     master_df.index.name = "utc_measured_on"
-    # Resample to daily frequency
-    master_df = master_df.resample("D").mean() 
+    # Resample to daily frequency and sum to get total daily output
+    master_df = master_df.resample("D").sum() 
     # Get percent difference
-    abs_diff = abs(master_df['actual_power_kW'] - 
-                   master_df['predicted_power_kW'])
+    diff_val = master_df['actual_power_kW'] - master_df['predicted_power_kW']
     mean_val = (master_df['actual_power_kW'] +
                 master_df['predicted_power_kW']) / 2
-    master_df['percent_difference'] = (abs_diff / mean_val) * 100
+    master_df['percent_difference'] = abs(diff_val / mean_val) * 100
     # Mark as anomalous (True) if percent difference passes the threshold
     # Otherwise, False
     master_df['anomalous'] = master_df['percent_difference'] > pct_threshold
