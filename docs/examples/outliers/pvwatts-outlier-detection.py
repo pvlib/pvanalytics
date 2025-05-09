@@ -10,11 +10,14 @@ PVWatts outlier detection.
 # Identifying and removing outliers from PV sensor time series
 # data allows for more accurate data analysis.
 # In this example, we demonstrate how to use
-# :py:func:`pvanalytics.quality.outliers.get_anomalous_days` to identify and
-# filter out outliers in a time series.
+# :py:func:`pvanalytics.quality.outliers.pvwatts_vs_actual_abs_percent_diff`
+# along with
+# :py:func:`pvanalytics.quality.outliers.flag_irregular_power_days`
+# to identify abnormal daily behavior in a time series by measuring
+# a data stream's daily performance against a PVWatts model.
 
 import pvanalytics
-from pvanalytics.quality.outliers import get_anomalous_days
+import pvanalytics.quality.outliers as outliers
 import matplotlib.pyplot as plt
 import pandas as pd
 import pathlib
@@ -50,24 +53,19 @@ print(weather_data.head(10))
 
 # %%
 # We then get the metadata for SERF East site and
-# use:py:func:`pvanalytics.quality.outliers.get_anomalous_days` to
-# identify the anomalous days in the time series. The predicted AC power
-# time series is modeled from PVWatts with NSRDB data and site metadata.
-# A 50% percent difference threshold is set to flag any days where the
-# percent difference between the actual and predicted data exceeds 50%.
-# The actual and predicted daily time series with detected anomalous days
-# are then plotted.
+# use:py:func:`pvanalytics.quality.outliers.pvwatts_vs_actual_abs_percent_diff`
+# to get the absolute percent difference between the actual and predicted
+# time series. The predicted AC power time series
+# is modeled from PVWatts with NSRDB data and site metadata.
 
-# Metadata for SERF East
 lat = 39.742
 long = -105.1727
 azimuth = 158
 tilt = 45
 tracking = False
 capacity = ac_power_series.max()
-
-# Get days with anomalies
-master_df = get_anomalous_days(
+# Get absolute percent difference
+abs_percent_diff_series = outliers.pvwatts_vs_actual_abs_percent_diff(
     power_time_series=ac_power_series,
     lat=lat,
     long=long,
@@ -75,17 +73,26 @@ master_df = get_anomalous_days(
     azimuth=azimuth,
     tracking=tracking,
     nsrdb_weather_df=weather_data,
-    pct_threshold=50,
     dc_capacity=capacity)
-print(master_df.head(10))
+print(abs_percent_diff_series.tail(10))
+
+# %%
+# We then flag the days where the absolute percent difference exceeds
+# the set precent threshold of 50%. We can use
+# :py:func:`pvanalytics.quality.outliers.flag_irregular_power_days`
+# for this flagging the irregular days.
+# The actual and predicted daily time series with detected anomalous days
+# are then plotted.
+
+irregular_day_series = outliers.flag_irregular_power_days(
+    abs_percent_diff_series, pct_threshold=50)
+print(irregular_day_series.tail(10))
 
 # Plot results
-master_df['actual_power'].plot()
-master_df['predicted_power'].plot()
-master_df.loc[master_df['anomalous'], 'actual_power'].plot(ls='', marker='o')
-plt.legend(labels=["Actual AC Power",
-            "Predicted AC Power", "Detected Outlier"])
+abs_percent_diff_series.plot()
+abs_percent_diff_series.loc[irregular_day_series].plot(ls='', marker='o')
+plt.legend(labels=["Absolute Percent Difference", "Detected Outlier"])
 plt.xlabel("Date")
-plt.ylabel("AC Power")
+plt.ylabel("Absolute Percent Difference")
 plt.tight_layout()
 plt.show()

@@ -128,7 +128,7 @@ def hampel(data, window=5, max_deviation=3.0, scale=None):
     return deviation > max_deviation * mad
 
 
-def run_pvwatts_data_checks(power_series, nsrdb_weather_df):
+def _run_pvwatts_data_checks(power_series, nsrdb_weather_df):
     """Check that the passed parameters can be run through the function.
 
     This includes checking the passed time series to ensure it has a
@@ -164,23 +164,21 @@ def run_pvwatts_data_checks(power_series, nsrdb_weather_df):
     return power_series
 
 
-def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
-                      solar_zenith, solar_azimuth, dni, dhi, ghi, dni_extra,
-                      relative_airmass, temperature, wind_speed,
-                      temperature_model_parameters,
-                      temperature_coefficient, tracking):
+def _run_pvwatts_model(tilt, azimuth, dc_capacity, solar_zenith,
+                       solar_azimuth, dni, dhi, ghi, dni_extra,
+                       relative_airmass, temperature, wind_speed,
+                       temperature_model_parameters,
+                       temperature_coefficient, tracking):
     r"""Run the PVWatts model with NSRDB data across the time period as inputs.
 
     Parameters
     ----------
     tilt : Float
-        Tilt angle of site in degrees.
+        Tilt angle of the data stream in degrees.
     azimuth : Float
-        Azimuth angle of site in degrees.
+        Azimuth angle of the data stream in degrees.
     dc_capacity : Float
-        DC capacity of the site.
-    dc_inverter_limit : Float
-        Maximum DC capacity for the site.
+        DC capacity of the the data stream.
     solar_zenith : Series
         Solar zenith angle in degrees
     solar_azimuth :
@@ -196,7 +194,7 @@ def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
     relative_airmass : Series
         Relative airmass (not adjusted for pressure)
     temperature : Series
-        Ambient dry bulb temperature in C. 
+        Ambient dry bulb temperature in C.
     wind_speed : Series
         Wind speed at a height of 10 meters in :math:`m/s`.
     temperature_model_parameters : Dict
@@ -257,28 +255,48 @@ def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
     return pdc
 
 
-def get_anomalous_days(power_time_series, lat, long, tilt, azimuth,
-                       tracking, nsrdb_weather_df, pct_threshold=50,
-                       dc_capacity=None):
-    """Identifies anomalous days for inverter power time series.
+def _calc_abs_percent_diff(actual_series, expected_series):
+    """Gets the absolute percent difference for actual and predicted series.
 
-    Compares the actual daily inverter power time series data with PVWatts
-    model power time series output by calculating their percent deference.
-    Days where the difference over the specified percent difference threshold
-    are flagged as anomalous.
+    Parameters
+    ----------
+    actual_series : Pandas series
+        Series of actual, measured data with matching index as expected_series.
+    expected_series : Pandas series
+        Series of predicted data with matching index as actual_series.
+
+    Returns
+    -------
+    abs_percent_diff_series : Pandas series
+        Absolute percent difference between the actual and predicted data.
+    """
+    diff_val = actual_series - expected_series
+    mean_val = (actual_series + expected_series) / 2
+    abs_percent_diff_series = abs(diff_val / mean_val) * 100
+    return abs_percent_diff_series
+
+
+def pvwatts_vs_actual_abs_percent_diff(power_time_series, lat, long, tilt,
+                                       azimuth, tracking, nsrdb_weather_df,
+                                       dc_capacity=None):
+    """Gets the absolute percent difference for actual and PVWatts time series.
+
+    Compares the actual daily power time series data with PVWatts
+    modeled power time series by calculating their absolute percent
+    differences.
 
     Parameters
     ----------
     power_time_series : Pandas series with datetime index.
         Time series of a PV power data stream with UTC tz-datetime aware index.
     lat : Float
-        Latitude value of site.
+        Latitude value of the data stream.
     long : FLoat
-        Longitude value of site.
+        Longitude value of the data stream.
     tilt : Float
-        Tilt angle of site in degrees.
+        Tilt angle of the data stream in degrees.
     azimuth : Float
-        Azimuth angle of site in degrees.
+        Azimuth angle of the data stream in degrees.
     tracking : Boolean
         True if tracking. Otherwise, False if not tracking.
     nsrdb_weather_df : Pandas dataframe with datetime index
@@ -286,27 +304,23 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth,
         'DNI', and 'Wind Speed' columns with datetime index. The minimum
         and maximum datetime matches the minimum and maximum datetime of the
         actual data.
-    pct_threshold : Float
-        Percent difference threshold for flagging data as anomalies.
-        Defaulted to 50.
     dc_capacity : None or Float
-        DC capacity of the site. If the inverter dc capacity is not
+        DC capacity of the the data stream. If the dc capacity is not
         known, set as None so that it can be calculated by finding the 95%
         percentile of the passed time series.
         Defaulted to None.
 
     Returns
     -------
-    master_df : Pandas dataframe with datetime index
-        A pandas dataframe containing columns 'actual_power',
-        'predicted_power', 'percent_difference', and 'anomalous'
-        columns with datetime index.
+    abs_percent_diff_series : Pandas series with datetime index.
+        Absolute percent difference between the actual and predicted data
+        with UTC tz-datetime aware index.
 
     """
     # Run data check on time series data to make sure index is datetime
     # and it matches nsrdb weather data frequency
-    actual_power_ts = run_pvwatts_data_checks(power_time_series,
-                                              nsrdb_weather_df)
+    actual_power_ts = _run_pvwatts_data_checks(power_time_series,
+                                               nsrdb_weather_df)
     # If dc_capacity is None, calculate the 95% percentile
     if dc_capacity is None:
         dc_capacity = actual_power_ts.quantile(0.95)
@@ -319,11 +333,10 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth,
     relative_airmass = pvlib.atmosphere.get_relative_airmass(solpos.zenith)
     temp_params = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
     # Run PVWatts model
-    predicted_power_ts = run_pvwatts_model(
+    predicted_power_ts = _run_pvwatts_model(
         tilt=tilt,
         azimuth=azimuth,
         dc_capacity=dc_capacity,
-        dc_inverter_limit=dc_capacity * 1.5,
         solar_zenith=solpos.zenith,
         solar_azimuth=solpos.azimuth,
         dni=nsrdb_weather_df['DNI'],
@@ -342,17 +355,38 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth,
         'predicted_power').rename_axis("datetime")
     actual_power_df = actual_power_ts.to_frame(
         'actual_power').rename_axis("datetime")
-    master_df = pd.merge(actual_power_df, predicted_power_df,
-                         left_index=True, right_index=True)
+    compare_power_df = pd.merge(actual_power_df, predicted_power_df,
+                                left_index=True, right_index=True)
     # Resample to daily frequency and sum to get total daily output
-    master_df = master_df.resample("D").sum()
+    compare_power_df = compare_power_df.resample("D").sum()
     # Get percent difference
-    diff_val = master_df['actual_power'] - master_df['predicted_power']
-    mean_val = (master_df['actual_power'] +
-                master_df['predicted_power']) / 2
-    master_df['percent_difference'] = abs(diff_val / mean_val) * 100
-    # Mark as anomalous (True) if percent difference passes the threshold
-    # Otherwise, False
-    master_df['anomalous'] = master_df['percent_difference'] > pct_threshold
+    abs_percent_diff_series = _calc_abs_percent_diff(
+        compare_power_df["actual_power"], compare_power_df["predicted_power"])
 
-    return master_df
+    return abs_percent_diff_series
+
+
+def flag_irregular_power_days(percent_diff_series, pct_threshold=50):
+    """Flags the days with abnormal power output behavior.
+
+    Days where the difference over the specified percent difference threshold
+    are flagged as irregular.
+
+    Parameters
+    ----------
+    percent_diff_series : Pandas series with datetime index.
+        Percent difference between the actual and predicted data
+        with UTC tz-datetime aware index.
+    pct_threshold : Float
+        Percent difference threshold for flagging data as anomalies.
+        Defaulted to 50.
+
+    Returns
+    -------
+    irregular_day_series : Pandas series with datetime index.
+       Boolean values that flag if the day is an anomaly if True. Otherwise,
+       False if the data stream is producing the output as expected.
+
+    """
+    irregular_day_series = percent_diff_series > pct_threshold
+    return irregular_day_series
