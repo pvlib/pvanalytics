@@ -130,7 +130,7 @@ def hampel(data, window=5, max_deviation=3.0, scale=None):
 
 def run_pvwatts_data_checks(power_series, nsrdb_weather_df):
     """Check that the passed parameters can be run through the function.
-    
+
     This includes checking the passed time series to ensure it has a
     datetime index, and that its frequency matches with nsrdb weather
     data frequency.
@@ -138,7 +138,7 @@ def run_pvwatts_data_checks(power_series, nsrdb_weather_df):
     Parameters
     ----------
     power_series : Pandas series with datetime index.
-        Time series of a PV power data stream.
+        Time series of a PV power data stream with UTC datetime tz-aware index.
     nsrdb_weather_df : Pandas dataframe with datetime index
         A pandas dataframe containing NSRDB PSM3 weather 'Temperature', 'DHI',
         'DNI', and 'Wind Speed' columns with datetime index. The minimum
@@ -151,10 +151,12 @@ def run_pvwatts_data_checks(power_series, nsrdb_weather_df):
         Daily time series of a PV power data stream. This series represents
         the summed daily values of the particular data stream.
     """
-    # Check that the time series has a datetime index, and consists of numeric
-    # values
+    # Check that the series and df has a datetime index
     if not isinstance(power_series.index, pd.DatetimeIndex):
-        raise TypeError('Must be a Pandas series with a datetime index.')
+        raise TypeError('Power series must be a Pandas series with a ' +
+                        'datetime index.')
+    if not isinstance(nsrdb_weather_df.index, pd.DatetimeIndex):
+        raise TypeError('Weather dataframe must have a datetime index.')
     # Get the frequency of weather data
     nsrdb_weather_df = pd.infer_freq(nsrdb_weather_df.index)
     # Resample power series to same frequency as weather data
@@ -176,9 +178,9 @@ def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
     azimuth : Float
         Azimuth angle of site in degrees.
     dc_capacity : Float
-        DC capacity of the inverter in kW.
+        DC capacity of the site.
     dc_inverter_limit : Float
-        Maximum DC capacity for the inverter in kW.
+        Maximum DC capacity for the site.
     solar_zenith : Series
         Solar zenith angle in degrees
     solar_azimuth :
@@ -207,7 +209,7 @@ def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
     Returns
     -------
     pdc : Series
-        Pandas series of DC power output in kW modeled from PVWatts with
+        Pandas series of DC power output modeled from PVWatts with
         datetime index.
     """
     if tracking:
@@ -255,81 +257,20 @@ def run_pvwatts_model(tilt, azimuth, dc_capacity, dc_inverter_limit,
     return pdc
 
 
-def build_pvwatts_model(lat, long, tilt, azimuth, power, tracking,
-                        nsrdb_weather_df):
-    """Models the system's power output using the PVWatts model.
-    
-    Pulls the NSRDB weather data via NSRDB PSM3 api and uses the system's
-    metadata to build the PVWatts model to get the predicted power ourtput.
-    
-    Parameters
-    ----------
-    lat : Float
-        Latitude value of site.
-    long : FLoat
-        Longitude value of site.
-    tilt : Float
-        Tilt angle of site in degrees.
-    azimuth : Float
-        Azimuth angle of site in degrees.
-    power : Float
-        DC capacity of the inverter in kW.
-    tracking : Boolean
-        True if tracking. Otherwise, False if not tracking.
-    nsrdb_weather_df : Pandas dataframe with datetime index
-        A pandas dataframe containing NSRDB PSM3 weather 'Temperature', 'DHI',
-        'DNI', and 'Wind Speed' columns with datetime index. The minimum
-        and maximum datetime matches the minimum and maximum datetime of the
-        actual data.
-
-    Returns
-    -------
-    master_df : Pandas dataframe with datetime index.
-        A pandas dataframe containing columns 'actual_power_kW',
-        'predicted_power_kW', 'percent_difference', and 'anomalous'
-        columns and datetime index.
-    """
-
-    # Build out the PVWatts model
-    solpos = pvlib.solarposition.get_solarposition(
-        nsrdb_weather_df.index, lat, long)
-    dni_extra = pvlib.irradiance.get_extra_radiation(
-        nsrdb_weather_df.index)
-    relative_airmass = pvlib.atmosphere.get_relative_airmass(solpos.zenith)
-    temp_params = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
-    pdc = run_pvwatts_model(tilt=tilt,
-                            azimuth=azimuth,
-                            dc_capacity=power,
-                            dc_inverter_limit=power * 1.5,
-                            solar_zenith=solpos.zenith,
-                            solar_azimuth=solpos.azimuth,
-                            dni=nsrdb_weather_df['DNI'],
-                            dhi=nsrdb_weather_df['DHI'],
-                            ghi=nsrdb_weather_df['GHI'],
-                            dni_extra=dni_extra,
-                            relative_airmass=relative_airmass,
-                            temperature=nsrdb_weather_df['Temperature'],
-                            wind_speed=nsrdb_weather_df['Wind Speed'],
-                            temperature_model_parameters=temp_params,
-                            temperature_coefficient=-0.0047,
-                            tracking=tracking)
-    return pdc
-
-
-def get_anomalous_days(power_time_series, lat, long, tilt, azimuth, tracking,
-                       nsrdb_weather_df, pct_threshold=50, dc_capacity=None):
+def get_anomalous_days(power_time_series, lat, long, tilt, azimuth,
+                       tracking, nsrdb_weather_df, pct_threshold=50,
+                       dc_capacity=None):
     """Identifies anomalous days for inverter power time series.
-    
-    Compares the actual daily inverter power time series data with PVWatts model
-    power time series output by calculating their percent deference. Days where
-    the difference over the specified percent difference threshold are flagged
-    as anomalous.
+
+    Compares the actual daily inverter power time series data with PVWatts
+    model power time series output by calculating their percent deference.
+    Days where the difference over the specified percent difference threshold
+    are flagged as anomalous.
 
     Parameters
     ----------
     power_time_series : Pandas series with datetime index.
-        Time series of a PV power data stream. The units for power should be
-        kW.
+        Time series of a PV power data stream with UTC tz-datetime aware index.
     lat : Float
         Latitude value of site.
     long : FLoat
@@ -349,7 +290,7 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth, tracking,
         Percent difference threshold for flagging data as anomalies.
         Defaulted to 50.
     dc_capacity : None or Float
-        DC capacity of the inverter in kW. If the inverter dc capacity is not
+        DC capacity of the site. If the inverter dc capacity is not
         known, set as None so that it can be calculated by finding the 95%
         percentile of the passed time series.
         Defaulted to None.
@@ -357,8 +298,8 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth, tracking,
     Returns
     -------
     master_df : Pandas dataframe with datetime index
-        A pandas dataframe containing columns 'actual_power_kW',
-        'predicted_power_kW', 'percent_difference', and 'anomalous'
+        A pandas dataframe containing columns 'actual_power',
+        'predicted_power', 'percent_difference', and 'anomalous'
         columns with datetime index.
 
     """
@@ -369,33 +310,49 @@ def get_anomalous_days(power_time_series, lat, long, tilt, azimuth, tracking,
     # If dc_capacity is None, calculate the 95% percentile
     if dc_capacity is None:
         dc_capacity = actual_power_ts.quantile(0.95)
-    # Get predicted power time series data from PVWatts
-    predicted_power_ts = build_pvwatts_model(
-        lat=lat,
-        long=long,
+
+    # Build out the PVWatts model
+    solpos = pvlib.solarposition.get_solarposition(
+        nsrdb_weather_df.index, lat, long)
+    dni_extra = pvlib.irradiance.get_extra_radiation(
+        nsrdb_weather_df.index)
+    relative_airmass = pvlib.atmosphere.get_relative_airmass(solpos.zenith)
+    temp_params = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    # Run PVWatts model
+    predicted_power_ts = run_pvwatts_model(
         tilt=tilt,
         azimuth=azimuth,
-        power=dc_capacity,
-        tracking=tracking,
-        nsrdb_weather_df=nsrdb_weather_df)
-    # Make timezone unaware
-    predicted_power_ts = predicted_power_ts.tz_localize(None)
+        dc_capacity=dc_capacity,
+        dc_inverter_limit=dc_capacity * 1.5,
+        solar_zenith=solpos.zenith,
+        solar_azimuth=solpos.azimuth,
+        dni=nsrdb_weather_df['DNI'],
+        dhi=nsrdb_weather_df['DHI'],
+        ghi=nsrdb_weather_df['GHI'],
+        dni_extra=dni_extra,
+        relative_airmass=relative_airmass,
+        temperature=nsrdb_weather_df['Temperature'],
+        wind_speed=nsrdb_weather_df['Wind Speed'],
+        temperature_model_parameters=temp_params,
+        temperature_coefficient=-0.0047,
+        tracking=tracking)
+
     # Combine actual and predicted power data
-    master_df = pd.DataFrame(
-        index=actual_power_ts.index,
-        data={'actual_power_kW': actual_power_ts,
-              'predicted_power_kW': predicted_power_ts})
-    master_df.index.name = "utc_measured_on"
+    predicted_power_df = predicted_power_ts.to_frame(
+        'predicted_power').rename_axis("datetime")
+    actual_power_df = actual_power_ts.to_frame(
+        'actual_power').rename_axis("datetime")
+    master_df = pd.merge(actual_power_df, predicted_power_df,
+                         left_index=True, right_index=True)
     # Resample to daily frequency and sum to get total daily output
-    master_df = master_df.resample("D").sum() 
+    master_df = master_df.resample("D").sum()
     # Get percent difference
-    diff_val = master_df['actual_power_kW'] - master_df['predicted_power_kW']
-    mean_val = (master_df['actual_power_kW'] +
-                master_df['predicted_power_kW']) / 2
+    diff_val = master_df['actual_power'] - master_df['predicted_power']
+    mean_val = (master_df['actual_power'] +
+                master_df['predicted_power']) / 2
     master_df['percent_difference'] = abs(diff_val / mean_val) * 100
     # Mark as anomalous (True) if percent difference passes the threshold
     # Otherwise, False
     master_df['anomalous'] = master_df['percent_difference'] > pct_threshold
 
     return master_df
-
