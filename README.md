@@ -1,4 +1,4 @@
-![lint and test](https://github.com/pvlib/pvanalytics/workflows/lint%20and%20test/badge.svg)
+[![lint and test](https://github.com/pvlib/pvanalytics/workflows/lint%20and%20test/badge.svg)](https://github.com/pvlib/pvanalytics/actions/workflows/lint-and-test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/pvlib/pvanalytics/badge.svg?branch=main)](https://coveralls.io/github/pvlib/pvanalytics?branch=main)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6110569.svg)](https://doi.org/10.5281/zenodo.6110569)
 
