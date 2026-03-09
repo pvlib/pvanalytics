@@ -168,4 +168,88 @@ def test_hampel_scale():
     data.iloc[20] = -25
     data.iloc[40] = 15
     data.iloc[60] = 5
-    assert not all(outliers.hampel(data) == outliers.hampel(data, scale=0.1))
+    assert not (outliers.hampel(data) == outliers.hampel(data, scale=0.1)).all()
+
+
+def test_compare_reference_difference():
+    """compare_reference identifies outliers in the difference."""
+    actual = pd.Series([1.0, 2.0, 3.0, 4.0, 10.0])
+    reference = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    # deviations: [0, 0, 0, 0, 5]
+    # z-scores: [-0.5, -0.5, -0.5, -0.5, 2.0]
+    expected = pd.Series([False, False, False, False, True])
+    assert_series_equal(
+        outliers.compare_reference(
+            actual, reference,
+            comparison='difference',
+            method='zscore',
+            zmax=1.5
+        ),
+        expected
+    )
+
+
+def test_compare_reference_relative():
+    """compare_reference identifies outliers in the relative difference."""
+    actual = pd.Series([1.0, 2.0, 3.0, 4.0, 8.0])
+    reference = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    # deviations: [0, 0, 0, 0, 0.6]
+    # z-scores: [-0.5, -0.5, -0.5, -0.5, 2.0]
+    expected = pd.Series([False, False, False, False, True])
+    assert_series_equal(
+        outliers.compare_reference(
+            actual, reference,
+            comparison='relative',
+            method='zscore',
+            zmax=1.5
+        ),
+        expected
+    )
+
+
+def test_compare_reference_absolute_difference():
+    """compare_reference identifies outliers in the absolute difference."""
+    actual = pd.Series([1.0, 2.0, 3.0, 4.0, 0.0])
+    reference = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    # deviations: [0, 0, 0, 0, 5]
+    expected = pd.Series([False, False, False, False, True])
+    assert_series_equal(
+        outliers.compare_reference(
+            actual, reference,
+            comparison='absolute_difference',
+            method='zscore',
+            zmax=1.5
+        ),
+        expected
+    )
+
+
+def test_compare_reference_tukey():
+    """compare_reference works with tukey method."""
+    actual = pd.Series([1.0, 2.0, 3.0, 4.0, 20.0])
+    reference = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    # deviations: [0, 0, 0, 0, 15]
+    expected = pd.Series([False, False, False, False, True])
+    assert_series_equal(
+        outliers.compare_reference(
+            actual, reference,
+            method='tukey'
+        ),
+        expected
+    )
+
+
+def test_quantile_threshold():
+    """quantile_threshold returns expected values."""
+    x = np.arange(100)
+    # y = 2x + 10 + noise
+    np.random.seed(1234)
+    y = 2 * x + 10 + np.random.normal(0, 1, 100)
+    threshold = outliers.quantile_threshold(x, pd.Series(y), 0.9)
+    assert len(threshold) == 100
+    # For a large enough sample, the slope should be close to 2
+    # and intercept close to 10 + 1.28*1
+    # We just check if it's generally in the right ballpark
+    assert np.all(threshold > 2 * x)
+    assert np.all(threshold < 2 * x + 20)
+

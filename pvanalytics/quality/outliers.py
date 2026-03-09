@@ -1,7 +1,9 @@
 """Functions for identifying and labeling outliers."""
 import pandas as pd
+import numpy as np
 from scipy import stats
 from statsmodels import robust
+
 
 
 def tukey(data, k=1.5):
@@ -124,3 +126,89 @@ def hampel(data, window=5, max_deviation=3.0, scale=None):
         kwargs=kwargs
     )
     return deviation > max_deviation * mad
+
+
+def compare_reference(actual, reference, comparison='difference',
+                      method='zscore', **kwargs):
+    """Identify outliers in `actual` based on deviations from `reference`.
+
+    The `actual` and `reference` series are compared using the
+    specified `comparison` type. The resulting deviations are then
+    checked for outliers using `method`.
+
+    Parameters
+    ----------
+    actual : Series
+        The data in which to find outliers.
+    reference : Series
+        The reference data to compare against.
+    comparison : {'difference', 'relative', 'absolute_difference'}, \
+        default 'difference'
+        How to compare `actual` and `reference`.
+        If 'difference', then `actual - reference`.
+        If 'relative', then `(actual - reference) / reference`.
+        If 'absolute_difference', then `abs(actual - reference)`.
+    method : {'zscore', 'tukey'}, default 'zscore'
+        The method used to identify outliers in the deviations.
+    **kwargs
+        Passed to the outlier detection `method` (e.g. `zmax` for
+        `zscore` or `k` for `tukey`).
+
+    Returns
+    -------
+    Series
+        A series of booleans with True for each value in `actual`
+        that is an outlier.
+
+    """
+    if comparison == 'difference':
+        deviations = actual - reference
+    elif comparison == 'relative':
+        deviations = (actual - reference) / reference
+    elif comparison == 'absolute_difference':
+        deviations = abs(actual - reference)
+    else:
+        raise ValueError(f"Invalid comparison '{comparison}'. "
+                         "Expected 'difference', 'relative', or "
+                         "'absolute_difference'.")
+
+    if method == 'zscore':
+        return zscore(deviations, **kwargs)
+    elif method == 'tukey':
+        return tukey(deviations, **kwargs)
+    else:
+        raise ValueError(f"Invalid method '{method}'. "
+                         "Expected 'zscore' or 'tukey'.")
+
+
+def quantile_threshold(x, y, quantile, formula='y ~ x'):
+    """Estimate a threshold curve using quantile regression.
+
+    This function uses quantile regression to find a threshold curve
+    for the data in `y` as a function of `x`.
+
+    Parameters
+    ----------
+    x : array_like
+        The independent variable.
+    y : Series
+        The dependent variable.
+    quantile : float
+        The quantile to estimate (between 0 and 1).
+    formula : str, default 'y ~ x'
+        The model formula passed to `statsmodels.formula.api.quantreg`.
+        The data frame passed to statsmodels will have columns named 'x'
+        and 'y'.
+
+    Returns
+    -------
+    Series
+        The predicted threshold values at each point in `x`.
+
+    """
+    import statsmodels.formula.api as smf
+    data = pd.DataFrame({'x': x, 'y': y})
+    model = smf.quantreg(formula, data)
+    res = model.fit(q=quantile)
+    return res.predict(data)
+
