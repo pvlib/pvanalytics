@@ -7,6 +7,12 @@
 Enhancements
 ~~~~~~~~~~~~
 
+* :py:func:`pvanalytics.quality.outliers.compare_reference` added for detecting
+  outliers based on deviations from a reference signal. (:issue:`224`, :pull:``)
+
+* :py:func:`pvanalytics.quality.outliers.quantile_threshold` added for
+  estimating threshold curves using quantile regression. (:issue:`224`, :pull:``)
+
 
 Bug Fixes
 ~~~~~~~~~

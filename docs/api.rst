@@ -132,6 +132,8 @@ Functions for detecting outliers.
    quality.outliers.tukey
    quality.outliers.zscore
    quality.outliers.hampel
+   quality.outliers.compare_reference
+   quality.outliers.quantile_threshold
 
 Time
 ----
