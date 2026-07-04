@@ -113,7 +113,7 @@ def _prepare_images(ghi, clearsky, daytime, interval):
     ghi_image = pd.DataFrame(cloudless_image).interpolate(
         axis=0,
         limit_direction='both'
-    ).to_numpy()
+    ).to_numpy().copy()
     # set night to nan
     ghi_image[~_to_image(daytime.to_numpy(), image_width)] = np.nan
     return (
