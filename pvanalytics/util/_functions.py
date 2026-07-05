@@ -14,5 +14,11 @@ def freq_to_timedelta(freq):
     -------
     Timedelta
         Timedelta corresponding to a single period at `freq`.
+        For offsets that cannot be directly converted (e.g. 'D', 'W'),
+        falls back to using the offset's nanosecond representation.
     """
-    return pd.to_timedelta(frequencies.to_offset(freq))
+    offset = frequencies.to_offset(freq)
+    try:
+        return pd.to_timedelta(offset)
+    except ValueError:
+        return pd.Timedelta(offset.nanos, unit='ns')
