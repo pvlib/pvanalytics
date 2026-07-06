@@ -178,8 +178,7 @@ plt.show()
 # Trim the series based on daily completeness score
 trim_series = pvanalytics.quality.gaps.trim_incomplete(
     time_series,
-    minimum_completeness=.25,
-    freq=data_freq)
+    minimum_completeness=.25)
 first_valid_date, last_valid_date = \
     pvanalytics.quality.gaps.start_stop_dates(trim_series)
 time_series = time_series[first_valid_date.tz_convert(time_series.index.tz):
