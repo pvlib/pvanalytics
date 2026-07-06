@@ -250,13 +250,11 @@ def _freq_to_seconds(freq):
     return delta.days * (1440 * 60) + delta.seconds
 
 
-def completeness_score(series, freq=None, keep_index=True):
+def completeness_score(series, keep_index=True):
     """Calculate a data completeness score for each day.
 
     The completeness score for a given day is the fraction of time in
-    the day for which there is data (a value other than NaN). The time
-    duration attributed to each value is equal to the timestamp
-    spacing of `series`, or `freq` if it is specified. For example, a
+    the day for which there is data (a value other than NaN). For example, a
     24-hour time series with 30 minute timestamp spacing and 24
     non-NaN values would have data for a total of 12 hours and
     therefore a completeness score of 0.5.
@@ -265,10 +263,6 @@ def completeness_score(series, freq=None, keep_index=True):
     ----------
     series : Series
         A DatetimeIndexed series.
-    freq : str, default None
-        Interval between samples in the series as a pandas frequency
-        string. If None, the frequency is inferred using
-        :py:func:`pandas.infer_freq`.
     keep_index : boolean, default True
         Whether or not the returned series has the same index as
         `series`. If False the returned series will be indexed by day.
@@ -279,22 +273,8 @@ def completeness_score(series, freq=None, keep_index=True):
         A series of floats giving the completeness score for each day
         (fraction of the day for which `series` has data).
 
-    Raises
-    ------
-    ValueError
-        If `freq` is longer than the frequency inferred from `series`.
-
     """
-    inferred_seconds = _freq_to_seconds(pd.infer_freq(series.index))
-    if freq:
-        freq_seconds = _freq_to_seconds(freq)
-        seconds_per_sample = freq_seconds
-    else:
-        seconds_per_sample = inferred_seconds
-
-    if freq and inferred_seconds < freq_seconds:
-        raise ValueError("freq must be less than or equal to the"
-                         + " frequency of the series")
+    seconds_per_sample = series.index.diff().total_seconds()[1]
     daily_counts = series.resample('D').count()
     daily_completeness = (daily_counts * seconds_per_sample) / (1440*60)
     if keep_index:
@@ -302,7 +282,7 @@ def completeness_score(series, freq=None, keep_index=True):
     return daily_completeness
 
 
-def complete(series, minimum_completeness=0.333, freq=None):
+def complete(series, minimum_completeness=0.333):
     """Select data points that are part of days with complete data.
 
     A day has complete data if its completeness score is greater than
@@ -312,12 +292,9 @@ def complete(series, minimum_completeness=0.333, freq=None):
     Parameters
     ----------
     series : Series
-        The data to be checked for completeness.
+        A DatetimeIndexed series to be checked for completeness.
     minimum_completeness : float, default 0.333
         Fraction of the day that must have data.
-    freq : str, default None
-        The expected frequency of the data in `series`. If none then
-        the frequency is inferred from the data.
 
     Returns
     -------
@@ -335,7 +312,7 @@ def complete(series, minimum_completeness=0.333, freq=None):
     completeness_score
 
     """
-    return completeness_score(series, freq=freq) >= minimum_completeness
+    return completeness_score(series) >= minimum_completeness
 
 
 def start_stop_dates(series, days=10):
@@ -415,7 +392,7 @@ def trim(series, days=10):
     return mask
 
 
-def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
+def trim_incomplete(series, minimum_completeness=0.333333, days=10):
     """Trim the series based on the completeness score.
 
     Combines :py:func:`completeness_score` and :py:func:`trim`.
@@ -430,9 +407,6 @@ def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
         The number of consecutive days with completeness greater than
         `minumum_completeness` for the 'good' data to start or
         end. See :py:func:`start_stop_dates` for more information.
-    freq : str, default None
-        The expected frequency of the series. See
-        :py:func:`completeness_score` fore more information.
 
     Returns
     -------
@@ -448,6 +422,6 @@ def trim_incomplete(series, minimum_completeness=0.333333, days=10, freq=None):
     completeness_score
 
     """
-    completeness = completeness_score(series, freq=freq)
+    completeness = completeness_score(series)
     complete_days = completeness >= minimum_completeness
     return trim(complete_days, days=days)
