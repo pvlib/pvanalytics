@@ -14,7 +14,7 @@ Bug Fixes
   ``window_length`` to the underlying pvlib function. (:pull:`221`)
 * Remove freq parameter from :py:func:`pvanalytics.quality.gaps.completeness`
   and :py:func:`pvanalytics.quality.gaps.completeness_score`. Frequency is now
-  always calculated from the input data's DatetimeIndex. (:pull:``) 
+  always calculated from the input data's DatetimeIndex. (:pull:`236`) 
 
 Requirements
 ~~~~~~~~~~~~
