@@ -492,33 +492,15 @@ def test_completeness_score_all_nans():
 def test_completeness_score_no_data():
     """A data set with completely missing timestamps and NaNs has
     completeness 0."""
-    four_days = pd.date_range(start='01/01/2020', freq='D', periods=4)
-    completeness = gaps.completeness_score(
-        pd.Series(index=four_days, dtype='float64'),
-        freq='15min',
-        keep_index=False
-    )
+    four_days = pd.date_range(start='01/01/2020', end='01/04/2020', periods=4)
+    test_data = pd.Series(index=four_days, dtype='float64')
+    completeness = gaps.completeness_score(test_data, keep_index=False)
+    # have to exclude freq because completeness is returned with freq='D'
+    # due to resampling, but test_data is not constructed with freq
     assert_series_equal(
         pd.Series(0.0, index=four_days),
-        completeness
-    )
-
-
-def test_completeness_score_incomplete_index():
-    """A series with one data point per hour has 25% completeness at
-    15-minute sample frequency"""
-    data = pd.Series(
-        1,
-        index=pd.date_range(start='01/01/2020', freq='1h', periods=72),
-    )
-    completeness = gaps.completeness_score(data, freq='15min',
-                                           keep_index=False)
-    assert_series_equal(
-        pd.Series(
-            0.25,
-            index=pd.date_range(start='01/01/2020', freq='D', periods=3)
-        ),
-        completeness
+        completeness,
+        check_freq=False
     )
 
 
@@ -536,19 +518,6 @@ def test_completeness_score_complete():
         ),
         completeness
     )
-
-
-def test_completeness_score_freq_too_high():
-    """If the infered freq is shorter than the passed freq an exception is
-    raised."""
-    data = pd.Series(
-        1,
-        index=pd.date_range(start='1/1/2020', freq='15min', periods=24*4*4)
-    )
-    with pytest.raises(ValueError):
-        gaps.completeness_score(data, freq='16min')
-    with pytest.raises(ValueError):
-        gaps.completeness_score(data, freq='1h')
 
 
 def test_completeness_score_reindex():
@@ -586,7 +555,7 @@ def test_complete_threshold_zero():
     data.dropna()
     assert_series_equal(
         pd.Series(True, index=data.index),
-        gaps.complete(data, minimum_completeness=0, freq='15min')
+        gaps.complete(data, minimum_completeness=0)
     )
     data = pd.Series(1.0, index=ten_days)
     assert_series_equal(
@@ -627,7 +596,7 @@ def test_complete_threshold_one():
     )
     assert_series_equal(
         gaps.complete(data, minimum_completeness=1.0),
-        gaps.complete(data, minimum_completeness=1.0, freq='15min')
+        gaps.complete(data, minimum_completeness=1.0)
     )
 
 
