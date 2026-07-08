@@ -7,6 +7,7 @@ import pvlib
 from pvanalytics import util
 from skimage.morphology import rectangle as footprint_rectangle
 
+
 def _to_image(data, width):
     """Convert data to an image.
 
