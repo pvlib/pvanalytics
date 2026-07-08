@@ -5,7 +5,8 @@ from scipy import ndimage
 from skimage import morphology, measure
 import pvlib
 from pvanalytics import util
-
+from skimage.morphology import footprint_rectangle
+from skimage.morphology import rectangle as footprint_rectangle
 
 def _to_image(data, width):
     """Convert data to an image.
@@ -365,7 +366,7 @@ def fixed(ghi, daytime, clearsky, interval=None, min_gradient=2):
     threshold = gradient > min_gradient  # binary image of wire candidates
 
     # From here we CAN use skimage because we are working with binary images.
-    three_minute_mask = morphology.footprint_rectangle((1, 3))
+    three_minute_mask = footprint_rectangle(1, 3)
     wires = morphology.remove_small_objects(
         morphology.binary_closing(threshold, three_minute_mask),
         min_size=200,
