@@ -274,7 +274,7 @@ def completeness_score(series, keep_index=True):
         (fraction of the day for which `series` has data).
 
     """
-    seconds_per_sample = series.index.diff().total_seconds()[1]
+    seconds_per_sample = (series.index[1] - series.index[0]).total_seconds()
     daily_counts = series.resample('D').count()
     daily_completeness = (daily_counts * seconds_per_sample) / (1440*60)
     if keep_index:
