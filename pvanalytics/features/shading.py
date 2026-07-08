@@ -5,7 +5,6 @@ from scipy import ndimage
 from skimage import morphology, measure
 import pvlib
 from pvanalytics import util
-from skimage.morphology import footprint_rectangle
 from skimage.morphology import rectangle as footprint_rectangle
 
 def _to_image(data, width):
