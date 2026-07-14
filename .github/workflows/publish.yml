@@ -1,0 +1,76 @@
+name: Package build
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+    tags:
+    - "v*"
+
+jobs:
+  build:
+    name: Build wheel and sdist
+    if: github.repository == 'pvlib/pvanalytics'
+    runs-on: ubuntu-latest
+    steps:
+    # fetch all commits and tags so versioneer works
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        # Python version should be the minimum supported version
+        python-version: "3.10"
+
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install build
+        python -m pip install twine
+
+    - name: Build packages
+      run: python -m build
+
+    - name: List distribution file sizes
+      run: du -h dist/*
+
+    - name: Check metadata verification
+      run: python -m twine check --strict dist/*
+
+    - name: Ensure that the wheel installs successfully
+      run: |
+        mkdir ./tmp
+        pip install $(find dist -type f -name "*.whl") --target=./tmp
+
+    - name: List installed file sizes
+      run: du -h pvanalytics
+      working-directory: ./tmp
+
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  publish:
+    name: Release dist files to PyPI
+    # only publish distribution to PyPI for tagged commits
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # for PyPI trusted publishing
+
+    steps:
+    - name: Download all dist files
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
