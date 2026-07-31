@@ -224,7 +224,7 @@ def categorize(transmission, measured_voltage,
     modeled_voltage_with_snow_copy = np.where(
         transmission == 0, 0, modeled_voltage_with_snow)
 
-    with np.errstate(divide='ignore'):
+    with np.errstate(divide='ignore', invalid='ignore'):
         vmp_ratio =\
             measured_voltage /\
             modeled_voltage_with_snow_copy
