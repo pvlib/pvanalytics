@@ -127,7 +127,4 @@ def quartic_restricted_r2(x, y, noon=720):
     )
     model = _quartic(x, params[0], params[1], params[2], params[3])
     residuals = y - model
-    ss_tot = np.sum((y - np.mean(y))**2)
-    if ss_tot == 0:
-        return 0.0
-    return 1 - (np.sum(residuals**2) / ss_tot)
+    return 1 - (np.sum(residuals**2) / np.sum((y - np.mean(y))**2))
