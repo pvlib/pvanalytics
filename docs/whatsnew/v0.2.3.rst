@@ -18,7 +18,7 @@ Bug Fixes
 * Suppress divide-by-zero warnings in
   :mod:`pvanalytics.features.snow` and precision-loss warnings in
   :mod:`pvanalytics.quality.outliers` by extending ``np.errstate`` to
-include ``invalid='ignore'``. (:issue:`#237`, :pull:`YYY`)
+  include ``invalid='ignore'``. (:issue:`#237`, :pull:`238`)
 
 Requirements
 ~~~~~~~~~~~~
