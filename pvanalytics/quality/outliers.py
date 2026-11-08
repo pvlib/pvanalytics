@@ -1,5 +1,7 @@
 """Functions for identifying and labeling outliers."""
+import warnings
 import pandas as pd
+import numpy as np
 from scipy import stats
 from statsmodels import robust
 
@@ -75,7 +77,16 @@ def zscore(data, zmax=1.5, nan_policy='raise'):
                              "nan_policy. Expected 'raise' or 'omit'.")
 
     is_outlier = pd.Series(False, index=data.index)
-    is_outlier.loc[~nan_mask] = abs(stats.zscore(data[~nan_mask])) > zmax
+    with np.errstate(invalid='ignore'):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="Precision loss occurred",
+                category=RuntimeWarning,
+            )
+            is_outlier.loc[~nan_mask] = (
+                abs(stats.zscore(data[~nan_mask])) > zmax
+            )
     return is_outlier
 
 
