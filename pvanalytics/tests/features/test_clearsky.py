@@ -26,7 +26,7 @@ def test_reno_begining_end(quadratic):
     ghi = quadratic.copy()
     ghi.iloc[20:31] *= 0.5
     ghi.iloc[31:41] = 0
-    clear_times = clearsky.reno(ghi, quadratic)
+    clear_times = clearsky.reno(ghi, quadratic, infer_limits=False)
     assert clear_times[0:20].all()
     assert not clear_times[21:40].any()
     assert clear_times[41:].all()
@@ -34,11 +34,21 @@ def test_reno_begining_end(quadratic):
 
 def test_reno_large_interval(quadratic):
     """clearsky.reno() raises ValueError if timestamp spacing too large."""
-    index = pd.date_range(start='04/03/2020', freq='35min',
+    index = pd.date_range(start='04/03/2020', freq='20min',
                           periods=len(quadratic))
     quadratic.index = index
     with pytest.raises(ValueError):
         clearsky.reno(quadratic, quadratic)
+
+
+def test_reno_large_interval_infer_limits(quadratic):
+    """clearsky.reno() raises ValueError if timestamp spacing too large
+    for infer_limits=True."""
+    index = pd.date_range(start='04/03/2020', freq='35min',
+                          periods=len(quadratic))
+    quadratic.index = index
+    with pytest.raises(ValueError):
+        clearsky.reno(quadratic, quadratic, infer_limits=True)
 
 
 def test_reno_small_interval(quadratic):
@@ -47,7 +57,7 @@ def test_reno_small_interval(quadratic):
                           periods=len(quadratic))
     quadratic.index = index
     with pytest.raises(ValueError):
-        clearsky.reno(quadratic, quadratic)
+        clearsky.reno(quadratic, quadratic, infer_limits=True)
 
 
 def test_reno_30min_interval(quadratic):
@@ -55,7 +65,7 @@ def test_reno_30min_interval(quadratic):
     index = pd.date_range(start='04/03/2020', freq='30min',
                           periods=len(quadratic))
     quadratic.index = index
-    assert clearsky.reno(quadratic, quadratic).all()
+    assert clearsky.reno(quadratic, quadratic, infer_limits=True).all()
 
 
 def test_reno_infer_limits(quadratic):
@@ -66,4 +76,5 @@ def test_reno_infer_limits(quadratic):
     ghi = quadratic * (1 + 0.03 * np.sin(np.arange(len(quadratic))))
     expected = pvlib.clearsky.detect_clearsky(ghi, quadratic,
                                               infer_limits=True)
-    assert_series_equal(clearsky.reno(ghi, quadratic), expected)
+    assert_series_equal(
+        clearsky.reno(ghi, quadratic, infer_limits=True), expected)

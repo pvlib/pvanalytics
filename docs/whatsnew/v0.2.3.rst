@@ -6,12 +6,12 @@
 
 Enhancements
 ~~~~~~~~~~~~
-* :py:func:`pvanalytics.features.clearsky.reno` now infers the window
+* :py:func:`pvanalytics.features.clearsky.reno` can now infer the window
   length and threshold values from the time interval of the data
   (``infer_limits=True`` in :py:func:`pvlib.clearsky.detect_clearsky`),
-  and accepts data at intervals of 1 to 30 minutes. The docstring now
+  and can accept data at intervals of 1 to 30 minutes. The docstring now
   notes that the function can be applied to plane-of-array irradiance.
-  Results differ from previous versions. (:issue:`222`, :pull:`239`)
+  (:issue:`222`, :pull:`239`)
 
 Bug Fixes
 ~~~~~~~~~
