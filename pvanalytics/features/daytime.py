@@ -201,7 +201,7 @@ def power_or_irradiance(series, outliers=None,
     rolling_median = _rolling_by_minute(
         series_norm,
         days=median_days,
-        f=pd.core.window.RollingGroupby.median
+        f=lambda x: x.median()
     )
     # Night-time if two of the following are satisfied:
     # - Near-zero value
