@@ -14,7 +14,10 @@ Bug Fixes
   ``window_length`` to the underlying pvlib function. (:pull:`221`)
 * Remove freq parameter from :py:func:`pvanalytics.quality.gaps.completeness`
   and :py:func:`pvanalytics.quality.gaps.completeness_score`. Frequency is now
-  always calculated from the input data's DatetimeIndex. (:pull:`236`) 
+  always calculated from the input data's DatetimeIndex. (:pull:`236`)
+* :py:func:`pvanalytics.features.daytime.power_or_irradiance` no longer
+  raises ``AttributeError`` with pandas 3.1, which renamed the private
+  ``RollingGroupby`` class. (:issue:`240`)
 
 Requirements
 ~~~~~~~~~~~~
@@ -39,3 +42,4 @@ Testing
 Contributors
 ~~~~~~~~~~~~
 * Cliff Hansen (:ghuser:`cwhanse`)
+* :ghuser:`maoji-y`
